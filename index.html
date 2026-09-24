@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linkedai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F4F2; --surface:#FFFFFF; --ink:#18181B; --muted:#6B6B72; --line:#E6E6E2;
+  --accent:#3A1F2B; --soft:#3A1F2B1F; --wa:#1F9D55; --err:#B3261E; --ok:#1F7A45;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111113; --surface:#1C1C1F; --ink:#F2F2F3; --muted:#A1A1AA; --line:#2E2E33;
+    --wa:#3DBE72; --err:#F2887F; --ok:#6FD39A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111113; --surface:#1C1C1F; --ink:#F2F2F3; --muted:#A1A1AA; --line:#2E2E33;
+  --wa:#3DBE72; --err:#F2887F; --ok:#6FD39A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;
+  -webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+img{max-width:100%;display:block}
+[hidden]{display:none!important}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 140px}
+
+/* ---------- Buttons & forms ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--line);background:var(--surface);
+  border-radius:12px;padding:11px 16px;cursor:pointer;font-weight:600;text-decoration:none;text-align:center}
+a.btn{color:var(--ink)}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.wa{background:var(--wa);border-color:var(--wa);color:#fff}
+.btn.small{padding:7px 12px;font-size:14px;border-radius:10px}
+.btn.full{width:100%}
+.btn:disabled{opacity:.6;cursor:default}
+label{display:block;font-weight:600;font-size:15px;margin:14px 0 0}
+input[type=text],input[type=tel],input[type=url],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input:not([type]),textarea,select{
+  width:100%;margin-top:6px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:400}
+textarea{min-height:72px;resize:vertical}
+.hint{color:var(--muted);font-size:13px;margin:6px 0 0;font-weight:400}
+.seg{display:flex;gap:8px;margin-top:6px}
+.seg button{flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600}
+.seg button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.check{display:flex;align-items:center;gap:10px;font-weight:500;margin-top:12px}
+.check input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+.err{color:var(--err);font-size:14px;min-height:20px;margin:14px 0 8px}
+.status{color:var(--ok);font-size:14px;min-height:20px;margin:8px 0 0}
+.okmsg{color:var(--ok)}
+.loading{color:var(--muted);text-align:center;padding:80px 10px}
+
+/* ---------- Gate & builder ---------- */
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.brand{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.bh h1{font-size:32px;line-height:1.1;letter-spacing:-.025em;font-weight:800;margin:6px 0 6px}
+.bh p{margin:0 0 20px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h2{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:0 0 2px}
+.linkcard .url{word-break:break-all;font-weight:700;font-size:17px;margin:6px 0 12px}
+.linkcard .row{display:flex;gap:8px;flex-wrap:wrap}
+.media-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
+.media-prev{width:72px;height:72px;border-radius:50%;border:1.5px dashed var(--line);display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:12px;text-align:center;flex:none}
+.media-prev.sq{border-radius:12px}
+.media-prev.wide{width:128px;border-radius:12px}
+.media-prev img{width:100%;height:100%;object-fit:cover}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.sw{width:40px;height:40px;border-radius:50%;border:3px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.sw[aria-pressed="true"]{border-color:var(--ink)}
+.item{border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-top:12px}
+.ihead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ctl{display:flex;gap:6px}
+.ctl button{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer}
+.ctl button.del{width:auto;padding:0 10px;color:var(--err)}
+.opt{display:flex;gap:8px;align-items:center;margin-top:8px}
+.opt input{margin-top:0}
+.opt input:first-child{flex:2}
+.opt input:nth-child(2){flex:1;min-width:72px}
+.opt button{flex:none;width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer}
+.actions{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+.actions .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
+.actions .btn{flex:1}
+
+/* ---------- Store ---------- */
+.st{max-width:720px;margin:0 auto;padding-bottom:130px}
+.cover{height:clamp(150px,40vw,250px);background:var(--accent) center/cover no-repeat;position:relative}
+.cover.plain{background-image:radial-gradient(circle at 20% 0%,rgba(255,255,255,.18),transparent 55%),radial-gradient(circle at 90% 120%,rgba(0,0,0,.35),transparent 60%)}
+.back{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:8}
+.shopcard{position:relative;margin:-48px 14px 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:0 18px 18px}
+.st-logo{width:84px;height:84px;border-radius:50%;border:4px solid var(--surface);margin-top:-42px;background:var(--accent);
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:32px;overflow:hidden}
+.st-logo img{width:100%;height:100%;object-fit:cover}
+.stname{font-size:clamp(25px,6.8vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.08;margin:10px 0 4px}
+.tag{color:var(--muted);margin:0}
+.info{margin:10px 0 0;font-size:14px;font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.chip{font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px;background:var(--soft)}
+.chat{margin-top:14px}
+.search{padding:14px 14px 0}
+.search input{margin:0;padding-left:40px;background:var(--surface) no-repeat 14px 50%/16px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6B72' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E")}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg);display:flex;gap:8px;overflow-x:auto;padding:12px 14px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:8px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.tab[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.group{padding:0 14px 6px;scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
+.group h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:12px 2px 10px}
+.plist{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.prow{display:flex;gap:14px;width:100%;text-align:left;padding:14px;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
+.prow:last-child{border-bottom:0}
+.ptext{flex:1;min-width:0}
+.ptext h3{font-size:16px;font-weight:700;margin:0 0 3px;line-height:1.25}
+.pdesc{font-size:14px;color:var(--muted);margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pprice{font-weight:700;font-size:15px}
+.pill{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--accent);color:#fff}
+.pill.dark{background:var(--ink);color:var(--bg)}
+.pimg{flex:none;width:98px;height:98px;position:relative}
+.pimg img,.ph{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.ph{display:grid;place-items:center;font-weight:800;font-size:30px;background:var(--soft);color:var(--ink)}
+.addb{position:absolute;right:-6px;bottom:-6px;width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:21px;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.14)}
+.prow.out{cursor:default}
+.prow.out .pimg,.prow.out h3,.prow.out .pprice{opacity:.5}
+.plist.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;background:none;border:0;border-radius:0;overflow:visible}
+.plist.grid .prow{flex-direction:column-reverse;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px}
+.plist.grid .pimg{width:100%;height:auto;aspect-ratio:1/1}
+.plist.grid .addb{right:8px;bottom:8px}
+.empty{color:var(--muted);text-align:center;padding:40px 16px}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin:32px 16px 0}
+.foot a{color:inherit}
+
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));z-index:5;
+  transform:translateY(120%);transition:transform .25s ease;pointer-events:none}
+.bar.show{transform:none;pointer-events:auto}
+.cartbtn{width:100%;max-width:692px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--accent);color:#fff;border:0;
+  border-radius:16px;padding:15px 18px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.cartbtn .cnt{background:rgba(255,255,255,.22);border-radius:8px;padding:2px 9px;min-width:30px;text-align:center}
+.cartbtn .lbl{flex:1;text-align:left}
+
+.overlay{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.overlay.open{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow-y:auto;border-radius:22px 22px 0 0;position:relative;
+  padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sheet-h h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0}
+.x{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.psheet{padding:0 0 calc(20px + env(safe-area-inset-bottom,0px))}
+.psheet .x{position:absolute;top:12px;right:12px;z-index:2}
+.pbig{aspect-ratio:16/10;background:var(--soft)}
+.pbig img{width:100%;height:100%;object-fit:cover;border-radius:22px 22px 0 0}
+.pbig .ph{border-radius:22px 22px 0 0;font-size:56px}
+.pbody{padding:18px 16px 0}
+.pbody h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px;line-height:1.15}
+.pbody .pdesc{display:block;-webkit-line-clamp:unset}
+.opts{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 14px}
+.optrow{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer;margin:0;font-weight:500}
+.optrow:last-child{border-bottom:0}
+.optrow input{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.optrow .ol{flex:1}
+.qtyrow{display:flex;justify-content:space-between;align-items:center;margin:18px 0}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:20px;line-height:1;cursor:pointer}
+.step .q{min-width:24px;text-align:center;font-weight:700}
+.lines{background:var(--surface);border-radius:14px;padding:2px 14px;border:1px solid var(--line)}
+.cline{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.cline .cn{flex:1;min-width:0}
+.cline .cn b{display:block;font-weight:600}
+.cline .cn span{color:var(--muted);font-size:14px}
+.ctotal{display:flex;justify-content:space-between;padding:12px 0;font-weight:800;font-size:17px}
+.row2{display:flex;gap:10px}.row2>div{flex:1}
+.paybox{margin-top:12px}
+.qrbox{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+.qrbox img{width:min(240px,70%);margin:4px auto 10px;border-radius:10px;background:#fff}
+.qrbox .amt{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0}
+.qrbox .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.qrbox ol{text-align:left;margin:12px 0 0;padding-left:20px;font-size:14px;color:var(--muted)}
+.qrbox .check{justify-content:center;margin-top:14px}
+.announce{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14px;font-weight:600}
+.announce.closed{background:var(--ink);color:var(--bg)}
+.coderow{display:flex;gap:8px;margin-top:6px}
+.coderow input{margin:0;text-transform:uppercase}
+.coderow .btn{flex:none}
+.daybtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.daybtns button{min-width:48px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer}
+.daybtns button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabbar{display:flex;gap:8px;margin:0 0 14px}
+.tabbar button{flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer}
+.tabbar button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stat{background:var(--bg);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:20px;font-weight:800}
+.stat span{font-size:13px;color:var(--muted)}
+.ord .ohead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ord .ohead b{font-size:18px}
+.ord .oitems{margin:10px 0;padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px}
+.ord .oitems div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.ord .orow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.ord select{width:auto;margin:0;padding:8px 10px}
+.tag2{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+.tag2.paid{background:#1F7A45;color:#fff;border-color:#1F7A45}
+.tag2.claim{background:#B26A00;color:#fff;border-color:#B26A00}
+.tag2.unpaid{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.inv{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px}
+.inv .ihd{display:flex;align-items:center;gap:12px}
+.inv .ihd .st-logo{width:56px;height:56px;margin:0;border-width:0;font-size:22px}
+.inv h1{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0}
+.inv table{width:100%;border-collapse:collapse;margin:14px 0;font-size:15px}
+.inv td{padding:8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.inv td:last-child{text-align:right;white-space:nowrap;padding-left:10px}
+.inv .tot td{border-bottom:0;font-weight:800;font-size:18px}
+.inv .meta{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;margin-top:14px}
+.inv .meta span:nth-child(odd){color:var(--muted)}
+.adm .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+@media print{.noprint{display:none!important} body{background:#fff} .inv{border:0}}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+
+.closedov{position:fixed;inset:0;z-index:9;background:rgba(10,10,12,.72);display:grid;place-items:center;padding:24px;text-align:center;color:#fff;
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.closedov .box{max-width:340px}
+.closedov .ic{width:64px;height:64px;border-radius:50%;margin:0 auto 14px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:30px}
+.closedov h2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px}
+.closedov p{margin:0;opacity:.9;font-size:16px}
+.closedov .shopn{font-weight:700;opacity:.8;margin-bottom:6px;font-size:14px}
+.back{z-index:11!important}
+.adwrap{position:relative;margin:14px 14px 0}
+.adban{display:block;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.adban img{width:100%;aspect-ratio:3/1;object-fit:cover}
+.adtag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;pointer-events:none}
+.adx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:19px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.brandbar{display:flex;justify-content:center;padding:10px 14px 0}
+.brandbar a{font-weight:800;font-size:13px;letter-spacing:.02em;color:var(--muted);text-decoration:none}
+</style>
+</head>
+<body>
+<!-- ============ OWN CONFIRM / MESSAGE BOX ============ -->
+<div class="overlay" id="askOverlay" role="alertdialog" aria-modal="true" aria-labelledby="askText" style="align-items:center;z-index:20">
+  <div class="sheet" style="border-radius:20px;margin:16px;max-width:420px">
+    <p id="askText" style="font-size:17px;font-weight:600;margin:0 0 18px"></p>
+    <div class="row2">
+      <div id="askNoWrap"><button class="btn full" id="askNo" type="button">Cancel</button></div>
+      <div><button class="btn solid full" id="askYes" type="button">OK</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BUILDER ============ -->
+<div id="builder" hidden>
+  <div class="wrap" id="bwrap"></div>
+  <div class="actions"><div class="in">
+    <button class="btn" data-act="preview">Preview</button>
+    <button class="btn solid" data-act="save">Save</button>
+  </div></div>
+</div>
+
+<!-- ============ PAGE (admin / messages) ============ -->
+<div id="page" hidden><div class="wrap" id="gwrap"></div></div>
+
+<!-- ============ STORE ============ -->
+<div id="store" hidden>
+  <button class="btn small back" id="backBtn" hidden>Back to editor</button>
+  <div class="st" id="stWrap">
+    <div class="cover" id="stCover" hidden></div>
+    <section class="shopcard" id="stCard">
+      <div class="st-logo" id="stLogo"></div>
+      <h1 class="stname" id="stName"></h1>
+      <p class="tag" id="stTag"></p>
+    </section>
+    <div class="adwrap" id="adWrap" hidden>
+      <a class="adban" id="adBan" target="_blank" rel="noopener sponsored"><img id="adImg" alt="Sponsored"></a>
+      <span class="adtag">Sponsored</span>
+      <button class="adx" id="adX" type="button" aria-label="Hide this ad">×</button>
+    </div>
+    <main id="menu" style="margin-top:14px"></main>
+    <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
+  </div>
+
+  <div class="closedov" id="closedOv" hidden role="alert">
+    <div class="box">
+      <div class="ic" aria-hidden="true">🔒</div>
+      <p class="shopn" id="closedShop"></p>
+      <h2>Store closed</h2>
+      <p id="closedMsg">We're not taking orders right now. Please check back later.</p>
+    </div>
+  </div>
+
+  <div class="bar" id="bar">
+    <button class="cartbtn" id="viewCart"><span class="cnt" id="count">0</span><span class="lbl">View cart</span><span id="total"></span></button>
+  </div>
+
+  <div class="overlay" id="pOverlay" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <div class="sheet psheet">
+      <button class="x" data-close="pOverlay" aria-label="Close">×</button>
+      <div class="pbig" id="pImg"></div>
+      <div class="pbody">
+        <h2 id="pTitle"></h2>
+        <p class="pdesc" id="pDesc"></p>
+        <div class="opts" id="pOpts"></div>
+        <div class="qtyrow"><b>Quantity</b>
+          <div class="step"><button id="pMinus" aria-label="Less">−</button><span class="q" id="pQty">1</span><button id="pPlus" aria-label="More">+</button></div>
+        </div>
+        <button class="btn solid full" id="pAdd" style="padding:15px">Add to cart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet">
+      <div class="sheet-h"><h2 id="sheetTitle">Your cart</h2><button class="x" data-close="overlay" aria-label="Close">×</button></div>
+      <div class="lines" id="lines"></div>
+      <label for="cName">Your name</label>
+      <input type="text" id="cName" autocomplete="name">
+      <label for="date">Date you want it</label>
+      <input type="date" id="date">
+      <label for="note">Note to the shop (optional)</label>
+      <textarea id="note" placeholder="e.g. Pickup Saturday 3pm"></textarea>
+      <p class="err" id="err" role="alert"></p>
+      <a class="btn wa full" id="send" href="#" target="_blank" rel="noopener" style="padding:15px">Send order on WhatsApp</a>
+      <p class="hint" style="text-align:center">Opens a chat with the shop, with your order written in. Just tap send.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   LINKEDAI (stores saved online through your Google Apps Script)
+   Files next to this index.html on your GitHub:
+     site.json   { "api": "your Apps Script web app URL", "ownerWa": "60...", "price": "RM79" }
+     ads.json    the ad banner on every store (optional)
+   ============================================================ */
+const APP_NAME = "Linkedai";
+
+const COLORS = ["#3A1F2B","#1F5E4A","#1E4D8C","#B03A2E","#8A4B08","#5B3FA8","#0F766E","#27272A"];
+const CURRENCIES = "AED AUD BDT BND CAD CHF CNY EUR GBP HKD IDR INR JPY KHR KRW LAK MMK MYR NZD PHP PKR SAR SGD THB TWD USD VND".split(" ");
+const COMMON_CUR = ["MYR","SGD","BND","IDR","THB","PHP","USD"];
+const BLANK = {
+  name: "", tagline: "", logo: "", cover: "", wa: "",
+  cur: "RM", curCode: "MYR", color: COLORS[0], layout: "list",
+  items: [{ n: "", d: "", img: "", out: false, o: [{ l: "", p: 0 }] }],
+  closed: false, closedMsg: ""
+};
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl = u => /^https:\/\/[^\s"'<>]+$/i.test(u || "") ? u : "";
+const safeImg = u => safeUrl(u) || (/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "");
+const safeLogo = u => /^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "";
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const smooth = () => reduceMotion() ? "auto" : "smooth";
+const initial = t => esc((String(t).trim()[0] || "•").toUpperCase());
+
+let curNames = null;
+try { curNames = new Intl.DisplayNames(["en"], { type: "currency" }); } catch(e) {}
+function curName(code){ try { return curNames ? curNames.of(code) : code; } catch(e){ return code; } }
+function curSymbol(code){
+  try {
+    if (code === "MYR") return "RM";
+    const part = new Intl.NumberFormat("en", { style: "currency", currency: code, currencyDisplay: "narrowSymbol" }).formatToParts(0).find(x => x.type === "currency");
+    if (part && part.value === "$" && code !== "USD") return code.slice(0,2) + "$";
+    return part ? part.value : code + " ";
+  } catch(e){ return code + " "; }
+}
+function curOption(code, sel){ const sym = curSymbol(code).trim(); return `<option value="${code}" ${code===sel?"selected":""}>${code} ${esc(curName(code))}${sym && sym !== code ? " (" + esc(sym) + ")" : ""}</option>`; }
+function slug(t){ return String(t||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40) || "shop"; }
+const fmtMoney = (cur, n) => (cur || "") + (Number.isInteger(n) ? Number(n).toLocaleString("en") : Number(n).toFixed(2));
+
+
+
+
+
+
+
+let SITE = { api: "", ownerWa: "", price: "", qr: "", duitnow: "", note: "", signup: true };
+const signupOpen = () => SITE.signup !== false;
+const siteUrl = path => new URL(path, location.href.split("#")[0].split("?")[0]).href;
+const home = () => siteUrl("./");
+const storeLink = id => home() + "?" + id;
+async function getJson(path){
+  const r = await fetch(siteUrl(path) + "?t=" + Date.now(), { cache: "no-store" });
+  if (!r.ok) throw new Error(r.status === 404 ? "missing" : "network");
+  return r.json();
+}
+async function loadSite(){ try { SITE = Object.assign(SITE, await getJson("site.json")); } catch(e) {} }
+
+/* ---------- Talking to your Google script ---------- */
+async function apiGet(params){
+  if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
+  const q = new URLSearchParams({ ...params, t: Date.now() }).toString();
+  let r;
+  try { r = await fetch(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q); } catch(e){ throw new Error("Can't reach the store server. Check your internet and try again."); }
+  return r.json();
+}
+async function apiPost(body){
+  if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
+  let r;
+  try { r = await fetch(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }); }
+  catch(e){ throw new Error("Can't reach the store server. Check your internet and try again."); }
+  let j = {};
+  try { j = await r.json(); } catch(e){ throw new Error("The store server didn't answer properly. Try again."); }
+  if (j.error) throw new Error(j.error);
+  return j;
+}
+
+function normalize(d){
+  const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
+  x.items = (Array.isArray(x.items) ? x.items : []).map(it => ({
+    n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out,
+    o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String(o.l || ""), p: Number(o.p) || 0 })) : [{ l: "", p: 0 }]
+  }));
+  if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
+  if (!["list","grid"].includes(x.layout)) x.layout = "list";
+  x.closed = !!x.closed; x.closedMsg = String(x.closedMsg || "");
+  x.wa = String(x.wa || "").replace(/\D/g, "");
+  return x;
+}
+function setAccent(c){ document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--soft", c + "1F"); }
+function show(id){ ["builder","page","store"].forEach(x => $(x).hidden = x !== id); window.scrollTo(0,0); }
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch(e){ const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch(_) {} ta.remove(); return ok; }
+}
+
+/* ---------- Photos ---------- */
+function resizeImage(file, max, square, type, quality){
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      let sx=0, sy=0, sw=img.width, sh=img.height, w, h;
+      if (square){ const m=Math.min(sw,sh); sx=(sw-m)/2; sy=(sh-m)/2; sw=sh=m; w=h=Math.min(max, m); }
+      else { const k=Math.min(1, max/Math.max(sw,sh)); w=Math.round(sw*k); h=Math.round(sh*k); }
+      const c=document.createElement("canvas"); c.width=w; c.height=h;
+      const ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+      URL.revokeObjectURL(img.src);
+      res(c);
+    };
+    img.onerror = () => rej(new Error("That file isn't a photo we can read."));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+
+
+/* ---------- Own confirm and message box (browser popups get blocked in some apps) ---------- */
+let askResolve = null;
+function ask(text, yesLabel, danger){
+  $("askText").textContent = text;
+  $("askYes").textContent = yesLabel || "OK";
+  $("askYes").style.background = danger ? "var(--err)" : "";
+  $("askYes").style.borderColor = danger ? "var(--err)" : "";
+  $("askNoWrap").hidden = false;
+  $("askOverlay").classList.add("open");
+  $("askYes").focus();
+  return new Promise(res => { askResolve = res; });
+}
+function notify(text){
+  $("askText").textContent = text;
+  $("askYes").textContent = "OK";
+  $("askYes").style.background = ""; $("askYes").style.borderColor = "";
+  $("askNoWrap").hidden = true;
+  $("askOverlay").classList.add("open");
+  return new Promise(res => { askResolve = res; });
+}
+function closeAsk(v){ $("askOverlay").classList.remove("open"); if (askResolve){ const r = askResolve; askResolve = null; r(v); } }
+$("askYes").onclick = () => closeAsk(true);
+$("askNo").onclick = () => closeAsk(false);
+$("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay")) closeAsk(false); });
+
+
+
+
+
+
+
+/* ============================================================
+   SELLER: log in or create (yoursite/?build)
+   ============================================================ */
+let SESSION = null, S = null, STATUS = "pending", DIRTY = false;
+function loadSession(){ try { return JSON.parse(sessionStorage.getItem("lk-session") || "null"); } catch(e){ return null; } }
+function saveSession(){ try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {} }
+function clearSession(){ SESSION = null; try { sessionStorage.removeItem("lk-session"); } catch(e) {} }
+
+function loginCardHtml(msg){
+  return `<section class="card" id="loginCard">
+      <h2>Seller login</h2>
+      <p class="hint">Edit your store: menu, prices, photos, open or closed.</p>
+      <label>Your WhatsApp number<input type="tel" id="lWa" autocomplete="tel" placeholder="e.g. 0123456789"></label>
+      <p class="hint">The number your store gets orders on.</p>
+      <label>6-digit PIN<input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"></label>
+      <p class="err" id="lErr">${esc(msg || "")}</p>
+      <button class="btn solid full" id="lGo">Log in and edit my store</button>
+      <p class="hint" style="margin-top:12px">Forgot your PIN? ${String(SITE.ownerWa || "").replace(/\D/g, "") ? `<a href="https://wa.me/${String(SITE.ownerWa).replace(/\D/g, "")}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us"} and we'll reset it.</p>
+    </section>`;
+}
+function wireLogin(){
+  const go = async () => {
+    const wa = normWa($("lWa").value), pin = $("lPin").value;
+    $("lErr").textContent = "";
+    if (wa.length < 9 || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your WhatsApp number and 6-digit PIN.";
+    $("lGo").disabled = true; $("lGo").textContent = "Logging in...";
+    try {
+      const r = await apiPost({ action: "login", wa, pin });
+      SESSION = { id: r.id, pin }; saveSession(); S = normalize(r.data); STATUS = r.status; DIRTY = false;
+      if (!/^\?(build|edit)\b/.test(location.search)) history.pushState(null, "", home() + "?build");
+      openEditor();
+    } catch(e){ $("lErr").textContent = e.message; $("lGo").disabled = false; $("lGo").textContent = "Log in and edit my store"; }
+  };
+  $("lGo").onclick = go;
+  $("lPin").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+}
+
+function normWa(v){ let d = String(v || "").replace(/\D/g, ""); if (d.startsWith("0")) d = "6" + d; return d; }
+
+function renderStart(msg, mode){
+  const signup = mode === "signup";
+  setAccent(COLORS[0]); document.title = APP_NAME + (signup ? " · Sign up" : " · Seller login");
+  $("gwrap").innerHTML = `
+    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <header class="bh"><h1>${signup ? "Sign up" : "Seller login"}</h1><p>${signup ? "Create your store. You can build and preview it for free." : "Log in to edit your store."}</p></header>
+    ${signup ? "" : loginCardHtml(msg)}
+    ${!signup && signupOpen() ? `<a class="btn full" href="${esc(home())}?signup">New seller? Sign up</a>` : ""}
+    <section class="card" ${signup ? "" : "hidden"}>
+      <h2>Your store details</h2>
+      <label>Shop name<input type="text" id="cShop" placeholder="e.g. Kedai Ali"></label>
+      <label>Your WhatsApp number<input type="tel" id="cWa" autocomplete="tel" placeholder="e.g. 0123456789"></label>
+      <p class="hint">Orders come to this number, and you log in with it.</p>
+      <label>Your store link name<input type="text" id="cId" autocapitalize="off" spellcheck="false"></label>
+      <p class="hint" id="cHint">Your link will be ${esc(home())}?your-shop</p>
+      <label>Choose a 6-digit PIN<input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+      <label>Type the PIN again<input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+      <p class="hint">You'll log in with your WhatsApp number and this PIN.</p>
+      <p class="err" id="cErr"></p>
+      <button class="btn solid full" id="cGo">Sign up</button>
+    </section>`;
+  show("page");
+  let touched = false, timer = null;
+  const idHint = () => {
+    const v = $("cId").value; clearTimeout(timer);
+    if (!v){ $("cHint").textContent = `Your link will be ${home()}?your-shop`; return; }
+    $("cHint").textContent = storeLink(v) + " … checking";
+    timer = setTimeout(async () => {
+      try { const r = await apiGet({ action: "check", id: v }); if ($("cId").value !== v) return; $("cHint").innerHTML = r.error ? "Couldn't check the name right now. It will be checked again when you tap Create." : r.available ? `<span class="okmsg">${esc(storeLink(v))} is free</span>` : esc(r.reason || "That name is taken."); }
+      catch(e){ $("cHint").textContent = e.message; }
+    }, 500);
+  };
+  $("cShop").oninput = () => { if (!touched){ $("cId").value = slug($("cShop").value) === "shop" ? "" : slug($("cShop").value); idHint(); } };
+  $("cId").oninput = () => { touched = true; $("cId").value = $("cId").value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-{2,}/g, "-").replace(/^-/, "").slice(0, 40); idHint(); };
+  if (!signup) wireLogin();
+  $("cGo").onclick = async () => {
+    const name = $("cShop").value.trim(), id = slug($("cId").value), pin = $("cPin").value, wa = normWa($("cWa").value);
+    $("cErr").textContent = "";
+    if (!name) return $("cErr").textContent = "Add your shop name.";
+    if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
+    if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
+    if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
+    if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
+    $("cGo").disabled = true; $("cGo").textContent = "Signing up...";
+    try {
+      const data = normalize({ name, wa });
+      await apiPost({ action: "create", id, pin, data });
+      SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false;
+      history.replaceState(null, "", home() + "?build");
+      openEditor("Store created. Add your menu and photos, then tap Save.");
+    } catch(e){ $("cErr").textContent = e.message; $("cGo").disabled = false; $("cGo").textContent = "Sign up"; }
+  };
+}
+
+/* ============================================================
+   SELLER: editor
+   ============================================================ */
+function openEditor(msg){ setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); }
+function touch(){ DIRTY = true; const st = $("saveStatus"); if (st) st.textContent = "Not saved yet. Tap Save when you're done."; }
+function photoBox(id, src, empty, shape){ const u = safeImg(src); return `<div class="media-prev ${shape}" id="${id}">${u ? `<img src="${esc(u)}" alt="" onerror="this.parentNode.textContent='Not a photo'">` : empty}</div>`; }
+function photoControls(kind, src, extra){
+  return `<label class="btn small filebtn" style="margin:0">${safeImg(src) ? "Change" : "Upload"} photo<input type="file" accept="image/*" data-media="${kind}" ${extra || ""}></label>
+    ${safeImg(src) ? `<button class="btn small" data-act="rm-${kind}" ${extra || ""}>Remove</button>` : ""}`;
+}
+
+function tipHtml(){
+  try { if (localStorage.getItem("lk-tip-home")) return ""; } catch(e) {}
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  return `<section class="card" id="tipCard">
+    <div class="between"><h2>Tip: make it an app</h2><button class="x" data-act="hidetip" aria-label="Hide tip" style="width:32px;height:32px;font-size:18px">×</button></div>
+    <p class="hint">Add ${esc(APP_NAME)} to your phone's home screen, then open it with one tap like an app.</p>
+    <p class="hint">${ios ? "In Safari, tap the <b>Share</b> button, then <b>Add to Home Screen</b>." : "In Chrome, tap the <b>⋮</b> menu, then <b>Add to home screen</b> (or <b>Install app</b>)."}</p>
+  </section>`;
+}
+
+function publishCardHtml(){
+  const to = String(SITE.ownerWa || "").replace(/\D/g, "");
+  const help = to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent(`Hi ${APP_NAME}, about my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us";
+  if (STATUS === "live") return "";
+  if (STATUS === "offline") return `<section class="card" style="border-color:var(--err)">
+    <h2>Your store is offline</h2>
+    <p class="hint">It was taken offline, usually because a payment couldn't be found. ${help} to sort it out.</p>
+  </section>`;
+  const qr = safeUrl(SITE.qr);
+  return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+    <h2>Publish your store</h2>
+    <p class="hint">Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, and your store goes live straight away.</p>
+    <div class="qrbox">
+      <p class="hint" style="margin:0 0 6px">Pay with DuitNow</p>
+      ${SITE.price ? `<p class="amt">${esc(SITE.price)}</p>` : ""}
+      ${qr ? `<img src="${esc(qr)}" alt="DuitNow QR for payment">` : ""}
+      ${SITE.duitnow ? `<p class="hint">DuitNow ID: <b>${esc(SITE.duitnow)}</b></p>` : ""}
+      <ol>
+        ${qr ? `<li>Save the QR to your gallery (press and hold it), then scan it from your gallery in your bank app or Touch 'n Go.</li>` : `<li>Pay by DuitNow to the ID above in your bank app or Touch 'n Go.</li>`}
+        <li>Take a screenshot of your payment receipt.</li>
+        <li>Tap the button below and choose that screenshot. Your store goes live at once.</li>
+      </ol>
+    </div>
+    <label class="btn wa full filebtn" style="margin-top:14px;padding:15px">I've paid: upload receipt and publish<input type="file" accept="image/*" data-media="receipt" aria-label="Upload payment receipt"></label>
+    <p class="hint">We check every payment. Stores without a real payment are taken offline. Problems? ${help}.</p>
+  </section>`;
+}
+
+function renderEditor(msg){
+  const link = storeLink(SESSION.id), live = STATUS === "live";
+  $("bwrap").innerHTML = `
+  <div class="top"><span class="brand">${esc(APP_NAME)}</span><button class="btn small" data-act="logout">Log out</button></div>
+
+  <section class="card linkcard">
+    <div class="between"><h2>Your store link</h2>${live ? `<span class="tag2 paid">Live</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
+    <p class="url">${esc(link)}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn small" data-act="copy">Copy</button>
+      <a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Open</a>
+      <a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">Share</a>
+    </div>
+    <p class="hint">This link never changes. Tap Save and your store updates straight away.</p>
+    <p class="hint">You log in with <b>${esc(S.wa || "your WhatsApp number")}</b> and your PIN.</p>
+    <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
+  </section>
+
+  ${tipHtml()}
+  ${publishCardHtml()}
+
+  <section class="card">
+    <h2>Store status</h2>
+    <div class="seg">
+      <button data-act="open" data-v="1" aria-pressed="${!S.closed}">Open</button>
+      <button data-act="open" data-v="0" aria-pressed="${S.closed}">Closed</button>
+    </div>
+    <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Back on Monday 9am"></label>
+  </section>
+
+  <section class="card">
+    <h2>Shop</h2>
+    <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}"></label>
+    <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="e.g. Baked fresh daily"></label>
+    <label>Logo</label>
+    <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
+    <label>Cover photo (optional)</label>
+    <div class="media-row">${photoBox("coverPrev", S.cover, "No cover", "wide")}${photoControls("cover", S.cover)}</div>
+    <label>WhatsApp number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="60123456789"></label>
+    <p class="hint">Orders are sent here, and you log in with this number.</p>
+    <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
+    <label>Brand colour</label>
+    <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
+    <label>Menu layout</label>
+    <div class="seg">
+      <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
+      <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Menu</h2>
+    ${S.items.map((it,i)=>`
+      <div class="item">
+        <div class="ihead"><b>Item ${i+1}</b>
+          <span class="ctl">
+            <button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>↑</button>
+            <button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>↓</button>
+            <button class="del" data-act="del" data-i="${i}">Delete</button>
+          </span>
+        </div>
+        <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}"></label>
+        <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}"></label>
+        <label>Photo (optional)</label>
+        <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
+        <label>Options and prices</label>
+        ${it.o.map((o,j)=>`
+          <div class="opt">
+            <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="e.g. Small (20 pcs)">
+            <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p||""}" placeholder="Price">
+            <button data-act="delopt" data-i="${i}" data-j="${j}" aria-label="Remove option">×</button>
+          </div>`).join("")}
+        <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">Add option</button>
+        <label class="check"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}> Sold out for now</label>
+      </div>`).join("")}
+    <button class="btn full" style="margin-top:14px" data-act="additem">Add menu item</button>
+  </section>`;
+}
+
+function onField(e){
+  const t = e.target, f = t.dataset.f;
+  if (!f) return;
+  const v = t.type === "checkbox" ? t.checked : t.value;
+  if (t.dataset.j !== undefined) S.items[+t.dataset.i].o[+t.dataset.j][f] = f === "p" ? (parseFloat(v) || 0) : v;
+  else if (t.dataset.i !== undefined) S.items[+t.dataset.i][f] = v;
+  else S[f] = v;
+  if (f === "wa") S.wa = normWa(v);
+  if (f === "curCode") S.cur = curSymbol(v);
+  touch();
+}
+$("bwrap").addEventListener("input", onField);
+$("bwrap").addEventListener("change", onField);
+
+$("builder").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
+  const redraw = () => { touch(); renderEditor(); };
+  const blankItem = () => ({ n: "", d: "", img: "", out: false, o: [{ l: "", p: 0 }] });
+  if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; redraw(); }
+  else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; redraw(); }
+  else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length) S.items.push(blankItem()); redraw(); } }
+  else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); }
+  else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
+  else if (a === "additem"){ S.items.push(blankItem()); redraw(); }
+  else if (a === "color"){ S.color = b.dataset.c; redraw(); }
+  else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
+  else if (a === "open"){ S.closed = b.dataset.v === "0"; redraw(); }
+  else if (a === "rm-logo"){ S.logo = ""; redraw(); }
+  else if (a === "rm-cover"){ S.cover = ""; redraw(); }
+  else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
+  else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
+  else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); $("saveStatus").textContent = ok ? "Link copied." : "Press and hold the link to copy it."; }
+  else if (a === "preview"){ showStore(S, true); }
+  else if (a === "save"){ await saveStore(); }
+  else if (a === "recheck"){
+    try { const r = await apiPost({ action: "login", id: SESSION.id, pin: SESSION.pin }); STATUS = r.status; renderEditor(STATUS === "live" ? "Your store is live!" : "Not approved yet. Try again after sending your receipt."); }
+    catch(err){ notify(err.message); }
+  }
+  else if (a === "logout"){
+    if (DIRTY && !(await ask("You have unsaved changes. Log out anyway?", "Log out", true))) return;
+    DIRTY = false; clearSession(); renderStart();
+  }
+});
+
+async function publishWithReceipt(input){
+  const file = input.files && input.files[0];
+  input.value = "";
+  if (!file) return;
+  if (!S.name.trim()) return notify("Add your shop name first.");
+  if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first.");
+  if (!S.items.some(it => it.n.trim())) return notify("Add at least one menu item before publishing.");
+  if (!(await ask("Publish your store now with this receipt?", "Publish"))) return;
+  const st = $("saveStatus");
+  try {
+    if (DIRTY){ st.textContent = "Saving your store..."; await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
+    st.textContent = "Publishing...";
+    const c = await resizeImage(file, 1400, false);
+    const r = await apiPost({ action: "selfpublish", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: c.toDataURL("image/jpeg", 0.82).split(",")[1] });
+    STATUS = r.status;
+    renderEditor("Your store is live! Copy or share your link below.");
+    window.scrollTo(0, 0);
+    notify("Your store is live! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok.");
+  } catch(err){ st.textContent = ""; notify(err.message); }
+}
+
+async function saveStore(){
+  if (!S.name.trim()) return notify("Add your shop name first.");
+  if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first, so orders can reach you.");
+  const btn = document.querySelector('[data-act="save"]');
+  btn.disabled = true; btn.textContent = "Saving...";
+  try {
+    const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
+    STATUS = r.status || STATUS; DIRTY = false;
+    renderEditor(STATUS === "live" ? "Saved. Your store link shows the new version now." : "Saved. Publish your store to make it live.");
+  } catch(e){ notify(e.message); }
+  btn.disabled = false; btn.textContent = "Save";
+}
+
+$("bwrap").addEventListener("change", async e => {
+  const t = e.target, kind = t.dataset.media;
+  if (!kind) return;
+  if (kind === "receipt") return publishWithReceipt(t);
+  const file = t.files && t.files[0];
+  if (!file) return;
+  const st = $("saveStatus");
+  st.textContent = "Uploading photo...";
+  try {
+    const size = kind === "logo" ? 300 : kind === "cover" ? 1200 : 700;
+    const c = await resizeImage(file, size, kind !== "cover");
+    const dataUrl = c.toDataURL("image/jpeg", 0.8);
+    const r = await apiPost({ action: "upload", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: dataUrl.split(",")[1] });
+    if (kind === "logo") S.logo = r.url; else if (kind === "cover") S.cover = r.url; else S.items[+t.dataset.i].img = r.url;
+    touch(); renderEditor("Photo added. Tap Save to put it on your store.");
+  } catch(err){ st.textContent = ""; notify(err.message); }
+});
+window.addEventListener("beforeunload", e => { if (DIRTY){ e.preventDefault(); e.returnValue = ""; } });
+
+/* ============================================================
+   STORE (yoursite/?shop-name)
+   ============================================================ */
+let D = null, cart = {}, pSel = { i: 0, j: 0, q: 1 }, AD = null;
+const money = n => fmtMoney(D.cur, n);
+function cartKey(){ return "lk-cart:" + D.wa; }
+function saveCart(){ try { localStorage.setItem(cartKey(), JSON.stringify(cart)); } catch(e) {} }
+const priceLabel = p => { const ps = p.o.map(o => o.p); const lo = Math.min(...ps); return (ps.length > 1 && Math.max(...ps) !== lo ? "From " : "") + money(lo); };
+const inCart = i => Object.keys(cart).filter(k => k.startsWith(i + "|")).reduce((a,k) => a + cart[k], 0);
+
+async function showStore(data, isPreview){
+  D = normalize(data);
+  show("store");
+  $("backBtn").hidden = !isPreview;
+  setAccent(D.color);
+  document.title = D.name + " · Order on WhatsApp";
+  const cover = safeImg(D.cover);
+  $("stCover").hidden = !cover;
+  $("stCover").style.backgroundImage = cover ? `url("${cover.replace(/"/g, "%22")}")` : "";
+  $("stWrap").style.paddingTop = cover ? "0" : "56px";
+  $("stCard").style.marginTop = cover ? "" : "0";
+  $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : initial(D.name);
+  $("stName").textContent = D.name;
+  $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
+  $("brandLink").href = home();
+  $("closedOv").hidden = !D.closed;
+  $("closedShop").textContent = D.name;
+  $("closedMsg").textContent = D.closedMsg.trim() || "We're not taking orders right now. Please check back later.";
+  const t = new Date();
+  $("date").min = new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  $("err").textContent = "";
+  try { cart = JSON.parse(localStorage.getItem(cartKey()) || "{}") || {}; } catch(e){ cart = {}; }
+  Object.keys(cart).forEach(k => { const [i,j] = k.split("|").map(Number); if (!D.items[i] || !D.items[i].o[j] || D.items[i].out) delete cart[k]; });
+  $("note").value = "";
+  renderMenu(); renderBar();
+  showAd();
+}
+async function loadAd(){ try { AD = await getJson("ads.json"); } catch(e){ AD = null; } }
+function showAd(){
+  const on = !!(AD && safeUrl(AD.img) && (!AD.until || Date.now() <= new Date(AD.until + "T23:59:59").getTime())
+    && !(AD.advertiserWa && String(AD.advertiserWa).replace(/\D/g, "") === D.wa)
+    && (() => { try { return !sessionStorage.getItem("lk-adx:" + AD.img); } catch(e){ return true; } })());
+  $("adWrap").hidden = !on;
+  if (!on) return;
+  $("adImg").src = safeUrl(AD.img);
+  $("adImg").onerror = () => { $("adWrap").hidden = true; };
+  const link = safeUrl(AD.link || "");
+  if (link) $("adBan").href = link; else $("adBan").removeAttribute("href");
+}
+$("adX").onclick = () => { try { sessionStorage.setItem("lk-adx:" + AD.img, "1"); } catch(e) {} $("adWrap").hidden = true; };
+
+function productRow(i){
+  const p = D.items[i], img = safeImg(p.img), n = inCart(i);
+  return `<button class="prow${p.out ? " out" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
+    <div class="ptext">
+      <h3>${esc(p.n)}</h3>
+      ${p.d ? `<p class="pdesc">${esc(p.d)}</p>` : ""}
+      <div class="pmeta"><span class="pprice">${priceLabel(p)}</span>
+        ${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
+    </div>
+    <div class="pimg">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<div class="ph">${initial(p.n)}</div>`}
+      ${p.out ? "" : `<span class="addb" aria-hidden="true">+</span>`}</div>
+  </button>`;
+}
+function renderMenu(){
+  const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
+  $("menu").innerHTML = list.length
+    ? `<section class="group"><div class="plist${D.layout === "grid" ? " grid" : ""}">${list.map(productRow).join("")}</div></section>`
+    : `<p class="empty">This store hasn't added a menu yet.</p>`;
+}
+function openProduct(i){
+  const p = D.items[i]; if (!p || p.out || D.closed) return;
+  pSel = { i, j: 0, q: 1 };
+  const img = safeImg(p.img);
+  $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : `<div class="ph">${initial(p.n)}</div>`;
+  $("pTitle").textContent = p.n;
+  $("pDesc").textContent = p.d; $("pDesc").hidden = !p.d;
+  $("pOpts").hidden = p.o.length < 2;
+  $("pOpts").innerHTML = p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
+  updateProduct();
+  $("pOverlay").classList.add("open");
+}
+function updateProduct(){ const o = D.items[pSel.i].o[pSel.j]; $("pQty").textContent = pSel.q; $("pAdd").textContent = "Add to cart · " + money(o.p * pSel.q); }
+$("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openProduct(+b.dataset.p); });
+$("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
+$("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
+$("pPlus").onclick = () => { pSel.q = Math.min(99, pSel.q + 1); updateProduct(); };
+$("pAdd").onclick = () => { const k = pSel.i + "|" + pSel.j; cart[k] = (cart[k] || 0) + pSel.q; saveCart(); $("pOverlay").classList.remove("open"); renderMenu(); renderBar(); };
+
+function items(){
+  const out = [];
+  D.items.forEach((p,i) => p.o.forEach((o,j) => { const q = cart[i+"|"+j] || 0; if (q > 0) out.push({ k: i+"|"+j, name: p.n, opt: o.l, q, sub: Math.round(q * o.p * 100) / 100 }); }));
+  return out;
+}
+function message(){
+  const it = items(), total = Math.round(it.reduce((a,b)=>a+b.sub,0) * 100) / 100;
+  const name = $("cName").value.trim(), dv = $("date").value;
+  const dt = dv ? new Date(dv + "T00:00").toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short" }) : "";
+  let m = `Hi ${D.name}, I'd like to order:\n\n`;
+  if (name) m += `Name: ${name}\n`;
+  if (dt) m += `Date: ${dt}\n`;
+  if (name || dt) m += `\n`;
+  m += it.map(x => `${x.q} × ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}`).join("\n");
+  m += `\n\n*Total: ${money(total)}*`;
+  const note = $("note").value.trim();
+  if (note) m += `\n\nNote: ${note}`;
+  return m;
+}
+function renderBar(){
+  const it = items();
+  const n = it.reduce((a,b)=>a+b.q,0), total = Math.round(it.reduce((a,b)=>a+b.sub,0) * 100) / 100;
+  $("bar").classList.toggle("show", n > 0 && !D.closed);
+  $("count").textContent = n;
+  $("total").textContent = money(total);
+  $("lines").innerHTML = it.map(x=>`
+    <div class="cline">
+      <div class="cn"><b>${esc(x.name)}</b><span>${x.opt ? esc(x.opt) + " · " : ""}${money(x.sub)}</span></div>
+      <div class="step"><button data-k="${x.k}" data-d="-1" aria-label="One less ${esc(x.name)}">−</button><span class="q">${x.q}</span><button data-k="${x.k}" data-d="1" aria-label="One more ${esc(x.name)}">+</button></div>
+    </div>`).join("") + `<div class="ctotal"><span>Total</span><span>${money(total)}</span></div>`;
+  $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
+  if (!n) $("overlay").classList.remove("open");
+}
+$("lines").addEventListener("click", e => {
+  const b = e.target.closest("button[data-k]"); if (!b) return;
+  const k = b.dataset.k; cart[k] = Math.max(0, (cart[k] || 0) + Number(b.dataset.d)); if (!cart[k]) delete cart[k];
+  saveCart(); renderBar(); renderMenu();
+});
+["note","cName","date"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
+$("send").addEventListener("click", e => {
+  let msg = "";
+  if (D.closed) msg = "This store is closed right now.";
+  else if (!$("cName").value.trim()) msg = "Add your name so the shop knows who the order is for.";
+  else if (!$("date").value) msg = "Pick the date you want your order.";
+  else if ($("date").value < $("date").min) msg = "Pick today or a later date.";
+  if (msg){ e.preventDefault(); $("err").textContent = msg; return; }
+  $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
+  setTimeout(() => { cart = {}; saveCart(); renderMenu(); renderBar(); }, 800);
+});
+$("viewCart").onclick = () => $("overlay").classList.add("open");
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-close]");
+  if (c) $(c.dataset.close).classList.remove("open");
+  if (e.target.classList && e.target.classList.contains("overlay") && e.target.id !== "askOverlay") e.target.classList.remove("open");
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if ($("askOverlay").classList.contains("open")) return closeAsk(false);
+  document.querySelectorAll(".overlay.open").forEach(o => o.classList.remove("open"));
+});
+$("backBtn").onclick = () => { renderEditor(); show("builder"); };
+
+
+
+/* ============================================================
+   ADMIN (yoursite/?admin): approve stores, reset PINs
+   ============================================================ */
+let ADMIN = "";
+try { ADMIN = sessionStorage.getItem("lk-admin") || ""; } catch(e) {}
+async function renderAdmin(msg){
+  setAccent(COLORS[0]); document.title = APP_NAME + " admin"; show("page");
+  const g = $("gwrap");
+  if (!ADMIN){
+    g.innerHTML = `<div class="top"><span class="brand">${esc(APP_NAME)} admin</span></div>
+      <section class="card"><label>Admin key<input type="password" id="admKey"></label><p class="err">${esc(msg || "")}</p><button class="btn solid full" id="admGo">Open</button></section>`;
+    $("admGo").onclick = () => { ADMIN = $("admKey").value; try { sessionStorage.setItem("lk-admin", ADMIN); } catch(e) {} renderAdmin(); };
+    return;
+  }
+  g.innerHTML = `<p class="loading">Loading stores...</p>`;
+  let list;
+  try { list = (await apiPost({ action: "admin", key: ADMIN, op: "list" })).stores; }
+  catch(e){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(_) {} return renderAdmin(e.message); }
+  const check = list.filter(x => x.status === "live" && x.receipt && !x.checked);
+  const waiting = list.filter(x => x.status === "pending");
+  const live = list.filter(x => x.status === "live" && !(x.receipt && !x.checked));
+  const offline = list.filter(x => x.status === "offline");
+  const row = x => `
+    <section class="card" data-name="${esc((x.name + " " + x.id).toLowerCase())}">
+      <div class="between"><b>${esc(x.name || x.id)}</b>${x.status === "offline" ? `<span class="tag2 unpaid">Offline</span>` : x.status === "pending" ? `<span class="tag2">Not paid</span>` : x.receipt && !x.checked ? `<span class="tag2 claim">Check payment</span>` : `<span class="tag2 paid">Live</span>`}</div>
+      <p class="hint"><a href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">?${esc(x.id)}</a>.${x.wa ? ` WhatsApp <a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>.` : ""} Created ${new Date(x.created).toLocaleDateString("en-MY")}.${x.paidAt ? ` Paid ${new Date(x.paidAt).toLocaleString("en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}.` : ""}</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        ${x.receipt ? `<a class="btn small" href="${esc(x.receipt)}" target="_blank" rel="noopener">View receipt</a>` : ""}
+        ${x.status === "live" && x.receipt && !x.checked ? `<button class="btn small solid" data-op="verify" data-id="${esc(x.id)}">Payment OK</button>` : ""}
+        ${x.status === "live" ? `<button class="btn small" data-op="unpublish" data-id="${esc(x.id)}">Take offline</button>` : `<button class="btn small ${x.status === "pending" ? "" : "solid"}" data-op="approve" data-id="${esc(x.id)}">${x.status === "offline" ? "Put back live" : "Make live"}</button>`}
+        <button class="btn small" data-op="resetpin" data-id="${esc(x.id)}">Reset PIN</button>
+      </div>
+    </section>`;
+  const section = (title, arr, empty) => `<h2 style="font-size:20px;margin:16px 2px 10px">${title} (${arr.length})</h2>${arr.map(row).join("") || `<p class="hint">${empty}</p>`}`;
+  g.innerHTML = `
+    <div class="top"><span class="brand">${esc(APP_NAME)} admin</span><button class="btn small" id="admOut">Lock</button></div>
+    <p class="status">${esc(msg || "")}</p>
+    <p class="hint">Open each receipt, check the money is in your bank, then tap Payment OK. If it isn't, tap Take offline.</p>
+    ${section("Check payment", check, "Nothing to check.")}
+    ${section("Live", live, "None yet.")}
+    ${section("Not paid yet", waiting, "None.")}
+    ${offline.length ? section("Offline", offline, "") : ""}`;
+  $("admOut").onclick = () => { ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} renderAdmin(); };
+  g.onclick = async e => {
+    const b = e.target.closest("[data-op]"); if (!b) return;
+    const op = b.dataset.op, id = b.dataset.id;
+    if ((op === "resetpin" || op === "unpublish") && !(await ask(op === "resetpin" ? `Reset the PIN for ${id}? Their old PIN stops working.` : `Take ${id} offline? They won't be able to publish it again themselves.`, "Yes", true))) return;
+    b.disabled = true;
+    try {
+      const r = await apiPost({ action: "admin", key: ADMIN, op, id });
+      renderAdmin(op === "resetpin" ? `New PIN for ${id}: ${r.newPin}. Send it to the seller privately.` : op === "approve" ? `${id} is live.` : op === "verify" ? `${id}: payment confirmed.` : `${id} is offline.`);
+    } catch(err){ b.disabled = false; notify(err.message); }
+  };
+}
+
+/* ============================================================
+   HOME + ROUTER
+   ============================================================ */
+function renderHome(){
+  setAccent(COLORS[0]); document.title = APP_NAME + " · WhatsApp order stores";
+  const to = String(SITE.ownerWa || "").replace(/\D/g, "");
+  $("gwrap").innerHTML = `
+    <div class="top"><span class="brand">${esc(APP_NAME)}</span></div>
+    <header class="bh"><h1>Your shop, one link</h1><p>Customers pick from your menu and the order lands in your WhatsApp. No app, no commission${SITE.price ? `, one payment of ${esc(SITE.price)}` : ""}.</p></header>
+    ${loginCardHtml()}
+    ${signupOpen() ? `<a class="btn full" style="padding:15px" href="${esc(home())}?signup">New seller? Sign up</a>` : ""}
+    ${to ? `<a class="btn full wa" style="margin-top:10px" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener">Ask us on WhatsApp</a>` : ""}`;
+  show("page");
+  wireLogin();
+}
+function showMessage(title, text){
+  setAccent(COLORS[0]);
+  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><a class="btn solid" href="${esc(home())}">Go to ${esc(APP_NAME)}</a>`;
+  show("page");
+}
+async function route(){
+  await loadSite();
+  const q = decodeURIComponent(location.search.slice(1)).split("&")[0].toLowerCase();
+  if (q === "admin") return renderAdmin();
+  if (q === "signup"){ return renderStart("", "signup"); }
+  if (q === "build" || q === "edit"){
+    SESSION = loadSession();
+    if (SESSION){
+      $("gwrap").innerHTML = `<p class="loading">Opening your store...</p>`; show("page");
+      try { const r = await apiPost({ action: "login", id: SESSION.id, pin: SESSION.pin }); S = normalize(r.data); STATUS = r.status; return openEditor(); }
+      catch(e){ clearSession(); }
+    }
+    return renderStart();
+  }
+  if (/^[a-z0-9-]{2,40}$/.test(q)){
+    $("gwrap").innerHTML = `<p class="loading">Opening store...</p>`; show("page");
+    try {
+      const [r] = await Promise.all([apiGet({ action: "shop", id: q }), loadAd()]);
+      if (r.error === "notfound") return showMessage("Store not found", "Check the link spelling, or ask the shop for their link again.");
+      if (r.error === "notlive") return showMessage("Opening soon", "This store isn't live yet. Please check back later.");
+      if (r.error) throw new Error(r.error);
+      return showStore(r.data, false);
+    } catch(e){ return showMessage("Couldn't open the store", e.message || "Check your internet connection and try again."); }
+  }
+  renderHome();
+}
+window.addEventListener("popstate", () => { if (!DIRTY) route(); });
+route();
+
+</script>
+</body>
+</html>
