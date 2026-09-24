@@ -131,6 +131,19 @@ textarea{min-height:72px;resize:vertical}
   animation:riseIn .5s .3s cubic-bezier(.16,1,.3,1) both;transition:transform .15s ease}
 .chatfab:active{transform:scale(.94)}
 .chatfab svg{width:28px;height:28px}
+/* ---------- Admin dashboard ---------- */
+.adminbar{border-color:var(--accent);background:var(--soft)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center}
+.stat b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.stat span{font-size:11px;color:var(--muted);font-weight:600}
+.stat.hot b{color:#B45309}
+.admtabs{margin:0 0 14px}
+.admrow .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.admrow .btn.small{padding:8px 11px}
+.btn.small.dangerline{border-color:var(--err);color:var(--err)}
+.admprev{margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--soft);min-height:40px}
+.admprev img{display:block;width:100%;height:auto}
 .dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);border-color:var(--err);color:#fff}
@@ -422,6 +435,19 @@ html,body{overflow-x:hidden}
   </div>
 </div>
 
+<!-- ============ TEXT INPUT POP-UP ============ -->
+<div class="overlay" id="promptOverlay" role="dialog" aria-modal="true" aria-labelledby="promptText">
+  <div class="sheet">
+    <p id="promptText" style="font-size:18px;font-weight:700;margin:4px 0 10px"></p>
+    <input type="text" id="promptInput" autocapitalize="off" spellcheck="false">
+    <p class="hint" id="promptHint"></p>
+    <div class="row2" style="margin-top:14px">
+      <div><button class="btn full" type="button" id="promptNo">Cancel</button></div>
+      <div><button class="btn solid full" type="button" id="promptYes">Save</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- ============ PAY AND PUBLISH ============ -->
 <div class="overlay" id="payOverlay" role="dialog" aria-modal="true" aria-labelledby="payTitle">
   <div class="sheet">
@@ -606,7 +632,26 @@ async function getJson(path){
   if (!r.ok) throw new Error(r.status === 404 ? "missing" : "network");
   return r.json();
 }
-async function loadSite(){ try { SITE = Object.assign(SITE, await getJson("site.json")); } catch(e) {} }
+let CONFIG_P = Promise.resolve(), HAS_AD_CONFIG = false;
+function applyConfig(c){
+  if (!c || typeof c !== "object") return;
+  Object.keys(c).forEach(k => {
+    if (k === "ad"){ HAS_AD_CONFIG = true; SITE.ad = c.ad; }
+    else if (k === "signup") SITE.signup = c.signup !== false;
+    else if (c[k] !== undefined && c[k] !== null) SITE[k] = c[k];
+  });
+}
+async function loadSite(){
+  try { SITE = Object.assign(SITE, await getJson("site.json")); } catch(e) {}
+  if (!safeUrl(SITE.api)) { CONFIG_P = Promise.resolve(); return; }
+  // Show the page straight away with the settings this phone remembers; fetch fresh ones in the background
+  let remembered = null;
+  try { remembered = JSON.parse(localStorage.getItem("lk-config") || "null"); } catch(e) {}
+  const fresh = apiGet({ action: "config" }).then(r => {
+    if (r && r.config){ try { localStorage.setItem("lk-config", JSON.stringify(r.config)); } catch(e) {} applyConfig(r.config); }
+  }).catch(() => {});
+  if (remembered){ applyConfig(remembered); CONFIG_P = Promise.resolve(); } else CONFIG_P = fresh;
+}
 
 /* ---------- Talking to your Google script ---------- */
 const SLOW_MSG = "The store server is slow right now. Please try again in a moment.";
@@ -634,6 +679,7 @@ async function apiGet(params){
 // Actions that are safe to repeat get one quiet retry if Google hiccups
 const RETRY_OK = new Set(["login", "save", "admin"]);
 async function apiPost(body){
+  if (SESSION && SESSION.admin && body.id === SESSION.id && !body.key && body.action !== "admin") body.key = SESSION.key;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
   const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }, RETRY_OK.has(body.action) ? 2 : 1);
   if (j.error) throw new Error(j.error);
@@ -676,6 +722,16 @@ new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
 
 function loaderHtml(text){
   return `<div class="lkload" role="status"><svg viewBox="0 0 100 100" aria-hidden="true"><path class="sp-l" d="M36 22 V76 H70" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="square"/><circle class="sp-dot" cx="67" cy="33" r="8.5" fill="#F2C14E"/></svg><span>${esc(text)}</span></div>`;
+}
+function askText(message, value, hint, okLabel){
+  return new Promise(res => {
+    $("promptText").textContent = message; $("promptHint").textContent = hint || "";
+    $("promptInput").value = value || ""; $("promptYes").textContent = okLabel || "Save";
+    openSheet("promptOverlay"); setTimeout(() => $("promptInput").focus(), 300);
+    const done = v => { closeSheet("promptOverlay"); $("promptYes").onclick = $("promptNo").onclick = null; res(v); };
+    $("promptYes").onclick = () => done($("promptInput").value.trim());
+    $("promptNo").onclick = () => done(null);
+  });
 }
 function closeSheet(id){
   const o = typeof id === "string" ? $(id) : id;
@@ -1005,6 +1061,7 @@ $("pubGo").onclick = async () => {
 
 function renderEditor(msg){
   const link = storeLink(SESSION.id), live = STATUS === "live";
+  const adminBar = SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : "";
   $("bwrap").innerHTML = `
   <div class="top"><span class="brand">${esc(APP_NAME)}</span><button class="btn small" data-act="logout">Log out</button></div>
 
@@ -1024,8 +1081,9 @@ function renderEditor(msg){
     <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
   </section>
 
-  ${tipHtml()}
-  ${publishCardHtml()}
+  ${adminBar}
+  ${SESSION.admin ? "" : tipHtml()}
+  ${SESSION.admin ? "" : publishCardHtml()}
 
   <section class="card">
     <h2>Store status</h2>
@@ -1130,6 +1188,10 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
+  else if (a === "backadmin"){
+    if (DIRTY && !(await ask("You have unsaved changes. Leave anyway?", "Leave", true))) return;
+    DIRTY = false; clearSession(); history.pushState(null, "", home() + "?admin"); renderAdmin();
+  }
   else if (a === "deleteacct"){
     if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
     b.disabled = true; b.textContent = "Deleting...";
@@ -1257,10 +1319,14 @@ async function showStore(data, isPreview){
   renderMenu(); renderBar();
   showAd();
 }
-async function loadAd(){ try { AD = await getJson("ads.json"); } catch(e){ AD = null; } }
+async function loadAd(){
+  await CONFIG_P;
+  if (HAS_AD_CONFIG){ AD = SITE.ad && SITE.ad.img ? SITE.ad : null; return; }   // the dashboard's ad wins
+  try { AD = await getJson("ads.json"); } catch(e){ AD = null; }
+}
 function showAd(){
   const on = !!(AD && safeUrl(AD.img) && (!AD.until || Date.now() <= new Date(AD.until + "T23:59:59").getTime())
-    && !(AD.advertiserWa && String(AD.advertiserWa).replace(/\D/g, "") === D.wa)
+    && !(AD.advertiserWa && normWa(AD.advertiserWa) === normWa(D.wa))
     && (() => { try { return !sessionStorage.getItem("lk-adx:" + AD.img); } catch(e){ return true; } })());
   $("adWrap").hidden = !on;
   if (!on) return;
@@ -1376,55 +1442,194 @@ $("backBtn").onclick = () => { renderEditor(); show("builder"); };
 /* ============================================================
    ADMIN (yoursite/?admin): approve stores, reset PINs
    ============================================================ */
-let ADMIN = "";
+let ADMIN = "", ADMTAB = "stores", ADMQ = "";
 try { ADMIN = sessionStorage.getItem("lk-admin") || ""; } catch(e) {}
+function adminLock(){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} }
+
 async function renderAdmin(msg){
   setAccent(COLORS[0]); document.title = APP_NAME + " admin"; show("page");
   const g = $("gwrap");
   if (!ADMIN){
-    g.innerHTML = `<div class="top"><span class="brand">${esc(APP_NAME)} admin</span></div>
-      <section class="card"><label>Admin key<input type="password" id="admKey"></label><p class="err">${esc(msg || "")}</p><button class="btn solid full" id="admGo">Open</button></section>`;
-    $("admGo").onclick = () => { ADMIN = $("admKey").value; try { sessionStorage.setItem("lk-admin", ADMIN); } catch(e) {} renderAdmin(); };
+    g.innerHTML = `<div class="auth" style="padding-top:10vh">
+      <div class="brandmark"><img src="icon-192.png" alt=""><h1 class="wordmark" style="font-size:34px">${esc(APP_NAME)} admin</h1></div>
+      <div class="authform" style="margin-top:26px">
+        <label>Admin key<span class="pinwrap"><input type="password" id="admKey" autocomplete="current-password"><button type="button" class="pineye" data-eye="admKey" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
+        <p class="err">${esc(msg || "")}</p>
+        <button class="btn solid full" id="admGo">Open dashboard</button>
+      </div></div>`;
+    const go = () => { ADMIN = $("admKey").value; try { sessionStorage.setItem("lk-admin", ADMIN); } catch(e) {} renderAdmin(); };
+    $("admGo").onclick = go; $("admKey").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
     return;
   }
-  g.innerHTML = `${loaderHtml("Loading stores...")}`;
+  const head = `<div class="top"><span class="brand">${esc(APP_NAME)} admin</span><button class="btn small" id="admOut">Lock</button></div>
+    <div class="seg admtabs">
+      <button data-admtab="stores" aria-pressed="${ADMTAB === "stores"}">Stores</button>
+      <button data-admtab="ads" aria-pressed="${ADMTAB === "ads"}">Ads</button>
+      <button data-admtab="settings" aria-pressed="${ADMTAB === "settings"}">Settings</button>
+    </div>
+    <p class="status" id="admMsg" role="status">${esc(msg || "")}</p>`;
+  const wire = () => {
+    $("admOut").onclick = () => { adminLock(); renderAdmin(); };
+    g.querySelectorAll("[data-admtab]").forEach(b => b.onclick = () => { ADMTAB = b.dataset.admtab; renderAdmin(); });
+  };
+  if (ADMTAB === "stores") return adminStores(g, head, wire);
+  g.innerHTML = head + loaderHtml("Loading settings..."); wire();
+  let cfg;
+  try { cfg = (await apiPost({ action: "admin", key: ADMIN, op: "getconfig" })).config || {}; }
+  catch(e){ adminLock(); return renderAdmin(e.message); }
+  if (ADMTAB === "ads") adminAds(g, head, wire, cfg); else adminSettings(g, head, wire, cfg);
+}
+
+async function adminStores(g, head, wire){
+  g.innerHTML = head + loaderHtml("Loading stores..."); wire();
   let list;
   try { list = (await apiPost({ action: "admin", key: ADMIN, op: "list" })).stores; }
-  catch(e){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(_) {} return renderAdmin(e.message); }
-  const check = list.filter(x => x.status === "live" && x.receipt && !x.checked);
-  const waiting = list.filter(x => x.status === "pending");
-  const live = list.filter(x => x.status === "live" && !(x.receipt && !x.checked));
-  const offline = list.filter(x => x.status === "offline");
+  catch(e){ adminLock(); return renderAdmin(e.message); }
+  const isCheck = x => x.status === "live" && x.receipt && !x.checked;
+  const groups = [
+    ["Check payment", list.filter(isCheck), "Nothing to check."],
+    ["Live", list.filter(x => x.status === "live" && !isCheck(x)), "None yet."],
+    ["Not paid yet", list.filter(x => x.status === "pending"), "None."],
+    ["Offline", list.filter(x => x.status === "offline"), ""]
+  ];
+  const tag = x => x.status === "offline" ? `<span class="tag2 unpaid">Offline</span>` : x.status === "pending" ? `<span class="tag2">Not paid</span>` : isCheck(x) ? `<span class="tag2 claim">Check payment</span>` : `<span class="tag2 paid">Live</span>`;
+  const when = t => t ? new Date(t).toLocaleString("en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "";
   const row = x => `
-    <section class="card" data-name="${esc((x.name + " " + x.id).toLowerCase())}">
-      <div class="between"><b>${esc(x.name || x.id)}</b>${x.status === "offline" ? `<span class="tag2 unpaid">Offline</span>` : x.status === "pending" ? `<span class="tag2">Not paid</span>` : x.receipt && !x.checked ? `<span class="tag2 claim">Check payment</span>` : `<span class="tag2 paid">Live</span>`}</div>
-      <p class="hint"><a href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">?${esc(x.id)}</a>.${x.wa ? ` WhatsApp <a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>.` : ""} Created ${new Date(x.created).toLocaleDateString("en-MY")}.${x.paidAt ? ` Paid ${new Date(x.paidAt).toLocaleString("en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}.` : ""}</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-        ${x.receipt ? `<a class="btn small" href="${esc(x.receipt)}" target="_blank" rel="noopener">View receipt</a>` : ""}
-        ${x.status === "live" && x.receipt && !x.checked ? `<button class="btn small solid" data-op="verify" data-id="${esc(x.id)}">Payment OK</button>` : ""}
+    <section class="card admrow" data-find="${esc((x.name + " " + x.id + " " + x.wa).toLowerCase())}">
+      <div class="between"><b>${esc(x.name || x.id)}</b>${tag(x)}</div>
+      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · <a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a> · ${x.items} item${x.items === 1 ? "" : "s"}${x.closed ? " · closed" : ""}</p>
+      <p class="hint" style="margin:2px 0 0">Created ${when(x.created)}${x.paidAt ? ` · Paid ${when(x.paidAt)}` : ""}</p>
+      <div class="acts">
+        ${x.status === "live" ? `<a class="btn small" href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">View</a>` : ""}
+        ${x.receipt ? `<a class="btn small" href="${esc(x.receipt)}" target="_blank" rel="noopener">Receipt</a>` : ""}
+        ${isCheck(x) ? `<button class="btn small solid" data-op="verify" data-id="${esc(x.id)}">Payment OK</button>` : ""}
         ${x.status === "live" ? `<button class="btn small" data-op="unpublish" data-id="${esc(x.id)}">Take offline</button>` : `<button class="btn small ${x.status === "pending" ? "" : "solid"}" data-op="approve" data-id="${esc(x.id)}">${x.status === "offline" ? "Put back live" : "Make live"}</button>`}
+        <button class="btn small" data-op="edit" data-id="${esc(x.id)}">Edit store</button>
+        <button class="btn small" data-op="rename" data-id="${esc(x.id)}">Rename link</button>
         <button class="btn small" data-op="resetpin" data-id="${esc(x.id)}">Reset PIN</button>
+        <button class="btn small dangerline" data-op="delete" data-id="${esc(x.id)}" data-name="${esc(x.name || x.id)}">Delete</button>
       </div>
     </section>`;
-  const section = (title, arr, empty) => `<h2 style="font-size:20px;margin:16px 2px 10px">${title} (${arr.length})</h2>${arr.map(row).join("") || `<p class="hint">${empty}</p>`}`;
-  g.innerHTML = `
-    <div class="top"><span class="brand">${esc(APP_NAME)} admin</span><button class="btn small" id="admOut">Lock</button></div>
-    <p class="status">${esc(msg || "")}</p>
-    <p class="hint">Open each receipt, check the money is in your bank, then tap Payment OK. If it isn't, tap Take offline.</p>
-    ${section("Check payment", check, "Nothing to check.")}
-    ${section("Live", live, "None yet.")}
-    ${section("Not paid yet", waiting, "None.")}
-    ${offline.length ? section("Offline", offline, "") : ""}`;
-  $("admOut").onclick = () => { ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} renderAdmin(); };
-  g.onclick = async e => {
-    const b = e.target.closest("[data-op]"); if (!b) return;
+  g.innerHTML = head + `
+    <div class="stats">
+      <div class="stat"><b>${groups[1][1].length + groups[0][1].length}</b><span>Live</span></div>
+      <div class="stat ${groups[0][1].length ? "hot" : ""}"><b>${groups[0][1].length}</b><span>Check</span></div>
+      <div class="stat"><b>${groups[2][1].length}</b><span>Not paid</span></div>
+      <div class="stat"><b>${groups[3][1].length}</b><span>Offline</span></div>
+    </div>
+    <input type="search" id="admFind" placeholder="Search name, link or WhatsApp number" value="${esc(ADMQ)}" style="margin-bottom:6px">
+    <p class="hint" style="margin:0 2px 8px">Open each receipt, check the money reached your account, then tap Payment OK. If it didn't, tap Take offline.</p>
+    ${groups.filter(([t, arr, empty]) => arr.length || empty).map(([t, arr, empty]) =>
+      `<h2 class="admhead" style="font-size:19px;margin:16px 2px 10px">${t} (${arr.length})</h2>${arr.map(row).join("") || `<p class="hint">${empty}</p>`}`).join("")}`;
+  wire();
+  const filter = () => {
+    ADMQ = $("admFind").value.trim().toLowerCase();
+    g.querySelectorAll(".admrow").forEach(r => r.hidden = !!ADMQ && !r.dataset.find.includes(ADMQ));
+  };
+  $("admFind").oninput = filter; filter();
+  g.querySelectorAll("[data-op]").forEach(b => b.onclick = async () => {
     const op = b.dataset.op, id = b.dataset.id;
-    if ((op === "resetpin" || op === "unpublish") && !(await ask(op === "resetpin" ? `Reset the PIN for ${id}? Their old PIN stops working.` : `Take ${id} offline? They won't be able to publish it again themselves.`, "Yes", true))) return;
+    if (op === "edit"){
+      g.innerHTML = loaderHtml("Opening store...");
+      try {
+        SESSION = { id, key: ADMIN, admin: true }; saveSession();
+        const r = await apiPost({ action: "login", id });
+        S = normalize(r.data); STATUS = r.status; DIRTY = false;
+        history.pushState(null, "", home() + "?build"); return openEditor();
+      } catch(e){ clearSession(); return renderAdmin(e.message); }
+    }
+    let extra = {};
+    if (op === "rename"){
+      const v = await askText(`New link name for ${id}`, id, "Lowercase letters, numbers and dashes. The old link stops working.", "Rename");
+      if (v === null || v === id) return;
+      extra.newId = v.toLowerCase();
+    }
+    if (op === "delete" && !(await ask(`Delete "${b.dataset.name}" for good? Their link stops working and this can't be undone.`, "Delete", true))) return;
+    if (op === "resetpin" && !(await ask(`Reset the PIN for ${id}? Their old PIN stops working.`, "Reset", true))) return;
+    if (op === "unpublish" && !(await ask(`Take ${id} offline? They won't be able to publish it again themselves.`, "Take offline", true))) return;
     b.disabled = true;
     try {
-      const r = await apiPost({ action: "admin", key: ADMIN, op, id });
-      renderAdmin(op === "resetpin" ? `New PIN for ${id}: ${r.newPin}. Send it to the seller privately.` : op === "approve" ? `${id} is live.` : op === "verify" ? `${id}: payment confirmed.` : `${id} is offline.`);
+      const r = await apiPost({ action: "admin", key: ADMIN, op, id, ...extra });
+      renderAdmin(op === "resetpin" ? `New PIN for ${id}: ${r.newPin}. Send it to the seller privately.`
+        : op === "approve" ? `${id} is live.` : op === "verify" ? `${id}: payment confirmed.` : op === "delete" ? `${id} was deleted.`
+        : op === "rename" ? `Renamed. New link: ${storeLink(r.id)}` : `${id} is offline.`);
     } catch(err){ b.disabled = false; notify(err.message); }
+  });
+}
+
+function adminSaveConfig(cfg, patch, doneMsg){
+  return apiPost({ action: "admin", key: ADMIN, op: "setconfig", config: Object.assign({}, cfg, patch) })
+    .then(r => { applyConfig(r.config); try { localStorage.setItem("lk-config", JSON.stringify(r.config)); } catch(e) {} renderAdmin(doneMsg); })
+    .catch(e => notify(e.message));
+}
+
+function adminAds(g, head, wire, cfg){
+  const ad = cfg.ad || {};
+  const live = ad.img && (!ad.until || Date.now() <= new Date(ad.until + "T23:59:59").getTime());
+  g.innerHTML = head + `
+    <section class="card">
+      <div class="between"><h2>Ad banner</h2>${live ? `<span class="tag2 paid">Showing</span>` : `<span class="tag2">Off</span>`}</div>
+      <p class="hint">Shows on every store under the shop card. Best size 1200 × 400.</p>
+      <label>Banner image link<input type="url" id="adImg" value="${esc(ad.img || "")}" placeholder="https://i.ibb.co/.../banner.jpg"></label>
+      <div class="admprev" id="adPrev">${safeUrl(ad.img) ? `<img src="${esc(ad.img)}" alt="Ad preview">` : ""}</div>
+      <label>When tapped, open<input type="url" id="adLink" value="${esc(ad.link || "")}" placeholder="e.g. their store link or https://wa.me/60..."></label>
+      <label>Show until (optional)<input type="date" id="adUntil" value="${esc(ad.until || "")}"></label>
+      <label>Advertiser's WhatsApp (their own store won't show it)<input type="tel" id="adWa" value="${esc(ad.advertiserWa || "")}" placeholder="e.g. 012-345 6789"></label>
+      <button class="btn solid full" style="margin-top:16px" id="adSave">Save ad</button>
+      ${ad.img ? `<button class="btn full dangerline" style="margin-top:10px" id="adStop">Stop ad</button>` : ""}
+    </section>`;
+  wire();
+  $("adImg").oninput = () => { const u = safeUrl($("adImg").value.trim()); $("adPrev").innerHTML = u ? `<img src="${esc(u)}" alt="Ad preview">` : ""; };
+  $("adSave").onclick = () => {
+    const img = $("adImg").value.trim();
+    if (img && !safeUrl(img)) return notify("The image link must start with https://");
+    const link = $("adLink").value.trim();
+    if (link && !safeUrl(link)) return notify("The tap link must start with https://");
+    adminSaveConfig(cfg, { ad: { img, link, until: $("adUntil").value, advertiserWa: normWa($("adWa").value) } }, img ? "Ad saved. It shows on all stores within a few minutes." : "Saved.");
+  };
+  if ($("adStop")) $("adStop").onclick = async () => { if (await ask("Stop showing this ad on all stores?", "Stop ad", true)) adminSaveConfig(cfg, { ad: {} }, "Ad stopped."); };
+}
+
+function adminSettings(g, head, wire, cfg){
+  const v = k => cfg[k] !== undefined ? cfg[k] : (SITE[k] || "");
+  const signup = cfg.signup !== undefined ? cfg.signup !== false : SITE.signup !== false;
+  g.innerHTML = head + `
+    <section class="card">
+      <h2>Your WhatsApp</h2>
+      <label>Your WhatsApp number<input type="tel" id="stWaOwner" value="${esc(v("ownerWa"))}" placeholder="e.g. 012-345 6789"></label>
+      <p class="hint">Used for the chat button, "Forgot PIN" and payment help.</p>
+    </section>
+    <section class="card">
+      <h2>Malaysia payment</h2>
+      <label>Price<input type="text" id="stPrice" value="${esc(v("price"))}" placeholder="e.g. RM29"></label>
+      <label>DuitNow ID<input type="text" id="stDuit" value="${esc(v("duitnow"))}" placeholder="e.g. 60123456789"></label>
+      <label>DuitNow QR image link<input type="url" id="stQr" value="${esc(v("qr"))}" placeholder="https://i.ibb.co/.../qr.png"></label>
+      <div class="admprev" id="qrPrev">${safeUrl(v("qr")) ? `<img src="${esc(v("qr"))}" alt="DuitNow QR">` : ""}</div>
+    </section>
+    <section class="card">
+      <h2>Other countries (PayPal)</h2>
+      <label>Price<input type="text" id="stPriceIntl" value="${esc(v("priceIntl"))}" placeholder="e.g. US$7"></label>
+      <label>PayPal.me link (optional)<input type="url" id="stPaypal" value="${esc(v("paypal"))}" placeholder="https://paypal.me/yourname"></label>
+      <label>PayPal QR image link (optional)<input type="url" id="stPpQr" value="${esc(v("paypalQr"))}" placeholder="https://i.ibb.co/.../paypal-qr.png"></label>
+      <div class="admprev" id="ppPrev">${safeUrl(v("paypalQr")) ? `<img src="${esc(v("paypalQr"))}" alt="PayPal QR">` : ""}</div>
+      <p class="hint">Leave the PayPal fields empty to accept Malaysia payments only.</p>
+    </section>
+    <section class="card">
+      <h2>Sign-ups</h2>
+      <label class="check"><input type="checkbox" id="stSignup" ${signup ? "checked" : ""}> Show "New seller? Sign up" to everyone</label>
+      <p class="hint">Turn off to invite sellers privately with ${esc(home())}?signup</p>
+    </section>
+    <button class="btn solid full" style="padding:15px" id="stSave">Save settings</button>`;
+  wire();
+  const prev = (inp, box) => $(inp).oninput = () => { const u = safeUrl($(inp).value.trim()); $(box).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
+  prev("stQr", "qrPrev"); prev("stPpQr", "ppPrev");
+  $("stSave").onclick = () => {
+    const links = ["stQr", "stPaypal", "stPpQr"].map(id => $(id).value.trim()).filter(Boolean);
+    if (links.some(u => !safeUrl(u))) return notify("Links must start with https://");
+    adminSaveConfig(cfg, {
+      ownerWa: normWa($("stWaOwner").value), price: $("stPrice").value.trim(), duitnow: $("stDuit").value.trim(), qr: $("stQr").value.trim(),
+      priceIntl: $("stPriceIntl").value.trim(), paypal: $("stPaypal").value.trim(), paypalQr: $("stPpQr").value.trim(), signup: $("stSignup").checked
+    }, "Settings saved. The site uses them within a few minutes.");
   };
 }
 
@@ -1463,6 +1668,8 @@ function showMessage(title, text){
 }
 async function route(){
   await loadSite();
+  const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || "";
+  if (/^(admin|build|edit|signup)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
@@ -1472,7 +1679,7 @@ async function route(){
     SESSION = loadSession();
     if (SESSION){
       $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page");
-      try { const r = await apiPost({ action: "login", id: SESSION.id, pin: SESSION.pin }); S = normalize(r.data); STATUS = r.status; return openEditor(); }
+      try { const r = await apiPost(SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }); S = normalize(r.data); STATUS = r.status; return openEditor(); }
       catch(e){ clearSession(); }
     }
     return renderStart();
@@ -1480,7 +1687,7 @@ async function route(){
   if (/^[a-z0-9-]{2,40}$/.test(q)){
     $("gwrap").innerHTML = `${loaderHtml("Opening store...")}`; show("page");
     try {
-      const [r] = await Promise.all([apiGet({ action: "shop", id: q }), loadAd()]);
+      const [r] = await Promise.all([apiGet({ action: "shop", id: q }), loadAd()]);   // loadAd waits for settings in parallel
       if (r.error === "notfound") return showMessage("Store not found", "Check the link spelling, or ask the shop for their link again.");
       if (r.error === "notlive") return showMessage("Opening soon", "This store isn't live yet. Please check back later.");
       if (r.error) throw new Error(r.error);
