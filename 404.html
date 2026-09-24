@@ -1043,7 +1043,9 @@ function showMessage(title, text){
 }
 async function route(){
   await loadSite();
-  const q = decodeURIComponent(location.search.slice(1)).split("&")[0].toLowerCase() || pathShop();
+  // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
+  const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
+  const q = (bare[0] || "").toLowerCase() || pathShop();
   if (q === "admin") return renderAdmin();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
