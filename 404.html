@@ -51,7 +51,7 @@ a.btn{color:var(--ink)}
 .btn.full{width:100%}
 .btn:disabled{opacity:.6;cursor:default}
 label{display:block;font-weight:600;font-size:15px;margin:14px 0 0}
-input[type=text],input[type=tel],input[type=url],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input:not([type]),textarea,select{
+input[type=text],input[type=tel],input[type=url],input[type=email],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input:not([type]),textarea,select{
   width:100%;margin-top:6px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:400}
 textarea{min-height:72px;resize:vertical}
 .hint{color:var(--muted);font-size:13px;margin:6px 0 0;font-weight:400}
@@ -144,10 +144,30 @@ textarea{min-height:72px;resize:vertical}
 .btn.small.dangerline{border-color:var(--err);color:var(--err)}
 .admprev{margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--soft);min-height:40px}
 .admprev img{display:block;width:100%;height:auto}
+.streport{text-align:center;margin-top:8px}
+.streport button{background:none;border:0;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:6px}
+.rules{margin:14px 0 4px;padding:12px 14px;border-radius:12px;background:var(--soft);font-size:14px}
+.rules p{margin:4px 0 0;color:var(--muted);line-height:1.45}
 /* short invitation under every store */
 .stcta{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 14px 0;font-size:14px;color:var(--muted)}
 .stcta-btn{display:inline-block;padding:7px 14px;border-radius:99px;background:#3A1F2B;color:#fff;font-weight:700;font-size:13px;text-decoration:none;transition:transform .15s ease}
 .stcta-btn:active{transform:scale(.96)}
+/* Linkedai Guard */
+.guard{border-color:#3A1F2B;background:linear-gradient(160deg,var(--surface) 55%,rgba(242,193,78,.12))}
+.guardhead{display:flex;align-items:center;gap:12px}
+.guardhead svg{width:46px;height:46px;flex:none;filter:drop-shadow(0 4px 10px rgba(58,31,43,.25))}
+.guardhead b{display:block;font-size:18px;font-weight:800;letter-spacing:-.01em}
+.guardstate{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#15803D}
+.guardstate::before{content:"";width:8px;height:8px;border-radius:50%;background:#22C55E;box-shadow:0 0 0 3px rgba(34,197,94,.2);animation:guardPulse 2s ease-in-out infinite}
+.guardstate.off{color:#B45309}
+.guardstate.off::before{background:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.2);animation:none}
+@keyframes guardPulse{50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+.guardline{margin:12px 0 0;font-size:15px;line-height:1.45}
+.guardline b{font-weight:800}
+.guardwords summary{cursor:pointer;font-weight:700;padding:4px 0}
+.guardbtn{display:flex;align-items:center;gap:10px}
+.guardbtn svg{width:22px;height:22px;flex:none}
+@media (prefers-reduced-motion:reduce){.guardstate::before{animation:none}}
 .dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);border-color:var(--err);color:#fff}
@@ -444,6 +464,26 @@ html,body{overflow-x:hidden}
   </div>
 </div>
 
+<!-- ============ REPORT A STORE ============ -->
+<div class="overlay" id="repOverlay" role="dialog" aria-modal="true" aria-labelledby="repTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="repOverlay" aria-label="Close">×</button>
+    <h2 id="repTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Report this store</h2>
+    <p class="hint" style="margin:0 0 12px">Tell us what's wrong. Your report is anonymous.</p>
+    <div class="opts" id="repOpts">
+      <label class="optrow"><input type="radio" name="rep" value="drugs"><span>Drugs, vape or cigarettes</span></label>
+      <label class="optrow"><input type="radio" name="rep" value="alcohol"><span>Alcohol</span></label>
+      <label class="optrow"><input type="radio" name="rep" value="adult"><span>Adult content or services</span></label>
+      <label class="optrow"><input type="radio" name="rep" value="weapons"><span>Weapons</span></label>
+      <label class="optrow"><input type="radio" name="rep" value="scam"><span>Scam or fake products</span></label>
+      <label class="optrow"><input type="radio" name="rep" value="other"><span>Something else</span></label>
+    </div>
+    <label>More details (optional)<input type="text" id="repNote" maxlength="140" placeholder="e.g. They sell vape in the second item"></label>
+    <p class="err" id="repErr"></p>
+    <button class="btn solid full" type="button" id="repGo" style="margin-top:6px">Send report</button>
+  </div>
+</div>
+
 <!-- ============ TEXT INPUT POP-UP ============ -->
 <div class="overlay" id="promptOverlay" role="dialog" aria-modal="true" aria-labelledby="promptText">
   <div class="sheet">
@@ -495,6 +535,7 @@ html,body{overflow-x:hidden}
     </div>
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
+    <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button></div>
     <div class="stcta" id="stCta" hidden>
       <span>Want your own store?</span>
       <a class="stcta-btn" id="stCtaBtn" href="#">Sign up</a>
@@ -899,6 +940,11 @@ function renderStart(msg, mode){
       <label>Choose a 6-digit PIN<span class="pinwrap"><input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="hint">You'll log in with your WhatsApp number and this PIN.</p>
+      <div class="rules">
+        <b>Not allowed on ${esc(APP_NAME)}</b>
+        <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
+      </div>
+      <label class="check"><input type="checkbox" id="cAgree"> I agree not to sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</label>
       <p class="err" id="cErr"></p>
       <button class="btn solid full" id="cGo">Sign up</button>
     </section>`;
@@ -924,6 +970,7 @@ function renderStart(msg, mode){
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
+    if (!$("cAgree").checked) return $("cErr").textContent = "Please tick the box to agree to the rules.";
     $("cGo").disabled = true; $("cGo").textContent = "Signing up...";
     try {
       const data = normalize({ name, wa });
@@ -957,6 +1004,7 @@ function tipHtml(){
 }
 
 function publishCardHtml(){
+  if (STATUS === "review") return "";
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const help = to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent(`Hi ${APP_NAME}, about my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us";
   if (STATUS === "live") return "";
@@ -1089,8 +1137,8 @@ function renderEditor(msg){
       <a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">Share</a>
     </div>
     <p class="hint">This link never changes. Tap Save and your store updates straight away.</p>` : `
-    <div class="between"><h2>Your store</h2>${STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
-    <p class="hint">${STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Build your store and tap Preview to see it. Your store link appears here once you publish."}</p>`}
+    <div class="between"><h2>Your store</h2>${STATUS === "review" ? `<span class="tag2 claim">In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
+    <p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Build your store and tap Preview to see it. Your store link appears here once you publish."}</p>`}
     <p class="hint">You log in with <b>${esc(S.wa || "your WhatsApp number")}</b> and your PIN.</p>
     <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
   </section>
@@ -1249,9 +1297,14 @@ async function publishWithReceipt(input){
     const r = await apiPost({ action: "selfpublish", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: c.toDataURL("image/jpeg", 0.82).split(",")[1] });
     STATUS = r.status;
     closeSheet("payOverlay");
-    renderEditor("Your store is live! Copy or share your link above.");
     window.scrollTo(0, 0);
-    notify("Your store is live! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok.");
+    if (STATUS === "review"){
+      renderEditor("Payment received. Your store is being checked.");
+      notify(`Payment received, thank you. ${APP_NAME} is quickly checking your store, and it goes live once approved, usually within 24 hours.`);
+    } else {
+      renderEditor("Your store is live! Copy or share your link above.");
+      notify("Your store is live! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok.");
+    }
   } catch(err){ st.textContent = ""; busy(false); notify(err.message); }
 }
 
@@ -1263,7 +1316,8 @@ async function saveStore(){
   try {
     const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
     STATUS = r.status || STATUS; DIRTY = false;
-    renderEditor(STATUS === "live" ? "Saved. Your store link shows the new version now." : "Saved. Publish your store to make it live.");
+    renderEditor(r.flagged && STATUS !== "live" ? `Saved. Some words in your store need a quick check by ${APP_NAME} before it can go live.`
+      : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
   } catch(e){ notify(e.message); }
   btn.disabled = false; btn.textContent = "Save";
 }
@@ -1318,6 +1372,7 @@ async function showStore(data, isPreview){
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
   $("brandLink").href = home();
+  $("stReportWrap").hidden = !!isPreview;
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const canSignup = signupOpen(), cta = $("stCta"), btn = $("stCtaBtn");
@@ -1396,6 +1451,24 @@ function goAd(n){
 }
 $("adDots").addEventListener("click", e => { const b = e.target.closest("[data-ad]"); if (!b) return; goAd(+b.dataset.ad); startAds(); });
 $("adX").onclick = () => { try { sessionStorage.setItem("lk-adx", "1"); } catch(e) {} clearInterval(adTimer); $("adWrap").hidden = true; };
+
+$("stReport").onclick = () => {
+  document.querySelectorAll('#repOpts input').forEach(r => r.checked = false);
+  $("repNote").value = ""; $("repErr").textContent = "";
+  openSheet("repOverlay");
+};
+$("repGo").onclick = async () => {
+  const pick = document.querySelector('#repOpts input:checked');
+  if (!pick) return $("repErr").textContent = "Choose a reason first.";
+  const btn = $("repGo"); btn.disabled = true; btn.textContent = "Sending...";
+  const id = (location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop() || "").toLowerCase();
+  try {
+    await apiPost({ action: "report", id, reason: pick.value, note: $("repNote").value.trim() });
+    closeSheet("repOverlay");
+    notify("Thanks for telling us. We'll check this store.");
+  } catch(e){ $("repErr").textContent = e.message; }
+  btn.disabled = false; btn.textContent = "Send report";
+};
 
 function productRow(i){
   const p = D.items[i], img = safeImg(p.img), n = inCart(i);
@@ -1524,6 +1597,7 @@ async function renderAdmin(msg){
   const head = `<div class="top"><span class="brand">${esc(APP_NAME)} admin</span><button class="btn small" id="admOut">Lock</button></div>
     <div class="seg admtabs">
       <button data-admtab="stores" aria-pressed="${ADMTAB === "stores"}">Stores</button>
+      <button data-admtab="review" aria-pressed="${ADMTAB === "review"}">Review</button>
       <button data-admtab="ads" aria-pressed="${ADMTAB === "ads"}">Ads</button>
       <button data-admtab="settings" aria-pressed="${ADMTAB === "settings"}">Settings</button>
     </div>
@@ -1533,6 +1607,7 @@ async function renderAdmin(msg){
     g.querySelectorAll("[data-admtab]").forEach(b => b.onclick = () => { ADMTAB = b.dataset.admtab; renderAdmin(); });
   };
   if (ADMTAB === "stores") return adminStores(g, head, wire);
+  if (ADMTAB === "review") return adminReview(g, head, wire);
   g.innerHTML = head + loaderHtml("Loading settings..."); wire();
   let cfg;
   try { cfg = (await apiPost({ action: "admin", key: ADMIN, op: "getconfig" })).config || {}; }
@@ -1550,9 +1625,10 @@ async function adminStores(g, head, wire){
     ["Check payment", list.filter(isCheck), "Nothing to check."],
     ["Live", list.filter(x => x.status === "live" && !isCheck(x)), "None yet."],
     ["Not paid yet", list.filter(x => x.status === "pending"), "None."],
+    ["In review", list.filter(x => x.status === "review"), ""],
     ["Offline", list.filter(x => x.status === "offline"), ""]
   ];
-  const tag = x => x.status === "offline" ? `<span class="tag2 unpaid">Offline</span>` : x.status === "pending" ? `<span class="tag2">Not paid</span>` : isCheck(x) ? `<span class="tag2 claim">Check payment</span>` : `<span class="tag2 paid">Live</span>`;
+  const tag = x => x.status === "review" ? `<span class="tag2 claim">In review</span>` : x.status === "offline" ? `<span class="tag2 unpaid">Offline</span>` : x.status === "pending" ? `<span class="tag2">Not paid</span>` : isCheck(x) ? `<span class="tag2 claim">Check payment</span>` : `<span class="tag2 paid">Live</span>`;
   const when = t => t ? new Date(t).toLocaleString("en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "";
   const row = x => `
     <section class="card admrow" data-find="${esc((x.name + " " + x.id + " " + x.wa).toLowerCase())}">
@@ -1577,6 +1653,7 @@ async function adminStores(g, head, wire){
       <div class="stat"><b>${groups[2][1].length}</b><span>Not paid</span></div>
       <div class="stat"><b>${groups[3][1].length}</b><span>Offline</span></div>
     </div>
+    ${needsReview(list).length ? `<button class="btn full" style="margin-bottom:10px;border-color:#B45309;color:#B45309" id="goReview"><span class="guardbtn" style="justify-content:center">${GUARD_SVG}Linkedai Guard: ${needsReview(list).length} store${needsReview(list).length > 1 ? "s" : ""} need${needsReview(list).length > 1 ? "" : "s"} review</span></button>` : ""}
     <input type="search" id="admFind" placeholder="Search name, link or WhatsApp number" value="${esc(ADMQ)}" style="margin-bottom:6px">
     <p class="hint" style="margin:0 2px 8px">Open each receipt, check the money reached your account, then tap Payment OK. If it didn't, tap Take offline.</p>
     ${groups.filter(([t, arr, empty]) => arr.length || empty).map(([t, arr, empty]) =>
@@ -1587,6 +1664,7 @@ async function adminStores(g, head, wire){
     g.querySelectorAll(".admrow").forEach(r => r.hidden = !!ADMQ && !r.dataset.find.includes(ADMQ));
   };
   $("admFind").oninput = filter; filter();
+  if ($("goReview")) $("goReview").onclick = () => { ADMTAB = "review"; renderAdmin(); };
   g.querySelectorAll("[data-op]").forEach(b => b.onclick = async () => {
     const op = b.dataset.op, id = b.dataset.id;
     if (op === "edit"){
@@ -1614,6 +1692,90 @@ async function adminStores(g, head, wire){
         : op === "approve" ? `${id} is live.` : op === "verify" ? `${id}: payment confirmed.` : op === "delete" ? `${id} was deleted.`
         : op === "rename" ? `Renamed. New link: ${storeLink(r.id)}` : `${id} is offline.`);
     } catch(err){ b.disabled = false; notify(err.message); }
+  });
+}
+
+const GUARD_SVG = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 6 10v12c0 11.2 7.7 20.6 18 23 10.3-2.4 18-11.8 18-23V10L24 3z" fill="#3A1F2B"/><path d="M15.5 24.5l6 6 11-12" fill="none" stroke="#F2C14E" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Stores the bot or customers flagged: only these need your eyes
+const needsReview = list => list.filter(x => x.status === "review" || (x.flag && !(x.reviewedAt >= x.updated)) || (x.reports && x.reports.count));
+const REASON_TXT = { drugs: "drugs, vape or cigarettes", alcohol: "alcohol", adult: "adult content", weapons: "weapons", scam: "scam or fake", other: "something else" };
+async function adminReview(g, head, wire){
+  g.innerHTML = head + loaderHtml("Loading..."); wire();
+  let list, words, lastScan = null, nightly = false;
+  try {
+    let w;
+    [list, w] = await Promise.all([
+      apiPost({ action: "admin", key: ADMIN, op: "list" }).then(r => r.stores),
+      apiPost({ action: "admin", key: ADMIN, op: "getwords" })
+    ]);
+    words = w.words; lastScan = w.lastScan || null; nightly = !!w.nightly;
+  } catch(e){ adminLock(); return renderAdmin(e.message); }
+  const todo = needsReview(list);
+  const card = x => {
+    const rep = x.reports && x.reports.count ? `<p class="hint" style="margin:6px 0 0;color:#B45309"><b>Reported ${x.reports.count}×:</b> ${Object.entries(x.reports.reasons || {}).map(([k, n]) => `${esc(REASON_TXT[k] || k)} (${n})`).join(", ")}${(x.reports.notes || []).length ? `<br>"${(x.reports.notes || []).map(esc).join('", "')}"` : ""}</p>` : "";
+    const flag = x.flag ? `<p class="hint" style="margin:6px 0 0"><b>Bot found:</b> ${esc(x.flag)}</p>` : "";
+    return `<section class="card admrow">
+      <div class="between"><b>${esc(x.name || x.id)}</b>${x.status === "review" ? `<span class="tag2 claim">Hidden until you approve</span>` : x.status === "live" ? `<span class="tag2 paid">Live</span>` : `<span class="tag2">${esc(x.status)}</span>`}</div>
+      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · <a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a></p>
+      ${flag}${rep}
+      <div class="acts">
+        ${x.status === "live" ? `<a class="btn small" href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">View</a>` : ""}
+        <button class="btn small" data-op="edit" data-id="${esc(x.id)}">Edit store</button>
+        <button class="btn small solid" data-op="reviewok" data-id="${esc(x.id)}">Looks OK</button>
+        ${x.status !== "offline" ? `<button class="btn small dangerline" data-op="unpublish" data-id="${esc(x.id)}">Take offline</button>` : ""}
+      </div>
+    </section>`;
+  };
+  const whenScan = t => {
+    const d = new Date(t), today = new Date(), y = new Date(Date.now() - 864e5);
+    const hm = d.toLocaleTimeString("en-MY", { hour: "numeric", minute: "2-digit" });
+    return d.toDateString() === today.toDateString() ? `${hm} today` : d.toDateString() === y.toDateString() ? `${hm} yesterday` : d.toLocaleDateString("en-MY", { day: "numeric", month: "short" }) + `, ${hm}`;
+  };
+  const line = !lastScan
+    ? `Hasn't checked all stores yet. Tap <b>Check all stores now</b>.`
+    : `Checked <b>${lastScan.stores}</b> store${lastScan.stores === 1 ? "" : "s"}${lastScan.auto ? " overnight" : ""} at ${esc(whenScan(lastScan.at))}${lastScan.hidden ? ` · hid <b>${lastScan.hidden}</b>` : ""} · <b>${todo.length}</b> need${todo.length === 1 ? "s" : ""} your review`;
+  g.innerHTML = head + `
+    <section class="card guard">
+      <div class="guardhead">${GUARD_SVG}<div><b>Linkedai Guard</b>
+        ${nightly ? `<span class="guardstate">On duty · checks every save and every night at 3am</span>` : `<span class="guardstate off">Checks every save · nightly check is off</span>`}</div></div>
+      <p class="guardline">${line}</p>
+      ${nightly ? "" : `<p class="hint" style="margin:8px 0 0">To turn on the nightly check, run <b>setupNightly</b> once in Apps Script.</p>`}
+      <button class="btn full guardbtn" style="margin-top:14px;justify-content:center" id="scanNow">Check all stores now</button>
+    </section>
+    <h2 style="font-size:19px;margin:18px 2px 10px">Needs review (${todo.length})</h2>
+    ${todo.map(card).join("") || `<p class="hint">All clear. Linkedai Guard found nothing that needs you.</p>`}
+    <section class="card" style="margin-top:18px">
+      <details class="guardwords">
+        <summary>Guard's word lists</summary>
+        <p class="hint">Blocked words stop the save. Check words are allowed, but the store comes here for your review. Separate words with commas.</p>
+        <label>Blocked words<textarea id="wBlock" rows="5">${esc((words.block || []).join(", "))}</textarea></label>
+        <label>Check words (allowed, but reviewed)<textarea id="wCheck" rows="3">${esc((words.check || []).join(", "))}</textarea></label>
+        <button class="btn solid full" style="margin-top:12px" id="wSave">Save words</button>
+      </details>
+    </section>`;
+  wire();
+  const split = t => t.split(/[,\n]/).map(w => w.trim().toLowerCase()).filter(Boolean);
+  $("wSave").onclick = () => apiPost({ action: "admin", key: ADMIN, op: "setwords", words: { block: split($("wBlock").value), check: split($("wCheck").value) } })
+    .then(r => renderAdmin(`Linkedai Guard updated: ${r.words.block.length} blocked words, ${r.words.check.length} check words. Tap Check all stores now to apply them to existing stores.`)).catch(e => notify(e.message));
+  $("scanNow").onclick = async () => {
+    $("scanNow").disabled = true; $("scanNow").innerHTML = `<span class="spin"></span> Linkedai Guard is checking...`;
+    try { const r = (await apiPost({ action: "admin", key: ADMIN, op: "scanall" })).result;
+      renderAdmin(`Linkedai Guard checked ${r.stores} store${r.stores === 1 ? "" : "s"}. ${r.flagged} flagged${r.hidden ? `, ${r.hidden} hidden until you approve` : ""}.`); }
+    catch(e){ notify(e.message); $("scanNow").disabled = false; $("scanNow").innerHTML = "Check all stores now"; }
+  };
+  g.querySelectorAll("[data-op]").forEach(b => b.onclick = async () => {
+    const op = b.dataset.op, id = b.dataset.id;
+    if (op === "edit"){
+      g.innerHTML = loaderHtml("Opening store...");
+      try { SESSION = { id, key: ADMIN, admin: true }; saveSession();
+        const r = await apiPost({ action: "login", id }); S = normalize(r.data); STATUS = r.status; DIRTY = false;
+        history.pushState(null, "", home() + "?build"); return openEditor(); }
+      catch(e){ clearSession(); return renderAdmin(e.message); }
+    }
+    if (op === "unpublish" && !(await ask(`Take ${id} offline? They won't be able to publish it again themselves.`, "Take offline", true))) return;
+    b.disabled = true;
+    try { await apiPost({ action: "admin", key: ADMIN, op, id }); renderAdmin(op === "reviewok" ? `${id} approved.` : `${id} is offline.`); }
+    catch(err){ b.disabled = false; notify(err.message); }
   });
 }
 
@@ -1672,6 +1834,73 @@ function adminAds(g, head, wire, cfg){
   if ($("adStop")) $("adStop").onclick = async () => { if (await ask("Stop all ads on every store?", "Stop all", true)) adminSaveConfig(cfg, { ad: [] }, "All ads stopped."); };
 }
 
+// ---------- Alerts from Linkedai Guard (Telegram + email) ----------
+async function loadAlertsCard(){
+  const box = $("alertsCard"); if (!box) return;
+  let al;
+  try { al = (await apiPost({ action: "admin", key: ADMIN, op: "getalerts" })).alerts; }
+  catch(e){ box.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+  const on = al.on || {};
+  const tick = (k, label) => `<label class="check"><input type="checkbox" data-alon="${k}" ${on[k] !== false ? "checked" : ""}> ${label}</label>`;
+  box.innerHTML = `
+    <div class="guardhead">${GUARD_SVG}<div><b>Alerts from Linkedai Guard</b><span class="hint" style="margin:0">Straight to your Telegram and email</span></div></div>
+    <h2 style="margin-top:18px">Telegram</h2>
+    ${al.telegram ? `
+      <p class="hint" style="margin:4px 0 8px"><span class="guardstate">Connected to @${esc(al.tgBot)}</span></p>
+      <button class="btn small dangerline" id="tgOff">Disconnect Telegram</button>` : `
+      <ol class="hint" style="padding-left:20px;margin:6px 0 0;line-height:1.55">
+        <li>In Telegram, open <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> and send <b>/newbot</b>. Name it, for example, <b>Linkedai Guard</b>.</li>
+        <li>BotFather replies with a <b>token</b> (it looks like <code>123456:ABC-xyz...</code>). Copy it and paste it below.</li>
+        <li>Open your new bot, tap <b>Start</b>, and send any message, like <b>hi</b>.</li>
+        <li>Tap <b>Connect Telegram</b>.</li>
+      </ol>
+      <label>Bot token<span class="pinwrap"><input type="password" id="tgToken" autocomplete="off" placeholder="${al.tokenSet ? "Token saved. Paste again to change it" : "123456:ABC-xyz..."}"><button type="button" class="pineye" data-eye="tgToken" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
+      <button class="btn full" style="margin-top:12px" id="tgConnect">Connect Telegram</button>`}
+    <h2 style="margin-top:20px">Email</h2>
+    <label>Send alerts to<input type="email" id="alEmail" value="${esc(al.email || "")}" placeholder="you@gmail.com"></label>
+    <p class="hint">Turn on Gmail notifications on your phone to see them straight away.</p>
+    <h2 style="margin-top:20px">Alert me about</h2>
+    ${tick("pay", "New payments to check")}
+    ${tick("review", "Paid stores waiting for my review")}
+    ${tick("report", "Stores reported by customers")}
+    ${tick("summary", "Morning summary, only when something needs me")}
+    <p class="err" id="alErr"></p>
+    <div class="row2" style="margin-top:12px">
+      <div><button class="btn full" id="alTest">Send test alert</button></div>
+      <div><button class="btn solid full" id="alSave">Save alerts</button></div>
+    </div>`;
+  const collect = () => { const on = {}; box.querySelectorAll("[data-alon]").forEach(c => on[c.dataset.alon] = c.checked); return { email: $("alEmail").value.trim(), on, site: home() }; };
+  const busy = (b, t) => { b.disabled = !!t; if (t) { b.dataset.l = b.dataset.l || b.textContent; b.innerHTML = `<span class="spin"></span> ${t}`; } else b.textContent = b.dataset.l || b.textContent; };
+  $("alSave").onclick = async () => {
+    $("alErr").textContent = ""; busy($("alSave"), "Saving");
+    try { await apiPost({ action: "admin", key: ADMIN, op: "setalerts", alerts: collect() }); busy($("alSave")); notify("Alerts saved."); }
+    catch(e){ busy($("alSave")); $("alErr").textContent = e.message; }
+  };
+  $("alTest").onclick = async () => {
+    $("alErr").textContent = ""; busy($("alTest"), "Sending");
+    try {
+      await apiPost({ action: "admin", key: ADMIN, op: "setalerts", alerts: collect() });
+      const r = (await apiPost({ action: "admin", key: ADMIN, op: "testalert", site: home() })).result;
+      busy($("alTest"));
+      const part = (name, v) => v === null ? "" : v === "sent" ? `${name}: sent.` : `${name}: ${v}`;
+      notify([part("Telegram", r.telegram), part("Email", r.email)].filter(Boolean).join(" ") || "Nothing to send yet.");
+    } catch(e){ busy($("alTest")); $("alErr").textContent = e.message; }
+  };
+  if ($("tgConnect")) $("tgConnect").onclick = async () => {
+    $("alErr").textContent = ""; busy($("tgConnect"), "Connecting");
+    try {
+      const r = await apiPost({ action: "admin", key: ADMIN, op: "tgconnect", token: $("tgToken").value.trim(), site: home() });
+      notify(`Connected to @${r.bot}. Check Telegram: Linkedai Guard just said hello.`);
+      loadAlertsCard();
+    } catch(e){ busy($("tgConnect")); $("alErr").textContent = e.message; }
+  };
+  if ($("tgOff")) $("tgOff").onclick = async () => {
+    if (!(await ask("Stop Telegram alerts?", "Disconnect", true))) return;
+    try { await apiPost({ action: "admin", key: ADMIN, op: "setalerts", alerts: { ...collect(), disconnectTelegram: true } }); loadAlertsCard(); }
+    catch(e){ $("alErr").textContent = e.message; }
+  };
+}
+
 function adminSettings(g, head, wire, cfg){
   const v = k => cfg[k] !== undefined ? cfg[k] : (SITE[k] || "");
   const signup = cfg.signup !== undefined ? cfg.signup !== false : SITE.signup !== false;
@@ -1701,8 +1930,10 @@ function adminSettings(g, head, wire, cfg){
       <label class="check"><input type="checkbox" id="stSignup" ${signup ? "checked" : ""}> Show "New seller? Sign up" to everyone</label>
       <p class="hint">Turn off to invite sellers privately with ${esc(home())}?signup</p>
     </section>
-    <button class="btn solid full" style="padding:15px" id="stSave">Save settings</button>`;
+    <button class="btn solid full" style="padding:15px" id="stSave">Save settings</button>
+    <section class="card guard" id="alertsCard" style="margin-top:22px">${loaderHtml("Loading alerts...")}</section>`;
   wire();
+  loadAlertsCard();
   const prev = (inp, box) => $(inp).oninput = () => { const u = safeUrl($(inp).value.trim()); $(box).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
   prev("stQr", "qrPrev"); prev("stPpQr", "ppPrev");
   $("stSave").onclick = () => {
