@@ -197,7 +197,11 @@ textarea{min-height:72px;resize:vertical}
 .cartbtn .lbl{flex:1;text-align:left}
 
 .overlay{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.overlay{-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
 .overlay.open{display:flex;animation:ovIn .28s ease both}
+.xmini{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
+  font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer;z-index:2}
+#payOverlay .sheet{padding-top:22px}
 .overlay.open .sheet{animation:shIn .42s cubic-bezier(.16,1,.3,1) both}
 .overlay.closing{animation:ovOut .24s ease both}
 .overlay.closing .sheet{animation:shOut .24s cubic-bezier(.4,0,1,1) both}
@@ -347,6 +351,14 @@ textarea{min-height:72px;resize:vertical}
       <div><button class="btn full" type="button" data-close="pubOverlay">Edit details</button></div>
       <div><button class="btn solid full" type="button" id="pubGo">Continue to payment</button></div>
     </div>
+  </div>
+</div>
+
+<!-- ============ PAY AND PUBLISH ============ -->
+<div class="overlay" id="payOverlay" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="payOverlay" aria-label="Close">×</button>
+    <div id="payBody"></div>
   </div>
 </div>
 
@@ -698,7 +710,7 @@ document.addEventListener("click", e => {
 /* ============================================================
    SELLER: log in or create (yoursite/?build)
    ============================================================ */
-let SESSION = null, S = null, STATUS = "pending", DIRTY = false, PAYSTEP = false;
+let SESSION = null, S = null, STATUS = "pending", DIRTY = false;
 function loadSession(){ try { return JSON.parse(sessionStorage.getItem("lk-session") || "null"); } catch(e){ return null; } }
 function saveSession(){ try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {} }
 function clearSession(){ SESSION = null; try { sessionStorage.removeItem("lk-session"); } catch(e) {} }
@@ -738,7 +750,7 @@ function normWa(v){ let d = String(v || "").replace(/\D/g, ""); if (d.startsWith
 
 function renderStart(msg, mode){
   const signup = mode === "signup";
-  PAYSTEP = false;
+  closeSheet("payOverlay");
   setAccent(COLORS[0]); document.title = APP_NAME + (signup ? " · Sign up" : " · Seller login");
   $("gwrap").innerHTML = `
     <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
@@ -821,30 +833,44 @@ function publishCardHtml(){
     <p class="hint">It was taken offline, usually because a payment couldn't be found. ${help} to sort it out.</p>
   </section>`;
   const qr = safeUrl(SITE.qr);
-  if (!PAYSTEP) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+  return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Publish your store</h2>
     <p class="hint">When your store looks right, publish it. Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, and it goes live straight away.</p>
     <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Publish my store</button>
   </section>`;
-  return `<section class="card" id="publishCard" style="border-color:var(--accent)">
-    <h2>Pay and publish</h2>
-    <p class="hint">Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, then upload your receipt. Your store goes live straight away.</p>
+}
+
+// If the QR photo link is broken, hide it and switch to DuitNow ID instructions
+function qrFailed(img){
+  img.remove();
+  const s1 = $("payStep1");
+  if (s1) s1.textContent = SITE.duitnow ? "Pay by DuitNow to the ID above in your bank app or Touch 'n Go." : "Message us on WhatsApp for payment details.";
+}
+function openPayment(){
+  const to = String(SITE.ownerWa || "").replace(/\D/g, "");
+  const help = to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent(`Hi ${APP_NAME}, about my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us";
+  const qr = safeUrl(SITE.qr);
+  $("payBody").innerHTML = `
+    <h2 id="payTitle" style="font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 44px 4px 0">Pay and publish</h2>
+    <p class="hint" style="margin:0">Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, then upload your receipt. Your store goes live straight away.</p>
     <div class="qrbox">
       <p class="hint" style="margin:0 0 6px">Pay with DuitNow</p>
       ${SITE.price ? `<p class="amt">${esc(SITE.price)}</p>` : ""}
-      ${qr ? `<img src="${esc(qr)}" alt="DuitNow QR for payment">` : ""}
+      ${qr ? `<img src="${esc(qr)}" alt="DuitNow QR for payment" onerror="qrFailed(this)">` : ""}
       ${SITE.duitnow ? `<p class="hint">DuitNow ID: <b>${esc(SITE.duitnow)}</b></p>` : ""}
       <ol>
-        ${qr ? `<li>Save the QR to your gallery (press and hold it), then scan it from your gallery in your bank app or Touch 'n Go.</li>` : `<li>Pay by DuitNow to the ID above in your bank app or Touch 'n Go.</li>`}
+        <li id="payStep1">${qr ? "Save the QR to your gallery (press and hold it), then scan it from your gallery in your bank app or Touch 'n Go." : "Pay by DuitNow to the ID above in your bank app or Touch 'n Go."}</li>
         <li>Take a screenshot of your payment receipt.</li>
         <li>Tap the button below and choose that screenshot. Your store goes live at once.</li>
       </ol>
     </div>
     <label class="btn wa full filebtn" style="margin-top:14px;padding:15px">I've paid: upload receipt and publish<input type="file" accept="image/*" data-media="receipt" aria-label="Upload payment receipt"></label>
-    <button class="btn small" style="margin-top:10px" data-act="unpay">Back</button>
-    <p class="hint">We check every payment. Stores without a real payment are taken offline. Problems? ${help}.</p>
-  </section>`;
+    <p class="status" id="payStatus" role="status"></p>
+    <p class="hint">We check every payment. Stores without a real payment are taken offline. Problems? ${help}.</p>`;
+  openSheet("payOverlay");
+  $("payOverlay").querySelector(".sheet").scrollTop = 0;
 }
+$("payOverlay").addEventListener("change", e => { if (e.target.dataset.media === "receipt") publishWithReceipt(e.target); });
 
 function openPublishCheck(){
   const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your WhatsApp number first." : !S.items.some(it => it.n.trim()) ? `Add at least one ${W(S).item} first.` : "";
@@ -868,10 +894,9 @@ $("pubGo").onclick = async () => {
   const btn = $("pubGo"); btn.disabled = true; btn.textContent = "Saving...";
   try {
     if (DIRTY){ await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
-    PAYSTEP = true;
     closeSheet("pubOverlay");
-    renderEditor("Details saved. Pay below, then upload your receipt.");
-    const card = $("publishCard"); if (card) card.scrollIntoView({ behavior: smooth(), block: "start" });
+    renderEditor("Details saved.");
+    setTimeout(openPayment, 260);
   } catch(e){ $("pubErr").textContent = e.message; }
   btn.disabled = false; btn.textContent = "Continue to payment";
 };
@@ -882,14 +907,17 @@ function renderEditor(msg){
   <div class="top"><span class="brand">${esc(APP_NAME)}</span><button class="btn small" data-act="logout">Log out</button></div>
 
   <section class="card linkcard">
-    <div class="between"><h2>Your store link</h2>${live ? `<span class="tag2 paid">Live</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
+    ${live ? `
+    <div class="between"><h2>Your store link</h2><span class="tag2 paid">Live</span></div>
     <p class="url">${esc(link)}</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn small" data-act="copy">Copy</button>
       <a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Open</a>
       <a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">Share</a>
     </div>
-    <p class="hint">This link never changes. Tap Save and your store updates straight away.</p>
+    <p class="hint">This link never changes. Tap Save and your store updates straight away.</p>` : `
+    <div class="between"><h2>Your store</h2>${STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
+    <p class="hint">${STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Build your store and tap Preview to see it. Your store link appears here once you publish."}</p>`}
     <p class="hint">You log in with <b>${esc(S.wa || "your WhatsApp number")}</b> and your PIN.</p>
     <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
   </section>
@@ -1000,7 +1028,6 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
-  else if (a === "unpay"){ PAYSTEP = false; renderEditor(); }
   else if (a === "deleteacct"){
     if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
     b.disabled = true; b.textContent = "Deleting...";
@@ -1030,17 +1057,15 @@ async function publishWithReceipt(input){
   const file = input.files && input.files[0];
   input.value = "";
   if (!file) return;
-  if (!S.name.trim()) return notify("Add your shop name first.");
-  if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first.");
-  if (!S.items.some(it => it.n.trim())) return notify(`Add at least one ${W(S).item} before publishing.`);
-  const st = $("saveStatus");
+  const st = $("payStatus") || $("saveStatus");
   try {
     if (DIRTY){ st.textContent = "Saving your store..."; await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
     st.textContent = "Publishing...";
     const c = await resizeImage(file, 1400, false);
     const r = await apiPost({ action: "selfpublish", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: c.toDataURL("image/jpeg", 0.82).split(",")[1] });
     STATUS = r.status;
-    renderEditor("Your store is live! Copy or share your link below.");
+    closeSheet("payOverlay");
+    renderEditor("Your store is live! Copy or share your link above.");
     window.scrollTo(0, 0);
     notify("Your store is live! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok.");
   } catch(err){ st.textContent = ""; notify(err.message); }
