@@ -85,23 +85,31 @@ textarea{min-height:72px;resize:vertical}
   background:radial-gradient(120% 90% at 25% 15%,#6B3551 0%,#3A1F2B 55%,#1E0F16 100%);
   transition:opacity .7s ease,visibility .7s ease}
 #splash.hide{opacity:0;visibility:hidden}
-#splash .sp-word{white-space:nowrap;padding:0 .3em;line-height:1.25;text-shadow:0 0 18px rgba(255,255,255,.18);
-  -webkit-mask-image:linear-gradient(90deg,#000 0 44%,transparent 56%);mask-image:linear-gradient(90deg,#000 0 44%,transparent 56%);
-  -webkit-mask-size:280% 100%;mask-size:280% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-  -webkit-mask-position:100% 0;mask-position:100% 0}
-#splash .sp-word.script{font-family:"Sacramento","Segoe Script","Brush Script MT",cursive;font-size:clamp(68px,21vw,128px)}
-#splash .sp-word.plain{font-family:"Figtree",system-ui,sans-serif;font-weight:300;font-size:clamp(46px,14vw,84px);letter-spacing:.02em}
-#splash .sp-word.write{animation:spWrite 1.35s cubic-bezier(.5,.05,.3,1) forwards}
-#splash .sp-word.out{-webkit-mask-position:0 0;mask-position:0 0;animation:spOut .5s ease forwards}
-@keyframes spWrite{from{-webkit-mask-position:100% 0;mask-position:100% 0}to{-webkit-mask-position:0 0;mask-position:0 0}}
-@keyframes spOut{from{opacity:1}to{opacity:0;filter:blur(6px);transform:translateY(-8px) scale(.98)}}
-#splash .sp-brand{position:absolute;left:0;right:0;bottom:calc(40px + env(safe-area-inset-bottom,0px));text-align:center;
-  font-family:"Figtree",system-ui,sans-serif;font-weight:700;letter-spacing:.18em;font-size:13px;text-transform:uppercase;opacity:.55}
+#splash .sp-logo{display:flex;flex-direction:column;align-items:center;gap:18px}
+#splash .sp-mark{width:118px;height:118px;overflow:visible}
+#splash .sp-l{stroke-dasharray:96;stroke-dashoffset:96;animation:spDraw .75s cubic-bezier(.65,0,.35,1) .15s forwards}
+#splash .sp-dot{transform-box:fill-box;transform-origin:center;transform:translateY(-46px) scale(.2);opacity:0;
+  animation:spDrop .6s cubic-bezier(.34,1.56,.64,1) .8s forwards, spPulse 1.6s ease-in-out 1.6s infinite}
+#splash .sp-name{font-family:"Figtree",system-ui,sans-serif;font-weight:800;font-size:34px;letter-spacing:-.03em;color:#fff;
+  opacity:0;transform:translateY(10px);animation:spName .6s cubic-bezier(.16,1,.3,1) 1.05s forwards}
+@keyframes spDraw{to{stroke-dashoffset:0}}
+@keyframes spDrop{0%{opacity:0;transform:translateY(-46px) scale(.2)}60%{opacity:1;transform:translateY(4px) scale(1.12)}100%{opacity:1;transform:none}}
+@keyframes spPulse{0%,100%{transform:none}50%{transform:scale(1.18)}}
+@keyframes spName{to{opacity:1;transform:none}}
+/* small version for loading messages inside the app */
+.lkload{display:flex;flex-direction:column;align-items:center;gap:14px;padding:90px 10px;color:var(--muted);font-size:15px}
+.lkload svg{width:56px;height:56px;border-radius:16px;background:#3A1F2B;padding:9px;box-sizing:border-box;box-shadow:0 8px 22px rgba(58,31,43,.22)}
+.lkload .sp-l{stroke-dasharray:96;stroke-dashoffset:96;animation:lkDraw 1.6s cubic-bezier(.65,0,.35,1) infinite}
+.lkload .sp-dot{transform-box:fill-box;transform-origin:center;animation:lkDot 1.6s cubic-bezier(.34,1.56,.64,1) infinite}
+@keyframes lkDraw{0%{stroke-dashoffset:96}45%,80%{stroke-dashoffset:0}100%{stroke-dashoffset:-96}}
+@keyframes lkDot{0%,35%{opacity:0;transform:translateY(-30px) scale(.3)}55%{opacity:1;transform:translateY(3px) scale(1.1)}65%,85%{opacity:1;transform:none}100%{opacity:0;transform:scale(.6)}}
 @media (prefers-reduced-motion:reduce){
-  #splash .sp-word{-webkit-mask-image:none;mask-image:none}
-  #splash .sp-word.write,#splash .sp-word.out{animation:none}
+  #splash .sp-l,.lkload .sp-l{animation:none;stroke-dashoffset:0}
+  #splash .sp-dot,.lkload .sp-dot{animation:none;opacity:1;transform:none}
+  #splash .sp-name{animation:none;opacity:1;transform:none}
   #splash{transition:opacity .3s ease,visibility .3s ease}
 }
+
 /* ---------- Home: centred brand + login, like Instagram ---------- */
 .auth{max-width:380px;margin:0 auto;padding:8vh 4px 120px;text-align:center}
 .brandmark{display:flex;flex-direction:column;align-items:center;gap:14px}
@@ -250,6 +258,10 @@ img.broken{visibility:hidden}
 .xmini{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
   font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer;z-index:2}
 #payOverlay .sheet{padding-top:22px}
+.overlay .sheet{overflow-x:hidden;max-width:100vw;box-sizing:border-box}
+.overlay .sheet *{max-width:100%}
+.overlay .sheet .url,.overlay .sheet b,.overlay .sheet p{overflow-wrap:anywhere}
+html,body{overflow-x:hidden}
 .overlay.open .sheet{animation:shIn .42s cubic-bezier(.16,1,.3,1) both}
 .overlay.closing{animation:ovOut .24s ease both}
 .overlay.closing .sheet{animation:shOut .24s cubic-bezier(.4,0,1,1) both}
@@ -304,7 +316,7 @@ img.broken{visibility:hidden}
 .lines{background:var(--surface);border-radius:14px;padding:2px 14px;border:1px solid var(--line)}
 .cline{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
 .cline .cn{flex:1;min-width:0}
-.cline .cn b{display:block;font-weight:600}
+.cline .cn b{display:block;font-weight:600;overflow-wrap:anywhere;word-break:break-word}
 .cline .cn span{color:var(--muted);font-size:14px}
 .ctotal{display:flex;justify-content:space-between;padding:12px 0;font-weight:800;font-size:17px}
 .row2{display:flex;gap:10px}.row2>div{flex:1}
@@ -373,7 +385,15 @@ img.broken{visibility:hidden}
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true"><div class="sp-word script" id="spWord"></div><div class="sp-brand">Linkedai</div></div>
+<div id="splash" aria-hidden="true">
+  <div class="sp-logo">
+    <svg viewBox="0 0 100 100" class="sp-mark">
+      <path class="sp-l" d="M36 22 V76 H70" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="square" stroke-linejoin="miter"/>
+      <circle class="sp-dot" cx="67" cy="33" r="8.5" fill="#F2C14E"/>
+    </svg>
+    <div class="sp-name">Linkedai</div>
+  </div>
+</div>
 <!-- ============ OWN CONFIRM / MESSAGE BOX ============ -->
 <div class="overlay" id="askOverlay" role="alertdialog" aria-modal="true" aria-labelledby="askText" style="align-items:center;z-index:20">
   <div class="sheet" style="border-radius:20px;margin:16px;max-width:420px">
@@ -490,55 +510,24 @@ img.broken{visibility:hidden}
 <script>
 /* ---------- Welcome screen ---------- */
 const SPLASH = (() => {
-  const WORDS = [
-    { t: "hello", f: "script" },
-    { t: "selamat datang", f: "script" },
-    { t: "欢迎", f: "plain" },
-    { t: "வணக்கம்", f: "plain" },
-    { t: "welcome", f: "script" }
-  ];
-  const box = document.getElementById("splash"), el = document.getElementById("spWord");
-  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const box = document.getElementById("splash");
+  if (!box) return { ready(){} };
   let first = true;
   try { first = !sessionStorage.getItem("lk-splash"); } catch(e) {}
-  // First visit: Linkedai pages show "hello" + "selamat datang"; a store shows just "hello" so customers aren't kept waiting
+  // First visit: let the logo finish drawing (a bit shorter before a store). Later visits: go as soon as ready.
   const qs = location.search.slice(1).split("&").filter(x => x && !x.includes("="));
   const isStore = (qs[0] && !/^(build|edit|signup|admin)$/i.test(qs[0])) || !/\/$/.test(location.pathname);
-  const minWords = first ? (isStore ? 1 : 2) : 0;
-  const WRITE = 1350, HOLD = 650, OUT = 500;
-  let i = 0, shown = 0, ready = false, done = false, timer = null, wordDone = false;
+  const minMs = first ? (isStore ? 1300 : 1900) : 0;
+  const t0 = Date.now();
+  let done = false;
   function hide(){
-    if (done) return; done = true; clearTimeout(timer);
+    if (done) return; done = true;
     try { sessionStorage.setItem("lk-splash", "1"); } catch(e) {}
     box.classList.add("hide");
     setTimeout(() => box.remove(), 800);
   }
-  function next(){
-    const w = WORDS[i++ % WORDS.length];
-    el.className = "sp-word " + w.f; el.textContent = w.t;
-    el.style.fontSize = "";
-    const room = window.innerWidth * 0.88, wide = el.scrollWidth;   // shrink long words to fit the screen
-    if (wide > room) el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * room / wide) + "px";
-    void el.offsetWidth;                    // restart the writing animation
-    el.classList.add("write");
-    shown++; wordDone = false;
-    timer = setTimeout(() => {
-      wordDone = true;
-      if (ready && shown >= minWords) return hide();
-      el.classList.add("out");
-      timer = setTimeout(next, OUT);
-    }, calm ? 900 : WRITE + HOLD);
-  }
-  if (!box) return { ready(){} };
-  next();
   setTimeout(hide, 12000);                  // never block the page for long
-  return {
-    ready(){
-      ready = true;
-      if (!first) return hide();            // later visits: go as soon as the page is ready
-      if (wordDone && shown >= minWords) hide();
-    }
-  };
+  return { ready(){ setTimeout(hide, Math.max(0, minMs - (Date.now() - t0))); } };
 })();
 
 /* ============================================================
@@ -685,6 +674,9 @@ new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
   if (n.tagName === "IMG") markImg(n); else n.querySelectorAll && n.querySelectorAll("img").forEach(markImg);
 }))).observe(document.documentElement, { childList: true, subtree: true });
 
+function loaderHtml(text){
+  return `<div class="lkload" role="status"><svg viewBox="0 0 100 100" aria-hidden="true"><path class="sp-l" d="M36 22 V76 H70" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="square"/><circle class="sp-dot" cx="67" cy="33" r="8.5" fill="#F2C14E"/></svg><span>${esc(text)}</span></div>`;
+}
 function closeSheet(id){
   const o = typeof id === "string" ? $(id) : id;
   if (!o || !o.classList.contains("open") || o.classList.contains("closing")) return;
@@ -1395,7 +1387,7 @@ async function renderAdmin(msg){
     $("admGo").onclick = () => { ADMIN = $("admKey").value; try { sessionStorage.setItem("lk-admin", ADMIN); } catch(e) {} renderAdmin(); };
     return;
   }
-  g.innerHTML = `<p class="loading">Loading stores...</p>`;
+  g.innerHTML = `${loaderHtml("Loading stores...")}`;
   let list;
   try { list = (await apiPost({ action: "admin", key: ADMIN, op: "list" })).stores; }
   catch(e){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(_) {} return renderAdmin(e.message); }
@@ -1479,14 +1471,14 @@ async function route(){
   if (q === "build" || q === "edit"){
     SESSION = loadSession();
     if (SESSION){
-      $("gwrap").innerHTML = `<p class="loading">Opening your store...</p>`; show("page");
+      $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page");
       try { const r = await apiPost({ action: "login", id: SESSION.id, pin: SESSION.pin }); S = normalize(r.data); STATUS = r.status; return openEditor(); }
       catch(e){ clearSession(); }
     }
     return renderStart();
   }
   if (/^[a-z0-9-]{2,40}$/.test(q)){
-    $("gwrap").innerHTML = `<p class="loading">Opening store...</p>`; show("page");
+    $("gwrap").innerHTML = `${loaderHtml("Opening store...")}`; show("page");
     try {
       const [r] = await Promise.all([apiGet({ action: "shop", id: q }), loadAd()]);
       if (r.error === "notfound") return showMessage("Store not found", "Check the link spelling, or ask the shop for their link again.");
