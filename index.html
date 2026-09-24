@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#3A1F2B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sacramento&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#F4F4F2; --surface:#FFFFFF; --ink:#18181B; --muted:#6B6B72; --line:#E6E6E2;
@@ -80,6 +80,31 @@ textarea{min-height:72px;resize:vertical}
 .media-prev.wide{width:128px;border-radius:12px}
 .media-prev img{width:100%;height:100%;object-fit:cover}
 .filebtn{position:relative;overflow:hidden}
+/* ---------- Welcome screen: words written left to right, like the iPhone "hello" ---------- */
+#splash{position:fixed;inset:0;z-index:60;display:grid;place-items:center;color:#fff;overflow:hidden;
+  background:radial-gradient(120% 90% at 25% 15%,#6B3551 0%,#3A1F2B 55%,#1E0F16 100%);
+  transition:opacity .7s ease,visibility .7s ease}
+#splash.hide{opacity:0;visibility:hidden}
+#splash .sp-word{white-space:nowrap;padding:0 .3em;line-height:1.25;text-shadow:0 0 18px rgba(255,255,255,.18);
+  -webkit-mask-image:linear-gradient(90deg,#000 0 44%,transparent 56%);mask-image:linear-gradient(90deg,#000 0 44%,transparent 56%);
+  -webkit-mask-size:280% 100%;mask-size:280% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:100% 0;mask-position:100% 0}
+#splash .sp-word.script{font-family:"Sacramento","Segoe Script","Brush Script MT",cursive;font-size:clamp(68px,21vw,128px)}
+#splash .sp-word.plain{font-family:"Figtree",system-ui,sans-serif;font-weight:300;font-size:clamp(46px,14vw,84px);letter-spacing:.02em}
+#splash .sp-word.write{animation:spWrite 1.35s cubic-bezier(.5,.05,.3,1) forwards}
+#splash .sp-word.out{-webkit-mask-position:0 0;mask-position:0 0;animation:spOut .5s ease forwards}
+@keyframes spWrite{from{-webkit-mask-position:100% 0;mask-position:100% 0}to{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes spOut{from{opacity:1}to{opacity:0;filter:blur(6px);transform:translateY(-8px) scale(.98)}}
+#splash .sp-brand{position:absolute;left:0;right:0;bottom:calc(40px + env(safe-area-inset-bottom,0px));text-align:center;
+  font-family:"Figtree",system-ui,sans-serif;font-weight:700;letter-spacing:.18em;font-size:13px;text-transform:uppercase;opacity:.55}
+@media (prefers-reduced-motion:reduce){
+  #splash .sp-word{-webkit-mask-image:none;mask-image:none}
+  #splash .sp-word.write,#splash .sp-word.out{animation:none}
+  #splash{transition:opacity .3s ease,visibility .3s ease}
+}
+.pinwrap{position:relative}
+.pinwrap input{padding-right:78px}
+.pineye{position:absolute;right:8px;bottom:8px;height:36px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer}
 .filebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .sw{width:40px;height:40px;border-radius:50%;border:3px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
@@ -144,6 +169,14 @@ textarea{min-height:72px;resize:vertical}
 .plist.grid .prow{flex-direction:column-reverse;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px}
 .plist.grid .pimg{width:100%;height:auto;aspect-ratio:1/1}
 .plist.grid .addb{right:8px;bottom:8px}
+/* Minimal style: clean text price list, no photo boxes */
+.plist.minimal{background:var(--surface);border-radius:16px}
+.plist.minimal .prow{padding:16px 18px;align-items:center}
+.plist.minimal .pimg{display:none}
+.plist.minimal .ptext h3{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.plist.minimal .pmeta{margin-top:4px}
+.plist.minimal .prow::after{content:"+";flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:18px;font-weight:600;color:var(--ink)}
+.plist.minimal .prow.out::after{content:none}
 .empty{color:var(--muted);text-align:center;padding:40px 16px}
 .foot{text-align:center;color:var(--muted);font-size:13px;margin:32px 16px 0}
 .foot a{color:inherit}
@@ -252,6 +285,7 @@ textarea{min-height:72px;resize:vertical}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><div class="sp-word script" id="spWord"></div><div class="sp-brand">Linkedai</div></div>
 <!-- ============ OWN CONFIRM / MESSAGE BOX ============ -->
 <div class="overlay" id="askOverlay" role="alertdialog" aria-modal="true" aria-labelledby="askText" style="align-items:center;z-index:20">
   <div class="sheet" style="border-radius:20px;margin:16px;max-width:420px">
@@ -259,6 +293,23 @@ textarea{min-height:72px;resize:vertical}
     <div class="row2">
       <div id="askNoWrap"><button class="btn full" id="askNo" type="button">Cancel</button></div>
       <div><button class="btn solid full" id="askYes" type="button">OK</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONFIRM BEFORE PUBLISHING ============ -->
+<div class="overlay" id="pubOverlay" role="dialog" aria-modal="true" aria-labelledby="pubTitle">
+  <div class="sheet">
+    <div class="sheet-h"><h2 id="pubTitle">Check before you publish</h2><button class="x" data-close="pubOverlay" aria-label="Close">×</button></div>
+    <p class="hint" style="margin:0 0 12px">Please check your details. After you pay, your store goes live with these.</p>
+    <div class="lines" id="pubSummary"></div>
+    <label class="check"><input type="checkbox" id="pubOk1"> My shop name, WhatsApp number and items are correct</label>
+    <label class="check"><input type="checkbox" id="pubOk2"> I understand my store link can't be changed later</label>
+    <label class="check"><input type="checkbox" id="pubOk3"> <span id="pubPayText">I understand this is a one-time payment</span></label>
+    <p class="err" id="pubErr"></p>
+    <div class="row2">
+      <div><button class="btn full" type="button" data-close="pubOverlay">Edit details</button></div>
+      <div><button class="btn solid full" type="button" id="pubGo">Continue to payment</button></div>
     </div>
   </div>
 </div>
@@ -329,7 +380,7 @@ textarea{min-height:72px;resize:vertical}
       <div class="lines" id="lines"></div>
       <label for="cName">Your name</label>
       <input type="text" id="cName" autocomplete="name">
-      <label for="date">Date you want it</label>
+      <label for="date" id="dateLabel">Date you want it</label>
       <input type="date" id="date">
       <label for="note">Note to the shop (optional)</label>
       <textarea id="note" placeholder="e.g. Pickup Saturday 3pm"></textarea>
@@ -341,6 +392,59 @@ textarea{min-height:72px;resize:vertical}
 </div>
 
 <script>
+/* ---------- Welcome screen ---------- */
+const SPLASH = (() => {
+  const WORDS = [
+    { t: "hello", f: "script" },
+    { t: "selamat datang", f: "script" },
+    { t: "欢迎", f: "plain" },
+    { t: "வணக்கம்", f: "plain" },
+    { t: "welcome", f: "script" }
+  ];
+  const box = document.getElementById("splash"), el = document.getElementById("spWord");
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let first = true;
+  try { first = !sessionStorage.getItem("lk-splash"); } catch(e) {}
+  // First visit: Linkedai pages show "hello" + "selamat datang"; a store shows just "hello" so customers aren't kept waiting
+  const qs = location.search.slice(1).split("&").filter(x => x && !x.includes("="));
+  const isStore = (qs[0] && !/^(build|edit|signup|admin)$/i.test(qs[0])) || !/\/$/.test(location.pathname);
+  const minWords = first ? (isStore ? 1 : 2) : 0;
+  const WRITE = 1350, HOLD = 650, OUT = 500;
+  let i = 0, shown = 0, ready = false, done = false, timer = null, wordDone = false;
+  function hide(){
+    if (done) return; done = true; clearTimeout(timer);
+    try { sessionStorage.setItem("lk-splash", "1"); } catch(e) {}
+    box.classList.add("hide");
+    setTimeout(() => box.remove(), 800);
+  }
+  function next(){
+    const w = WORDS[i++ % WORDS.length];
+    el.className = "sp-word " + w.f; el.textContent = w.t;
+    el.style.fontSize = "";
+    const room = window.innerWidth * 0.88, wide = el.scrollWidth;   // shrink long words to fit the screen
+    if (wide > room) el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * room / wide) + "px";
+    void el.offsetWidth;                    // restart the writing animation
+    el.classList.add("write");
+    shown++; wordDone = false;
+    timer = setTimeout(() => {
+      wordDone = true;
+      if (ready && shown >= minWords) return hide();
+      el.classList.add("out");
+      timer = setTimeout(next, OUT);
+    }, calm ? 900 : WRITE + HOLD);
+  }
+  if (!box) return { ready(){} };
+  next();
+  setTimeout(hide, 12000);                  // never block the page for long
+  return {
+    ready(){
+      ready = true;
+      if (!first) return hide();            // later visits: go as soon as the page is ready
+      if (wordDone && shown >= minWords) hide();
+    }
+  };
+})();
+
 /* ============================================================
    LINKEDAI (stores saved online through your Google Apps Script)
    Files next to this index.html on your GitHub:
@@ -426,6 +530,17 @@ async function apiPost(body){
   return j;
 }
 
+// What the seller sells changes the words customers and sellers see
+const KINDS = {
+  food:     { label: "Food",     list: "Menu",     item: "menu item", add: "Add to cart", date: "Date you want it",               dateNeeded: true,  empty: "This store hasn't added a menu yet.",
+              ex: { shop: "e.g. Dapur Seri Mawar", tag: "e.g. Homemade cakes & kuih, baked fresh daily", name: "e.g. Kek Batik Premium", desc: "e.g. Rich chocolate, serves 8 to 10", opt: "e.g. 1 kg", price: "e.g. 45", note: "e.g. Pickup Saturday 3pm, less sugar please" } },
+  products: { label: "Products", list: "Products", item: "product",   add: "Add to cart", date: "Delivery or pickup date (optional)", dateNeeded: false, empty: "This store hasn't added products yet.",
+              ex: { shop: "e.g. Aurora Boutique", tag: "e.g. Modest fashion, delivery across Malaysia", name: "e.g. Satin Blouse", desc: "e.g. Soft satin, 4 colours, sizes S to XL", opt: "e.g. Size M, Dusty Pink", price: "e.g. 59", note: "e.g. Please deliver to my office address" } },
+  services: { label: "Services", list: "Services", item: "service",   add: "Book",        date: "Preferred date",                 dateNeeded: true,  empty: "This store hasn't added services yet.",
+              ex: { shop: "e.g. Glow Beauty Studio", tag: "e.g. Hair, nails & bridal makeup by appointment", name: "e.g. Keratin Hair Treatment", desc: "e.g. About 90 minutes, includes wash & blow", opt: "e.g. Long hair", price: "e.g. 180", note: "e.g. Prefer afternoon, around 2pm" } }
+};
+const W = d => KINDS[d && d.kind] || KINDS.products;
+
 function normalize(d){
   const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
   x.items = (Array.isArray(x.items) ? x.items : []).map(it => ({
@@ -433,7 +548,8 @@ function normalize(d){
     o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String(o.l || ""), p: Number(o.p) || 0 })) : [{ l: "", p: 0 }]
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
-  if (!["list","grid"].includes(x.layout)) x.layout = "list";
+  if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
+  if (!KINDS[x.kind]) x.kind = "products";
   x.closed = !!x.closed; x.closedMsg = String(x.closedMsg || "");
   x.wa = String(x.wa || "").replace(/\D/g, "");
   return x;
@@ -497,10 +613,22 @@ $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay"
 
 
 
+// Show / hide PIN buttons (work on every page)
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-eye]"); if (!b) return;
+  e.preventDefault();
+  const inp = $(b.dataset.eye); if (!inp) return;
+  const showing = inp.type === "text";
+  inp.type = showing ? "password" : "text";
+  b.textContent = showing ? "Show" : "Hide";
+  b.setAttribute("aria-pressed", String(!showing));
+  b.setAttribute("aria-label", showing ? "Show PIN" : "Hide PIN");
+});
+
 /* ============================================================
    SELLER: log in or create (yoursite/?build)
    ============================================================ */
-let SESSION = null, S = null, STATUS = "pending", DIRTY = false;
+let SESSION = null, S = null, STATUS = "pending", DIRTY = false, PAYSTEP = false;
 function loadSession(){ try { return JSON.parse(sessionStorage.getItem("lk-session") || "null"); } catch(e){ return null; } }
 function saveSession(){ try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {} }
 function clearSession(){ SESSION = null; try { sessionStorage.removeItem("lk-session"); } catch(e) {} }
@@ -508,10 +636,10 @@ function clearSession(){ SESSION = null; try { sessionStorage.removeItem("lk-ses
 function loginCardHtml(msg){
   return `<section class="card" id="loginCard">
       <h2>Seller login</h2>
-      <p class="hint">Edit your store: menu, prices, photos, open or closed.</p>
-      <label>Your WhatsApp number<input type="tel" id="lWa" autocomplete="tel" placeholder="e.g. 0123456789"></label>
+      <p class="hint">Edit your store: items, prices, photos, open or closed.</p>
+      <label>Your WhatsApp number<input type="tel" id="lWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
       <p class="hint">The number your store gets orders on.</p>
-      <label>6-digit PIN<input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"></label>
+      <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false">Show</button></span></label>
       <p class="err" id="lErr">${esc(msg || "")}</p>
       <button class="btn solid full" id="lGo">Log in and edit my store</button>
       <p class="hint" style="margin-top:12px">Forgot your PIN? ${String(SITE.ownerWa || "").replace(/\D/g, "") ? `<a href="https://wa.me/${String(SITE.ownerWa).replace(/\D/g, "")}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us"} and we'll reset it.</p>
@@ -538,6 +666,7 @@ function normWa(v){ let d = String(v || "").replace(/\D/g, ""); if (d.startsWith
 
 function renderStart(msg, mode){
   const signup = mode === "signup";
+  PAYSTEP = false;
   setAccent(COLORS[0]); document.title = APP_NAME + (signup ? " · Sign up" : " · Seller login");
   $("gwrap").innerHTML = `
     <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
@@ -546,13 +675,13 @@ function renderStart(msg, mode){
     ${!signup && signupOpen() ? `<a class="btn full" href="${esc(home())}?signup">New seller? Sign up</a>` : ""}
     <section class="card" ${signup ? "" : "hidden"}>
       <h2>Your store details</h2>
-      <label>Shop name<input type="text" id="cShop" placeholder="e.g. Kedai Ali"></label>
-      <label>Your WhatsApp number<input type="tel" id="cWa" autocomplete="tel" placeholder="e.g. 0123456789"></label>
+      <label>Shop name<input type="text" id="cShop" placeholder="e.g. Aurora Boutique"></label>
+      <label>Your WhatsApp number<input type="tel" id="cWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
       <p class="hint">Orders come to this number, and you log in with it.</p>
-      <label>Your store link name<input type="text" id="cId" autocapitalize="off" spellcheck="false"></label>
+      <label>Your store link name<input type="text" id="cId" autocapitalize="off" spellcheck="false" placeholder="e.g. aurora-boutique"></label>
       <p class="hint" id="cHint">Your link will be ${esc(home())}your-shop</p>
-      <label>Choose a 6-digit PIN<input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
-      <label>Type the PIN again<input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+      <label>Choose a 6-digit PIN<span class="pinwrap"><input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin" aria-label="Show PIN" aria-pressed="false">Show</button></span></label>
+      <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false">Show</button></span></label>
       <p class="hint">You'll log in with your WhatsApp number and this PIN.</p>
       <p class="err" id="cErr"></p>
       <button class="btn solid full" id="cGo">Sign up</button>
@@ -585,7 +714,7 @@ function renderStart(msg, mode){
       await apiPost({ action: "create", id, pin, data });
       SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false;
       history.replaceState(null, "", home() + "?build");
-      openEditor("Store created. Add your menu and photos, then tap Save.");
+      openEditor("Store created. Choose what you sell, add your items and photos, then tap Save.");
     } catch(e){ $("cErr").textContent = e.message; $("cGo").disabled = false; $("cGo").textContent = "Sign up"; }
   };
 }
@@ -620,9 +749,14 @@ function publishCardHtml(){
     <p class="hint">It was taken offline, usually because a payment couldn't be found. ${help} to sort it out.</p>
   </section>`;
   const qr = safeUrl(SITE.qr);
-  return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+  if (!PAYSTEP) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Publish your store</h2>
-    <p class="hint">Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, and your store goes live straight away.</p>
+    <p class="hint">When your store looks right, publish it. Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, and it goes live straight away.</p>
+    <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Publish my store</button>
+  </section>`;
+  return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+    <h2>Pay and publish</h2>
+    <p class="hint">Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, then upload your receipt. Your store goes live straight away.</p>
     <div class="qrbox">
       <p class="hint" style="margin:0 0 6px">Pay with DuitNow</p>
       ${SITE.price ? `<p class="amt">${esc(SITE.price)}</p>` : ""}
@@ -635,9 +769,40 @@ function publishCardHtml(){
       </ol>
     </div>
     <label class="btn wa full filebtn" style="margin-top:14px;padding:15px">I've paid: upload receipt and publish<input type="file" accept="image/*" data-media="receipt" aria-label="Upload payment receipt"></label>
+    <button class="btn small" style="margin-top:10px" data-act="unpay">Back</button>
     <p class="hint">We check every payment. Stores without a real payment are taken offline. Problems? ${help}.</p>
   </section>`;
 }
+
+function openPublishCheck(){
+  const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your WhatsApp number first." : !S.items.some(it => it.n.trim()) ? `Add at least one ${W(S).item} first.` : "";
+  if (bad) return notify(bad);
+  const named = S.items.filter(it => it.n.trim());
+  const row = (k, v) => `<div class="cline"><div class="cn"><span>${esc(k)}</span><b>${esc(v)}</b></div></div>`;
+  $("pubSummary").innerHTML =
+    row("Shop name", S.name) +
+    row("Store link", storeLink(SESSION.id)) +
+    row("WhatsApp number (orders + login)", S.wa) +
+    row("What you sell", W(S).label + ", " + named.length + " " + (named.length === 1 ? W(S).item : W(S).item + "s")) +
+    (SITE.price ? row("Payment", SITE.price + ", one time") : "");
+  $("pubPayText").textContent = SITE.price ? `I understand this is a one-time payment of ${SITE.price}` : "I understand this is a one-time payment";
+  ["pubOk1","pubOk2","pubOk3"].forEach(id => $(id).checked = false);
+  $("pubErr").textContent = "";
+  $("pubOverlay").classList.add("open");
+  $("pubOverlay").querySelector(".sheet").scrollTop = 0;
+}
+$("pubGo").onclick = async () => {
+  if (!["pubOk1","pubOk2","pubOk3"].every(id => $(id).checked)) { $("pubErr").textContent = "Tick all three boxes to continue."; return; }
+  const btn = $("pubGo"); btn.disabled = true; btn.textContent = "Saving...";
+  try {
+    if (DIRTY){ await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
+    PAYSTEP = true;
+    $("pubOverlay").classList.remove("open");
+    renderEditor("Details saved. Pay below, then upload your receipt.");
+    const card = $("publishCard"); if (card) card.scrollIntoView({ behavior: smooth(), block: "start" });
+  } catch(e){ $("pubErr").textContent = e.message; }
+  btn.disabled = false; btn.textContent = "Continue to payment";
+};
 
 function renderEditor(msg){
   const link = storeLink(SESSION.id), live = STATUS === "live";
@@ -666,31 +831,36 @@ function renderEditor(msg){
       <button data-act="open" data-v="1" aria-pressed="${!S.closed}">Open</button>
       <button data-act="open" data-v="0" aria-pressed="${S.closed}">Closed</button>
     </div>
-    <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Back on Monday 9am"></label>
+    <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Closed for Hari Raya. Back on 5 April, 9am"></label>
   </section>
 
   <section class="card">
     <h2>Shop</h2>
-    <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}"></label>
-    <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="e.g. Baked fresh daily"></label>
+    <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}" placeholder="${esc(W(S).ex.shop)}"></label>
+    <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="${esc(W(S).ex.tag)}"></label>
     <label>Logo</label>
     <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
     <label>Cover photo (optional)</label>
     <div class="media-row">${photoBox("coverPrev", S.cover, "No cover", "wide")}${photoControls("cover", S.cover)}</div>
-    <label>WhatsApp number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="60123456789"></label>
+    <label>WhatsApp number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="e.g. 012-345 6789"></label>
     <p class="hint">Orders are sent here, and you log in with this number.</p>
     <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
     <label>Brand colour</label>
     <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
-    <label>Menu layout</label>
+    <label>What do you sell?</label>
+    <div class="seg">
+      ${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}
+    </div>
+    <label>Store style</label>
     <div class="seg">
       <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
       <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
+      <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
     </div>
   </section>
 
   <section class="card">
-    <h2>Menu</h2>
+    <h2>${W(S).list}</h2>
     ${S.items.map((it,i)=>`
       <div class="item">
         <div class="ihead"><b>Item ${i+1}</b>
@@ -700,21 +870,21 @@ function renderEditor(msg){
             <button class="del" data-act="del" data-i="${i}">Delete</button>
           </span>
         </div>
-        <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}"></label>
-        <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}"></label>
+        <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
+        <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
         <label>Photo (optional)</label>
         <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
         <label>Options and prices</label>
         ${it.o.map((o,j)=>`
           <div class="opt">
-            <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="e.g. Small (20 pcs)">
-            <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p||""}" placeholder="Price">
+            <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}">
+            <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p||""}" placeholder="${esc(W(S).ex.price)}">
             <button data-act="delopt" data-i="${i}" data-j="${j}" aria-label="Remove option">×</button>
           </div>`).join("")}
         <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">Add option</button>
         <label class="check"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}> Sold out for now</label>
       </div>`).join("")}
-    <button class="btn full" style="margin-top:14px" data-act="additem">Add menu item</button>
+    <button class="btn full" style="margin-top:14px" data-act="additem">Add ${W(S).item}</button>
   </section>`;
 }
 
@@ -746,10 +916,13 @@ $("builder").addEventListener("click", async e => {
   else if (a === "additem"){ S.items.push(blankItem()); redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
+  else if (a === "kind"){ S.kind = b.dataset.v; redraw(); }
   else if (a === "open"){ S.closed = b.dataset.v === "0"; redraw(); }
   else if (a === "rm-logo"){ S.logo = ""; redraw(); }
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
+  else if (a === "publish"){ openPublishCheck(); }
+  else if (a === "unpay"){ PAYSTEP = false; renderEditor(); }
   else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
   else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); $("saveStatus").textContent = ok ? "Link copied." : "Press and hold the link to copy it."; }
   else if (a === "preview"){ showStore(S, true); }
@@ -770,8 +943,7 @@ async function publishWithReceipt(input){
   if (!file) return;
   if (!S.name.trim()) return notify("Add your shop name first.");
   if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first.");
-  if (!S.items.some(it => it.n.trim())) return notify("Add at least one menu item before publishing.");
-  if (!(await ask("Publish your store now with this receipt?", "Publish"))) return;
+  if (!S.items.some(it => it.n.trim())) return notify(`Add at least one ${W(S).item} before publishing.`);
   const st = $("saveStatus");
   try {
     if (DIRTY){ st.textContent = "Saving your store..."; await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
@@ -847,6 +1019,9 @@ async function showStore(data, isPreview){
   $("closedMsg").textContent = D.closedMsg.trim() || "We're not taking orders right now. Please check back later.";
   const t = new Date();
   $("date").min = new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  $("dateLabel").textContent = W(D).date;
+  $("note").placeholder = W(D).ex.note;
+  $("send").textContent = D.kind === "services" ? "Send booking on WhatsApp" : "Send order on WhatsApp";
   $("err").textContent = "";
   try { cart = JSON.parse(localStorage.getItem(cartKey()) || "{}") || {}; } catch(e){ cart = {}; }
   Object.keys(cart).forEach(k => { const [i,j] = k.split("|").map(Number); if (!D.items[i] || !D.items[i].o[j] || D.items[i].out) delete cart[k]; });
@@ -884,8 +1059,8 @@ function productRow(i){
 function renderMenu(){
   const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
   $("menu").innerHTML = list.length
-    ? `<section class="group"><div class="plist${D.layout === "grid" ? " grid" : ""}">${list.map(productRow).join("")}</div></section>`
-    : `<p class="empty">This store hasn't added a menu yet.</p>`;
+    ? `<section class="group"><div class="plist${D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : ""}">${list.map(productRow).join("")}</div></section>`
+    : `<p class="empty">${esc(W(D).empty)}</p>`;
 }
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
@@ -899,7 +1074,7 @@ function openProduct(i){
   updateProduct();
   $("pOverlay").classList.add("open");
 }
-function updateProduct(){ const o = D.items[pSel.i].o[pSel.j]; $("pQty").textContent = pSel.q; $("pAdd").textContent = "Add to cart · " + money(o.p * pSel.q); }
+function updateProduct(){ const o = D.items[pSel.i].o[pSel.j]; $("pQty").textContent = pSel.q; $("pAdd").textContent = W(D).add + " · " + money(o.p * pSel.q); }
 $("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openProduct(+b.dataset.p); });
 $("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
 $("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
@@ -915,7 +1090,7 @@ function message(){
   const it = items(), total = Math.round(it.reduce((a,b)=>a+b.sub,0) * 100) / 100;
   const name = $("cName").value.trim(), dv = $("date").value;
   const dt = dv ? new Date(dv + "T00:00").toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short" }) : "";
-  let m = `Hi ${D.name}, I'd like to order:\n\n`;
+  let m = `Hi ${D.name}, I'd like to ${D.kind === "services" ? "book" : "order"}:\n\n`;
   if (name) m += `Name: ${name}\n`;
   if (dt) m += `Date: ${dt}\n`;
   if (name || dt) m += `\n`;
@@ -949,8 +1124,8 @@ $("send").addEventListener("click", e => {
   let msg = "";
   if (D.closed) msg = "This store is closed right now.";
   else if (!$("cName").value.trim()) msg = "Add your name so the shop knows who the order is for.";
-  else if (!$("date").value) msg = "Pick the date you want your order.";
-  else if ($("date").value < $("date").min) msg = "Pick today or a later date.";
+  else if (W(D).dateNeeded && !$("date").value) msg = "Pick a date first.";
+  else if ($("date").value && $("date").value < $("date").min) msg = "Pick today or a later date.";
   if (msg){ e.preventDefault(); $("err").textContent = msg; return; }
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   setTimeout(() => { cart = {}; saveCart(); renderMenu(); renderBar(); }, 800);
@@ -1033,7 +1208,7 @@ function renderHome(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   $("gwrap").innerHTML = `
     <div class="top"><span class="brand">${esc(APP_NAME)}</span></div>
-    <header class="bh"><h1>Your shop, one link</h1><p>Customers pick from your menu and the order lands in your WhatsApp. No app, no commission${SITE.price ? `, one payment of ${esc(SITE.price)}` : ""}.</p></header>
+    <header class="bh"><h1>Your shop, one link</h1><p>Sell anything: food, products or services. Customers pick what they want and the order lands in your WhatsApp. No app, no commission${SITE.price ? `, one payment of ${esc(SITE.price)}` : ""}.</p></header>
     ${loginCardHtml()}
     ${signupOpen() ? `<a class="btn full" style="padding:15px" href="${esc(home())}?signup">New seller? Sign up</a>` : ""}
     ${to ? `<a class="btn full wa" style="margin-top:10px" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener">Ask us on WhatsApp</a>` : ""}`;
@@ -1074,7 +1249,7 @@ async function route(){
   renderHome();
 }
 window.addEventListener("popstate", () => { if (!DIRTY) route(); });
-route();
+route().finally(() => SPLASH.ready());
 
 </script>
 </body>
