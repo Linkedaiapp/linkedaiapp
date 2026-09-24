@@ -102,9 +102,15 @@ textarea{min-height:72px;resize:vertical}
   #splash .sp-word.write,#splash .sp-word.out{animation:none}
   #splash{transition:opacity .3s ease,visibility .3s ease}
 }
-.pinwrap{position:relative}
-.pinwrap input{padding-right:78px}
-.pineye{position:absolute;right:8px;bottom:8px;height:36px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer}
+.dangercard{border-color:var(--err)}
+.dangercard h2{color:var(--err)}
+.btn.danger{background:var(--err);border-color:var(--err);color:#fff}
+.pinwrap{position:relative;display:block;margin-top:6px}
+.pinwrap input{margin-top:0;padding-right:54px}
+.pineye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:42px;height:42px;border:0;border-radius:12px;background:transparent;
+  color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.pineye:active{background:var(--soft)}
+.pineye svg{width:22px;height:22px}
 .filebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .sw{width:40px;height:40px;border-radius:50%;border:3px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
@@ -129,10 +135,11 @@ textarea{min-height:72px;resize:vertical}
 .cover{height:clamp(150px,40vw,250px);background:var(--accent) center/cover no-repeat;position:relative}
 .cover.plain{background-image:radial-gradient(circle at 20% 0%,rgba(255,255,255,.18),transparent 55%),radial-gradient(circle at 90% 120%,rgba(0,0,0,.35),transparent 60%)}
 .back{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:8}
-.shopcard{position:relative;margin:-48px 14px 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:0 18px 18px}
-.st-logo{width:84px;height:84px;border-radius:50%;border:4px solid var(--surface);margin-top:-42px;background:var(--accent);
-  color:#fff;display:grid;place-items:center;font-weight:800;font-size:32px;overflow:hidden}
-.st-logo img{width:100%;height:100%;object-fit:cover}
+.shopcard{position:relative;margin:-48px 14px 0;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:0 18px 18px;box-shadow:0 10px 30px rgba(20,10,15,.07)}
+.st-logo{width:88px;height:88px;border-radius:50%;margin-top:-44px;background:var(--surface);
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:32px;overflow:hidden;
+  box-shadow:0 0 0 5px var(--surface),0 8px 22px rgba(20,10,15,.16);position:relative}
+.st-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .stname{font-size:clamp(25px,6.8vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.08;margin:10px 0 4px}
 .tag{color:var(--muted);margin:0}
 .info{margin:10px 0 0;font-size:14px;font-weight:500}
@@ -190,7 +197,36 @@ textarea{min-height:72px;resize:vertical}
 .cartbtn .lbl{flex:1;text-align:left}
 
 .overlay{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
-.overlay.open{display:flex}
+.overlay.open{display:flex;animation:ovIn .28s ease both}
+.overlay.open .sheet{animation:shIn .42s cubic-bezier(.16,1,.3,1) both}
+.overlay.closing{animation:ovOut .24s ease both}
+.overlay.closing .sheet{animation:shOut .24s cubic-bezier(.4,0,1,1) both}
+#askOverlay.open .sheet{animation:popIn .32s cubic-bezier(.16,1,.3,1) both}
+#askOverlay.closing .sheet{animation:popOut .18s ease both}
+@keyframes ovIn{from{background:rgba(10,10,12,0)}to{background:rgba(10,10,12,.5)}}
+@keyframes ovOut{from{background:rgba(10,10,12,.5)}to{background:rgba(10,10,12,0)}}
+@keyframes shIn{from{transform:translateY(100%)}to{transform:none}}
+@keyframes shOut{from{transform:none}to{transform:translateY(100%)}}
+@keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@keyframes popOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.96)}}
+/* pages and cards glide in softly */
+.enter{animation:pageIn .45s cubic-bezier(.16,1,.3,1) both}
+.enter .card,.enter .shopcard,.enter .group,.enter .bh,.enter .btn.full{animation:riseIn .55s cubic-bezier(.16,1,.3,1) both}
+.enter .card:nth-of-type(2),.enter .group{animation-delay:.05s}
+.enter .card:nth-of-type(3){animation-delay:.1s}
+.enter .card:nth-of-type(4){animation-delay:.14s}
+.enter .card:nth-of-type(n+5){animation-delay:.18s}
+@keyframes pageIn{from{opacity:0}to{opacity:1}}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.btn,.prow,.tab,.seg button,.sw,.x,.cartbtn{transition:transform .15s ease,background-color .2s ease,border-color .2s ease,opacity .2s ease}
+.btn:active,.seg button:active,.cartbtn:active,.x:active{transform:scale(.97)}
+.prow:active{transform:scale(.985)}
+.err:not(:empty){animation:errIn .3s ease both}
+@keyframes errIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .overlay.open,.overlay.open .sheet,.overlay.closing,.overlay.closing .sheet,#askOverlay.open .sheet,#askOverlay.closing .sheet,
+  .enter,.enter .card,.enter .shopcard,.enter .group,.enter .bh,.enter .btn.full,.err:not(:empty){animation:none}
+}
 .sheet{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow-y:auto;border-radius:22px 22px 0 0;position:relative;
   padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px))}
 .sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -512,20 +548,33 @@ async function getJson(path){
 async function loadSite(){ try { SITE = Object.assign(SITE, await getJson("site.json")); } catch(e) {} }
 
 /* ---------- Talking to your Google script ---------- */
+const SLOW_MSG = "The store server is slow right now. Please try again in a moment.";
+async function fetchJson(url, opts, tries){
+  for (let n = 0; n < tries; n++){
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 25000);
+    try {
+      const r = await fetch(url, { ...opts, signal: ctl.signal });
+      const text = await r.text();
+      clearTimeout(timer);
+      try { return JSON.parse(text); } catch(e) { if (n === tries - 1) throw new Error(SLOW_MSG); }
+    } catch(e){
+      clearTimeout(timer);
+      if (e.message === SLOW_MSG) throw e;
+      if (n === tries - 1) throw new Error(e.name === "AbortError" ? SLOW_MSG : "Can't reach the store server. Check your internet and try again.");
+    }
+    await new Promise(res => setTimeout(res, 1200));
+  }
+}
 async function apiGet(params){
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
   const q = new URLSearchParams({ ...params, t: Date.now() }).toString();
-  let r;
-  try { r = await fetch(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q); } catch(e){ throw new Error("Can't reach the store server. Check your internet and try again."); }
-  return r.json();
+  return fetchJson(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q, {}, 2);
 }
+// Actions that are safe to repeat get one quiet retry if Google hiccups
+const RETRY_OK = new Set(["login", "save", "admin"]);
 async function apiPost(body){
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
-  let r;
-  try { r = await fetch(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }); }
-  catch(e){ throw new Error("Can't reach the store server. Check your internet and try again."); }
-  let j = {};
-  try { j = await r.json(); } catch(e){ throw new Error("The store server didn't answer properly. Try again."); }
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }, RETRY_OK.has(body.action) ? 2 : 1);
   if (j.error) throw new Error(j.error);
   return j;
 }
@@ -555,7 +604,26 @@ function normalize(d){
   return x;
 }
 function setAccent(c){ document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--soft", c + "1F"); }
-function show(id){ ["builder","page","store"].forEach(x => $(x).hidden = x !== id); window.scrollTo(0,0); }
+function closeSheet(id){
+  const o = typeof id === "string" ? $(id) : id;
+  if (!o || !o.classList.contains("open") || o.classList.contains("closing")) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches){ o.classList.remove("open"); return; }
+  o.classList.add("closing");
+  clearTimeout(o._closeT);
+  o._closeT = setTimeout(() => o.classList.remove("open", "closing"), 230);
+}
+// Opening cancels any close still in progress, so a new pop-up never vanishes
+function openSheet(id){
+  const o = $(id); if (!o) return;
+  clearTimeout(o._closeT);
+  o.classList.remove("closing");
+  o.classList.add("open");
+}
+function show(id){
+  ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
+  const el = $(id); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
+  window.scrollTo(0,0);
+}
 async function copyText(text){
   try { await navigator.clipboard.writeText(text); return true; }
   catch(e){ const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch(_) {} ta.remove(); return ok; }
@@ -590,7 +658,7 @@ function ask(text, yesLabel, danger){
   $("askYes").style.background = danger ? "var(--err)" : "";
   $("askYes").style.borderColor = danger ? "var(--err)" : "";
   $("askNoWrap").hidden = false;
-  $("askOverlay").classList.add("open");
+  openSheet("askOverlay");
   $("askYes").focus();
   return new Promise(res => { askResolve = res; });
 }
@@ -599,10 +667,10 @@ function notify(text){
   $("askYes").textContent = "OK";
   $("askYes").style.background = ""; $("askYes").style.borderColor = "";
   $("askNoWrap").hidden = true;
-  $("askOverlay").classList.add("open");
+  openSheet("askOverlay");
   return new Promise(res => { askResolve = res; });
 }
-function closeAsk(v){ $("askOverlay").classList.remove("open"); if (askResolve){ const r = askResolve; askResolve = null; r(v); } }
+function closeAsk(v){ closeSheet("askOverlay"); if (askResolve){ const r = askResolve; askResolve = null; r(v); } }
 $("askYes").onclick = () => closeAsk(true);
 $("askNo").onclick = () => closeAsk(false);
 $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay")) closeAsk(false); });
@@ -614,13 +682,15 @@ $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay"
 
 
 // Show / hide PIN buttons (work on every page)
+const EYE_OPEN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const EYE_SHUT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.5 4.5-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-eye]"); if (!b) return;
   e.preventDefault();
   const inp = $(b.dataset.eye); if (!inp) return;
   const showing = inp.type === "text";
   inp.type = showing ? "password" : "text";
-  b.textContent = showing ? "Show" : "Hide";
+  b.innerHTML = showing ? EYE_OPEN : EYE_SHUT;
   b.setAttribute("aria-pressed", String(!showing));
   b.setAttribute("aria-label", showing ? "Show PIN" : "Hide PIN");
 });
@@ -639,7 +709,7 @@ function loginCardHtml(msg){
       <p class="hint">Edit your store: items, prices, photos, open or closed.</p>
       <label>Your WhatsApp number<input type="tel" id="lWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
       <p class="hint">The number your store gets orders on.</p>
-      <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false">Show</button></span></label>
+      <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="err" id="lErr">${esc(msg || "")}</p>
       <button class="btn solid full" id="lGo">Log in and edit my store</button>
       <p class="hint" style="margin-top:12px">Forgot your PIN? ${String(SITE.ownerWa || "").replace(/\D/g, "") ? `<a href="https://wa.me/${String(SITE.ownerWa).replace(/\D/g, "")}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us"} and we'll reset it.</p>
@@ -651,12 +721,14 @@ function wireLogin(){
     $("lErr").textContent = "";
     if (wa.length < 9 || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your WhatsApp number and 6-digit PIN.";
     $("lGo").disabled = true; $("lGo").textContent = "Logging in...";
+    const slow = setTimeout(() => { if ($("lGo") && $("lGo").disabled) $("lGo").textContent = "Still working, please wait..."; }, 6000);
     try {
       const r = await apiPost({ action: "login", wa, pin });
       SESSION = { id: r.id, pin }; saveSession(); S = normalize(r.data); STATUS = r.status; DIRTY = false;
       if (!/^\?(build|edit)\b/.test(location.search)) history.pushState(null, "", home() + "?build");
       openEditor();
-    } catch(e){ $("lErr").textContent = e.message; $("lGo").disabled = false; $("lGo").textContent = "Log in and edit my store"; }
+      clearTimeout(slow);
+    } catch(e){ clearTimeout(slow); $("lErr").textContent = e.message; $("lGo").disabled = false; $("lGo").textContent = "Log in and edit my store"; }
   };
   $("lGo").onclick = go;
   $("lPin").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
@@ -680,8 +752,8 @@ function renderStart(msg, mode){
       <p class="hint">Orders come to this number, and you log in with it.</p>
       <label>Your store link name<input type="text" id="cId" autocapitalize="off" spellcheck="false" placeholder="e.g. aurora-boutique"></label>
       <p class="hint" id="cHint">Your link will be ${esc(home())}your-shop</p>
-      <label>Choose a 6-digit PIN<span class="pinwrap"><input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin" aria-label="Show PIN" aria-pressed="false">Show</button></span></label>
-      <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false">Show</button></span></label>
+      <label>Choose a 6-digit PIN<span class="pinwrap"><input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+      <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="hint">You'll log in with your WhatsApp number and this PIN.</p>
       <p class="err" id="cErr"></p>
       <button class="btn solid full" id="cGo">Sign up</button>
@@ -788,7 +860,7 @@ function openPublishCheck(){
   $("pubPayText").textContent = SITE.price ? `I understand this is a one-time payment of ${SITE.price}` : "I understand this is a one-time payment";
   ["pubOk1","pubOk2","pubOk3"].forEach(id => $(id).checked = false);
   $("pubErr").textContent = "";
-  $("pubOverlay").classList.add("open");
+  openSheet("pubOverlay");
   $("pubOverlay").querySelector(".sheet").scrollTop = 0;
 }
 $("pubGo").onclick = async () => {
@@ -797,7 +869,7 @@ $("pubGo").onclick = async () => {
   try {
     if (DIRTY){ await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
     PAYSTEP = true;
-    $("pubOverlay").classList.remove("open");
+    closeSheet("pubOverlay");
     renderEditor("Details saved. Pay below, then upload your receipt.");
     const card = $("publishCard"); if (card) card.scrollIntoView({ behavior: smooth(), block: "start" });
   } catch(e){ $("pubErr").textContent = e.message; }
@@ -885,6 +957,12 @@ function renderEditor(msg){
         <label class="check"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}> Sold out for now</label>
       </div>`).join("")}
     <button class="btn full" style="margin-top:14px" data-act="additem">Add ${W(S).item}</button>
+  </section>
+
+  <section class="card dangercard">
+    <h2>Danger zone</h2>
+    <p class="hint">Delete your store and account. Your store link stops working, and your items and photos are removed. This can't be undone.</p>
+    <button class="btn danger full" style="margin-top:12px" data-act="deleteacct">Delete my account</button>
   </section>`;
 }
 
@@ -923,6 +1001,17 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
   else if (a === "unpay"){ PAYSTEP = false; renderEditor(); }
+  else if (a === "deleteacct"){
+    if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
+    b.disabled = true; b.textContent = "Deleting...";
+    try {
+      await apiPost({ action: "delete", id: SESSION.id, pin: SESSION.pin });
+      DIRTY = false; clearSession();
+      history.replaceState(null, "", home());
+      renderHome();
+      notify("Your store and account have been deleted.");
+    } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(err.message); }
+  }
   else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
   else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); $("saveStatus").textContent = ok ? "Link copied." : "Press and hold the link to copy it."; }
   else if (a === "preview"){ showStore(S, true); }
@@ -1010,7 +1099,7 @@ async function showStore(data, isPreview){
   $("stCover").style.backgroundImage = cover ? `url("${cover.replace(/"/g, "%22")}")` : "";
   $("stWrap").style.paddingTop = cover ? "0" : "56px";
   $("stCard").style.marginTop = cover ? "" : "0";
-  $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : initial(D.name);
+  $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`;
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
   $("brandLink").href = home();
@@ -1072,14 +1161,14 @@ function openProduct(i){
   $("pOpts").hidden = p.o.length < 2;
   $("pOpts").innerHTML = p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
   updateProduct();
-  $("pOverlay").classList.add("open");
+  openSheet("pOverlay");
 }
 function updateProduct(){ const o = D.items[pSel.i].o[pSel.j]; $("pQty").textContent = pSel.q; $("pAdd").textContent = W(D).add + " · " + money(o.p * pSel.q); }
 $("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openProduct(+b.dataset.p); });
 $("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
 $("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
 $("pPlus").onclick = () => { pSel.q = Math.min(99, pSel.q + 1); updateProduct(); };
-$("pAdd").onclick = () => { const k = pSel.i + "|" + pSel.j; cart[k] = (cart[k] || 0) + pSel.q; saveCart(); $("pOverlay").classList.remove("open"); renderMenu(); renderBar(); };
+$("pAdd").onclick = () => { const k = pSel.i + "|" + pSel.j; cart[k] = (cart[k] || 0) + pSel.q; saveCart(); closeSheet("pOverlay"); renderMenu(); renderBar(); };
 
 function items(){
   const out = [];
@@ -1112,7 +1201,7 @@ function renderBar(){
       <div class="step"><button data-k="${x.k}" data-d="-1" aria-label="One less ${esc(x.name)}">−</button><span class="q">${x.q}</span><button data-k="${x.k}" data-d="1" aria-label="One more ${esc(x.name)}">+</button></div>
     </div>`).join("") + `<div class="ctotal"><span>Total</span><span>${money(total)}</span></div>`;
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
-  if (!n) $("overlay").classList.remove("open");
+  if (!n) closeSheet("overlay");
 }
 $("lines").addEventListener("click", e => {
   const b = e.target.closest("button[data-k]"); if (!b) return;
@@ -1130,16 +1219,16 @@ $("send").addEventListener("click", e => {
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   setTimeout(() => { cart = {}; saveCart(); renderMenu(); renderBar(); }, 800);
 });
-$("viewCart").onclick = () => $("overlay").classList.add("open");
+$("viewCart").onclick = () => openSheet("overlay");
 document.addEventListener("click", e => {
   const c = e.target.closest("[data-close]");
-  if (c) $(c.dataset.close).classList.remove("open");
-  if (e.target.classList && e.target.classList.contains("overlay") && e.target.id !== "askOverlay") e.target.classList.remove("open");
+  if (c) closeSheet(c.dataset.close);
+  if (e.target.classList && e.target.classList.contains("overlay") && e.target.id !== "askOverlay") closeSheet(e.target);
 });
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if ($("askOverlay").classList.contains("open")) return closeAsk(false);
-  document.querySelectorAll(".overlay.open").forEach(o => o.classList.remove("open"));
+  document.querySelectorAll(".overlay.open").forEach(o => closeSheet(o));
 });
 $("backBtn").onclick = () => { renderEditor(); show("builder"); };
 
