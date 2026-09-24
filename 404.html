@@ -590,10 +590,10 @@ const fmtMoney = (cur, n) => (cur || "") + (Number.isInteger(n) ? Number(n).toLo
 
 
 
-let SITE = { api: "", ownerWa: "", price: "", qr: "", duitnow: "", note: "", signup: true, paypal: "", priceIntl: "" };
+let SITE = { api: "", ownerWa: "", price: "", qr: "", duitnow: "", note: "", signup: true, paypal: "", priceIntl: "", paypalQr: "" };
 // Malaysia or elsewhere? Decides which price and payment tab people see first.
 const IN_MY = (() => { try { return /^Asia\/(Kuala_Lumpur|Kuching)$/.test(Intl.DateTimeFormat().resolvedOptions().timeZone); } catch(e){ return true; } })();
-const hasPaypal = () => !!(safeUrl(SITE.paypal) && SITE.priceIntl);
+const hasPaypal = () => !!((safeUrl(SITE.paypal) || safeUrl(SITE.paypalQr)) && SITE.priceIntl);
 const shownPrice = () => (!IN_MY && hasPaypal()) ? SITE.priceIntl : SITE.price;
 // paypal.me link with the amount filled in, e.g. paypal.me/name/7USD
 function paypalLink(){
@@ -917,6 +917,12 @@ function qrFailed(img){
   if (s1) s1.textContent = SITE.duitnow ? "Pay by DuitNow to the ID above in your bank app or Touch 'n Go." : "Message us on WhatsApp for payment details.";
 }
 let PAYTAB = "my";
+// PayPal QR link broken: hide it; the Pay with PayPal button still works
+function ppQrFailed(img){
+  img.remove();
+  const s1 = $("ppStep1");
+  if (s1 && safeUrl(SITE.paypal)) s1.innerHTML = `Tap <b>Pay with PayPal</b> and pay <b>${esc(SITE.priceIntl)}</b>. Add your shop name <b>${esc(S.name)}</b> in the note.`;
+}
 function openPayment(){
   PAYTAB = (!IN_MY && hasPaypal()) ? "intl" : "my";
   renderPayment();
@@ -936,11 +942,16 @@ function renderPayment(){
     </div>` : "";
   const how = intl ? `
     <div class="qrbox">
-      <p class="hint" style="margin:0 0 6px">Pay with PayPal or card</p>
+      <p class="hint" style="margin:0 0 6px">Pay with PayPal</p>
       <p class="amt">${esc(price)}</p>
-      <a class="btn full" style="margin:6px 0 4px;background:#FFC439;border-color:#FFC439;color:#111;font-weight:800" href="${esc(paypalLink())}" target="_blank" rel="noopener">Pay with PayPal</a>
+      ${safeUrl(SITE.paypalQr) ? `<img src="${esc(safeUrl(SITE.paypalQr))}" alt="PayPal QR for payment" onerror="ppQrFailed(this)">` : ""}
+      ${safeUrl(SITE.paypal) ? `<a class="btn full" style="margin:6px 0 4px;background:#FFC439;border-color:#FFC439;color:#111;font-weight:800" href="${esc(paypalLink())}" target="_blank" rel="noopener">Pay with PayPal</a>` : ""}
       <ol>
-        <li>Tap <b>Pay with PayPal</b> and pay <b>${esc(price)}</b>. Add your shop name <b>${esc(S.name)}</b> in the note.</li>
+        <li id="ppStep1">${safeUrl(SITE.paypalQr) && safeUrl(SITE.paypal)
+          ? `Scan the QR with your PayPal app, or tap <b>Pay with PayPal</b>. Pay <b>${esc(price)}</b> and add your shop name <b>${esc(S.name)}</b> in the note.`
+          : safeUrl(SITE.paypalQr)
+          ? `Save the QR to your gallery (press and hold it), then scan it in your PayPal app. Pay <b>${esc(price)}</b> and add your shop name <b>${esc(S.name)}</b> in the note.`
+          : `Tap <b>Pay with PayPal</b> and pay <b>${esc(price)}</b>. Add your shop name <b>${esc(S.name)}</b> in the note.`}</li>
         <li>Take a screenshot of your PayPal receipt.</li>
         <li>Come back here, tap the button below and choose that screenshot. Your store goes live at once.</li>
       </ol>
