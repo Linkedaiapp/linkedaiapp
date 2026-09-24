@@ -197,6 +197,33 @@ textarea{min-height:72px;resize:vertical}
 .cartbtn .lbl{flex:1;text-align:left}
 
 .overlay{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
+/* ---------- Images: soft shimmer while loading, then fade in ---------- */
+.pimg,.pbig,.st-logo,.media-prev,.adban,.qrbox{position:relative}
+.pimg img,.pbig img,.st-logo img,.media-prev img,.adban img,.qrbox img{opacity:0;transition:opacity .45s ease}
+.pimg img.loaded,.pbig img.loaded,.st-logo img.loaded,.media-prev img.loaded,.adban img.loaded,.qrbox img.loaded{opacity:1}
+.pimg:has(img:not(.loaded)),.pbig:has(img:not(.loaded)),.st-logo:has(img:not(.loaded)),.media-prev:has(img:not(.loaded)),.adban:has(img:not(.loaded)){
+  background:linear-gradient(100deg,var(--line) 20%,var(--surface) 42%,var(--line) 64%) 0 0/300% 100%;animation:shimmer 1.3s ease-in-out infinite;border-radius:12px}
+.st-logo:has(img:not(.loaded)){border-radius:50%}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease}
+.cover img.loaded{opacity:1}
+.cover:has(img:not(.loaded)){background:linear-gradient(100deg,var(--line) 20%,var(--surface) 42%,var(--line) 64%) 0 0/300% 100%;animation:shimmer 1.3s ease-in-out infinite}
+/* a photo link that doesn't work: clean empty tile instead of a broken icon */
+img.broken{visibility:hidden}
+.pimg:has(img.broken),.pbig:has(img.broken),.media-prev:has(img.broken){background:var(--soft)}
+.cover:has(img.broken){background:var(--accent)}
+@keyframes shimmer{from{background-position:100% 0}to{background-position:0 0}}
+/* spinner for uploads */
+.spin{width:24px;height:24px;border:2.5px solid rgba(0,0,0,.12);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:none}
+.btn .spin{width:18px;height:18px;border-color:rgba(255,255,255,.35);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+.upov{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;background:rgba(255,255,255,.78);
+  font-size:11px;font-weight:700;color:var(--ink);border-radius:inherit;animation:pageIn .2s ease both}
+@media (prefers-color-scheme:dark){.upov{background:rgba(20,20,22,.78)}}
+.filebtn.busy{pointer-events:none;opacity:.85}
+@media (prefers-reduced-motion:reduce){
+  .pimg:has(img:not(.loaded)),.pbig:has(img:not(.loaded)),.st-logo:has(img:not(.loaded)),.media-prev:has(img:not(.loaded)),.adban:has(img:not(.loaded)),.cover:has(img:not(.loaded)){animation:none}
+  .spin{animation-duration:1.6s}
+}
 .overlay{-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
 .overlay.open{display:flex;animation:ovIn .28s ease both}
 .xmini{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
@@ -616,6 +643,15 @@ function normalize(d){
   return x;
 }
 function setAccent(c){ document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--soft", c + "1F"); }
+// Every picture fades in once it has loaded; broken ones stop shimmering too
+function markImg(img){ if (img.complete){ img.classList.add("loaded"); if (!img.naturalWidth && img.getAttribute("src")) img.classList.add("broken"); } }
+document.addEventListener("load", e => { if (e.target.tagName === "IMG") e.target.classList.add("loaded"); }, true);
+document.addEventListener("error", e => { if (e.target.tagName === "IMG") e.target.classList.add("loaded", "broken"); }, true);
+new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
+  if (n.nodeType !== 1) return;
+  if (n.tagName === "IMG") markImg(n); else n.querySelectorAll && n.querySelectorAll("img").forEach(markImg);
+}))).observe(document.documentElement, { childList: true, subtree: true });
+
 function closeSheet(id){
   const o = typeof id === "string" ? $(id) : id;
   if (!o || !o.classList.contains("open") || o.classList.contains("closing")) return;
@@ -1058,6 +1094,12 @@ async function publishWithReceipt(input){
   input.value = "";
   if (!file) return;
   const st = $("payStatus") || $("saveStatus");
+  const btn = document.querySelector("#payOverlay .filebtn");
+  const oldLabel = btn ? btn.firstChild.textContent : "";
+  const busy = on => { if (!btn) return; btn.classList.toggle("busy", on);
+    if (on){ btn.firstChild.textContent = "Publishing your store "; if (!btn.querySelector(".spin")) btn.insertBefore(Object.assign(document.createElement("span"), { className: "spin" }), btn.firstChild.nextSibling); }
+    else { btn.firstChild.textContent = oldLabel; const sp = btn.querySelector(".spin"); if (sp) sp.remove(); } };
+  busy(true);
   try {
     if (DIRTY){ st.textContent = "Saving your store..."; await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
     st.textContent = "Publishing...";
@@ -1068,7 +1110,7 @@ async function publishWithReceipt(input){
     renderEditor("Your store is live! Copy or share your link above.");
     window.scrollTo(0, 0);
     notify("Your store is live! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok.");
-  } catch(err){ st.textContent = ""; notify(err.message); }
+  } catch(err){ st.textContent = ""; busy(false); notify(err.message); }
 }
 
 async function saveStore(){
@@ -1092,6 +1134,11 @@ $("bwrap").addEventListener("change", async e => {
   if (!file) return;
   const st = $("saveStatus");
   st.textContent = "Uploading photo...";
+  const box = kind === "logo" ? $("logoPrev") : kind === "cover" ? $("coverPrev") : $("imgPrev" + t.dataset.i);
+  const btn = t.closest(".filebtn");
+  let ov = null;
+  if (box){ ov = document.createElement("div"); ov.className = "upov"; ov.innerHTML = `<span class="spin"></span>Uploading`; box.appendChild(ov); }
+  if (btn) btn.classList.add("busy");
   try {
     const size = kind === "logo" ? 300 : kind === "cover" ? 1200 : 700;
     const c = await resizeImage(file, size, kind !== "cover");
@@ -1099,7 +1146,7 @@ $("bwrap").addEventListener("change", async e => {
     const r = await apiPost({ action: "upload", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: dataUrl.split(",")[1] });
     if (kind === "logo") S.logo = r.url; else if (kind === "cover") S.cover = r.url; else S.items[+t.dataset.i].img = r.url;
     touch(); renderEditor("Photo added. Tap Save to put it on your store.");
-  } catch(err){ st.textContent = ""; notify(err.message); }
+  } catch(err){ st.textContent = ""; if (ov) ov.remove(); if (btn) btn.classList.remove("busy"); notify(err.message); }
 });
 window.addEventListener("beforeunload", e => { if (DIRTY){ e.preventDefault(); e.returnValue = ""; } });
 
@@ -1121,7 +1168,8 @@ async function showStore(data, isPreview){
   document.title = D.name + " · Order on WhatsApp";
   const cover = safeImg(D.cover);
   $("stCover").hidden = !cover;
-  $("stCover").style.backgroundImage = cover ? `url("${cover.replace(/"/g, "%22")}")` : "";
+  $("stCover").style.backgroundImage = "";
+  $("stCover").innerHTML = cover ? `<img src="${esc(cover)}" alt="">` : "";
   $("stWrap").style.paddingTop = cover ? "0" : "56px";
   $("stCard").style.marginTop = cover ? "" : "0";
   $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`;
