@@ -144,13 +144,10 @@ textarea{min-height:72px;resize:vertical}
 .btn.small.dangerline{border-color:var(--err);color:var(--err)}
 .admprev{margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--soft);min-height:40px}
 .admprev img{display:block;width:100%;height:auto}
-/* invitation under every store: "Want a store like this?" */
-.stcta{margin:18px 14px 0;padding:22px 18px 18px;border-radius:20px;background:var(--surface);border:1px solid var(--line);text-align:center;
-  box-shadow:0 8px 24px rgba(20,10,15,.05)}
-.stcta-mark{display:block;margin:0 auto;width:44px;height:44px;border-radius:13px;box-shadow:0 6px 16px rgba(58,31,43,.22)}
-.stcta h3{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:12px 0 6px;color:var(--ink)}
-.stcta p{font-size:14px;line-height:1.5;color:var(--muted);margin:0 auto 16px;max-width:300px}
-.stcta .btn{background:#3A1F2B;border-color:#3A1F2B;color:#fff}
+/* short invitation under every store */
+.stcta{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 14px 0;font-size:14px;color:var(--muted)}
+.stcta-btn{display:inline-block;padding:7px 14px;border-radius:99px;background:#3A1F2B;color:#fff;font-weight:700;font-size:13px;text-decoration:none;transition:transform .15s ease}
+.stcta-btn:active{transform:scale(.96)}
 .dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);border-color:var(--err);color:#fff}
@@ -498,12 +495,10 @@ html,body{overflow-x:hidden}
     </div>
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
-    <section class="stcta" id="stCta" hidden>
-      <img src="icon-192.png" alt="" class="stcta-mark">
-      <h3>Want a store like this?</h3>
-      <p>Create your own shop link in minutes. Customers order straight to your WhatsApp. No app, no commission.</p>
-      <a class="btn solid full" id="stCtaBtn" href="#">Create my store</a>
-    </section>
+    <div class="stcta" id="stCta" hidden>
+      <span>Want your own store?</span>
+      <a class="stcta-btn" id="stCtaBtn" href="#">Sign up</a>
+    </div>
   </div>
 
   <div class="closedov" id="closedOv" hidden role="alert">
@@ -1327,8 +1322,8 @@ async function showStore(data, isPreview){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const canSignup = signupOpen(), cta = $("stCta"), btn = $("stCtaBtn");
   cta.hidden = !!isPreview || (!canSignup && !to);
-  if (canSignup){ btn.textContent = "Create my store"; btn.href = home() + "?signup"; btn.removeAttribute("target"); }
-  else if (to){ btn.textContent = "Ask us on WhatsApp"; btn.href = `https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I saw a store made with " + APP_NAME + " and I'd like one too.")}`; btn.target = "_blank"; btn.rel = "noopener"; }
+  if (canSignup){ btn.textContent = "Sign up"; btn.href = home() + "?signup"; btn.removeAttribute("target"); }
+  else if (to){ btn.textContent = "Chat with us"; btn.href = `https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I saw a store made with " + APP_NAME + " and I'd like one too.")}`; btn.target = "_blank"; btn.rel = "noopener"; }
   $("closedOv").hidden = !D.closed;
   $("closedShop").textContent = D.name;
   $("closedMsg").textContent = D.closedMsg.trim() || "We're not taking orders right now. Please check back later.";
