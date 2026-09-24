@@ -102,6 +102,27 @@ textarea{min-height:72px;resize:vertical}
   #splash .sp-word.write,#splash .sp-word.out{animation:none}
   #splash{transition:opacity .3s ease,visibility .3s ease}
 }
+/* ---------- Home: centred brand + login, like Instagram ---------- */
+.auth{max-width:380px;margin:0 auto;padding:8vh 4px 120px;text-align:center}
+.brandmark{display:flex;flex-direction:column;align-items:center;gap:14px}
+.brandmark img{width:76px;height:76px;border-radius:22px;box-shadow:0 10px 28px rgba(58,31,43,.25)}
+.wordmark{font-size:46px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:0;color:var(--ink)}
+.tagline{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:18px 0 6px;color:var(--ink)}
+.subhead{font-size:15px;line-height:1.5;color:var(--muted);margin:0 auto 26px;max-width:330px}
+.authform{text-align:left}
+.authform label{font-size:14px}
+.authform .btn.solid{margin-top:18px;padding:15px;font-size:16px}
+.authform .err:empty{margin:0;min-height:0}
+.authlink{display:block;text-align:center;margin-top:14px;font-size:14px;color:var(--muted)}
+.authlink a{color:var(--ink);font-weight:700}
+.signupbox{display:block;margin-top:26px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:center;
+  font-size:15px;color:var(--muted);text-decoration:none}
+.signupbox b{color:var(--accent)}
+.chatfab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;
+  background:#25D366;color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:20;
+  animation:riseIn .5s .3s cubic-bezier(.16,1,.3,1) both;transition:transform .15s ease}
+.chatfab:active{transform:scale(.94)}
+.chatfab svg{width:28px;height:28px}
 .dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);border-color:var(--err);color:#fff}
@@ -422,7 +443,7 @@ img.broken{visibility:hidden}
 
   <div class="closedov" id="closedOv" hidden role="alert">
     <div class="box">
-      <div class="ic" aria-hidden="true">🔒</div>
+      <div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></div>
       <p class="shopn" id="closedShop"></p>
       <h2>Store closed</h2>
       <p id="closedMsg">We're not taking orders right now. Please check back later.</p>
@@ -569,7 +590,19 @@ const fmtMoney = (cur, n) => (cur || "") + (Number.isInteger(n) ? Number(n).toLo
 
 
 
-let SITE = { api: "", ownerWa: "", price: "", qr: "", duitnow: "", note: "", signup: true };
+let SITE = { api: "", ownerWa: "", price: "", qr: "", duitnow: "", note: "", signup: true, paypal: "", priceIntl: "" };
+// Malaysia or elsewhere? Decides which price and payment tab people see first.
+const IN_MY = (() => { try { return /^Asia\/(Kuala_Lumpur|Kuching)$/.test(Intl.DateTimeFormat().resolvedOptions().timeZone); } catch(e){ return true; } })();
+const hasPaypal = () => !!(safeUrl(SITE.paypal) && SITE.priceIntl);
+const shownPrice = () => (!IN_MY && hasPaypal()) ? SITE.priceIntl : SITE.price;
+// paypal.me link with the amount filled in, e.g. paypal.me/name/7USD
+function paypalLink(){
+  const base = String(SITE.paypal).replace(/\/+$/, "");
+  const m = String(SITE.priceIntl).match(/([\d.]+)/);
+  const t = String(SITE.priceIntl).toUpperCase();
+  const cur = /US\$|USD/.test(t) ? "USD" : /S\$|SGD/.test(t) ? "SGD" : /€|EUR/.test(t) ? "EUR" : /£|GBP/.test(t) ? "GBP" : /A\$|AUD/.test(t) ? "AUD" : /B\$|BND/.test(t) ? "BND" : "";
+  return /paypal\.me\//i.test(base) && m && cur ? `${base}/${m[1]}${cur}` : base;
+}
 const signupOpen = () => SITE.signup !== false;
 // Works for yoursite/?shop (old links) and yoursite/shop (new links, served by 404.html on GitHub Pages)
 const siteUrl = path => new URL(path, location.href.split("#")[0].split("?")[0]).href;
@@ -768,6 +801,7 @@ function wireLogin(){
     const wa = normWa($("lWa").value), pin = $("lPin").value;
     $("lErr").textContent = "";
     if (wa.length < 9 || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your WhatsApp number and 6-digit PIN.";
+    $("lGo").dataset.label = $("lGo").dataset.label || $("lGo").textContent;
     $("lGo").disabled = true; $("lGo").textContent = "Logging in...";
     const slow = setTimeout(() => { if ($("lGo") && $("lGo").disabled) $("lGo").textContent = "Still working, please wait..."; }, 6000);
     try {
@@ -776,7 +810,7 @@ function wireLogin(){
       if (!/^\?(build|edit)\b/.test(location.search)) history.pushState(null, "", home() + "?build");
       openEditor();
       clearTimeout(slow);
-    } catch(e){ clearTimeout(slow); $("lErr").textContent = e.message; $("lGo").disabled = false; $("lGo").textContent = "Log in and edit my store"; }
+    } catch(e){ clearTimeout(slow); $("lErr").textContent = e.message; $("lGo").disabled = false; $("lGo").textContent = $("lGo").dataset.label || "Log in and edit my store"; }
   };
   $("lGo").onclick = go;
   $("lPin").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
@@ -871,7 +905,7 @@ function publishCardHtml(){
   const qr = safeUrl(SITE.qr);
   return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Publish your store</h2>
-    <p class="hint">When your store looks right, publish it. Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, and it goes live straight away.</p>
+    <p class="hint">When your store looks right, publish it. Pay once${shownPrice() ? `, <b>${esc(shownPrice())}</b>` : ""}, and it goes live straight away.</p>
     <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Publish my store</button>
   </section>`;
 }
@@ -882,16 +916,38 @@ function qrFailed(img){
   const s1 = $("payStep1");
   if (s1) s1.textContent = SITE.duitnow ? "Pay by DuitNow to the ID above in your bank app or Touch 'n Go." : "Message us on WhatsApp for payment details.";
 }
+let PAYTAB = "my";
 function openPayment(){
+  PAYTAB = (!IN_MY && hasPaypal()) ? "intl" : "my";
+  renderPayment();
+  openSheet("payOverlay");
+  $("payOverlay").querySelector(".sheet").scrollTop = 0;
+}
+function renderPayment(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const help = to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent(`Hi ${APP_NAME}, about my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us";
+  const intl = PAYTAB === "intl" && hasPaypal();
+  const price = intl ? SITE.priceIntl : SITE.price;
   const qr = safeUrl(SITE.qr);
-  $("payBody").innerHTML = `
-    <h2 id="payTitle" style="font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 44px 4px 0">Pay and publish</h2>
-    <p class="hint" style="margin:0">Pay once${SITE.price ? `, <b>${esc(SITE.price)}</b>` : ""}, then upload your receipt. Your store goes live straight away.</p>
+  const tabs = hasPaypal() ? `
+    <div class="seg" style="margin:14px 0 4px">
+      <button data-paytab="my" aria-pressed="${!intl}">Malaysia</button>
+      <button data-paytab="intl" aria-pressed="${intl}">Other countries</button>
+    </div>` : "";
+  const how = intl ? `
+    <div class="qrbox">
+      <p class="hint" style="margin:0 0 6px">Pay with PayPal or card</p>
+      <p class="amt">${esc(price)}</p>
+      <a class="btn full" style="margin:6px 0 4px;background:#FFC439;border-color:#FFC439;color:#111;font-weight:800" href="${esc(paypalLink())}" target="_blank" rel="noopener">Pay with PayPal</a>
+      <ol>
+        <li>Tap <b>Pay with PayPal</b> and pay <b>${esc(price)}</b>. Add your shop name <b>${esc(S.name)}</b> in the note.</li>
+        <li>Take a screenshot of your PayPal receipt.</li>
+        <li>Come back here, tap the button below and choose that screenshot. Your store goes live at once.</li>
+      </ol>
+    </div>` : `
     <div class="qrbox">
       <p class="hint" style="margin:0 0 6px">Pay with DuitNow</p>
-      ${SITE.price ? `<p class="amt">${esc(SITE.price)}</p>` : ""}
+      ${price ? `<p class="amt">${esc(price)}</p>` : ""}
       ${qr ? `<img src="${esc(qr)}" alt="DuitNow QR for payment" onerror="qrFailed(this)">` : ""}
       ${SITE.duitnow ? `<p class="hint">DuitNow ID: <b>${esc(SITE.duitnow)}</b></p>` : ""}
       <ol>
@@ -899,13 +955,20 @@ function openPayment(){
         <li>Take a screenshot of your payment receipt.</li>
         <li>Tap the button below and choose that screenshot. Your store goes live at once.</li>
       </ol>
-    </div>
+    </div>`;
+  $("payBody").innerHTML = `
+    <h2 id="payTitle" style="font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 44px 4px 0">Pay and publish</h2>
+    <p class="hint" style="margin:0">Pay once${price ? `, <b>${esc(price)}</b>` : ""}, then upload your receipt. Your store goes live straight away.</p>
+    ${tabs}
+    ${how}
     <label class="btn wa full filebtn" style="margin-top:14px;padding:15px">I've paid: upload receipt and publish<input type="file" accept="image/*" data-media="receipt" aria-label="Upload payment receipt"></label>
     <p class="status" id="payStatus" role="status"></p>
     <p class="hint">We check every payment. Stores without a real payment are taken offline. Problems? ${help}.</p>`;
-  openSheet("payOverlay");
-  $("payOverlay").querySelector(".sheet").scrollTop = 0;
 }
+$("payOverlay").addEventListener("click", e => {
+  const b = e.target.closest("[data-paytab]"); if (!b) return;
+  PAYTAB = b.dataset.paytab; renderPayment();
+});
 $("payOverlay").addEventListener("change", e => { if (e.target.dataset.media === "receipt") publishWithReceipt(e.target); });
 
 function openPublishCheck(){
@@ -918,8 +981,8 @@ function openPublishCheck(){
     row("Store link", storeLink(SESSION.id)) +
     row("WhatsApp number (orders + login)", S.wa) +
     row("What you sell", W(S).label + ", " + named.length + " " + (named.length === 1 ? W(S).item : W(S).item + "s")) +
-    (SITE.price ? row("Payment", SITE.price + ", one time") : "");
-  $("pubPayText").textContent = SITE.price ? `I understand this is a one-time payment of ${SITE.price}` : "I understand this is a one-time payment";
+    (shownPrice() ? row("Payment", shownPrice() + ", one time") : "");
+  $("pubPayText").textContent = shownPrice() ? `I understand this is a one-time payment of ${shownPrice()}` : "I understand this is a one-time payment";
   ["pubOk1","pubOk2","pubOk3"].forEach(id => $(id).checked = false);
   $("pubErr").textContent = "";
   openSheet("pubOverlay");
@@ -1368,12 +1431,25 @@ async function renderAdmin(msg){
 function renderHome(){
   setAccent(COLORS[0]); document.title = APP_NAME + " · WhatsApp order stores";
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
+  const chat = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.5-4.6A8.4 8.4 0 1 1 20.5 11.6z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg>`;
   $("gwrap").innerHTML = `
-    <div class="top"><span class="brand">${esc(APP_NAME)}</span></div>
-    <header class="bh"><h1>Your shop, one link</h1><p>Sell anything: food, products or services. Customers pick what they want and the order lands in your WhatsApp. No app, no commission${SITE.price ? `, one payment of ${esc(SITE.price)}` : ""}.</p></header>
-    ${loginCardHtml()}
-    ${signupOpen() ? `<a class="btn full" style="padding:15px" href="${esc(home())}?signup">New seller? Sign up</a>` : ""}
-    ${to ? `<a class="btn full wa" style="margin-top:10px" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener">Ask us on WhatsApp</a>` : ""}`;
+    <div class="auth">
+      <div class="brandmark">
+        <img src="icon-192.png" alt="">
+        <h1 class="wordmark">${esc(APP_NAME)}</h1>
+      </div>
+      <p class="tagline">Your shop, one link.</p>
+      <p class="subhead">Take orders on WhatsApp through one simple store link. No app. No commission.${shownPrice() ? ` One-time fee of ${esc(shownPrice())}.` : ""}</p>
+      <div class="authform" id="loginCard">
+        <label>WhatsApp number<input type="tel" id="lWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
+        <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
+        <p class="err" id="lErr"></p>
+        <button class="btn solid full" id="lGo">Seller log in</button>
+        <span class="authlink">Forgot your PIN? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Get help</a>` : "Contact us"}</span>
+      </div>
+      ${signupOpen() ? `<a class="signupbox" href="${esc(home())}?signup">New seller? <b>Sign up</b></a>` : ""}
+    </div>
+    ${to ? `<a class="chatfab" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">${chat}</a>` : ""}`;
   show("page");
   wireLogin();
 }
