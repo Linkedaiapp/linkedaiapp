@@ -391,6 +391,11 @@ html,body{overflow-x:hidden}
 .adwrap{position:relative;margin:14px 14px 0}
 .adban{display:block;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
 .adban img{width:100%;aspect-ratio:3/1;object-fit:cover}
+.adban.swapping{animation:none !important;background:var(--surface) !important}
+.addots{display:flex;justify-content:center;gap:6px;margin-top:8px}
+.addots:empty{display:none}
+.addots button{width:7px;height:7px;padding:0;border:0;border-radius:99px;background:var(--line);cursor:pointer;transition:width .3s ease,background .3s ease}
+.addots button[aria-current="true"]{width:18px;background:var(--ink)}
 .adtag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;pointer-events:none}
 .adx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:19px;line-height:1;cursor:pointer;display:grid;place-items:center}
 .brandbar{display:flex;justify-content:center;padding:10px 14px 0}
@@ -481,7 +486,8 @@ html,body{overflow-x:hidden}
     <div class="adwrap" id="adWrap" hidden>
       <a class="adban" id="adBan" target="_blank" rel="noopener sponsored"><img id="adImg" alt="Sponsored"></a>
       <span class="adtag">Sponsored</span>
-      <button class="adx" id="adX" type="button" aria-label="Hide this ad">×</button>
+      <button class="adx" id="adX" type="button" aria-label="Hide ads">×</button>
+      <div class="addots" id="adDots"></div>
     </div>
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
@@ -1321,21 +1327,61 @@ async function showStore(data, isPreview){
 }
 async function loadAd(){
   await CONFIG_P;
-  if (HAS_AD_CONFIG){ AD = SITE.ad && SITE.ad.img ? SITE.ad : null; return; }   // the dashboard's ad wins
+  if (HAS_AD_CONFIG){ AD = asList(SITE.ad); return; }   // the dashboard's ads win (one ad or a list)
   try { AD = await getJson("ads.json"); } catch(e){ AD = null; }
 }
+// Up to 5 ads share the banner spot and rotate every few seconds
+const AD_EVERY = 5000;
+let ADS = [], adI = 0, adTimer = null;
+const asList = x => Array.isArray(x) ? x : (x && x.img ? [x] : []);
 function showAd(){
-  const on = !!(AD && safeUrl(AD.img) && (!AD.until || Date.now() <= new Date(AD.until + "T23:59:59").getTime())
-    && !(AD.advertiserWa && normWa(AD.advertiserWa) === normWa(D.wa))
-    && (() => { try { return !sessionStorage.getItem("lk-adx:" + AD.img); } catch(e){ return true; } })());
-  $("adWrap").hidden = !on;
-  if (!on) return;
-  $("adImg").src = safeUrl(AD.img);
-  $("adImg").onerror = () => { $("adWrap").hidden = true; };
-  const link = safeUrl(AD.link || "");
-  if (link) $("adBan").href = link; else $("adBan").removeAttribute("href");
+  clearInterval(adTimer);
+  let hidden = false;
+  try { hidden = !!sessionStorage.getItem("lk-adx"); } catch(e) {}
+  const now = Date.now();
+  ADS = asList(AD).filter(a => a && safeUrl(a.img)
+    && (!a.until || now <= new Date(a.until + "T23:59:59").getTime())
+    && !(a.advertiserWa && normWa(a.advertiserWa) === normWa(D.wa))).slice(0, 5);
+  $("adWrap").hidden = hidden || !ADS.length;
+  if ($("adWrap").hidden) return;
+  ADS.forEach(a => { const im = new Image(); im.src = safeUrl(a.img); });     // load them all early, so switching is instant
+  adI = Math.floor(Math.random() * ADS.length);                             // fair start for every advertiser
+  $("adDots").innerHTML = ADS.length > 1 ? ADS.map((a, k) => `<button type="button" data-ad="${k}" aria-label="Ad ${k + 1}"></button>`).join("") : "";
+  paintAd();
+  startAds();
 }
-$("adX").onclick = () => { try { sessionStorage.setItem("lk-adx:" + AD.img, "1"); } catch(e) {} $("adWrap").hidden = true; };
+function startAds(){
+  clearInterval(adTimer);
+  if (ADS.length > 1) adTimer = setInterval(() => { if (!document.hidden) goAd(adI + 1); }, AD_EVERY);
+}
+function paintAd(){
+  const a = ADS[adI], img = $("adImg"), ban = $("adBan");
+  img.onload = () => ban.classList.remove("swapping");
+  img.onerror = () => {                                   // a broken banner is skipped
+    ADS.splice(adI, 1);
+    if (!ADS.length){ $("adWrap").hidden = true; clearInterval(adTimer); return; }
+    adI = adI % ADS.length;
+    $("adDots").innerHTML = ADS.length > 1 ? ADS.map((x, k) => `<button type="button" data-ad="${k}" aria-label="Ad ${k + 1}"></button>`).join("") : "";
+    paintAd(); startAds();
+  };
+  const url = safeUrl(a.img);
+  if (img.getAttribute("src") === url && img.complete && img.naturalWidth){ img.classList.add("loaded"); ban.classList.remove("swapping"); }
+  else img.src = url;
+  const link = safeUrl(a.link || "");
+  if (link) ban.href = link; else ban.removeAttribute("href");
+  $("adDots").querySelectorAll("button").forEach((b, k) => b.setAttribute("aria-current", String(k === adI)));
+}
+function goAd(n){
+  if (!ADS.length) return;
+  const target = ((n % ADS.length) + ADS.length) % ADS.length;
+  if (target === adI && $("adImg").classList.contains("loaded")) return;   // already showing
+  const img = $("adImg"), ban = $("adBan");
+  ban.classList.add("swapping");
+  img.classList.remove("loaded");                         // fade out...
+  setTimeout(() => { adI = ((n % ADS.length) + ADS.length) % ADS.length; paintAd(); }, 320);   // ...then the next one fades in
+}
+$("adDots").addEventListener("click", e => { const b = e.target.closest("[data-ad]"); if (!b) return; goAd(+b.dataset.ad); startAds(); });
+$("adX").onclick = () => { try { sessionStorage.setItem("lk-adx", "1"); } catch(e) {} clearInterval(adTimer); $("adWrap").hidden = true; };
 
 function productRow(i){
   const p = D.items[i], img = safeImg(p.img), n = inCart(i);
@@ -1564,30 +1610,52 @@ function adminSaveConfig(cfg, patch, doneMsg){
 }
 
 function adminAds(g, head, wire, cfg){
-  const ad = cfg.ad || {};
-  const live = ad.img && (!ad.until || Date.now() <= new Date(ad.until + "T23:59:59").getTime());
+  const list = asList(cfg.ad).slice(0, 5);
+  while (list.length < 5) list.push({});
+  const now = Date.now();
+  const state = a => !a.img ? `<span class="tag2">Empty</span>` : (a.until && now > new Date(a.until + "T23:59:59").getTime()) ? `<span class="tag2 unpaid">Ended</span>` : `<span class="tag2 paid">Showing</span>`;
+  const showing = list.filter(a => a.img && !(a.until && now > new Date(a.until + "T23:59:59").getTime())).length;
   g.innerHTML = head + `
-    <section class="card">
-      <div class="between"><h2>Ad banner</h2>${live ? `<span class="tag2 paid">Showing</span>` : `<span class="tag2">Off</span>`}</div>
-      <p class="hint">Shows on every store under the shop card. Best size 1200 × 400.</p>
-      <label>Banner image link<input type="url" id="adImg" value="${esc(ad.img || "")}" placeholder="https://i.ibb.co/.../banner.jpg"></label>
-      <div class="admprev" id="adPrev">${safeUrl(ad.img) ? `<img src="${esc(ad.img)}" alt="Ad preview">` : ""}</div>
-      <label>When tapped, open<input type="url" id="adLink" value="${esc(ad.link || "")}" placeholder="e.g. their store link or https://wa.me/60..."></label>
-      <label>Show until (optional)<input type="date" id="adUntil" value="${esc(ad.until || "")}"></label>
-      <label>Advertiser's WhatsApp (their own store won't show it)<input type="tel" id="adWa" value="${esc(ad.advertiserWa || "")}" placeholder="e.g. 012-345 6789"></label>
-      <button class="btn solid full" style="margin-top:16px" id="adSave">Save ad</button>
-      ${ad.img ? `<button class="btn full dangerline" style="margin-top:10px" id="adStop">Stop ad</button>` : ""}
-    </section>`;
+    <p class="hint" style="margin:0 2px 12px">Up to 5 ads share the banner spot on every store and rotate every 5 seconds. Best size 1200 × 400. <b>${showing}</b> showing now.</p>
+    ${list.map((a, k) => `
+    <section class="card adslot">
+      <div class="between"><h2>Ad ${k + 1}</h2>${state(a)}</div>
+      <label>Banner image link<input type="url" id="adImg${k}" value="${esc(a.img || "")}" placeholder="https://i.ibb.co/.../banner.jpg"></label>
+      <div class="admprev" id="adPrev${k}">${safeUrl(a.img) ? `<img src="${esc(a.img)}" alt="Ad ${k + 1} preview">` : ""}</div>
+      <label>When tapped, open<input type="url" id="adLink${k}" value="${esc(a.link || "")}" placeholder="e.g. their store link or https://wa.me/60..."></label>
+      <label>Show until (optional)<input type="date" id="adUntil${k}" value="${esc(a.until || "")}"></label>
+      <label>Advertiser's WhatsApp (their own store won't show it)<input type="tel" id="adWa${k}" value="${esc(a.advertiserWa || "")}" placeholder="e.g. 012-345 6789"></label>
+      ${a.img ? `<button class="btn small dangerline" style="margin-top:12px" data-clearad="${k}">Clear this ad</button>` : ""}
+    </section>`).join("")}
+    <button class="btn solid full" style="padding:15px" id="adSave">Save ads</button>
+    ${showing ? `<button class="btn full dangerline" style="margin-top:10px" id="adStop">Stop all ads</button>` : ""}`;
   wire();
-  $("adImg").oninput = () => { const u = safeUrl($("adImg").value.trim()); $("adPrev").innerHTML = u ? `<img src="${esc(u)}" alt="Ad preview">` : ""; };
-  $("adSave").onclick = () => {
-    const img = $("adImg").value.trim();
-    if (img && !safeUrl(img)) return notify("The image link must start with https://");
-    const link = $("adLink").value.trim();
-    if (link && !safeUrl(link)) return notify("The tap link must start with https://");
-    adminSaveConfig(cfg, { ad: { img, link, until: $("adUntil").value, advertiserWa: normWa($("adWa").value) } }, img ? "Ad saved. It shows on all stores within a few minutes." : "Saved.");
+  for (let k = 0; k < 5; k++){
+    $("adImg" + k).oninput = () => { const u = safeUrl($("adImg" + k).value.trim()); $("adPrev" + k).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
+  }
+  const collect = () => {
+    const out = [];
+    for (let k = 0; k < 5; k++){
+      const img = $("adImg" + k).value.trim(), link = $("adLink" + k).value.trim();
+      if (!img && !link) continue;
+      if (!safeUrl(img)) throw new Error(`Ad ${k + 1}: the image link must start with https://`);
+      if (link && !safeUrl(link)) throw new Error(`Ad ${k + 1}: the tap link must start with https://`);
+      out.push({ img, link, until: $("adUntil" + k).value, advertiserWa: normWa($("adWa" + k).value) });
+    }
+    return out;
   };
-  if ($("adStop")) $("adStop").onclick = async () => { if (await ask("Stop showing this ad on all stores?", "Stop ad", true)) adminSaveConfig(cfg, { ad: {} }, "Ad stopped."); };
+  $("adSave").onclick = () => {
+    let ads; try { ads = collect(); } catch(e){ return notify(e.message); }
+    adminSaveConfig(cfg, { ad: ads }, ads.length ? `${ads.length} ad${ads.length > 1 ? "s" : ""} saved. They show on all stores within a few minutes.` : "Saved. No ads are showing.");
+  };
+  g.querySelectorAll("[data-clearad]").forEach(b => b.onclick = async () => {
+    const k = +b.dataset.clearad;
+    if (!(await ask(`Clear Ad ${k + 1}?`, "Clear", true))) return;
+    ["adImg", "adLink", "adUntil", "adWa"].forEach(f => $(f + k).value = "");
+    let ads; try { ads = collect(); } catch(e){ return notify(e.message); }
+    adminSaveConfig(cfg, { ad: ads }, `Ad ${k + 1} cleared.`);
+  });
+  if ($("adStop")) $("adStop").onclick = async () => { if (await ask("Stop all ads on every store?", "Stop all", true)) adminSaveConfig(cfg, { ad: [] }, "All ads stopped."); };
 }
 
 function adminSettings(g, head, wire, cfg){
