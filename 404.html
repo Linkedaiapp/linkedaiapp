@@ -191,6 +191,40 @@ textarea{min-height:72px;resize:vertical}
 .copyright{display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--muted)}
 .legallinks{display:block;text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
 .legallinks a{color:var(--muted);text-decoration:underline;margin:0 6px}
+/* ---------- Verified badge + safety note ---------- */
+.vbadge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px 4px 6px;border-radius:99px;background:rgba(242,193,78,.18);color:#3A1F2B;font-size:12px;font-weight:800}
+.vbadge svg{width:16px;height:16px}
+.safenote{display:flex;gap:10px;align-items:flex-start;margin:16px 14px 0;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;line-height:1.45;color:var(--muted)}
+.safenote svg{width:22px;height:22px;flex:none;margin-top:1px}
+.safenote b{color:var(--ink)}
+.safenote a{color:var(--ink);font-weight:700}
+/* ---------- Seller bulletin board ---------- */
+.topacts{display:flex;align-items:center;gap:8px}
+.bellbtn{position:relative;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.bellbtn svg{width:21px;height:21px}
+.bellcount{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:#DC2626;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px var(--bg);animation:popIn .3s cubic-bezier(.16,1,.3,1) both}
+.bulhead{display:flex;align-items:center;gap:12px;margin:0 44px 14px 0}
+.bulhead img{width:42px;height:42px;border-radius:12px}
+.bulhead b{display:block;font-size:20px;font-weight:800}
+.bulcard{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:10px;position:relative}
+.bulcard.unread{border-color:#3A1F2B;box-shadow:0 4px 14px rgba(58,31,43,.08)}
+.bulcard.unread::after{content:"";position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:#DC2626}
+.bulic{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;background:var(--soft);color:#3A1F2B}
+.bulic svg{width:19px;height:19px}
+.bulbody{flex:1;min-width:0}
+.bulmeta{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.bulbody h3{font-size:16px;font-weight:800;margin:3px 18px 4px 0;letter-spacing:-.01em}
+.bulbody p{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.bulnums{display:flex;gap:16px;margin:10px 0 4px}
+.bulnums div b{display:block;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.bulnums div span{font-size:12px;color:var(--muted)}
+.bulnums .up{color:#15803D;font-weight:700}.bulnums .down{color:#B45309;font-weight:700}
+.bulbars{display:flex;align-items:flex-end;gap:6px;height:56px;margin:10px 0 2px}
+.bulbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.bulbars i{display:block;width:100%;border-radius:5px 5px 2px 2px;background:#3A1F2B;min-height:3px}
+.bulbars i.low{background:var(--line)}
+.bulbars span{font-size:10px;color:var(--muted);font-weight:700}
+.bulcta{margin-top:10px}
 .dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);border-color:var(--err);color:#fff}
@@ -507,6 +541,15 @@ html,body{overflow-x:hidden}
   </div>
 </div>
 
+<!-- ============ SELLER BULLETIN BOARD ============ -->
+<div class="overlay" id="bulOverlay" role="dialog" aria-modal="true" aria-labelledby="bulTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="bulOverlay" aria-label="Close">×</button>
+    <div class="bulhead"><img src="icon-192.png" alt=""><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From the Linkedai bot</span></div></div>
+    <div id="bulList"></div>
+  </div>
+</div>
+
 <!-- ============ TEXT INPUT POP-UP ============ -->
 <div class="overlay" id="promptOverlay" role="dialog" aria-modal="true" aria-labelledby="promptText">
   <div class="sheet">
@@ -548,6 +591,7 @@ html,body{overflow-x:hidden}
     <section class="shopcard" id="stCard">
       <div class="st-logo" id="stLogo"></div>
       <h1 class="stname" id="stName"></h1>
+      <span class="vbadge" id="stVerified" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified by Linkedai</span>
       <p class="tag" id="stTag"></p>
     </section>
     <div class="adwrap" id="adWrap" hidden>
@@ -558,6 +602,7 @@ html,body{overflow-x:hidden}
     </div>
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
+    <div class="safenote" id="stSafe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Safe to use.</b> Linkedai never asks for your bank login, OTP or passwords, and never asks you to install apps. You order on WhatsApp and pay the seller directly. <a href="#" id="stSafeLink">Is this safe?</a></div></div>
     <span class="copyright" id="stCopy"></span>
     <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button><span class="stlegal"> · <a href="#" id="stTerms">Terms</a> · <a href="#" id="stPrivacy">Privacy</a></span></div>
     <div class="stcta" id="stCta" hidden>
@@ -791,6 +836,17 @@ function normalize(d){
 }
 function setAccent(c){ document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--soft", c + "1F"); }
 // Every picture fades in once it has loaded; broken ones stop shimmering too
+// ---------- Counting for shop and ad insights (anonymous, no personal data) ----------
+let STORE_ID = "", STORE_VERIFIED = false;
+function track(t, img){
+  try {
+    if (!safeUrl(SITE.api) || (!STORE_ID && !img)) return;
+    const day = new Date().toISOString().slice(0, 10), once = t === "view" ? `lk-v:${STORE_ID}:${day}` : t === "adview" ? `lk-av:${img}:${day}:${STORE_ID}` : "";
+    if (once){ if (sessionStorage.getItem(once)) return; sessionStorage.setItem(once, "1"); }
+    const q = new URLSearchParams({ action: "hit", t, id: STORE_ID || "", img: img || "" });
+    fetch(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q, { mode: "no-cors", keepalive: true }).catch(() => {});
+  } catch(e) {}
+}
 function markImg(img){ if (img.complete){ img.classList.add("loaded"); if (!img.naturalWidth && img.getAttribute("src")) img.classList.add("broken"); } }
 document.addEventListener("load", e => { if (e.target.tagName === "IMG") e.target.classList.add("loaded"); }, true);
 document.addEventListener("error", e => { if (e.target.tagName === "IMG") e.target.classList.add("loaded", "broken"); }, true);
@@ -992,7 +1048,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["terms", "privacy", "refund"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["terms", "privacy", "refund", "safe"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (!$("cAgree").checked) return $("cErr").textContent = "Please tick the box to agree to the rules.";
@@ -1010,7 +1066,101 @@ function renderStart(msg, mode){
 /* ============================================================
    SELLER: editor
    ============================================================ */
-function openEditor(msg){ setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); }
+// ---------- Bulletin board: everything here is written by the Linkedai bot ----------
+// New Linkedai features are announced to sellers automatically from this list.
+const APP_UPDATES = [
+  { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Linkedai news now appear here. Look for the red number on the bell." },
+  { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Linkedai Guard now show a Verified badge, so customers can trust your link." },
+  { id: "u-20260924-guard", at: "2026-09-24", title: "Linkedai Guard keeps stores safe", body: "Every store is checked automatically for prohibited items, and customers can report stores. This keeps Linkedai trusted for honest sellers like you." },
+  { id: "u-20260924-styles", at: "2026-09-24", title: "Three store styles", body: "Choose List, Photo grid or Minimal under Store style in your editor, to suit food, products or services." }
+];
+const IC = {
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  ad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>',
+  tip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.5 1 2.5h6c0-1 .3-1.9 1-2.5A6 6 0 0 0 12 3z"/></svg>',
+  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>'
+};
+let BUL = null;
+const bulSeenKey = () => "lk-bul:" + (SESSION ? SESSION.id : "");
+function bulSeen(){ try { return new Set(JSON.parse(localStorage.getItem(bulSeenKey()) || "[]")); } catch(e){ return new Set(); } }
+function weekKey(){ const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); }
+function shortHash(t){ let h = 0; for (const c of String(t)) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); }
+function bulletinItems(){
+  const out = [], b = BUL || {}, wk = weekKey(), to = String(b.ownerWa || SITE.ownerWa || "").replace(/\D/g, "");
+  const push = (id, kind, label, title, body, cta) => out.push({ id, kind, label, title, body, cta });
+  const sum = (arr, f) => arr.reduce((a, x) => a + (x[f] || 0), 0);
+  // store status
+  if (b.status === "review") push("st-review-" + b.paidAt, "shield", "Store status", "Linkedai Guard is checking your store", "Thanks for your payment. Your store goes live as soon as it's approved, usually within 24 hours.");
+  else if (b.status === "offline") push("st-offline", "shield", "Store status", "Your store is offline", "Your store isn't visible to customers right now. Please message Linkedai to sort it out.", to ? `<a class="btn small" href="https://wa.me/${to}" target="_blank" rel="noopener">Message Linkedai</a>` : "");
+  else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Linkedai Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
+  else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a Verified by Linkedai badge on your store. It shows your payment was confirmed and your store passed our safety check.");
+  else if (b.status === "live" && b.paid) push("st-paid-" + b.paidAt, "shield", "Store status", "Payment received", "Your store is live. Once your payment is confirmed, you'll get the Verified badge.");
+  else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store in your editor to go live.");
+  // shop insights, this week vs last week
+  const st = Array.isArray(b.stats) ? b.stats : [];
+  if (b.status === "live" && st.length >= 7){
+    const last = st.slice(-7), prev = st.slice(-14, -7);
+    const v = sum(last, "v"), o = sum(last, "o"), pv = sum(prev, "v");
+    const change = pv ? Math.round((v - pv) / pv * 100) : null;
+    const max = Math.max(1, ...last.map(x => x.v));
+    const best = last.reduce((a, x) => x.v > a.v ? x : a, last[0]);
+    const dn = d => new Date(d + "T00:00:00").toLocaleDateString("en-MY", { weekday: "short" });
+    const bars = `<div class="bulbars">${last.map(x => `<div><i class="${x.v ? "" : "low"}" style="height:${Math.max(4, Math.round(x.v / max * 44))}px"></i><span>${dn(x.date).slice(0, 2)}</span></div>`).join("")}</div>`;
+    push("ins-" + wk, "chart", "Shop insights · last 7 days", v ? `${v} visit${v === 1 ? "" : "s"} this week` : "No visits yet this week",
+      v ? `<div class="bulnums"><div><b>${v}</b><span>Store visits</span></div><div><b>${o}</b><span>Order taps</span></div><div><b>${Math.round(o / v * 100)}%</b><span>Ordered</span></div></div>
+        ${bars}<p>${change === null ? "" : change >= 0 ? `<span class="up">Up ${change}%</span> on last week. ` : `<span class="down">Down ${Math.abs(change)}%</span> on last week. `}Your busiest day was <b>${dn(best.date)}</b>.</p>`
+        : `<p>Share your store link on WhatsApp status, Instagram, TikTok and Threads. Stores shared every few days get the most visits.</p>`);
+  }
+  // ad insights for sellers who advertise
+  (b.ads || []).forEach((a, i) => {
+    const last = (a.stats || []).slice(-7), views = sum(last, "v"), taps = sum(last, "o");
+    const left = a.until ? Math.ceil((new Date(a.until + "T23:59:59") - Date.now()) / 864e5) : null;
+    push(`adins-${wk}-${i}`, "ad", "Ad insights · last 7 days", `Your ad was shown ${views} time${views === 1 ? "" : "s"}`,
+      `<div class="bulnums"><div><b>${views}</b><span>Times shown</span></div><div><b>${taps}</b><span>Taps</span></div><div><b>${views ? (taps / views * 100).toFixed(1) : 0}%</b><span>Tap rate</span></div></div>
+       <p>${left === null ? "Your ad has no end date." : left > 0 ? `Your ad runs for <b>${left} more day${left === 1 ? "" : "s"}</b>.` : "Your ad has ended."}</p>`,
+      to && left !== null && left <= 3 ? `<a class="btn small" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Linkedai, I'd like to extend my ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Extend my ad</a>` : "");
+  });
+  // ad pricing, for sellers who don't advertise yet
+  if (b.adPrice && !(b.ads || []).length) push("adprice-" + shortHash(b.adPrice), "ad", "Advertise", "Put your banner on every Linkedai store",
+    `<p>Your banner rotates with up to 4 others on every store, and you'll get weekly ad insights here. Price: <b>${esc(b.adPrice)}</b>.</p>`,
+    to ? `<a class="btn small solid" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Linkedai, I'd like to book an ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Book an ad</a>` : "");
+  // smart tips from the store itself
+  const named = S.items.filter(it => it.n.trim()), noPhoto = named.filter(it => !safeImg(it.img)).length;
+  if (noPhoto && S.layout !== "minimal") push("tip-photos-" + noPhoto, "tip", "Tip", `${noPhoto} item${noPhoto === 1 ? " has" : "s have"} no photo`, "Stores with a photo on every item get more orders. Tap Upload photo on each item in your editor.");
+  if (!safeImg(S.logo)) push("tip-logo", "tip", "Tip", "Add your logo", "A logo makes your store look professional and helps customers recognise you.");
+  if (named.length === 1) push("tip-more", "tip", "Tip", "Add more items", "Stores with at least 5 items get more visits. Add your other products or services.");
+  if (S.closed) push("tip-closed", "tip", "Tip", "Your store shows as Closed", "Customers can't order while your store is closed. Switch it to Open under Store status when you're ready.");
+  // Linkedai updates
+  const since = b.created ? new Date(b.created - 14 * 864e5).toISOString().slice(0, 10) : "";
+  APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
+  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Linkedai", "<p>I'm the Linkedai bot. I'll post your shop insights, tips and news here every week.</p>");
+  return out;
+}
+function updateBell(){
+  const el = $("bellCount"); if (!el) return;
+  const seen = bulSeen(), n = bulletinItems().filter(x => !seen.has(x.id)).length;
+  el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n);
+}
+async function loadBulletin(){
+  if (!SESSION) return;
+  try { BUL = await apiPost({ action: "bulletin", id: SESSION.id, pin: SESSION.pin }); } catch(e){ BUL = null; }
+  updateBell();
+}
+function openBulletin(){
+  const items = bulletinItems(), seen = bulSeen();
+  $("bulList").innerHTML = items.length ? items.map(x => `
+    <article class="bulcard ${seen.has(x.id) ? "" : "unread"}">
+      <div class="bulic">${IC[x.kind] || IC.news}</div>
+      <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
+    </article>`).join("") : `<p class="hint">Nothing here yet. Check back soon.</p>`;
+  openSheet("bulOverlay");
+  $("bulOverlay").querySelector(".sheet").scrollTop = 0;
+  try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {}
+  updateBell();
+}
+
+function openEditor(msg){ setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
 function touch(){ DIRTY = true; const st = $("saveStatus"); if (st) st.textContent = "Not saved yet. Tap Save when you're done."; }
 function photoBox(id, src, empty, shape){ const u = safeImg(src); return `<div class="media-prev ${shape}" id="${id}">${u ? `<img src="${esc(u)}" alt="" onerror="this.parentNode.textContent='Not a photo'">` : empty}</div>`; }
 function photoControls(kind, src, extra){
@@ -1147,10 +1297,11 @@ $("pubGo").onclick = async () => {
 };
 
 function renderEditor(msg){
+  setTimeout(updateBell, 0);
   const link = storeLink(SESSION.id), live = STATUS === "live";
   const adminBar = SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : "";
   $("bwrap").innerHTML = `
-  <div class="top"><span class="brand">${esc(APP_NAME)}</span><button class="btn small" data-act="logout">Log out</button></div>
+  <div class="top"><span class="brand">${esc(APP_NAME)}</span><div class="topacts"><button class="bellbtn" data-act="bulletin" aria-label="Bulletin board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="bellcount" id="bellCount" hidden></span></button><button class="btn small" data-act="logout">Log out</button></div></div>
 
   <section class="card linkcard">
     ${live ? `
@@ -1290,6 +1441,7 @@ $("builder").addEventListener("click", async e => {
       notify("Your store and account have been deleted.");
     } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(err.message); }
   }
+  else if (a === "bulletin"){ openBulletin(); }
   else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
   else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); $("saveStatus").textContent = ok ? "Link copied." : "Press and hold the link to copy it."; }
   else if (a === "preview"){ showStore(S, true); }
@@ -1400,6 +1552,9 @@ async function showStore(data, isPreview){
   $("stReportWrap").hidden = !!isPreview;
   $("stTerms").href = home() + "?terms"; $("stPrivacy").href = home() + "?privacy";
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
+  $("stSafeLink").href = home() + "?safe";
+  $("stVerified").hidden = !(isPreview ? false : STORE_VERIFIED);
+  if (!isPreview) track("view");
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const canSignup = signupOpen(), cta = $("stCta"), btn = $("stCtaBtn");
@@ -1461,6 +1616,7 @@ function paintAd(){
     paintAd(); startAds();
   };
   const url = safeUrl(a.img);
+  if ($("backBtn").hidden) track("adview", url);
   if (img.getAttribute("src") === url && img.complete && img.naturalWidth){ img.classList.add("loaded"); ban.classList.remove("swapping"); }
   else img.src = url;
   const link = safeUrl(a.link || "");
@@ -1476,6 +1632,7 @@ function goAd(n){
   img.classList.remove("loaded");                         // fade out...
   setTimeout(() => { adI = ((n % ADS.length) + ADS.length) % ADS.length; paintAd(); }, 320);   // ...then the next one fades in
 }
+$("adBan").addEventListener("click", () => { const a = ADS[adI]; if (a && $("backBtn").hidden) track("adclick", safeUrl(a.img)); });
 $("adDots").addEventListener("click", e => { const b = e.target.closest("[data-ad]"); if (!b) return; goAd(+b.dataset.ad); startAds(); });
 $("adX").onclick = () => { try { sessionStorage.setItem("lk-adx", "1"); } catch(e) {} clearInterval(adTimer); $("adWrap").hidden = true; };
 
@@ -1582,6 +1739,7 @@ $("send").addEventListener("click", e => {
   else if ($("date").value && $("date").value < $("date").min) msg = "Pick today or a later date.";
   if (msg){ e.preventDefault(); $("err").textContent = msg; return; }
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
+  if ($("backBtn").hidden) track("order");
   setTimeout(() => { cart = {}; saveCart(); renderMenu(); renderBar(); }, 800);
 });
 $("viewCart").onclick = () => openSheet("overlay");
@@ -1820,6 +1978,11 @@ function adminAds(g, head, wire, cfg){
   const showing = list.filter(a => a.img && !(a.until && now > new Date(a.until + "T23:59:59").getTime())).length;
   g.innerHTML = head + `
     <p class="hint" style="margin:0 2px 12px">Up to 5 ads share the banner spot on every store and rotate every 5 seconds. Best size 1200 × 400. <b>${showing}</b> showing now.</p>
+    <section class="card">
+      <h2>Ad price for sellers</h2>
+      <label>Shown on sellers' Bulletin board<input type="text" id="adPriceIn" value="${esc(cfg.adPrice || "")}" placeholder="e.g. RM30 per week"></label>
+      <p class="hint">The Linkedai bot shows this with a "Book an ad" button that opens WhatsApp to you. Leave empty to hide it.</p>
+    </section>
     ${list.map((a, k) => `
     <section class="card adslot">
       <div class="between"><h2>Ad ${k + 1}</h2>${state(a)}</div>
@@ -1849,7 +2012,7 @@ function adminAds(g, head, wire, cfg){
   };
   $("adSave").onclick = () => {
     let ads; try { ads = collect(); } catch(e){ return notify(e.message); }
-    adminSaveConfig(cfg, { ad: ads }, ads.length ? `${ads.length} ad${ads.length > 1 ? "s" : ""} saved. They show on all stores within a few minutes.` : "Saved. No ads are showing.");
+    adminSaveConfig(cfg, { ad: ads, adPrice: $("adPriceIn").value.trim() }, ads.length ? `${ads.length} ad${ads.length > 1 ? "s" : ""} saved. They show on all stores within a few minutes.` : "Saved. No ads are showing.");
   };
   g.querySelectorAll("[data-clearad]").forEach(b => b.onclick = async () => {
     const k = +b.dataset.clearad;
@@ -2082,6 +2245,43 @@ function legalDoc(which){
     <h2>10. Law and contact</h2>
     <p>These Terms follow the laws of Malaysia. Questions? Contact us on ${legalContact()}.</p>`;
 }
+function renderSafe(){
+  setAccent(COLORS[0]); document.title = "Is " + APP_NAME + " safe?";
+  const A = esc(APP_NAME);
+  $("gwrap").innerHTML = `
+    <div class="top"><span class="brand">${A}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <article class="legal">
+      <h1>Is ${A} safe?</h1><p class="updated">A quick guide for customers</p>
+      <p>Yes. ${A} is a simple way for local sellers to share their menu or products with one link. Here's exactly how it works, so you can order with confidence.</p>
+      <h2>How ordering works</h2>
+      <ul>
+        <li>You choose items on the seller's store page.</li>
+        <li>Tap <b>Send order on WhatsApp</b>. Your own WhatsApp opens with the order written in.</li>
+        <li><b>You</b> tap send, and chat with the seller directly.</li>
+        <li>You pay the seller directly, the way you both agree.</li>
+      </ul>
+      <h2>${A} will never</h2>
+      <ul>
+        <li>Ask for your <b>bank login, card number, OTP or passwords</b></li>
+        <li>Ask you to <b>download or install any app or APK file</b></li>
+        <li>Take payment from you on a seller's behalf</li>
+        <li>Send you messages first</li>
+      </ul>
+      <p>If anyone asks you for these while using a ${A} link, stop. It's not us.</p>
+      <h2>What the Verified badge means</h2>
+      <p>Stores marked <b>Verified by ${A}</b> have paid to publish, had their payment confirmed, and passed ${A} Guard, our automatic safety check for prohibited items.</p>
+      <h2>Tips for safe buying</h2>
+      <ul>
+        <li>Check the store link starts with this site's address.</li>
+        <li>Confirm details with the seller on WhatsApp before you pay.</li>
+        <li>For bigger orders, ask about pickup or pay part first.</li>
+      </ul>
+      <h2>Something wrong?</h2>
+      <p>Every store has a <b>Report this store</b> link at the bottom. Reports are anonymous, and ${A} checks every one.</p>
+    </article>
+    ${legalLinks()}${copyrightLine()}`;
+  show("page");
+}
 function renderLegal(which){
   const titles = { terms: "Terms of Service", privacy: "Privacy Policy", refund: "Refund Policy" };
   setAccent(COLORS[0]); document.title = titles[which] + " · " + APP_NAME;
@@ -2130,12 +2330,13 @@ function showMessage(title, text){
 async function route(){
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || "";
-  if (/^(admin|build|edit|signup|terms|privacy|refund)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
+  if (/^(admin|build|edit|signup|terms|privacy|refund|safe)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
   if (q === "admin") return renderAdmin();
   if (q === "terms" || q === "privacy" || q === "refund") return renderLegal(q);
+  if (q === "safe") return renderSafe();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
     SESSION = loadSession();
@@ -2153,6 +2354,7 @@ async function route(){
       if (r.error === "notfound") return showMessage("Store not found", "Check the link spelling, or ask the shop for their link again.");
       if (r.error === "notlive") return showMessage("Opening soon", "This store isn't live yet. Please check back later.");
       if (r.error) throw new Error(r.error);
+      STORE_ID = q; STORE_VERIFIED = !!r.verified;
       return showStore(r.data, false);
     } catch(e){ return showMessage("Couldn't open the store", e.message || "Check your internet connection and try again."); }
   }
