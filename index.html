@@ -145,6 +145,7 @@ textarea{min-height:72px;resize:vertical}
 .admprev{margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--soft);min-height:40px}
 .admprev img{display:block;width:100%;height:auto}
 .streport{text-align:center;margin-top:8px}
+.streport .stlegal,.streport .stlegal a{color:var(--muted);font-size:12px}
 .streport button{background:none;border:0;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:6px}
 .rules{margin:14px 0 4px;padding:12px 14px;border-radius:12px;background:var(--soft);font-size:14px}
 .rules p{margin:4px 0 0;color:var(--muted);line-height:1.45}
@@ -168,6 +169,20 @@ textarea{min-height:72px;resize:vertical}
 .guardbtn{display:flex;align-items:center;gap:10px}
 .guardbtn svg{width:22px;height:22px;flex:none}
 @media (prefers-reduced-motion:reduce){.guardstate::before{animation:none}}
+/* ---------- Terms, Privacy, Refund ---------- */
+.legal{max-width:680px;margin:0 auto;padding:6px 2px 60px;line-height:1.6;font-size:15px}
+.legal h1{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:10px 0 2px}
+.legal .updated{color:var(--muted);font-size:13px;margin:0 0 18px}
+.legal h2{font-size:18px;font-weight:800;margin:24px 0 6px}
+.legal p,.legal li{color:var(--ink)}
+.legal ul{padding-left:20px;margin:6px 0}
+.legal li{margin:4px 0}
+.legal .note{background:var(--soft);border-radius:12px;padding:12px 14px;margin:14px 0;font-size:14px}
+.legalnav{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.legalnav a{padding:8px 14px;border-radius:99px;border:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:700;font-size:14px;background:var(--surface)}
+.legalnav a[aria-current="page"]{background:#3A1F2B;border-color:#3A1F2B;color:#fff}
+.legallinks{display:block;text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
+.legallinks a{color:var(--muted);text-decoration:underline;margin:0 6px}
 .dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);border-color:var(--err);color:#fff}
@@ -535,7 +550,7 @@ html,body{overflow-x:hidden}
     </div>
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
-    <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button></div>
+    <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button><span class="stlegal"> · <a href="#" id="stTerms">Terms</a> · <a href="#" id="stPrivacy">Privacy</a></span></div>
     <div class="stcta" id="stCta" hidden>
       <span>Want your own store?</span>
       <a class="stcta-btn" id="stCtaBtn" href="#">Sign up</a>
@@ -944,7 +959,7 @@ function renderStart(msg, mode){
         <b>Not allowed on ${esc(APP_NAME)}</b>
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
       </div>
-      <label class="check"><input type="checkbox" id="cAgree"> I agree not to sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</label>
+      <label class="check"><input type="checkbox" id="cAgree"> I agree to the <a href="${esc(home())}?terms" target="_blank" rel="noopener">Terms</a> and <a href="${esc(home())}?privacy" target="_blank" rel="noopener">Privacy Policy</a>, and not to sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</label>
       <p class="err" id="cErr"></p>
       <button class="btn solid full" id="cGo">Sign up</button>
     </section>`;
@@ -968,6 +983,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
+    if (["terms", "privacy", "refund"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (!$("cAgree").checked) return $("cErr").textContent = "Please tick the box to agree to the rules.";
@@ -1084,7 +1100,7 @@ function renderPayment(){
     ${how}
     <label class="btn wa full filebtn" style="margin-top:14px;padding:15px">I've paid: upload receipt and publish<input type="file" accept="image/*" data-media="receipt" aria-label="Upload payment receipt"></label>
     <p class="status" id="payStatus" role="status"></p>
-    <p class="hint">We check every payment. Stores without a real payment are taken offline. Problems? ${help}.</p>`;
+    <p class="hint">We check every payment. Stores without a real payment are taken offline. See our <a href="${esc(home())}?refund" target="_blank" rel="noopener">Refund Policy</a>. Problems? ${help}.</p>`;
 }
 $("payOverlay").addEventListener("click", e => {
   const b = e.target.closest("[data-paytab]"); if (!b) return;
@@ -1373,6 +1389,7 @@ async function showStore(data, isPreview){
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
   $("brandLink").href = home();
   $("stReportWrap").hidden = !!isPreview;
+  $("stTerms").href = home() + "?terms"; $("stPrivacy").href = home() + "?privacy";
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const canSignup = signupOpen(), cta = $("stCta"), btn = $("stCtaBtn");
@@ -1949,6 +1966,123 @@ function adminSettings(g, head, wire, cfg){
 /* ============================================================
    HOME + ROUTER
    ============================================================ */
+// ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
+const LEGAL_UPDATED = "25 September 2026";
+const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}?terms">Terms</a>·<a href="${esc(home())}?privacy">Privacy</a>·<a href="${esc(home())}?refund">Refunds</a></span>`;
+function legalContact(){
+  const to = String(SITE.ownerWa || "").replace(/\D/g, "");
+  return to ? `WhatsApp <a href="https://wa.me/${to}" target="_blank" rel="noopener">+${esc(to)}</a>` : "the contact details on our home page";
+}
+function legalDoc(which){
+  const A = esc(APP_NAME), price = shownPrice() ? esc(shownPrice()) : "the published fee";
+  if (which === "privacy") return `
+    <h1>Privacy Policy</h1><p class="updated">Last updated: ${LEGAL_UPDATED}</p>
+    <p>This policy explains what information ${A} collects, why, and how it's protected. We follow Malaysia's Personal Data Protection Act 2010 (PDPA).</p>
+    <h2>1. Information from sellers</h2>
+    <ul>
+      <li><b>Account:</b> your shop name, store link name, WhatsApp number and PIN. Your PIN is stored scrambled, so no one can read it, including us.</li>
+      <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
+      <li><b>Payment receipts:</b> the receipt screenshot you upload when you publish. Receipts are private and only seen by us.</li>
+    </ul>
+    <h2>2. Information from customers</h2>
+    <ul>
+      <li><b>Orders are not stored by ${A}.</b> Your order is written on your own phone and sent by you through WhatsApp directly to the seller.</li>
+      <li><b>Your cart</b> is saved only on your own device so it isn't lost if you close the page.</li>
+      <li><b>Reports</b> you send about a store are anonymous: we only receive the reason and any note you write.</li>
+    </ul>
+    <h2>3. How we use it</h2>
+    <ul>
+      <li>To run your store and show it to customers.</li>
+      <li>To confirm payments, review stores and keep ${A} safe, including automatic checks for prohibited items.</li>
+      <li>To contact sellers about their store, payments or important changes.</li>
+    </ul>
+    <p>We don't sell your information, and we don't use advertising trackers.</p>
+    <h2>4. Where it's stored and who helps us</h2>
+    <p>Your information is stored using trusted providers: Google (store data, photos and receipts), GitHub (the website), and WhatsApp/Meta (orders you send). Payments are handled by your bank, DuitNow or PayPal. Each of these follows its own privacy policy.</p>
+    <h2>5. How long we keep it</h2>
+    <ul>
+      <li>Store information is kept while your store exists. When you delete your account in the Danger zone, your store and photos are removed.</li>
+      <li>Payment receipts may be kept for our records, as required for accounting.</li>
+    </ul>
+    <h2>6. Your rights</h2>
+    <p>You can view and correct your store information anytime in your editor, and delete your account yourself. You can also ask us what information we hold about you, or ask us to correct or delete it.</p>
+    <h2>7. Contact</h2>
+    <p>For privacy questions, contact us on ${legalContact()}.</p>`;
+  if (which === "refund") return `
+    <h1>Refund Policy</h1><p class="updated">Last updated: ${LEGAL_UPDATED}</p>
+    <p>${A} charges a one-time fee (${price}) to publish a store. This policy explains when that fee can be refunded.</p>
+    <h2>1. When you can get a refund</h2>
+    <ul>
+      <li>Your store <b>could not be published</b> because of a technical problem on our side, or it <b>was not approved</b> in our review, and you ask within <b>7 days</b> of paying.</li>
+      <li>You were <b>charged twice</b> by mistake for the same store.</li>
+    </ul>
+    <h2>2. When the fee is not refundable</h2>
+    <ul>
+      <li>Your store has <b>gone live</b>, because the service has been delivered.</li>
+      <li>Your store was <b>removed for breaking our Terms</b>, for example selling prohibited items.</li>
+      <li>You <b>deleted your own account</b>, or changed your mind after your store went live.</li>
+      <li>A payment receipt was <b>not genuine</b>.</li>
+    </ul>
+    <h2>3. Ads</h2>
+    <p>If we can't show an ad you paid for, we'll either extend it by the missing days or refund the unused part.</p>
+    <h2>4. How to ask for a refund</h2>
+    <p>Message us on ${legalContact()} with your store link and payment receipt. We reply within 3 working days, and approved refunds are paid back to the same method you used, usually within 7 working days.</p>`;
+  return `
+    <h1>Terms of Service</h1><p class="updated">Last updated: ${LEGAL_UPDATED}</p>
+    <p>Welcome to ${A}. By creating a store or using ${A}, you agree to these Terms. Please read them carefully.</p>
+    <h2>1. What ${A} is</h2>
+    <p>${A} lets sellers create a simple online store with their own link. Customers choose items and send their order to the seller through WhatsApp. <b>${A} is not a party to any sale.</b> Payment, delivery, refunds and service between a seller and their customers are handled directly between them.</p>
+    <h2>2. Your account</h2>
+    <ul>
+      <li>You must be at least 18 years old, or have a parent or guardian's permission.</li>
+      <li>The information you give must be true and yours, including your WhatsApp number.</li>
+      <li>Keep your PIN private. You're responsible for everything done with your account.</li>
+    </ul>
+    <h2>3. Fees</h2>
+    <ul>
+      <li>Publishing a store costs a one-time fee of ${price}. There are no monthly fees and no commission on your sales.</li>
+      <li>Ad banners are sold separately.</li>
+      <li>Refunds follow our <a href="${esc(home())}?refund">Refund Policy</a>.</li>
+    </ul>
+    <h2>4. What you can't sell</h2>
+    <p>You may not sell or promote:</p>
+    <ul>
+      <li>Drugs, including ketum, and anything illegal to sell in Malaysia</li>
+      <li>Cigarettes, tobacco, vape and e-liquid</li>
+      <li>Alcohol</li>
+      <li>Adult content or adult services</li>
+      <li>Weapons, gambling, and fake or counterfeit goods</li>
+      <li>Anything that is illegal, harmful or misleading</li>
+    </ul>
+    <h2>5. Your responsibilities as a seller</h2>
+    <ul>
+      <li>Your items, prices, photos and descriptions must be accurate and yours to use.</li>
+      <li>You're responsible for your products and services, any permits they need (for example for food), delivering what you sell, and handling your customers fairly.</li>
+      <li>Follow WhatsApp's rules. Don't send spam or unwanted messages.</li>
+    </ul>
+    <h2>6. Reviews and removal</h2>
+    <p>${A} automatically checks stores for prohibited items and reviews stores that are flagged or reported. We may hide, suspend or remove any store that breaks these Terms or the law, with or without notice.</p>
+    <h2>7. Your content</h2>
+    <p>You keep ownership of your content. You allow ${A} to store and display it to run your store and to show your store to customers.</p>
+    <h2>8. Our service</h2>
+    <p>The ${A} name, design and software belong to ${A} and may not be copied. We work hard to keep ${A} running, but it's provided "as is" and may sometimes be unavailable. To the extent the law allows, ${A} isn't responsible for losses from sales between sellers and customers, or from service interruptions.</p>
+    <h2>9. Changes</h2>
+    <p>We may update these Terms. We'll show the new date above, and important changes will be shared with sellers.</p>
+    <h2>10. Law and contact</h2>
+    <p>These Terms follow the laws of Malaysia. Questions? Contact us on ${legalContact()}.</p>`;
+}
+function renderLegal(which){
+  const titles = { terms: "Terms of Service", privacy: "Privacy Policy", refund: "Refund Policy" };
+  setAccent(COLORS[0]); document.title = titles[which] + " · " + APP_NAME;
+  $("gwrap").innerHTML = `
+    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <nav class="legalnav" aria-label="Policies">
+      ${["terms", "privacy", "refund"].map(k => `<a href="${esc(home())}?${k}" ${k === which ? 'aria-current="page"' : ""}>${k === "terms" ? "Terms" : k === "privacy" ? "Privacy" : "Refunds"}</a>`).join("")}
+    </nav>
+    <article class="legal">${legalDoc(which)}</article>`;
+  show("page");
+}
+
 function renderHome(){
   setAccent(COLORS[0]); document.title = APP_NAME + " · WhatsApp order stores";
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -1969,6 +2103,7 @@ function renderHome(){
         <span class="authlink">Forgot your PIN? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Get help</a>` : "Contact us"}</span>
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}?signup">New seller? <b>Sign up</b></a>` : ""}
+      ${legalLinks()}
     </div>
     ${to ? `<a class="chatfab" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">${chat}</a>` : ""}`;
   show("page");
@@ -1982,11 +2117,12 @@ function showMessage(title, text){
 async function route(){
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || "";
-  if (/^(admin|build|edit|signup)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
+  if (/^(admin|build|edit|signup|terms|privacy|refund)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
   if (q === "admin") return renderAdmin();
+  if (q === "terms" || q === "privacy" || q === "refund") return renderLegal(q);
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
     SESSION = loadSession();
