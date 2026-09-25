@@ -151,6 +151,7 @@ textarea{min-height:72px;resize:vertical}
 .btn.small.dangerline{border-color:var(--err);color:var(--err)}
 .admprev{margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--soft);min-height:40px}
 .admprev img{display:block;width:100%;height:auto}
+.stmore{display:block;text-align:center;margin:14px 0 0;font-size:13px;font-weight:700;color:var(--ink)}
 .streport{text-align:center;margin-top:8px}
 .streport .stlegal,.streport .stlegal a{color:var(--muted);font-size:12px}
 .streport button{background:none;border:0;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:6px}
@@ -225,6 +226,55 @@ textarea{min-height:72px;resize:vertical}
 .bulbars i.low{background:var(--line)}
 .bulbars span{font-size:10px;color:var(--muted);font-weight:700}
 .bulcta{margin-top:10px}
+/* ---------- Linkedai map (own lightweight map) ---------- */
+.lmap{position:relative;overflow:hidden;touch-action:none;background:#E8E4DA;border-radius:16px;user-select:none;-webkit-user-select:none}
+.lm-tiles,.lm-pins{position:absolute;inset:0;transform-origin:0 0}
+.lm-tiles img{position:absolute;width:256px;height:256px;max-width:none;display:block;pointer-events:none}
+.lm-pin{position:absolute;width:48px;height:58px;margin:0;padding:0;border:0;background:none;transform:translate(-50%,-100%);cursor:pointer;z-index:2}
+.lm-pin .lm-face{display:grid;place-items:center;width:44px;height:44px;margin:0 auto;border-radius:50%;overflow:hidden;background:#fff;
+  box-shadow:0 0 0 3px #fff,0 6px 14px rgba(20,10,15,.28);color:#fff;font-weight:800;font-size:18px}
+.lm-pin .lm-face img{width:100%;height:100%;object-fit:cover;max-width:none}
+.lm-pin::after{content:"";display:block;width:0;height:0;margin:3px auto 0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid #fff;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
+.lm-pin.closed .lm-face{filter:grayscale(.7);opacity:.7}
+.lm-pin.sel{z-index:4;transform:translate(-50%,-100%) scale(1.18)}
+.lm-pin.sel .lm-face{box-shadow:0 0 0 3px #F2C14E,0 8px 18px rgba(20,10,15,.35)}
+.lm-cl{position:absolute;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;border:0;background:#3A1F2B;color:#fff;font-weight:800;font-size:15px;
+  box-shadow:0 0 0 4px rgba(242,193,78,.55),0 6px 14px rgba(20,10,15,.3);cursor:pointer;z-index:3}
+.lm-me{position:absolute;width:16px;height:16px;border-radius:50%;background:#2563EB;border:3px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 0 rgba(37,99,235,.5);animation:mePulse 2s infinite;z-index:1}
+@keyframes mePulse{70%{box-shadow:0 0 0 14px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+.lm-zoom{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.lm-zoom button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:20px;font-weight:700;cursor:pointer;color:var(--ink)}
+.lm-attr{position:absolute;right:4px;bottom:4px;font-size:10px;background:rgba(255,255,255,.8);color:#333;padding:1px 5px;border-radius:4px;z-index:5;pointer-events:none}
+.lm-center{position:absolute;left:50%;top:50%;width:34px;height:44px;transform:translate(-50%,-100%);pointer-events:none;z-index:6}
+.locmap{height:260px;margin-top:12px}
+/* ---------- Stores near you ---------- */
+.exhead h1{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:6px 0 2px}
+.exwhere{color:var(--muted);font-size:14px;margin:0 0 12px}
+.exbar{display:flex;gap:8px;align-items:center}
+.exbar input{flex:1;margin:0}
+.exbar .seg{flex:none;width:auto;margin:0}
+.exbar .seg button{padding:10px 12px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;cursor:pointer;color:var(--ink)}
+.chips button[aria-pressed="true"]{background:#3A1F2B;border-color:#3A1F2B;color:#fff}
+.exlocbtn{display:flex;align-items:center;justify-content:center;gap:8px}
+.excard{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:10px;text-decoration:none;color:inherit;position:relative}
+.exlogo{width:56px;height:56px;border-radius:50%;flex:none;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;font-size:22px;box-shadow:0 0 0 3px var(--surface),0 4px 10px rgba(20,10,15,.12)}
+.exlogo img{width:100%;height:100%;object-fit:cover}
+.exinfo{flex:1;min-width:0}
+.exinfo b{display:flex;align-items:center;gap:5px;font-size:16px;font-weight:800}
+.exinfo b svg{width:16px;height:16px;flex:none}
+.exinfo .exmeta{font-size:13px;color:var(--muted);margin-top:2px}
+.exinfo .exitems{font-size:12.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exopen{font-size:11px;font-weight:800;color:#15803D}.exshut{font-size:11px;font-weight:800;color:#B45309}
+.exfav{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.exfav svg{width:20px;height:20px}
+.exfav[aria-pressed="true"]{color:#DC2626}
+.exmap{height:calc(100vh - 250px);min-height:340px}
+.exsheet{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:30;animation:riseIn .35s cubic-bezier(.16,1,.3,1) both;box-shadow:0 14px 34px rgba(20,10,15,.22)}
+.exsheet .excard{margin:0}
+.exinstall{margin-top:12px}
 .dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);border-color:var(--err);color:#fff}
@@ -603,6 +653,7 @@ html,body{overflow-x:hidden}
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
     <div class="safenote" id="stSafe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Safe to use.</b> Linkedai never asks for your bank login, OTP or passwords, and never asks you to install apps. You order on WhatsApp and pay the seller directly. <a href="#" id="stSafeLink">Is this safe?</a></div></div>
+    <a class="stmore" id="stMore" href="#">Find more Linkedai stores near you</a>
     <span class="copyright" id="stCopy"></span>
     <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button><span class="stlegal"> · <a href="#" id="stTerms">Terms</a> · <a href="#" id="stPrivacy">Privacy</a></span></div>
     <div class="stcta" id="stCta" hidden>
@@ -830,6 +881,8 @@ function normalize(d){
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
   if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
   if (!KINDS[x.kind]) x.kind = "products";
+  const l = d && d.loc && typeof d.loc === "object" ? d.loc : {};
+  x.loc = { on: !!l.on, lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60) };
   x.closed = !!x.closed; x.closedMsg = String(x.closedMsg || "");
   x.wa = String(x.wa || "").replace(/\D/g, "");
   return x;
@@ -847,6 +900,138 @@ function track(t, img){
     fetch(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q, { mode: "no-cors", keepalive: true }).catch(() => {});
   } catch(e) {}
 }
+// ---------- Linkedai map: raster tiles, drag, pinch, logo pins, grouping ----------
+const MAP_DEFAULT = { tiles: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", attr: "© OpenStreetMap contributors" };
+const mapTiles = () => (/^https:\/\/.+\{z\}.+\{x\}.+\{y\}/.test(String(SITE.mapTiles || "")) ? SITE.mapTiles : MAP_DEFAULT.tiles);
+const mapAttr = () => (SITE.mapTiles && mapTiles() === SITE.mapTiles ? (SITE.mapAttr || "") : MAP_DEFAULT.attr);
+const KL = [3.139, 101.6869];
+function project(lat, lng, z){ const sz = 256 * Math.pow(2, z), sn = Math.sin(Math.max(-85.05, Math.min(85.05, lat)) * Math.PI / 180);
+  return { x: (lng + 180) / 360 * sz, y: (0.5 - Math.log((1 + sn) / (1 - sn)) / (4 * Math.PI)) * sz }; }
+function unproject(x, y, z){ const sz = 256 * Math.pow(2, z), n = Math.PI - 2 * Math.PI * y / sz;
+  return { lat: 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))), lng: x / sz * 360 - 180 }; }
+function kmBetween(a, b, c, d){ const t = x => x * Math.PI / 180, h = Math.sin(t(c - a) / 2) ** 2 + Math.cos(t(a)) * Math.cos(t(c)) * Math.sin(t(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
+class LMap {
+  constructor(el, o){
+    this.el = el; this.z = o.zoom || 13; this.c = { lat: o.center[0], lng: o.center[1] };
+    this.tpl = o.tiles; this.onMove = o.onMove || null; this.onPin = o.onPin || null; this.onTap = o.onTap || null;
+    this.pins = []; this.me = null; this.sel = ""; this.tiles = new Map(); this.pinEls = new Map(); this.ptrs = new Map();
+    el.classList.add("lmap");
+    el.innerHTML = `<div class="lm-tiles"></div><div class="lm-pins"></div><div class="lm-zoom"><button type="button" data-z="1" aria-label="Zoom in">+</button><button type="button" data-z="-1" aria-label="Zoom out">−</button></div><div class="lm-attr"></div>`;
+    this.tl = el.querySelector(".lm-tiles"); this.pl = el.querySelector(".lm-pins");
+    el.querySelector(".lm-attr").textContent = o.attr || "";
+    el.querySelector(".lm-zoom").addEventListener("click", e => { const b = e.target.closest("[data-z]"); if (b){ this.zoomBy(+b.dataset.z); } });
+    this.pl.addEventListener("click", e => {
+      const cl = e.target.closest(".lm-cl"); if (cl){ this.zoomBy(2, +cl.dataset.x, +cl.dataset.y); return; }
+      const p = e.target.closest(".lm-pin"); if (p && this.onPin) this.onPin(p.dataset.id);
+    });
+    this.gestures();
+    if (window.ResizeObserver){ this.ro = new ResizeObserver(() => this.draw()); this.ro.observe(el); }
+    this.draw();
+  }
+  size(){ return { w: this.el.clientWidth || 300, h: this.el.clientHeight || 300 }; }
+  cpx(){ return project(this.c.lat, this.c.lng, this.z); }
+  setView(lat, lng, z){ this.c = { lat, lng }; if (z) this.z = Math.max(3, Math.min(18, z)); this.draw(); }
+  zoomBy(dz, ax, ay){
+    const nz = Math.max(3, Math.min(18, this.z + dz)); if (nz === this.z) return;
+    const { w, h } = this.size(); ax = ax == null ? w / 2 : ax; ay = ay == null ? h / 2 : ay;
+    const cp = this.cpx(), ll = unproject(cp.x - w / 2 + ax, cp.y - h / 2 + ay, this.z);
+    this.z = nz; const np = project(ll.lat, ll.lng, nz); this.c = unproject(np.x - ax + w / 2, np.y - ay + h / 2, nz);
+    this.draw(); this.moved();
+  }
+  panBy(dx, dy){ const cp = this.cpx(), sz = 256 * Math.pow(2, this.z); this.c = unproject(cp.x - dx, Math.max(0, Math.min(sz, cp.y - dy)), this.z); this.draw(); }
+  moved(){ if (this.onMove) this.onMove(this.c, this.z); }
+  toPx(lat, lng){ const { w, h } = this.size(), cp = this.cpx(), p = project(lat, lng, this.z); return { x: p.x - cp.x + w / 2, y: p.y - cp.y + h / 2 }; }
+  setPins(list){ this.pins = list; this.drawPins(); }
+  setMe(lat, lng){ this.me = lat == null ? null : { lat, lng }; this.drawPins(); }
+  select(id){ this.sel = id || ""; this.drawPins(); }
+  draw(){ this.drawTiles(); this.drawPins(); }
+  drawTiles(){
+    const { w, h } = this.size(), cp = this.cpx(), n = Math.pow(2, this.z), tlx = cp.x - w / 2, tly = cp.y - h / 2, keep = new Set();
+    for (let x = Math.floor(tlx / 256); x <= Math.floor((tlx + w) / 256); x++){
+      for (let y = Math.max(0, Math.floor(tly / 256)); y <= Math.min(n - 1, Math.floor((tly + h) / 256)); y++){
+        const k = this.z + "/" + x + "/" + y; keep.add(k);
+        let im = this.tiles.get(k);
+        if (!im){
+          im = document.createElement("img"); im.alt = ""; im.decoding = "async"; im.draggable = false;
+          im.src = this.tpl.replace("{z}", this.z).replace("{x}", ((x % n) + n) % n).replace("{y}", y).replace("{s}", "abc"[(x + y) % 3]);
+          this.tl.appendChild(im); this.tiles.set(k, im);
+        }
+        im.style.transform = `translate(${Math.round(x * 256 - tlx)}px,${Math.round(y * 256 - tly)}px)`;
+      }
+    }
+    this.tiles.forEach((im, k) => { if (!keep.has(k)){ im.remove(); this.tiles.delete(k); } });
+  }
+  drawPins(){
+    const { w, h } = this.size(), want = new Map(), cell = 60;
+    const pts = this.pins.map(p => ({ p, ...this.toPx(p.lat, p.lng) })).filter(q => q.x > -60 && q.x < w + 60 && q.y > -60 && q.y < h + 80);
+    const groups = new Map();
+    pts.forEach(q => { const key = this.z >= 16 ? q.p.id : Math.floor(q.x / cell) + ":" + Math.floor(q.y / cell); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(q); });
+    groups.forEach(g => {
+      if (g.length === 1){ const q = g[0]; want.set("p:" + q.p.id, { kind: "pin", q }); }
+      else { const x = g.reduce((a, q) => a + q.x, 0) / g.length, y = g.reduce((a, q) => a + q.y, 0) / g.length; want.set("c:" + g.map(q => q.p.id).sort().join(","), { kind: "cl", x, y, n: g.length }); }
+    });
+    if (this.me){ const m = this.toPx(this.me.lat, this.me.lng); want.set("me", { kind: "me", x: m.x, y: m.y }); }
+    this.pinEls.forEach((el, k) => { if (!want.has(k)){ el.remove(); this.pinEls.delete(k); } });
+    want.forEach((v, k) => {
+      let el = this.pinEls.get(k);
+      if (!el){
+        if (v.kind === "pin"){ el = document.createElement("button"); el.type = "button"; el.className = "lm-pin" + (v.q.p.closed ? " closed" : ""); el.dataset.id = v.q.p.id; el.setAttribute("aria-label", v.q.p.title || v.q.p.id); el.innerHTML = v.q.p.html; }
+        else if (v.kind === "cl"){ el = document.createElement("button"); el.type = "button"; el.className = "lm-cl"; el.textContent = v.n; el.setAttribute("aria-label", v.n + " stores here. Zoom in"); }
+        else { el = document.createElement("div"); el.className = "lm-me"; }
+        this.pl.appendChild(el); this.pinEls.set(k, el);
+      }
+      const x = v.kind === "pin" ? v.q.x : v.x, y = v.kind === "pin" ? v.q.y : v.y;
+      el.style.left = Math.round(x) + "px"; el.style.top = Math.round(y) + "px";
+      if (v.kind === "cl"){ el.dataset.x = Math.round(x); el.dataset.y = Math.round(y); }
+      if (v.kind === "pin") el.classList.toggle("sel", v.q.p.id === this.sel);
+    });
+  }
+  gestures(){
+    const el = this.el; let last = null, pinch = null, downAt = 0, moved = 0, lastTap = 0;
+    const pos = e => { const r = el.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    el.addEventListener("pointerdown", e => {
+      if (e.target.closest(".lm-pin,.lm-cl,.lm-zoom")) return;
+      el.setPointerCapture(e.pointerId); this.ptrs.set(e.pointerId, pos(e));
+      if (this.ptrs.size === 1){ last = pos(e); downAt = Date.now(); moved = 0; }
+      if (this.ptrs.size === 2){ const [a, b] = [...this.ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, s: 1 }; last = null; }
+    });
+    el.addEventListener("pointermove", e => {
+      if (!this.ptrs.has(e.pointerId)) return;
+      const p = pos(e); this.ptrs.set(e.pointerId, p);
+      if (pinch && this.ptrs.size >= 2){
+        const [a, b] = [...this.ptrs.values()]; pinch.s = Math.max(.25, Math.min(4, Math.hypot(a.x - b.x, a.y - b.y) / pinch.d));
+        const t = `translate(${pinch.mx}px,${pinch.my}px) scale(${pinch.s}) translate(${-pinch.mx}px,${-pinch.my}px)`;
+        this.tl.style.transform = t; this.pl.style.transform = t;
+      } else if (last){ const dx = p.x - last.x, dy = p.y - last.y; moved += Math.abs(dx) + Math.abs(dy); last = p; this.panBy(dx, dy); }
+    });
+    const up = e => {
+      if (!this.ptrs.has(e.pointerId)) return;
+      const p = pos(e); this.ptrs.delete(e.pointerId);
+      if (pinch && this.ptrs.size < 2){
+        this.tl.style.transform = ""; this.pl.style.transform = "";
+        const dz = Math.round(Math.log2(pinch.s)); const pc = pinch; pinch = null; last = null;
+        if (dz) this.zoomBy(dz, pc.mx, pc.my); else this.draw();
+        return;
+      }
+      if (this.ptrs.size === 0 && last !== null){
+        last = null;
+        if (moved > 6) this.moved();
+        else if (Date.now() - downAt < 300){
+          if (Date.now() - lastTap < 320){ lastTap = 0; this.zoomBy(1, p.x, p.y); }
+          else { lastTap = Date.now(); if (this.onTap) this.onTap(); }
+        }
+      }
+    };
+    el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+    let wheelAt = 0;
+    el.addEventListener("wheel", e => { e.preventDefault(); if (Date.now() - wheelAt < 250) return; wheelAt = Date.now(); const p = pos(e); this.zoomBy(e.deltaY < 0 ? 1 : -1, p.x, p.y); }, { passive: false });
+  }
+}
+function pinFace(st){
+  const logo = safeImg(st.logo);
+  return `<span class="lm-face" style="background:${/^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#3A1F2B"}">${logo ? `<img src="${esc(logo)}" alt="">` : esc(initial(st.name))}</span>`;
+}
+
 function markImg(img){ if (img.complete){ img.classList.add("loaded"); if (!img.naturalWidth && img.getAttribute("src")) img.classList.add("broken"); } }
 document.addEventListener("load", e => { if (e.target.tagName === "IMG") e.target.classList.add("loaded"); }, true);
 document.addEventListener("error", e => { if (e.target.tagName === "IMG") e.target.classList.add("loaded", "broken"); }, true);
@@ -886,6 +1071,7 @@ function openSheet(id){
 function show(id){
   ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
   const el = $(id); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
+  clearTimeout(el._enterT); el._enterT = setTimeout(() => el.classList.remove("enter"), 800);   // only animate when a page opens, not on every redraw
   window.scrollTo(0,0);
 }
 async function copyText(text){
@@ -989,7 +1175,7 @@ function wireLogin(){
     const slow = setTimeout(() => { if ($("lGo") && $("lGo").disabled) $("lGo").textContent = "Still working, please wait..."; }, 6000);
     try {
       const r = await apiPost({ action: "login", wa, pin });
-      SESSION = { id: r.id, pin }; saveSession(); S = normalize(r.data); STATUS = r.status; DIRTY = false;
+      SESSION = { id: r.id, pin }; saveSession(); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
       if (!/^\?(build|edit)\b/.test(location.search)) history.pushState(null, "", home() + "?build");
       openEditor();
       clearTimeout(slow);
@@ -1048,7 +1234,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["terms", "privacy", "refund", "safe"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["terms", "privacy", "refund", "safe", "explore", "near"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (!$("cAgree").checked) return $("cErr").textContent = "Please tick the box to agree to the rules.";
@@ -1069,6 +1255,7 @@ function renderStart(msg, mode){
 // ---------- Bulletin board: everything here is written by the Linkedai bot ----------
 // New Linkedai features are announced to sellers automatically from this list.
 const APP_UPDATES = [
+  { id: "u-20260925-map", at: "2026-09-25", title: "New: get found on the Linkedai map", body: "Turn on Show my store on the Linkedai map under Store location, so customers nearby can find you in Stores near you. Only an approximate spot is shown, never your exact address." },
   { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Linkedai news now appear here. Look for the red number on the bell." },
   { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Linkedai Guard now show a Verified badge, so customers can trust your link." },
   { id: "u-20260924-guard", at: "2026-09-24", title: "Linkedai Guard keeps stores safe", body: "Every store is checked automatically for prohibited items, and customers can report stores. This keeps Linkedai trusted for honest sellers like you." },
@@ -1298,6 +1485,7 @@ $("pubGo").onclick = async () => {
 
 function renderEditor(msg){
   setTimeout(updateBell, 0);
+  setTimeout(mountLocMap, 0);
   const link = storeLink(SESSION.id), live = STATUS === "live";
   const adminBar = SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : "";
   $("bwrap").innerHTML = `
@@ -1357,6 +1545,18 @@ function renderEditor(msg){
     </div>
   </section>
 
+  <section class="card" id="locCard">
+    <h2>Store location</h2>
+    <label class="check"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}> Show my store on the Linkedai map</label>
+    <p class="hint">Customers nearby can find you in "Stores near you". They only see an approximate spot, about 300 to 500 m away, never your exact address.</p>
+    <div id="locBox" ${S.loc.on ? "" : "hidden"}>
+      <label>Area name<input type="text" data-floc="area" value="${esc(S.loc.area)}" placeholder="e.g. Taman Melawati, Kuala Lumpur"></label>
+      <button class="btn small" data-act="myloc" style="margin-top:10px">Use my current location</button>
+      <div class="locmap" id="locMap"></div>
+      <p class="hint">${S.loc.lat == null ? "Tap Use my current location, or move the map so the pin sits on your shop or pickup point." : "Move the map so the pin sits on your shop or pickup point."}</p>
+    </div>
+  </section>
+
   <section class="card">
     <h2>${W(S).list}</h2>
     ${S.items.map((it,i)=>`
@@ -1392,8 +1592,21 @@ function renderEditor(msg){
   </section>`;
 }
 
+const PIN_SVG = '<svg class="lm-center" viewBox="0 0 34 44" aria-hidden="true"><path d="M17 43C17 43 3 26 3 16a14 14 0 1 1 28 0c0 10-14 27-14 27z" fill="#3A1F2B"/><circle cx="17" cy="16" r="6" fill="#F2C14E"/></svg>';
+let LOCMAP = null;
+function mountLocMap(){
+  const box = $("locMap"); if (!box || $("locBox").hidden) return;
+  const has = S.loc.lat != null;
+  LOCMAP = new LMap(box, { center: has ? [S.loc.lat, S.loc.lng] : KL, zoom: has ? 16 : 11, tiles: mapTiles(), attr: mapAttr(),
+    onMove: c => { S.loc.lat = Math.round(c.lat * 1e6) / 1e6; S.loc.lng = Math.round(c.lng * 1e6) / 1e6; touch(); } });
+  box.insertAdjacentHTML("beforeend", PIN_SVG);
+}
 function onField(e){
   const t = e.target, f = t.dataset.f;
+  if (t.dataset.floc){
+    if (t.dataset.floc === "on"){ S.loc.on = t.checked; touch(); renderEditor(); if (t.checked && S.loc.lat == null) $("locCard").scrollIntoView({ block: "center" }); return; }
+    if (t.dataset.floc === "area"){ S.loc.area = t.value; touch(); return; }
+  }
   if (!f) return;
   const v = t.type === "checkbox" ? t.checked : t.value;
   if (t.dataset.j !== undefined) S.items[+t.dataset.i].o[+t.dataset.j][f] = f === "p" ? (parseFloat(v) || 0) : v;
@@ -1442,6 +1655,15 @@ $("builder").addEventListener("click", async e => {
     } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(err.message); }
   }
   else if (a === "bulletin"){ openBulletin(); }
+  else if (a === "myloc"){
+    if (!navigator.geolocation) return notify("Your phone's browser can't share location. Move the map to your shop instead.");
+    b.disabled = true; b.textContent = "Finding you...";
+    navigator.geolocation.getCurrentPosition(pos => {
+      S.loc.lat = Math.round(pos.coords.latitude * 1e6) / 1e6; S.loc.lng = Math.round(pos.coords.longitude * 1e6) / 1e6; S.loc.on = true;
+      touch(); renderEditor("Location set. Move the map to fine-tune it, then tap Save.");
+    }, () => { b.disabled = false; b.textContent = "Use my current location"; notify("Couldn't get your location. Allow location for this site, or move the map to your shop."); },
+    { enableHighAccuracy: true, timeout: 12000 });
+  }
   else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
   else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); $("saveStatus").textContent = ok ? "Link copied." : "Press and hold the link to copy it."; }
   else if (a === "preview"){ showStore(S, true); }
@@ -1486,6 +1708,7 @@ async function publishWithReceipt(input){
 }
 
 async function saveStore(){
+  if (S.loc.on && S.loc.lat == null) return notify("Set your store location first: tap Use my current location, or move the map to your shop.");
   if (!S.name.trim()) return notify("Add your shop name first.");
   if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
@@ -1553,6 +1776,7 @@ async function showStore(data, isPreview){
   $("stTerms").href = home() + "?terms"; $("stPrivacy").href = home() + "?privacy";
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   $("stSafeLink").href = home() + "?safe";
+  $("stMore").href = home() + "?explore"; $("stMore").hidden = !!isPreview;
   $("stVerified").hidden = !(isPreview ? false : STORE_VERIFIED);
   if (!isPreview) track("view");
   // "Want a store like this?" for customers (not in the seller's own preview)
@@ -1857,7 +2081,7 @@ async function adminStores(g, head, wire){
       try {
         SESSION = { id, key: ADMIN, admin: true }; saveSession();
         const r = await apiPost({ action: "login", id });
-        S = normalize(r.data); STATUS = r.status; DIRTY = false;
+        S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
         history.pushState(null, "", home() + "?build"); return openEditor();
       } catch(e){ clearSession(); return renderAdmin(e.message); }
     }
@@ -1953,7 +2177,7 @@ async function adminReview(g, head, wire){
     if (op === "edit"){
       g.innerHTML = loaderHtml("Opening store...");
       try { SESSION = { id, key: ADMIN, admin: true }; saveSession();
-        const r = await apiPost({ action: "login", id }); S = normalize(r.data); STATUS = r.status; DIRTY = false;
+        const r = await apiPost({ action: "login", id }); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
         history.pushState(null, "", home() + "?build"); return openEditor(); }
       catch(e){ clearSession(); return renderAdmin(e.message); }
     }
@@ -2116,6 +2340,12 @@ function adminSettings(g, head, wire, cfg){
       <p class="hint">Leave the PayPal fields empty to accept Malaysia payments only.</p>
     </section>
     <section class="card">
+      <h2>Map</h2>
+      <label>Map tiles link (optional)<input type="url" id="stTiles" value="${esc(v("mapTiles"))}" placeholder="https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=YOUR_KEY"></label>
+      <label>Map credit text<input type="text" id="stTilesAttr" value="${esc(v("mapAttr"))}" placeholder="© MapTiler © OpenStreetMap contributors"></label>
+      <p class="hint">Leave empty to use free OpenStreetMap tiles, which suit a small start. When you get busy, switch to a map provider like MapTiler (free tier) and paste its tiles link here.</p>
+    </section>
+    <section class="card">
       <h2>Sign-ups</h2>
       <label class="check"><input type="checkbox" id="stSignup" ${signup ? "checked" : ""}> Show "New seller? Sign up" to everyone</label>
       <p class="hint">Turn off to invite sellers privately with ${esc(home())}?signup</p>
@@ -2127,11 +2357,13 @@ function adminSettings(g, head, wire, cfg){
   const prev = (inp, box) => $(inp).oninput = () => { const u = safeUrl($(inp).value.trim()); $(box).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
   prev("stQr", "qrPrev"); prev("stPpQr", "ppPrev");
   $("stSave").onclick = () => {
-    const links = ["stQr", "stPaypal", "stPpQr"].map(id => $(id).value.trim()).filter(Boolean);
+    const links = ["stQr", "stPaypal", "stPpQr", "stTiles"].map(id => $(id).value.trim()).filter(Boolean);
+    if ($("stTiles").value.trim() && !/\{z\}.*\{x\}.*\{y\}/.test($("stTiles").value)) return notify("The map tiles link must contain {z}, {x} and {y}.");
     if (links.some(u => !safeUrl(u))) return notify("Links must start with https://");
     adminSaveConfig(cfg, {
       ownerWa: normWa($("stWaOwner").value), price: $("stPrice").value.trim(), duitnow: $("stDuit").value.trim(), qr: $("stQr").value.trim(),
-      priceIntl: $("stPriceIntl").value.trim(), paypal: $("stPaypal").value.trim(), paypalQr: $("stPpQr").value.trim(), signup: $("stSignup").checked
+      priceIntl: $("stPriceIntl").value.trim(), paypal: $("stPaypal").value.trim(), paypalQr: $("stPpQr").value.trim(), signup: $("stSignup").checked,
+      mapTiles: $("stTiles").value.trim(), mapAttr: $("stTilesAttr").value.trim()
     }, "Settings saved. The site uses them within a few minutes.");
   };
 }
@@ -2157,12 +2389,15 @@ function legalDoc(which){
       <li><b>Account:</b> your shop name, store link name, WhatsApp number and PIN. Your PIN is stored scrambled, so no one can read it, including us.</li>
       <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
       <li><b>Payment receipts:</b> the receipt screenshot you upload when you publish. Receipts are private and only seen by us.</li>
+      <li><b>Store location (optional):</b> if you choose to show your store on the map, we keep your exact spot private. Customers only see an approximate point about 300 to 500 m away, and the area name you write.</li>
     </ul>
     <h2>2. Information from customers</h2>
     <ul>
       <li><b>Orders are not stored by ${A}.</b> Your order is written on your own phone and sent by you through WhatsApp directly to the seller.</li>
       <li><b>Your cart</b> is saved only on your own device so it isn't lost if you close the page.</li>
       <li><b>Reports</b> you send about a store are anonymous: we only receive the reason and any note you write.</li>
+      <li><b>Your location</b> in "Stores near you" is used only on your own phone to sort stores by distance. It is never sent to ${A} or to sellers.</li>
+      <li><b>Visit counts:</b> we count store visits, order taps and ad views without any names or numbers, to show sellers simple insights.</li>
     </ul>
     <h2>3. How we use it</h2>
     <ul>
@@ -2245,6 +2480,101 @@ function legalDoc(which){
     <h2>10. Law and contact</h2>
     <p>These Terms follow the laws of Malaysia. Questions? Contact us on ${legalContact()}.</p>`;
 }
+// ---------- Customer app: Stores near you (yoursite/?explore) ----------
+let EX = null;
+function exFavs(){ try { return new Set(JSON.parse(localStorage.getItem("lk-favs") || "[]")); } catch(e){ return new Set(); } }
+function exSaveFavs(){ try { localStorage.setItem("lk-favs", JSON.stringify([...EX.favs])); } catch(e) {} }
+function exDist(st){ return EX.me ? kmBetween(EX.me.lat, EX.me.lng, st.lat, st.lng) : null; }
+function exFmt(km){ return km == null ? "" : km < 1 ? "about " + (Math.max(1, Math.round(km * 10)) * 100) + " m" : "about " + (km < 10 ? km.toFixed(1) : Math.round(km)) + " km"; }
+function exList(){
+  const q = EX.q.trim().toLowerCase(), f = EX.filter;
+  let list = EX.stores.filter(st =>
+    (!q || (st.name + " " + st.area + " " + st.items + " " + st.tag).toLowerCase().includes(q)) &&
+    (f === "all" || (f === "open" && !st.closed) || (f === "verified" && st.v) || (f === "fav" && EX.favs.has(st.id)) || f === st.kind));
+  list.forEach(st => st._km = exDist(st));
+  return list.sort((a, b) => a._km == null ? a.name.localeCompare(b.name) : a._km - b._km);
+}
+function exCard(st){
+  return `<a class="excard" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}">
+    <span class="exlogo" style="background:${/^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#3A1F2B"}">${safeImg(st.logo) ? `<img src="${esc(safeImg(st.logo))}" alt="">` : esc(initial(st.name))}</span>
+    <span class="exinfo"><b>${esc(st.name)}${st.v ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}</b>
+      <span class="exmeta">${esc(KINDS[st.kind] ? KINDS[st.kind].label : "Products")}${st.area ? " · " + esc(st.area) : ""}${st._km != null ? " · " + exFmt(st._km) : ""} · ${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`}</span>
+      ${st.items ? `<span class="exitems">${esc(st.items)}</span>` : ""}</span>
+    <button type="button" class="exfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.5 3 4.5 6.8 4.5c2.1 0 3.5 1.1 4.2 2.3.7-1.2 2.1-2.3 4.2-2.3 3.8 0 5.9 4 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg></button>
+  </a>`;
+}
+function exRender(){
+  const body = $("exBody"); if (!body) return;
+  document.querySelectorAll("[data-exv]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.exv === EX.view)));
+  document.querySelectorAll("[data-exf]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.exf === EX.filter)));
+  $("exWhere").textContent = EX.me ? `Showing ${EX.stores.length ? "stores closest to you first" : "stores near you"}` : "Turn on your location to see the closest stores first.";
+  $("exLocBtn").hidden = !!EX.me;
+  const list = exList();
+  closeExSheet();
+  if (EX.view === "map"){
+    body.innerHTML = `<div class="exmap" id="exMap"></div>`;
+    const c = EX.me ? [EX.me.lat, EX.me.lng] : list.length ? [list[0].lat, list[0].lng] : KL;
+    EX.map = new LMap($("exMap"), { center: c, zoom: EX.me || list.length ? 14 : 11, tiles: mapTiles(), attr: mapAttr(),
+      onPin: id => { const st = EX.stores.find(x => x.id === id); if (st){ EX.map.select(id); openExSheet(st); } },
+      onTap: () => { EX.map.select(""); closeExSheet(); } });
+    EX.map.setPins(list.map(st => ({ id: st.id, lat: st.lat, lng: st.lng, closed: st.closed, title: st.name, html: pinFace(st) })));
+    if (EX.me) EX.map.setMe(EX.me.lat, EX.me.lng);
+  } else {
+    body.innerHTML = list.length ? list.map(exCard).join("") :
+      `<section class="card" style="text-align:center"><h2>${EX.stores.length ? "No stores match" : "No stores on the map yet"}</h2>
+       <p class="hint">${EX.stores.length ? "Try another search or filter." : "Linkedai stores appear here when sellers turn on their map location."}</p>
+       ${signupOpen() ? `<a class="btn small" style="margin-top:10px" href="${esc(home())}?signup">Are you a seller? Open a store</a>` : ""}</section>`;
+  }
+}
+function openExSheet(st){
+  closeExSheet();
+  st._km = exDist(st);
+  document.body.insertAdjacentHTML("beforeend", `<div class="exsheet" id="exSheet">${exCard(st)}</div>`);
+}
+function closeExSheet(){ const e = $("exSheet"); if (e) e.remove(); }
+function exLocate(silent){
+  if (!navigator.geolocation){ if (!silent) notify("Your browser can't share location."); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    EX.me = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    try { localStorage.setItem("lk-me", JSON.stringify(EX.me)); } catch(e) {}
+    exRender();
+  }, () => { if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings."); }, { timeout: 12000 });
+}
+async function renderExplore(){
+  setAccent(COLORS[0]); document.title = APP_NAME + " · Stores near you";
+  // install as the Linkedai app: manifest + offline helper, only on this page
+  if (!document.querySelector('link[rel="manifest"]')) document.head.insertAdjacentHTML("beforeend", `<link rel="manifest" href="manifest.webmanifest">`);
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
+  EX = { stores: [], me, view: "list", q: "", filter: "all", favs: exFavs(), map: null };
+  const chip = (k, t) => `<button type="button" data-exf="${k}">${t}</button>`;
+  $("gwrap").innerHTML = `
+    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">For sellers</a></div>
+    <header class="exhead"><h1>Stores near you</h1><p class="exwhere" id="exWhere"></p></header>
+    <button class="btn full exlocbtn" id="exLocBtn" style="margin-bottom:12px">Use my location</button>
+    <div class="exbar"><input type="search" id="exQ" placeholder="Search stores or items">
+      <div class="seg"><button type="button" data-exv="list">List</button><button type="button" data-exv="map">Map</button></div></div>
+    <div class="chips">${chip("all","All")}${chip("food","Food")}${chip("products","Products")}${chip("services","Services")}${chip("open","Open now")}${chip("verified","Verified")}${chip("fav","Favourites")}</div>
+    <div id="exBody">${loaderHtml("Finding stores...")}</div>
+    <button class="btn full exinstall" id="exInstall" hidden>Install the Linkedai app</button>
+    ${legalLinks()}${copyrightLine()}`;
+  show("page");
+  $("exLocBtn").onclick = () => exLocate(false);
+  $("exQ").oninput = () => { EX.q = $("exQ").value; if (EX.view === "list") exRender(); else { clearTimeout(EX.qt); EX.qt = setTimeout(exRender, 400); } };
+  $("gwrap").addEventListener("click", e => {
+    const fav = e.target.closest("[data-fav]");
+    if (fav){ e.preventDefault(); e.stopPropagation(); const id = fav.dataset.fav; EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs(); fav.setAttribute("aria-pressed", String(EX.favs.has(id))); if (EX.filter === "fav") exRender(); return; }
+    const v = e.target.closest("[data-exv]"); if (v){ EX.view = v.dataset.exv; exRender(); return; }
+    const f = e.target.closest("[data-exf]"); if (f){ EX.filter = f.dataset.exf; exRender(); }
+  });
+  document.addEventListener("click", e => { const fav = e.target.closest("#exSheet [data-fav]"); if (fav){ e.preventDefault(); const id = fav.dataset.fav; EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs(); fav.setAttribute("aria-pressed", String(EX.favs.has(id))); } });
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); EX.install = e; const b = $("exInstall"); if (b){ b.hidden = false; b.onclick = async () => { EX.install.prompt(); b.hidden = true; }; } });
+  try { EX.stores = (await apiGet({ action: "near" })).stores || []; }
+  catch(e){ $("exBody").innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+  exRender();
+  if (EX.me) exLocate(true);                  // refresh quietly if they allowed it before
+}
+
 function renderSafe(){
   setAccent(COLORS[0]); document.title = "Is " + APP_NAME + " safe?";
   const A = esc(APP_NAME);
@@ -2315,6 +2645,7 @@ function renderHome(){
         <span class="authlink">Forgot your PIN? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Get help</a>` : "Contact us"}</span>
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}?signup">New seller? <b>Sign up</b></a>` : ""}
+      <a class="signupbox" style="margin-top:10px" href="${esc(home())}?explore">Shopping? <b>Find stores near you</b></a>
       ${legalLinks()}
       ${copyrightLine()}
     </div>
@@ -2330,19 +2661,20 @@ function showMessage(title, text){
 async function route(){
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || "";
-  if (/^(admin|build|edit|signup|terms|privacy|refund|safe)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
+  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
   if (q === "admin") return renderAdmin();
   if (q === "terms" || q === "privacy" || q === "refund") return renderLegal(q);
   if (q === "safe") return renderSafe();
+  if (q === "explore" || q === "near") return renderExplore();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
     SESSION = loadSession();
     if (SESSION){
       $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page");
-      try { const r = await apiPost(SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }); S = normalize(r.data); STATUS = r.status; return openEditor(); }
+      try { const r = await apiPost(SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; return openEditor(); }
       catch(e){ clearSession(); }
     }
     return renderStart();
