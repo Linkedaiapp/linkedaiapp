@@ -1,9 +1,16 @@
 <!DOCTYPE html>
+<!--
+  Linkedai
+  Copyright (c) 2026 Linkedai. All rights reserved.
+  This software, its design and its code are the property of Linkedai.
+  Copying, modifying, reusing or redistributing any part of it without written permission is not allowed.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Linkedai</title>
+<meta name="copyright" content="© 2026 Linkedai. All rights reserved.">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -181,6 +188,7 @@ textarea{min-height:72px;resize:vertical}
 .legalnav{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
 .legalnav a{padding:8px 14px;border-radius:99px;border:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:700;font-size:14px;background:var(--surface)}
 .legalnav a[aria-current="page"]{background:#3A1F2B;border-color:#3A1F2B;color:#fff}
+.copyright{display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--muted)}
 .legallinks{display:block;text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
 .legallinks a{color:var(--muted);text-decoration:underline;margin:0 6px}
 .dangercard{border-color:var(--err)}
@@ -550,6 +558,7 @@ html,body{overflow-x:hidden}
     </div>
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
+    <span class="copyright" id="stCopy"></span>
     <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button><span class="stlegal"> · <a href="#" id="stTerms">Terms</a> · <a href="#" id="stPrivacy">Privacy</a></span></div>
     <div class="stcta" id="stCta" hidden>
       <span>Want your own store?</span>
@@ -1390,6 +1399,7 @@ async function showStore(data, isPreview){
   $("brandLink").href = home();
   $("stReportWrap").hidden = !!isPreview;
   $("stTerms").href = home() + "?terms"; $("stPrivacy").href = home() + "?privacy";
+  $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const canSignup = signupOpen(), cta = $("stCta"), btn = $("stCtaBtn");
@@ -1968,6 +1978,7 @@ function adminSettings(g, head, wire, cfg){
    ============================================================ */
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
 const LEGAL_UPDATED = "25 September 2026";
+const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
 const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}?terms">Terms</a>·<a href="${esc(home())}?privacy">Privacy</a>·<a href="${esc(home())}?refund">Refunds</a></span>`;
 function legalContact(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -2079,7 +2090,8 @@ function renderLegal(which){
     <nav class="legalnav" aria-label="Policies">
       ${["terms", "privacy", "refund"].map(k => `<a href="${esc(home())}?${k}" ${k === which ? 'aria-current="page"' : ""}>${k === "terms" ? "Terms" : k === "privacy" ? "Privacy" : "Refunds"}</a>`).join("")}
     </nav>
-    <article class="legal">${legalDoc(which)}</article>`;
+    <article class="legal">${legalDoc(which)}</article>
+    ${copyrightLine()}`;
   show("page");
 }
 
@@ -2104,6 +2116,7 @@ function renderHome(){
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}?signup">New seller? <b>Sign up</b></a>` : ""}
       ${legalLinks()}
+      ${copyrightLine()}
     </div>
     ${to ? `<a class="chatfab" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">${chat}</a>` : ""}`;
   show("page");
