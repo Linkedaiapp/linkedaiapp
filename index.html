@@ -151,6 +151,9 @@ textarea{min-height:72px;resize:vertical}
 .btn.small.dangerline{border-color:var(--err);color:var(--err)}
 .admprev{margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--soft);min-height:40px}
 .admprev img{display:block;width:100%;height:auto}
+.stplace{position:absolute;top:14px;right:16px;max-width:calc(100% - 140px);display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:99px;
+  background:var(--soft);color:var(--ink);font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stplace svg{width:14px;height:14px;flex:none;color:var(--plum)}
 .stmore{display:block;text-align:center;margin:14px 0 0;font-size:13px;font-weight:700;color:var(--ink)}
 .streport{text-align:center;margin-top:8px}
 .streport .stlegal,.streport .stlegal a{color:var(--muted);font-size:12px}
@@ -767,6 +770,7 @@ body.exploring #gwrap{padding-bottom:96px}
     <div class="cover" id="stCover" hidden></div>
     <section class="shopcard" id="stCard">
       <div class="st-logo" id="stLogo"></div>
+      <span class="stplace" id="stPlace" hidden></span>
       <h1 class="stname" id="stName"></h1>
       <span class="vbadge" id="stVerified" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified by Linkedai</span>
       <p class="tag" id="stTag"></p>
@@ -1018,7 +1022,7 @@ function normalize(d){
 function setAccent(c){ document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--soft", c + "1F"); }
 // Every picture fades in once it has loaded; broken ones stop shimmering too
 // ---------- Counting for shop and ad insights (anonymous, no personal data) ----------
-let STORE_ID = "", STORE_VERIFIED = false;
+let STORE_ID = "", STORE_VERIFIED = false, STORE_PLACE = null;
 function track(t, img){
   try {
     if (!safeUrl(SITE.api) || (!STORE_ID && !img)) return;
@@ -1403,6 +1407,7 @@ function edHome(msg){
     ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link)}</span></p>
       <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
     : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
+    ${live ? "" : `<button class="btn small" style="margin-top:12px" data-act="preview">${ico("eye",16)}Preview my store</button>`}
     <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
   </section>
   ${SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : ""}
@@ -1984,6 +1989,10 @@ async function showStore(data, isPreview){
   $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`;
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
+  // town + state (the seller's own preview uses what they've set in the editor)
+  const pl = isPreview ? (S && S.loc && S.loc.state ? { city: S.loc.city, state: S.loc.state } : null) : STORE_PLACE;
+  const plTxt = pl ? [pl.city, pl.state].filter(Boolean).join(", ") : "";
+  $("stPlace").hidden = !plTxt; $("stPlace").innerHTML = plTxt ? ico("pin", 14, 2) + `<span>${esc(plTxt)}</span>` : "";
   $("brandLink").href = home();
   $("stReportWrap").hidden = !!isPreview;
   $("stTerms").href = home() + "?terms"; $("stPrivacy").href = home() + "?privacy";
@@ -2924,7 +2933,7 @@ async function route(){
       if (r.error === "notfound") return showMessage("Store not found", "Check the link spelling, or ask the shop for their link again.");
       if (r.error === "notlive") return showMessage("Opening soon", "This store isn't live yet. Please check back later.");
       if (r.error) throw new Error(r.error);
-      STORE_ID = q; STORE_VERIFIED = !!r.verified;
+      STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_PLACE = r.place || null;
       return showStore(r.data, false);
     } catch(e){ return showMessage("Couldn't open the store", e.message || "Check your internet connection and try again."); }
   }
