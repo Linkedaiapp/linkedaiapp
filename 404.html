@@ -664,6 +664,62 @@ body.exploring #gwrap{padding-bottom:96px}
 .xf-body{padding:70px 32px 0;display:flex;flex-direction:column;gap:12px}
 .xf-body i{display:block;height:14px;border-radius:8px;background:linear-gradient(90deg,var(--soft),var(--line),var(--soft));background-size:200% 100%;animation:xfShim 1.1s linear infinite}
 @keyframes xfShim{to{background-position:-200% 0}}
+
+/* =====================================================================
+   Finishing polish: soft, smooth interactions
+   ===================================================================== */
+html{scroll-behavior:smooth}
+button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
+:root{--spring:cubic-bezier(.34,1.56,.64,1);--soft-ease:cubic-bezier(.22,1,.36,1)}
+/* buttons press in softly and spring back */
+.btn,.iconbtn,.bellbtn,.chips button,.excities button,.stalls button,.seg button,.lk-tabs button,.exsfav,.xmini{
+  transition:transform .22s var(--spring),background-color .25s ease,color .25s ease,border-color .25s ease,box-shadow .25s ease,opacity .2s ease}
+.btn:active,.iconbtn:active,.bellbtn:active,.chips button:active,.excities button:active,.seg button:active,.lk-tabs button:active,.xmini:active{transform:scale(.96);transition-duration:.08s}
+.stalls button:active .stall{transform:scale(.92)}
+.stalls button .stall{transition:transform .25s var(--spring),background .25s ease,border-color .25s ease,box-shadow .25s ease,color .25s ease}
+/* rows get a soft tint when tapped */
+.lk-row,.prow{transition:background-color .2s ease}
+.lk-row:active,.prow:active{background:color-mix(in srgb,var(--plum) 5%,transparent)}
+.exshop{transition:transform .2s var(--spring),box-shadow .3s ease}
+.exshop:active{transform:scale(.97);box-shadow:0 2px 6px rgba(20,10,15,.06)}
+/* cards and products float in one after another */
+@keyframes lkRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.exgrid > .exshop,.plist > .prow{animation:lkRise .55s var(--soft-ease) both}
+.exgrid > .exshop:nth-child(1),.plist > .prow:nth-child(1){animation-delay:0ms}
+.exgrid > .exshop:nth-child(2),.plist > .prow:nth-child(2){animation-delay:55ms}
+.exgrid > .exshop:nth-child(3),.plist > .prow:nth-child(3){animation-delay:110ms}
+.exgrid > .exshop:nth-child(4),.plist > .prow:nth-child(4){animation-delay:165ms}
+.exgrid > .exshop:nth-child(5),.plist > .prow:nth-child(5){animation-delay:220ms}
+.exgrid > .exshop:nth-child(6),.plist > .prow:nth-child(6){animation-delay:275ms}
+.exgrid > .exshop:nth-child(7),.plist > .prow:nth-child(7){animation-delay:330ms}
+.exgrid > .exshop:nth-child(8),.plist > .prow:nth-child(8){animation-delay:385ms}
+.exgrid > .exshop:nth-child(9),.plist > .prow:nth-child(9){animation-delay:440ms}
+.exgrid > .exshop:nth-child(10),.plist > .prow:nth-child(10){animation-delay:495ms}
+.exgrid > .exshop:nth-child(11),.plist > .prow:nth-child(11){animation-delay:550ms}
+.exgrid > .exshop:nth-child(12),.plist > .prow:nth-child(12){animation-delay:605ms}
+.exgrid > .exshop:nth-child(n+13),.plist > .prow:nth-child(n+13){animation-delay:660ms}
+.lk-group,.card{transition:box-shadow .3s ease}
+/* photos fade in instead of popping */
+.excover img,.exslogo img,.lk-row .thumb img,.media-prev img{opacity:0;transition:opacity .5s ease}
+.excover img.loaded,.exslogo img.loaded,.lk-row .thumb img.loaded,.media-prev img.loaded{opacity:1}
+/* the heart pops when a shop is saved */
+@keyframes heartPop{0%{transform:scale(1)}35%{transform:scale(1.35)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+.exsfav[aria-pressed="true"] svg{animation:heartPop .45s var(--spring)}
+.lk-tabs button[aria-current="page"] svg{animation:heartPop .4s var(--spring)}
+/* softer sheets and pop-ups */
+.overlay.open .sheet{animation:shIn .5s var(--soft-ease) both}
+.overlay{transition:background-color .3s ease}
+/* status messages fade in */
+.status{transition:opacity .3s ease}
+@keyframes softIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.status:not(:empty){animation:softIn .35s var(--soft-ease)}
+/* the progress bar fills smoothly */
+.lk-prog i{transition:width .8s var(--soft-ease)}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .exgrid > .exshop,.plist > .prow,.exsfav[aria-pressed="true"] svg,.lk-tabs button[aria-current="page"] svg,.status:not(:empty){animation:none}
+  .btn:active,.iconbtn:active,.exshop:active,.stalls button:active .stall{transform:none}
+}
 </style>
 </head>
 <body>
