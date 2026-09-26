@@ -96,22 +96,19 @@ textarea{min-height:72px;resize:vertical}
 #splash.hide{opacity:0;visibility:hidden}
 #splash .sp-logo{display:flex;flex-direction:column;align-items:center;gap:18px}
 #splash .sp-mark{width:118px;height:118px;overflow:visible}
-#splash .sp-l{stroke-dasharray:96;stroke-dashoffset:96;animation:spDraw .75s cubic-bezier(.65,0,.35,1) .15s forwards}
-#splash .sp-dot{transform-box:fill-box;transform-origin:center;transform:translateY(-46px) scale(.2);opacity:0;
-  animation:spDrop .6s cubic-bezier(.34,1.56,.64,1) .8s forwards, spPulse 1.6s ease-in-out 1.6s infinite}
-#splash .sp-name{font-family:"Figtree",system-ui,sans-serif;font-weight:800;font-size:34px;letter-spacing:-.03em;color:#fff;
-  opacity:0;transform:translateY(10px);animation:spName .6s cubic-bezier(.16,1,.3,1) 1.05s forwards}
+#splash .sp-l{stroke-dasharray:110;stroke-dashoffset:110;animation:spDraw .7s cubic-bezier(.65,0,.35,1) .15s forwards}
+#splash .sp-dot{transform-box:fill-box;transform-origin:15% 50%;opacity:0;animation:spLink .75s cubic-bezier(.34,1.56,.64,1) .8s forwards}
+#splash .sp-name{font-family:"Figtree",system-ui,sans-serif;font-weight:800;font-size:34px;letter-spacing:-.03em;color:#fff;opacity:0;transform:translateY(10px);animation:spName .6s cubic-bezier(.16,1,.3,1) 1.15s forwards}
 @keyframes spDraw{to{stroke-dashoffset:0}}
-@keyframes spDrop{0%{opacity:0;transform:translateY(-46px) scale(.2)}60%{opacity:1;transform:translateY(4px) scale(1.12)}100%{opacity:1;transform:none}}
-@keyframes spPulse{0%,100%{transform:none}50%{transform:scale(1.18)}}
+@keyframes spLink{0%{opacity:0;transform:rotate(-70deg) scale(.4)}60%{opacity:1;transform:rotate(12deg) scale(1.08)}100%{opacity:1;transform:none}}
 @keyframes spName{to{opacity:1;transform:none}}
 /* small version for loading messages inside the app */
 .lkload{display:flex;flex-direction:column;align-items:center;gap:14px;padding:90px 10px;color:var(--muted);font-size:15px}
-.lkload svg{width:56px;height:56px;border-radius:16px;background:#3A1F2B;padding:9px;box-sizing:border-box;box-shadow:0 8px 22px rgba(58,31,43,.22)}
-.lkload .sp-l{stroke-dasharray:96;stroke-dashoffset:96;animation:lkDraw 1.6s cubic-bezier(.65,0,.35,1) infinite}
-.lkload .sp-dot{transform-box:fill-box;transform-origin:center;animation:lkDot 1.6s cubic-bezier(.34,1.56,.64,1) infinite}
-@keyframes lkDraw{0%{stroke-dashoffset:96}45%,80%{stroke-dashoffset:0}100%{stroke-dashoffset:-96}}
-@keyframes lkDot{0%,35%{opacity:0;transform:translateY(-30px) scale(.3)}55%{opacity:1;transform:translateY(3px) scale(1.1)}65%,85%{opacity:1;transform:none}100%{opacity:0;transform:scale(.6)}}
+.lkload svg{width:56px;height:56px;border-radius:16px;background:#3A1F2B;padding:6px;box-sizing:border-box;box-shadow:0 8px 22px rgba(58,31,43,.22)}
+.lkload .sp-l{stroke-dasharray:110;stroke-dashoffset:110;animation:lkDraw 1.8s cubic-bezier(.65,0,.35,1) infinite}
+.lkload .sp-dot{transform-box:fill-box;transform-origin:15% 50%;animation:lkLink 1.8s cubic-bezier(.34,1.56,.64,1) infinite}
+@keyframes lkDraw{0%{stroke-dashoffset:110}45%,80%{stroke-dashoffset:0}100%{stroke-dashoffset:-110}}
+@keyframes lkLink{0%,38%{opacity:0;transform:rotate(-70deg) scale(.4)}58%{opacity:1;transform:rotate(10deg) scale(1.06)}66%,86%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
 @media (prefers-reduced-motion:reduce){
   #splash .sp-l,.lkload .sp-l{animation:none;stroke-dashoffset:0}
   #splash .sp-dot,.lkload .sp-dot{animation:none;opacity:1;transform:none}
@@ -537,15 +534,131 @@ html,body{overflow-x:hidden}
 .adx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:19px;line-height:1;cursor:pointer;display:grid;place-items:center}
 .brandbar{display:flex;justify-content:center;padding:10px 14px 0}
 .brandbar a{font-weight:800;font-size:13px;letter-spacing:.02em;color:var(--muted);text-decoration:none}
+
+/* =====================================================================
+   Linkedai design system v2: warm neutrals, plum + gold, liquid glass
+   ===================================================================== */
+:root{--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#3A1F2B;--gold:#E9B949;
+  --glass:rgba(255,255,255,.62);--glass-edge:rgba(255,255,255,.85);--r-card:18px;--r-btn:14px;--r-field:12px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}}
+:root[data-theme="dark"]{--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}
+body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+.card{border-radius:var(--r-card);border:1px solid var(--line);background:var(--surface);box-shadow:0 1px 2px rgba(20,10,15,.04)}
+.card h2{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.hint{color:var(--muted)}
+/* ---- buttons: liquid glass ---- */
+.btn{height:48px;border-radius:var(--r-btn);font-weight:600;font-size:15px;position:relative;isolation:isolate;overflow:hidden;
+  background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 1px rgba(20,10,15,.05),0 4px 14px rgba(20,10,15,.08)}
+.btn::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 52%);pointer-events:none;z-index:-1}
+.btn.solid{color:#FFFFFF;border-color:rgba(255,255,255,.24);background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--accent) 92%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -1px 1px rgba(0,0,0,.25),0 8px 22px color-mix(in srgb,var(--accent) 30%,transparent)}
+.btn.wa{color:#FFFFFF;border-color:rgba(255,255,255,.24);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--wa) 92%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -1px 1px rgba(0,0,0,.2),0 8px 22px color-mix(in srgb,var(--wa) 28%,transparent)}
+.btn.danger,.btn.dangerline,.btn.small.dangerline{color:var(--err);border-color:color-mix(in srgb,var(--err) 30%,transparent)}
+.btn.small{height:38px;border-radius:12px;font-size:13.5px;padding:0 13px}
+.btn:disabled{opacity:.5}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.btn{background:var(--surface)}}
+/* ---- fields ---- */
+input[type=text],input[type=tel],input[type=url],input[type=email],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input:not([type]),textarea,select{
+  border-radius:var(--r-field);border:1px solid var(--line2);background:var(--surface);min-height:48px;font-size:15px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+label{font-weight:600;font-size:13.5px}
+/* ---- checkbox rows: box on the left, text wraps as one paragraph ---- */
+.check{display:grid !important;grid-template-columns:22px minmax(0,1fr);gap:12px;align-items:start;font-weight:500;font-size:14px;line-height:1.5}
+.check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--plum)}
+.check > span{display:block}
+/* ---- segmented control (iOS style) ---- */
+.seg{background:var(--soft);border-radius:14px;padding:4px;gap:4px;border:0}
+.seg button{border:0;border-radius:11px;background:transparent;font-weight:600;color:var(--muted);min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(20,10,15,.12)}
+/* ---- badges ---- */
+.tag2{height:24px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border-radius:99px;font-size:12px;font-weight:700;background:#F1EDEA;color:#4A4340;border:0}
+.tag2.paid{background:#E7F4EC;color:#146C36}.tag2.claim{background:#FDF0DC;color:#9A4A06}.tag2.unpaid{background:#F4E4E2;color:#A12C1E}
+/* ---- top bars with the Linkedai mark ---- */
+.top{min-height:56px}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em}
+.brand::before{content:"";width:30px;height:30px;border-radius:9px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22hl%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%22.16%22/%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%220%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2227%22%20fill%3D%22%233A1F2B%22/%3E%3Cg%20transform%3D%22translate%2860%2060%29%20scale%28.88%29%20translate%28-67%20-56%29%22%3E%3Cpath%20d%3D%22M40%2030V80a8%208%200%200%200%208%208H76%22%20fill%3D%22none%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%2215%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3Cg%20transform%3D%22translate%2884%2038%29%20rotate%28-45%29%22%3E%3Cg%20transform%3D%22translate%28-11.626%20-0.000%29%22%3E%3Cdefs%3E%3CclipPath%20id%3D%22c0i%22%3E%3Ccircle%20cx%3D%2210.040%22%20cy%3D%22-7.734%22%20r%3D%225.42%22/%3E%3C/clipPath%3E%3CclipPath%20id%3D%22C0i%22%3E%3Ccircle%20cx%3D%2210.040%22%20cy%3D%22-7.734%22%20r%3D%227.92%22/%3E%3C/clipPath%3E%3CclipPath%20id%3D%22c1i%22%3E%3Ccircle%20cx%3D%2214.639%22%20cy%3D%224.462%22%20r%3D%225.26%22/%3E%3C/clipPath%3E%3CclipPath%20id%3D%22C1i%22%3E%3Ccircle%20cx%3D%2214.639%22%20cy%3D%224.462%22%20r%3D%227.76%22/%3E%3C/clipPath%3E%3C/defs%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%280.000%200.000%29%20rotate%280.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%2824.000%200.000%29%20rotate%2825.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3Cg%20clip-path%3D%22url%28%23c0i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%280.000%200.000%29%20rotate%280.00%29%22%20fill%3D%22none%22%20stroke%3D%22%233A1F2B%22%20stroke-width%3D%228.0%22/%3E%3C/g%3E%3Cg%20clip-path%3D%22url%28%23C0i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%280.000%200.000%29%20rotate%280.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3C/g%3E%3Cg%20clip-path%3D%22url%28%23c1i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%2824.000%200.000%29%20rotate%2825.00%29%22%20fill%3D%22none%22%20stroke%3D%22%233A1F2B%22%20stroke-width%3D%228.0%22/%3E%3C/g%3E%3Cg%20clip-path%3D%22url%28%23C1i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%2824.000%200.000%29%20rotate%2825.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2227%22%20fill%3D%22url%28%23hl%29%22/%3E%3C/svg%3E") center/cover;flex:none;box-shadow:0 3px 8px rgba(58,31,43,.25)}
+/* ---- glass icon buttons ---- */
+.bellbtn,.iconbtn{width:42px;height:42px;border-radius:14px;border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.1);display:grid;place-items:center;color:var(--ink);cursor:pointer;padding:0;position:relative;text-decoration:none}
+.iconbtn svg{width:21px;height:21px}
+/* ---- chips ---- */
+.chips button,.chip{border-radius:99px;border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(20,10,15,.06);font-weight:600}
+.chips button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);border-color:rgba(255,255,255,.24);color:#FFFFFF;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 12px rgba(58,31,43,.25)}
+/* ---- category tiles (line icons, no stalls) ---- */
+.stalls button .stall{width:58px;height:58px;border-radius:18px;background:var(--surface);border:1px solid var(--line);color:var(--plum);box-shadow:0 1px 2px rgba(20,10,15,.04)}
+.stalls button .stall svg{width:27px;height:27px}
+.stalls button[aria-pressed="true"] .stall{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);color:#FFFFFF;border-color:var(--plum);box-shadow:0 6px 16px rgba(58,31,43,.25)}
+/* ---- home page ---- */
+.brandmark img{border-radius:22px;box-shadow:0 12px 30px rgba(58,31,43,.28)}
+.signupbox{border-radius:var(--r-btn);background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.07)}
+.chatfab{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--wa) 92%,transparent);border:1px solid rgba(255,255,255,.3);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 24px rgba(31,157,85,.35)}
+/* ---- sheets ---- */
+.overlay .sheet{border-radius:26px 26px 0 0}
+.xmini{border-radius:12px}
+
+/* ---------- seller: store home + section pages ---------- */
+.lk-tabs{position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:560px;margin:0 auto;height:64px;border-radius:26px;z-index:20;
+  background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 12px 32px rgba(20,10,15,.16);display:flex;justify-content:space-around;align-items:center}
+.lk-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;font:inherit;font-size:11.5px;font-weight:600;color:var(--muted);padding:6px 12px;border-radius:16px;cursor:pointer;position:relative}
+.lk-tabs button[aria-current="page"]{color:var(--plum);background:color-mix(in srgb,var(--plum) 9%,transparent)}
+.lk-tabs .dotn{position:absolute;top:0;right:8px;min-width:16px;height:16px;border-radius:99px;background:#C8352A;color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+#builder.tabbed .wrap{padding-bottom:110px}
+#builder.tabbed.dirty .wrap{padding-bottom:180px}
+#builder.tabbed .actions{bottom:calc(90px + env(safe-area-inset-bottom,0px));background:transparent;border:0;padding-top:0}
+#builder.tabbed:not(.dirty) .actions{display:none}
+.lk-bar{display:flex;align-items:center;gap:10px;min-height:56px;margin:0 0 6px}
+.lk-bar h1{flex:1;font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0}
+.lk-group{padding:0;overflow:hidden}
+.lk-row{display:flex;align-items:center;gap:14px;padding:14px 16px;width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.lk-row + .lk-row{border-top:1px solid var(--line)}
+.lk-row .tile{width:40px;height:40px;border-radius:12px;background:var(--soft);color:var(--plum);display:grid;place-items:center;flex:none}
+.lk-row .tt{flex:1;min-width:0}
+.lk-row .tt b{display:block;font-size:15px;font-weight:600}
+.lk-row .tt span{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-row .chev{color:#A39A96;flex:none}
+.lk-row .thumb{width:48px;height:48px;border-radius:12px;background:var(--soft);overflow:hidden;flex:none;display:grid;place-items:center;color:#A39A96}
+.lk-row .thumb img{width:100%;height:100%;object-fit:cover}
+.lk-prog{height:8px;border-radius:99px;background:var(--soft);overflow:hidden;margin-top:10px}
+.lk-prog i{display:block;height:100%;border-radius:99px;background:var(--plum);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.lk-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.lk-kpis b{display:block;font-size:22px;font-weight:800}
+.lk-kpis span{font-size:12.5px;color:var(--muted)}
+.lk-link{display:flex;align-items:center;gap:8px;font-weight:600;word-break:break-all}
+.lk-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.lk-3 .btn{padding:0 8px;gap:6px}
+.lk-sec{animation:lkIn .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes lkIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.lk-sec{animation:none}}
+
+/* ---------- Browse stores v2 ---------- */
+.excities{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 2px;scrollbar-width:none}
+.excities::-webkit-scrollbar{display:none}
+.excities button{flex:none;height:34px;padding:0 13px;border-radius:99px;border:1px solid var(--line2);background:var(--surface);font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.excities button[aria-pressed="true"]{border-color:var(--plum);color:var(--plum);background:color-mix(in srgb,var(--plum) 8%,var(--surface))}
+.exshop{border-radius:18px;transition:transform .14s ease,box-shadow .2s ease}
+.exshop:active{transform:scale(.965)}
+.exsfav{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+body.exploring #gwrap{padding-bottom:96px}
+/* ---------- enter-shop transition ---------- */
+.xfer{position:fixed;inset:0;z-index:60;background:var(--bg);overflow:hidden;pointer-events:none}
+.xf-cover{height:clamp(150px,40vw,250px);display:grid;place-items:center;overflow:hidden;color:#fff}
+.xf-cover img{width:100%;height:100%;object-fit:cover}
+.xf-cover svg{width:56px;height:56px;opacity:.9}
+.xf-logo{position:absolute;left:32px;top:clamp(62px,calc(40vw - 92px),162px);width:88px;height:88px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:34px;overflow:hidden;box-shadow:0 0 0 4px var(--surface);transform-origin:0 0}
+.xf-logo img{width:100%;height:100%;object-fit:cover}
+.xf-body{padding:70px 32px 0;display:flex;flex-direction:column;gap:12px}
+.xf-body i{display:block;height:14px;border-radius:8px;background:linear-gradient(90deg,var(--soft),var(--line),var(--soft));background-size:200% 100%;animation:xfShim 1.1s linear infinite}
+@keyframes xfShim{to{background-position:-200% 0}}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true">
   <div class="sp-logo">
-    <svg viewBox="0 0 100 100" class="sp-mark">
-      <path class="sp-l" d="M36 22 V76 H70" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="square" stroke-linejoin="miter"/>
-      <circle class="sp-dot" cx="67" cy="33" r="8.5" fill="#F2C14E"/>
-    </svg>
+    <svg viewBox="0 0 120 120" class="sp-mark"><g transform="translate(60 60) scale(.88) translate(-67 -56)"><path class="sp-l" d="M40 30V80a8 8 0 0 0 8 8H76" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(84 38) rotate(-45)"><g class="sp-dot"><g transform="translate(-11.626 -0.000)"><defs><clipPath id="c0z0"><circle cx="10.040" cy="-7.734" r="5.42"/></clipPath><clipPath id="C0z0"><circle cx="10.040" cy="-7.734" r="7.92"/></clipPath><clipPath id="c1z0"><circle cx="14.639" cy="4.462" r="5.26"/></clipPath><clipPath id="C1z0"><circle cx="14.639" cy="4.462" r="7.76"/></clipPath></defs><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><g clip-path="url(#c0z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C0z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g><g clip-path="url(#c1z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C1z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g></g></g></g></g></svg>
     <div class="sp-name">Linkedai</div>
   </div>
 </div>
@@ -888,7 +1001,7 @@ function normalize(d){
   if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
   if (!KINDS[x.kind]) x.kind = "products";
   const l = d && d.loc && typeof d.loc === "object" ? d.loc : {};
-  x.loc = { on: !!l.on, state: STATES.includes(l.state) ? l.state : "", lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60) };
+  x.loc = { on: !!l.on, state: STATES.includes(l.state) ? l.state : "", city: String(l.city || "").slice(0, 40), lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60) };
   x.cat = d && CATS[d.cat] ? d.cat : "";
   x.closed = !!x.closed; x.closedMsg = String(x.closedMsg || "");
   x.wa = String(x.wa || "").replace(/\D/g, "");
@@ -909,28 +1022,15 @@ function track(t, img){
 }
 // ---------- States, categories and stall icons ----------
 const STATES = ["Johor", "Kedah", "Kelantan", "Kuala Lumpur", "Labuan", "Melaka", "Negeri Sembilan", "Pahang", "Perak", "Perlis", "Pulau Pinang", "Putrajaya", "Sabah", "Sarawak", "Selangor", "Terengganu"];
+// Cities and towns per state, for the Browse listing picker ("Other town" covers the rest)
+const CITIES = {"Johor": ["Johor Bahru", "Iskandar Puteri", "Pasir Gudang", "Skudai", "Kulai", "Batu Pahat", "Muar", "Kluang", "Segamat", "Pontian", "Kota Tinggi", "Mersing", "Tangkak", "Yong Peng", "Simpang Renggam"], "Kedah": ["Alor Setar", "Sungai Petani", "Kulim", "Langkawi", "Jitra", "Pendang", "Yan", "Baling", "Kuala Kedah", "Gurun", "Pokok Sena", "Bandar Baharu", "Sik"], "Kelantan": ["Kota Bharu", "Pasir Mas", "Tanah Merah", "Machang", "Kuala Krai", "Gua Musang", "Tumpat", "Pasir Puteh", "Bachok", "Jeli"], "Kuala Lumpur": ["Bangsar", "Brickfields", "Bukit Bintang", "Bukit Jalil", "Cheras", "Desa ParkCity", "Kampung Baru", "Kepong", "Mont Kiara", "Segambut", "Sentul", "Setapak", "Setiawangsa", "Sri Petaling", "Titiwangsa", "Wangsa Maju"], "Labuan": ["Labuan"], "Melaka": ["Melaka City", "Ayer Keroh", "Alor Gajah", "Jasin", "Masjid Tanah", "Merlimau", "Batu Berendam", "Bukit Beruang"], "Negeri Sembilan": ["Seremban", "Nilai", "Senawang", "Port Dickson", "Rembau", "Kuala Pilah", "Tampin", "Bahau", "Gemas", "Mantin"], "Pahang": ["Kuantan", "Temerloh", "Mentakab", "Bentong", "Raub", "Jerantut", "Pekan", "Rompin", "Maran", "Kuala Lipis", "Bera", "Cameron Highlands", "Genting Highlands"], "Perak": ["Ipoh", "Taiping", "Teluk Intan", "Sitiawan", "Lumut", "Kampar", "Batu Gajah", "Kuala Kangsar", "Parit Buntar", "Tapah", "Slim River", "Tanjung Malim", "Seri Iskandar", "Gerik"], "Perlis": ["Kangar", "Arau", "Padang Besar", "Kuala Perlis"], "Pulau Pinang": ["George Town", "Bayan Lepas", "Air Itam", "Tanjung Bungah", "Balik Pulau", "Butterworth", "Bukit Mertajam", "Seberang Jaya", "Kepala Batas", "Nibong Tebal", "Simpang Ampat"], "Putrajaya": ["Putrajaya"], "Sabah": ["Kota Kinabalu", "Penampang", "Putatan", "Papar", "Tuaran", "Kota Belud", "Sandakan", "Tawau", "Lahad Datu", "Semporna", "Keningau", "Kudat", "Ranau", "Beaufort"], "Sarawak": ["Kuching", "Samarahan", "Serian", "Sri Aman", "Betong", "Sibu", "Sarikei", "Mukah", "Kapit", "Bintulu", "Miri", "Limbang", "Lawas"], "Selangor": ["Shah Alam", "Petaling Jaya", "Subang Jaya", "Puchong", "Klang", "Port Klang", "Setia Alam", "Kajang", "Bangi", "Semenyih", "Seri Kembangan", "Cyberjaya", "Putra Heights", "Ampang", "Cheras", "Hulu Langat", "Selayang", "Gombak", "Rawang", "Sungai Buloh", "Kota Damansara", "Puncak Alam", "Kuala Selangor", "Tanjong Karang", "Sabak Bernam", "Kuala Kubu Bharu", "Batang Kali", "Sepang", "Dengkil", "Banting"], "Terengganu": ["Kuala Terengganu", "Kuala Nerus", "Kemaman", "Chukai", "Kerteh", "Dungun", "Marang", "Besut", "Setiu", "Hulu Terengganu"]};
 const CATS = { food: "Food", cakes: "Cakes & kuih", drinks: "Drinks", fashion: "Fashion", beauty: "Beauty", crafts: "Crafts", homestay: "Homestay", services: "Services", other: "Other" };
 function kmBetween(a, b, c, d){ const t = x => x * Math.PI / 180, h = Math.sin(t(c - a) / 2) ** 2 + Math.cos(t(a)) * Math.cos(t(c)) * Math.sin(t(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
-// Each category is a little market stall: plum-and-gold awning, counter, and what it sells
-const P = "#3A1F2B", G = "#F2C14E", Rd = "#E4572E";
-const GLYPH = {
-  all: `<rect x="17" y="20" width="6" height="6" rx="1.5" fill="${G}" stroke="${P}" stroke-width="1.8"/><rect x="25" y="20" width="6" height="6" rx="1.5" fill="${G}" stroke="${P}" stroke-width="1.8"/><rect x="17" y="28" width="6" height="6" rx="1.5" fill="${G}" stroke="${P}" stroke-width="1.8"/><rect x="25" y="28" width="6" height="6" rx="1.5" fill="${G}" stroke="${P}" stroke-width="1.8"/>`,
-  food: `<path d="M15 26h18c0 5-4 8-9 8s-9-3-9-8z" fill="${G}" stroke="${P}" stroke-width="2" stroke-linejoin="round"/><path d="M20 23c0-2 2-2 2-4M26 23c0-2 2-2 2-4" stroke="${P}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
-  cakes: `<rect x="15" y="25" width="18" height="9" rx="2" fill="${G}" stroke="${P}" stroke-width="2"/><path d="M15 29h18" stroke="${P}" stroke-width="2"/><path d="M24 25v-4" stroke="${P}" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="19.5" r="1.8" fill="${Rd}"/>`,
-  drinks: `<path d="M17 21h14l-2 13h-10z" fill="${G}" stroke="${P}" stroke-width="2" stroke-linejoin="round"/><path d="M26 21l3-5h3" stroke="${P}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
-  fashion: `<path d="M20 19l4 3 4-3 5 4-3 3v8H18v-8l-3-3z" fill="${G}" stroke="${P}" stroke-width="2" stroke-linejoin="round"/>`,
-  beauty: `<rect x="20" y="27" width="8" height="8" rx="1.5" fill="${P}"/><path d="M21 27v-5l6-3v8" fill="${Rd}" stroke="${P}" stroke-width="2" stroke-linejoin="round"/>`,
-  crafts: `<circle cx="24" cy="27" r="7" fill="${G}" stroke="${P}" stroke-width="2"/><path d="M18.5 24.5c4 1 8 4 10 8M19 30c3-3 7-6 11-6" stroke="${P}" stroke-width="1.6" fill="none"/>`,
-  homestay: `<path d="M16 26l8-7 8 7v8H16z" fill="${G}" stroke="${P}" stroke-width="2" stroke-linejoin="round"/><rect x="22" y="29" width="4" height="5" fill="${P}"/>`,
-  services: `<path d="M29.5 19.5a5 5 0 0 0-6.2 6.2L16 33l2 2 7.3-7.3a5 5 0 0 0 6.2-6.2l-3 3-2.4-.6-.6-2.4z" fill="${G}" stroke="${P}" stroke-width="2" stroke-linejoin="round"/>`,
-  other: `<path d="M16 23l8-4 8 4v9l-8 4-8-4z" fill="${G}" stroke="${P}" stroke-width="2" stroke-linejoin="round"/><path d="M16 23l8 4 8-4M24 27v9" stroke="${P}" stroke-width="2" fill="none"/>`
-};
-function stallIcon(cat){
-  const scallops = [9, 15, 21, 27, 33, 39].map((x, i) => `<circle cx="${x}" cy="14" r="3" fill="${i % 2 ? G : P}"/>`).join("");
-  return `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="13" width="32" height="27" rx="3" fill="#fff" stroke="${P}" stroke-width="2"/>`
-    + `<rect x="6" y="7" width="36" height="7" rx="1.5" fill="${P}"/><rect x="12" y="7" width="6" height="7" fill="${G}"/><rect x="24" y="7" width="6" height="7" fill="${G}"/><rect x="36" y="7" width="6" height="7" fill="${G}"/>${scallops}`
-    + `${GLYPH[cat] || GLYPH.other}<rect x="8" y="37" width="32" height="4" rx="1" fill="${P}"/></svg>`;
-}
+// ---------- Linkedai icon set: one line style everywhere (24px grid, 1.8 stroke, rounded) ----------
+const ICONS = {"chevron": "<path d=\"m9 6 6 6-6 6\"/>", "back": "<path d=\"m15 6-6 6 6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/>", "heart": "<path d=\"M12 20s-7-4.4-9-9a4.6 4.6 0 0 1 9-3 4.6 4.6 0 0 1 9 3c-2 4.6-9 9-9 9z\"/>", "bell": "<path d=\"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.9 1.9 0 0 0 3.4 0\"/>", "chart": "<path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/>", "shield": "<path d=\"M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z\"/><path d=\"m9 12 2 2 4-4\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "chat": "<path d=\"M21 12a8.5 8.5 0 0 1-12.5 7.5L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z\"/>", "sliders": "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><circle cx=\"9\" cy=\"10\" r=\"2\"/><path d=\"m21 16-5-5-9 9\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-1-.9-1.4-.9-2.4 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4.1-4-7.2-9-7.2z\"/><circle cx=\"7.5\" cy=\"11.5\" r=\"1\"/><circle cx=\"10\" cy=\"7.5\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "card": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"2.5\"/><path d=\"M2.5 10h19M6 15h4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "share": "<circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "logout": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3\"/><path d=\"m10 17-5-5 5-5M5 12h11\"/>", "check": "<path d=\"m5 12 5 5 9-10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "box": "<path d=\"M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z\"/><path d=\"m3 7.5 9 4.5 9-4.5M12 12v9\"/>", "grid": "<rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "store": "<path d=\"M4 9.5V20h16V9.5\"/><path d=\"M3 9.5 4.5 4h15L21 9.5c0 1.6-1.3 2.5-2.9 2.5S15.3 11 15.3 9.5c0 1.6-1.4 2.5-3.3 2.5S8.7 11 8.7 9.5C8.7 11 7.5 12 5.9 12S3 11.1 3 9.5z\"/><path d=\"M9.5 20v-5h5v5\"/>", "food": "<path d=\"M3.5 11h17a8.5 8.5 0 0 1-17 0z\"/><path d=\"M9 7.5c0-1.4 1.4-1.4 1.4-3M13.6 7.5c0-1.4 1.4-1.4 1.4-3\"/>", "cake": "<path d=\"M4 21h16M5 21v-8.5h14V21\"/><path d=\"M5 16.5c2.3 1.2 4.7 1.2 7 0s4.7-1.2 7 0\"/><path d=\"M12 12.5V9\"/><path d=\"M12 6.5c.8-.8.8-1.7 0-2.5-.8.8-.8 1.7 0 2.5z\"/>", "cup": "<path d=\"M6 8h12l-1.5 12.5h-9z\"/><path d=\"M5 8h14M12 8V4h4\"/>", "shirt": "<path d=\"M8.5 3.5 3.5 6.5l2 4.5 2.5-1v10.5h8V10l2.5 1 2-4.5-5-3c0 1.6-1.6 2.8-3.5 2.8S8.5 5.1 8.5 3.5z\"/>", "sparkle": "<path d=\"M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z\"/><path d=\"M19 17v4M17 19h4\"/>", "scissors": "<circle cx=\"6\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"6\" cy=\"17.5\" r=\"2.5\"/><path d=\"M8.2 7.8 20 18M8.2 16.2 20 6\"/>", "home": "<path d=\"M3.5 11 12 4l8.5 7\"/><path d=\"M5.5 9.5V20h13V9.5\"/><path d=\"M10 20v-6h4v6\"/>", "wrench": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5v3h3l5.8-5.8a4 4 0 0 0 5.4-5.4L15 12l-2.4-.6L12 9z\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "flag": "<path d=\"M5 21V4M5 4h11l-2 4 2 4H5\"/>", "star": "<path d=\"m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z\"/>", "trend": "<path d=\"m3 17 6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "upload": "<path d=\"M12 16V4M7 9l5-5 5 5\"/><path d=\"M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/>", "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17\"/>", "up": "<path d=\"m6 15 6-6 6 6\"/>", "down": "<path d=\"m6 9 6 6 6-6\"/>", "x": "<path d=\"M6 6l12 12M18 6 6 18\"/>", "ext": "<path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/>"};
+function ico(name, size, sw){ return `<svg width="${size || 22}" height="${size || 22}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw || 1.8}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.box}</svg>`; }
+const CAT_ICON = { all: "grid", food: "food", cakes: "cake", drinks: "cup", fashion: "shirt", beauty: "sparkle", crafts: "scissors", homestay: "home", services: "wrench", other: "box" };
+function stallIcon(cat){ return ico(CAT_ICON[cat] || "box", 27); }
 function catOf(d){ return CATS[d.cat] ? d.cat : d.kind === "food" ? "food" : d.kind === "services" ? "services" : "other"; }
 
 function markImg(img){ if (img.complete){ img.classList.add("loaded"); if (!img.naturalWidth && img.getAttribute("src")) img.classList.add("broken"); } }
@@ -942,7 +1042,7 @@ new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
 }))).observe(document.documentElement, { childList: true, subtree: true });
 
 function loaderHtml(text){
-  return `<div class="lkload" role="status"><svg viewBox="0 0 100 100" aria-hidden="true"><path class="sp-l" d="M36 22 V76 H70" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="square"/><circle class="sp-dot" cx="67" cy="33" r="8.5" fill="#F2C14E"/></svg><span>${esc(text)}</span></div>`;
+  return `<div class="lkload" role="status"><svg viewBox="0 0 120 120" aria-hidden="true"><g transform="translate(60 60) scale(.88) translate(-67 -56)"><path class="sp-l" d="M40 30V80a8 8 0 0 0 8 8H76" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(84 38) rotate(-45)"><g class="sp-dot"><g transform="translate(-11.626 -0.000)"><defs><clipPath id="c0z1"><circle cx="10.040" cy="-7.734" r="5.42"/></clipPath><clipPath id="C0z1"><circle cx="10.040" cy="-7.734" r="7.92"/></clipPath><clipPath id="c1z1"><circle cx="14.639" cy="4.462" r="5.26"/></clipPath><clipPath id="C1z1"><circle cx="14.639" cy="4.462" r="7.76"/></clipPath></defs><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><g clip-path="url(#c0z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C0z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g><g clip-path="url(#c1z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C1z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g></g></g></g></g></svg><span>${esc(text)}</span></div>`;
 }
 function askText(message, value, hint, okLabel){
   return new Promise(res => {
@@ -1111,7 +1211,7 @@ function renderStart(msg, mode){
         <b>Not allowed on ${esc(APP_NAME)}</b>
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
       </div>
-      <label class="check"><input type="checkbox" id="cAgree"> I agree to the <a href="${esc(home())}?terms" target="_blank" rel="noopener">Terms</a> and <a href="${esc(home())}?privacy" target="_blank" rel="noopener">Privacy Policy</a>, and not to sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</label>
+      <label class="check"><input type="checkbox" id="cAgree"><span>I agree to the <a href="${esc(home())}?terms" target="_blank" rel="noopener">Terms</a> and <a href="${esc(home())}?privacy" target="_blank" rel="noopener">Privacy Policy</a>, and I won't sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</span></label>
       <p class="err" id="cErr"></p>
       <button class="btn solid full" id="cGo">Sign up</button>
     </section>`;
@@ -1248,8 +1348,225 @@ function openBulletin(){
   updateBell();
 }
 
-function openEditor(msg){ setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
-function touch(){ DIRTY = true; const st = $("saveStatus"); if (st) st.textContent = "Not saved yet. Tap Save when you're done."; }
+// ================= Seller: store home + section pages =================
+let EDV = "home", EDI = 0;
+function edGo(v, i){ EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0); }
+function edSteps(){
+  const named = S.items.filter(it => it.n.trim());
+  return {
+    details: !!(S.name.trim() && S.wa),
+    products: named.some(it => it.o.some(o => +o.p > 0)),
+    look: !!(safeImg(S.logo) || safeImg(S.cover)),
+    listing: !!(S.loc.on && S.loc.state && S.loc.city),
+    status: true,
+    plan: STATUS === "live"
+  };
+}
+function edRow(v, icon, title, sub, done, i){
+  const b = done === true ? `<span class="tag2 paid">Done</span>` : done === false ? `<span class="tag2 claim">To do</span>` : "";
+  return `<button class="lk-row" data-act="go" data-v="${v}" ${i != null ? `data-i="${i}"` : ""}><span class="tile">${ico(icon)}</span><span class="tt"><b>${esc(title)}</b><span>${esc(sub)}</span></span>${b}<span class="chev">${ico("chevron",18)}</span></button>`;
+}
+function edTop(title, back, right){
+  return `<div class="lk-bar">${back ? `<button class="iconbtn" data-act="go" data-v="${back}" aria-label="Back">${ico("back",20)}</button>` : ""}<h1>${esc(title)}</h1>${right || ""}</div>`;
+}
+function edTabs(){
+  const unread = (() => { try { const seen = bulSeen(); return bulletinItems().filter(x => !seen.has(x.id)).length; } catch(e){ return 0; } })();
+  const t = (v, icon, label, n) => `<button data-act="go" data-v="${v}" ${EDV === v ? 'aria-current="page"' : ""}>${ico(icon,22)}<span>${label}</span>${n ? `<span class="dotn">${n > 9 ? "9+" : n}</span>` : ""}</button>`;
+  return `<nav class="lk-tabs" aria-label="Seller menu">${t("home","store","Store")}${t("products","box","Products")}${t("insights","chart","Insights", unread)}${t("account","user","Account")}</nav>`;
+}
+function priceText(it){
+  const ps = it.o.map(o => +o.p).filter(x => x > 0);
+  if (!ps.length) return "No price yet";
+  const lo = Math.min(...ps);
+  return (ps.length > 1 ? "From " : "") + fmtMoney(S.cur || curSymbol(S.curCode), lo);
+}
+function edHome(msg){
+  const link = storeLink(SESSION.id), live = STATUS === "live", st = edSteps();
+  const done = Object.values(st).filter(Boolean).length, total = Object.keys(st).length;
+  const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
+  const b = BUL || {}, last = (b.stats || []).slice(-7), sum = f => last.reduce((a, x) => a + (x[f] || 0), 0);
+  const v = sum("v"), o = sum("o");
+  const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2" style="background:#F6EEE1;color:#3A1F2B">${ico("shield",14,2)}Verified</span>` : ""}`
+    : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
+  return `
+  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="insights" aria-label="Bulletin board">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
+  <section class="card linkcard">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${status}</div>
+    ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link)}</span></p>
+      <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
+    : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
+    <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
+  </section>
+  ${SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : ""}
+  ${SESSION.admin ? "" : tipHtml()}
+  ${SESSION.admin ? "" : publishCardHtml()}
+  <section class="card">
+    <div class="between"><h2 style="margin:0">Store setup</h2><span class="hint" style="margin:0">${done} of ${total} done</span></div>
+    <div class="lk-prog"><i style="width:${Math.round(done / total * 100)}%"></i></div>
+  </section>
+  <section class="card lk-group">
+    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet"].join(" · "), st.details)}
+    ${edRow("products","box", W(S).list, named.length ? `${named.length} ${named.length === 1 ? W(S).item : W(S).item + "s"}${out ? ` · ${out} sold out` : ""}` : "Nothing added yet", st.products)}
+    ${edRow("look","palette","Appearance","Logo, cover, colour and layout", st.look)}
+    ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", st.listing)}
+    ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
+    ${edRow("plan","card","Plan & payment", live ? "Paid · one-time" : STATUS === "review" ? "Paid · being checked" : "Not published yet", st.plan)}
+  </section>
+  ${live ? `<section class="card">
+    <div class="between"><h2 style="margin:0">This week</h2><button class="btn small" data-act="go" data-v="insights">See insights</button></div>
+    <div class="lk-kpis"><div><b>${v}</b><span>Visits</span></div><div><b>${o}</b><span>Order taps</span></div><div><b>${v ? Math.round(o / v * 100) : 0}%</b><span>Ordered</span></div></div>
+  </section>` : ""}`;
+}
+function edDetails(){
+  return `${edTop("Shop details", "home")}
+  <section class="card">
+    <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}" placeholder="${esc(W(S).ex.shop)}"></label>
+    <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="${esc(W(S).ex.tag)}"></label>
+    <label>WhatsApp number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="e.g. 012-345 6789"></label>
+    <p class="hint">Orders are sent here, and you log in with this number.</p>
+    <label>What do you sell?</label>
+    <div class="seg">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
+    <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
+  </section>`;
+}
+function edLook(){
+  return `${edTop("Appearance", "home")}
+  <section class="card">
+    <label>Logo</label>
+    <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
+    <label>Cover photo (optional)</label>
+    <div class="media-row">${photoBox("coverPrev", S.cover, "No cover", "wide")}${photoControls("cover", S.cover)}</div>
+  </section>
+  <section class="card">
+    <label style="margin-top:0">Brand colour</label>
+    <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
+    <label>Store style</label>
+    <div class="seg">
+      <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
+      <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
+      <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
+    </div>
+  </section>`;
+}
+function edStatus(){
+  return `${edTop("Store status", "home")}
+  <section class="card">
+    <div class="seg">
+      <button data-act="open" data-v="1" aria-pressed="${!S.closed}">Open</button>
+      <button data-act="open" data-v="0" aria-pressed="${S.closed}">Closed</button>
+    </div>
+    <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Closed for Hari Raya. Back on 5 April, 9am"></label>
+    <p class="hint">While closed, customers can still see your store, but can't send orders.</p>
+  </section>`;
+}
+function edPlan(){
+  return `${edTop("Plan & payment", "home")}
+  ${publishCardHtml() || `<section class="card"><div class="between"><h2 style="margin:0">Linkedai store</h2><span class="tag2 paid">${STATUS === "review" ? "Paid" : "Active"}</span></div>
+    <p class="hint">One-time payment, no monthly fees and no commission on your sales.</p>
+    <p class="hint"><a href="${esc(home())}?refund" target="_blank" rel="noopener">Refund Policy</a> · <a href="${esc(home())}?terms" target="_blank" rel="noopener">Terms</a></p></section>`}`;
+}
+function edProducts(){
+  const rows = S.items.map((it, i) => {
+    const u = safeImg(it.img);
+    return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(u)}" alt="">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
+  }).join("");
+  return `${edTop(W(S).list, "", `<button class="btn small solid" data-act="additem">${ico("plus",16,2.2)}Add</button>`)}
+  ${S.items.length ? `<section class="card lk-group">${rows}</section>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button></section>`}`;
+}
+function edProduct(i){
+  const it = S.items[i];
+  if (!it){ EDV = "products"; return edProducts(); }
+  return `${edTop("Edit " + W(S).item, "products", `<button class="btn small dangerline" data-act="del" data-i="${i}">${ico("trash",16)}Delete</button>`)}
+  <section class="card">
+    <label style="margin-top:0">Photo (optional)</label>
+    <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
+  </section>
+  <section class="card">
+    <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
+    <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
+  </section>
+  <section class="card">
+    <div class="between"><h2 style="margin:0">Options and prices</h2><span class="hint" style="margin:0">Customers pick one</span></div>
+    ${it.o.map((o,j)=>`
+      <div class="opt">
+        <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}" aria-label="Option name">
+        <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p||""}" placeholder="${esc(W(S).ex.price)}" aria-label="Price">
+        <button data-act="delopt" data-i="${i}" data-j="${j}" aria-label="Remove option">${ico("x",18)}</button>
+      </div>`).join("")}
+    <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add option</button>
+  </section>
+  <section class="card">
+    <label class="check" style="margin-top:0"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>Sold out for now</span></label>
+    <div class="between" style="margin-top:12px"><span class="hint" style="margin:0">Position in your list</span>
+      <span class="ctl"><button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button><button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button></span></div>
+  </section>`;
+}
+function edListing(){ return `${edTop("Browse listing", "home")}${edListingCard()}`; }
+function edListingCard(){
+  const cities = CITIES[S.loc.state] || [];
+  const other = S.loc.city && !cities.includes(S.loc.city);
+  return `
+  <section class="card" id="locCard">
+    <label class="check" style="margin-top:0"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}><span>List my store in Browse stores</span></label>
+    <p class="hint">Customers using the Linkedai app can find you by state, city and category.</p>
+    <div id="locBox" ${S.loc.on ? "" : "hidden"}>
+      <label>State<select data-floc="state"><option value="">Choose your state</option>${STATES.map(st => `<option ${S.loc.state === st ? "selected" : ""}>${st}</option>`).join("")}</select></label>
+      <label>City or town<select data-floc="city" ${S.loc.state ? "" : "disabled"}><option value="">${S.loc.state ? "Choose your city or town" : "Choose a state first"}</option>${cities.map(c => `<option ${S.loc.city === c ? "selected" : ""}>${c}</option>`).join("")}<option value="__other" ${other || EDOTHER ? "selected" : ""}>Other town</option></select></label>
+      ${other || EDOTHER ? `<label>Your town<input type="text" data-floc="cityOther" value="${esc(other ? S.loc.city : "")}" placeholder="Type your town"></label>` : ""}
+      <label>Neighbourhood (optional)<input type="text" data-floc="area" value="${esc(S.loc.area)}" placeholder="e.g. Taman Prima Saujana"></label>
+      <label>Category</label>
+      <div class="stalls pick">${Object.keys(CATS).map(k => `<button type="button" data-act="setcat" data-v="${k}" aria-pressed="${(S.cat ? S.cat : catOf(S)) === k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
+      <div class="nearbox">
+        <b>Nearest first (optional)</b>
+        <p class="hint" style="margin:4px 0 8px">Add your location so nearby customers see you first. It stays private: customers only see roughly how far away you are, never where.</p>
+        ${S.loc.lat != null ? `<p class="hint" style="margin:0 0 8px;color:#15803D;font-weight:700">Location added</p><button class="btn small" data-act="noloc">Remove my location</button>` : `<button class="btn small" data-act="myloc">${ico("pin",16)}Add my current location</button>`}
+      </div>
+    </div>
+  </section>`;
+}
+function edInsights(){
+  const items = bulletinItems(), seen = bulSeen();
+  setTimeout(() => { try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {} }, 0);
+  return `${edTop("Insights & news", "")}
+  <p class="hint" style="margin:-4px 2px 14px">Written for you by the Linkedai bot: your shop numbers, tips and updates.</p>
+  ${items.length ? items.map(x => `
+    <article class="bulcard ${seen.has(x.id) ? "" : "unread"}">
+      <div class="bulic">${IC[x.kind] || IC.news}</div>
+      <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
+    </article>`).join("") : `<p class="hint">Nothing here yet. Check back soon.</p>`}`;
+}
+function edAccount(){
+  const to = String(SITE.ownerWa || "").replace(/\D/g, "");
+  return `${edTop("Account", "")}
+  <section class="card lk-group">
+    <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(S.wa || "your WhatsApp number")} and your PIN</span></span></div>
+    ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
+    <a class="lk-row" href="${esc(home())}?terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
+    <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>You can log in again anytime</span></span></button>
+  </section>
+  <section class="card dangercard">
+    <h2>Danger zone</h2>
+    <p class="hint">Delete your store and account. Your store link stops working, and your items and photos are removed. This can't be undone.</p>
+    <button class="btn danger full" style="margin-top:12px" data-act="deleteacct">${ico("trash",18)}Delete my account</button>
+  </section>`;
+}
+let EDOTHER = false;
+function renderEditor(msg){
+  if (window.LK_ALLVIEW) return legacyEditor(msg);
+  setTimeout(updateBell, 0);
+  const tabbed = ["home","products","insights","account"].includes(EDV);
+  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, product: () => edProduct(EDI), listing: edListing, insights: edInsights, account: edAccount }[EDV] || (() => edHome(msg));
+  $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
+  const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY);
+  const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
+  if (msg && EDV !== "home") notifyQuiet(msg);
+}
+function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
+
+function openEditor(msg){
+  if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
+  if (!window.LK_KEEPVIEW) EDV = "home"; setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
+function touch(){ DIRTY = true; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Not saved yet. Tap Save when you're done."; }
 function photoBox(id, src, empty, shape){ const u = safeImg(src); return `<div class="media-prev ${shape}" id="${id}">${u ? `<img src="${esc(u)}" alt="" onerror="this.parentNode.textContent='Not a photo'">` : empty}</div>`; }
 function photoControls(kind, src, extra){
   return `<label class="btn small filebtn" style="margin:0">${safeImg(src) ? "Change" : "Upload"} photo<input type="file" accept="image/*" data-media="${kind}" ${extra || ""}></label>
@@ -1384,7 +1701,7 @@ $("pubGo").onclick = async () => {
   btn.disabled = false; btn.textContent = "Continue to payment";
 };
 
-function renderEditor(msg){
+function legacyEditor(msg){
   setTimeout(updateBell, 0);
   const link = storeLink(SESSION.id), live = STATUS === "live";
   const adminBar = SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : "";
@@ -1445,22 +1762,7 @@ function renderEditor(msg){
     </div>
   </section>
 
-  <section class="card" id="locCard">
-    <h2>Browse stores listing</h2>
-    <label class="check"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}> List my store in Browse stores</label>
-    <p class="hint">Customers using the Linkedai app can find you by state, area and category.</p>
-    <div id="locBox" ${S.loc.on ? "" : "hidden"}>
-      <label>State<select data-floc="state"><option value="">Choose your state</option>${STATES.map(st => `<option ${S.loc.state === st ? "selected" : ""}>${st}</option>`).join("")}</select></label>
-      <label>Area or town<input type="text" data-floc="area" value="${esc(S.loc.area)}" placeholder="e.g. Shah Alam, Taman Melawati"></label>
-      <label style="margin-bottom:0">Category</label>
-      <div class="stalls pick">${Object.keys(CATS).map(k => `<button type="button" data-act="setcat" data-v="${k}" aria-pressed="${(S.cat ? S.cat : catOf(S)) === k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
-      <div class="nearbox">
-        <b>Nearest first (optional)</b>
-        <p class="hint" style="margin:4px 0 8px">Add your location so nearby customers see you first. It stays private: customers only see roughly how far away you are, never where.</p>
-        ${S.loc.lat != null ? `<p class="hint" style="margin:0 0 8px;color:#15803D;font-weight:700">Location added</p><button class="btn small" data-act="noloc">Remove my location</button>` : `<button class="btn small" data-act="myloc">Add my current location</button>`}
-      </div>
-    </div>
-  </section>
+  ${edListingCard()}
 
   <section class="card">
     <h2>${W(S).list}</h2>
@@ -1468,8 +1770,8 @@ function renderEditor(msg){
       <div class="item">
         <div class="ihead"><b>Item ${i+1}</b>
           <span class="ctl">
-            <button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>↑</button>
-            <button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>↓</button>
+            <button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button>
+            <button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button>
             <button class="del" data-act="del" data-i="${i}">Delete</button>
           </span>
         </div>
@@ -1500,8 +1802,10 @@ function renderEditor(msg){
 function onField(e){
   const t = e.target, f = t.dataset.f;
   if (t.dataset.floc){
-    if (t.dataset.floc === "on"){ S.loc.on = t.checked; touch(); renderEditor(); return; }
-    if (t.dataset.floc === "state"){ S.loc.state = t.value; touch(); return; }
+    if (t.dataset.floc === "on"){ if (e.type !== "change") return; S.loc.on = t.checked; touch(); renderEditor(); return; }
+    if (t.dataset.floc === "state"){ S.loc.state = t.value; S.loc.city = ""; EDOTHER = false; touch(); if (!window.LK_ALLVIEW && e.type === "change") renderEditor(); return; }
+    if (t.dataset.floc === "city"){ if (t.value === "__other"){ EDOTHER = true; S.loc.city = ""; } else { EDOTHER = false; S.loc.city = t.value; } touch(); if (e.type === "change") renderEditor(); return; }
+    if (t.dataset.floc === "cityOther"){ const sel = document.querySelector('[data-floc="city"]'); if (!t.isConnected || (sel && sel.value !== "__other")) return; S.loc.city = t.value.trim().slice(0, 40); touch(); return; }
     if (t.dataset.floc === "area"){ S.loc.area = t.value; touch(); return; }
   }
   if (!f) return;
@@ -1522,12 +1826,13 @@ $("builder").addEventListener("click", async e => {
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
   const blankItem = () => ({ n: "", d: "", img: "", out: false, o: [{ l: "", p: 0 }] });
-  if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; redraw(); }
-  else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; redraw(); }
-  else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length) S.items.push(blankItem()); redraw(); } }
+  if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
+  if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
+  else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
+  else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem()); if (EDV === "product") EDV = "products"; redraw(); } }
   else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); }
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
-  else if (a === "additem"){ S.items.push(blankItem()); redraw(); }
+  else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ EDV = "product"; EDI = S.items.length - 1; window.scrollTo(0, 0); } redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
   else if (a === "kind"){ S.kind = b.dataset.v; redraw(); }
@@ -1551,7 +1856,7 @@ $("builder").addEventListener("click", async e => {
       notify("Your store and account have been deleted.");
     } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(err.message); }
   }
-  else if (a === "bulletin"){ openBulletin(); }
+  else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("insights"); }
   else if (a === "setcat"){ S.cat = b.dataset.v; touch(); renderEditor(); }
   else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed. Tap Save to keep the change."); }
   else if (a === "myloc"){
@@ -1607,7 +1912,8 @@ async function publishWithReceipt(input){
 }
 
 async function saveStore(){
-  if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse stores listing, so customers can find you.");
+  if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse listing, so customers can find you.");
+  if (S.loc.on && !S.loc.city) return notify("Choose your city or town under Browse listing, so customers can find you.");
   if (!S.name.trim()) return notify("Add your shop name first.");
   if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
@@ -2379,8 +2685,8 @@ function exFmt(km){ return km == null ? "" : km < 1 ? "about " + (Math.max(1, Ma
 function exList(){
   const q = EX.q.trim().toLowerCase();
   let list = EX.stores.filter(st =>
-    (!EX.state || st.state === EX.state) && (EX.cat === "all" || st.cat === EX.cat) &&
-    (!q || (st.name + " " + st.area + " " + st.state + " " + st.items + " " + st.tag).toLowerCase().includes(q)) &&
+    (!EX.state || st.state === EX.state) && (!EX.city || st.city === EX.city) && (EX.cat === "all" || st.cat === EX.cat) &&
+    (!q || (st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag).toLowerCase().includes(q)) &&
     (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)));
   list.forEach(st => st._km = EX.near && EX.me && st.lat != null ? kmBetween(EX.me.lat, EX.me.lng, st.lat, st.lng) : null);
   const byName = (a, b) => (a.closed - b.closed) || (b.v - a.v) || a.name.localeCompare(b.name);
@@ -2393,7 +2699,7 @@ function exCard(st){
     <span class="exslogo" style="background:${col}">${safeImg(st.logo) ? `<img src="${esc(safeImg(st.logo))}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
     <div class="exsbody">
       <b><span>${esc(st.name)}</span>${st.v ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}</b>
-      <span class="exsmeta">${esc(st.area ? st.area + ", " + st.state : st.state)}</span>
+      <span class="exsmeta">${esc([st.city || st.area, st.state].filter(Boolean).join(", "))}</span>
       <span class="exsmeta">${st._km != null ? esc(exFmt(st._km)) + " · " : ""}${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`} · ${esc(CATS[st.cat] || "Other")}</span>
     </div>
     <button type="button" class="exsfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.5 3 4.5 6.8 4.5c2.1 0 3.5 1.1 4.2 2.3.7-1.2 2.1-2.3 4.2-2.3 3.8 0 5.9 4 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg></button>
@@ -2403,12 +2709,45 @@ function exRender(){
   const body = $("exBody"); if (!body) return;
   document.querySelectorAll("[data-excat]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.excat === EX.cat)));
   const t = (id, on) => { const b = $(id); if (b) b.setAttribute("aria-pressed", String(!!on)); };
-  t("exNear", EX.near && EX.me); t("exOpen", EX.open); t("exVer", EX.ver); t("exFav", EX.fav);
+  t("exNear", EX.near && EX.me); t("exOpen", EX.open); t("exVer", EX.ver);
+  const fb = $("exFav"), bb = $("exBrowse"); if (fb && bb){ fb.toggleAttribute("aria-current", EX.fav); bb.toggleAttribute("aria-current", !EX.fav); if (EX.fav) fb.setAttribute("aria-current", "page"); else bb.setAttribute("aria-current", "page"); }
+  const cbox = $("exCities");
+  if (cbox){
+    const towns = [...new Set(EX.stores.filter(x => x.state === EX.state && x.city).map(x => x.city))].sort();
+    cbox.hidden = !EX.state || !towns.length;
+    cbox.innerHTML = cbox.hidden ? "" : [`<button type="button" data-city="" aria-pressed="${!EX.city}">All towns</button>`].concat(towns.map(c => `<button type="button" data-city="${esc(c)}" aria-pressed="${EX.city === c}">${esc(c)}</button>`)).join("");
+  }
   const list = exList();
   body.innerHTML = list.length ? list.map(exCard).join("") :
     `<section class="card exempty" style="text-align:center"><h2>${EX.stores.length ? `No stores ${EX.state ? "in " + esc(EX.state) + " " : ""}match yet` : "No stores listed yet"}</h2>
      <p class="hint">${EX.stores.length ? "Try another state, category or search." : "Linkedai stores appear here when sellers list them."}</p>
      ${signupOpen() ? `<a class="btn small" style="margin-top:10px" href="${esc(home())}?signup">Are you a seller? Open a store</a>` : ""}</section>`;
+}
+async function enterShop(card){
+  const id = card.dataset.store, st = (EX && EX.stores.find(x => x.id === id)) || {};
+  const url = new URL(storeLink(id), location.href);
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const go = async () => { history.pushState(null, "", url.pathname + url.search); document.body.classList.remove("exploring"); await route(); };
+  if (reduce || !card.animate){ return go(); }
+  const r = card.getBoundingClientRect(), lg = card.querySelector(".exslogo"), lr = lg ? lg.getBoundingClientRect() : null;
+  const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#3A1F2B";
+  const coverImg = safeImg(st.cover), logoImg = safeImg(st.logo);
+  const ov = document.createElement("div"); ov.className = "xfer"; ov.setAttribute("aria-hidden", "true");
+  ov.innerHTML = `<div class="xf-cover" style="background:${col}">${coverImg ? `<img src="${esc(coverImg)}" alt="">` : ""}</div>
+    <div class="xf-logo" style="background:${col}">${logoImg ? `<img src="${esc(logoImg)}" alt="">` : esc(initial(st.name || id))}</div>
+    <div class="xf-body"><i style="width:62%;height:22px"></i><i style="width:84%"></i><i style="width:40%"></i><i style="width:100%;height:76px;margin-top:14px"></i><i style="width:100%;height:76px"></i></div>`;
+  document.body.appendChild(ov);
+  const W = innerWidth, H = innerHeight, ease = "cubic-bezier(.2,.8,.2,1)";
+  const grow = ov.animate([{ clipPath: `inset(${r.top}px ${W - r.right}px ${H - r.bottom}px ${r.left}px round 18px)` }, { clipPath: "inset(0px 0px 0px 0px round 0px)" }], { duration: 520, easing: ease, fill: "both" });
+  ov.querySelector(".xf-cover").animate([{ transform: "scale(1.15)" }, { transform: "none" }], { duration: 700, easing: ease, fill: "both" });
+  const fl = ov.querySelector(".xf-logo"), tr = fl.getBoundingClientRect();
+  if (lr) fl.animate([{ transform: `translate(${lr.left - tr.left}px,${lr.top - tr.top}px) scale(${lr.width / tr.width})` }, { transform: "none" }], { duration: 620, easing: "cubic-bezier(.2,.9,.3,1.18)", fill: "both" });
+  const page = $("gwrap"), sink = page.animate([{ transform: "none", filter: "none" }, { transform: "scale(.94)", filter: "brightness(.8)" }], { duration: 520, easing: ease, fill: "forwards" });
+  const loaded = go();
+  await Promise.all([grow.finished.catch(() => {}), loaded.catch(() => {})]);
+  sink.cancel();
+  const fade = ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 280, easing: "ease-out", fill: "forwards" });
+  fade.onfinish = () => ov.remove(); setTimeout(() => ov.remove(), 900);
 }
 function exLocate(silent){
   if (!navigator.geolocation){ if (!silent) notify("Your browser can't share location."); return; }
@@ -2421,27 +2760,33 @@ function exLocate(silent){
 async function renderExplore(){
   setAccent(COLORS[0]); document.title = APP_NAME + " · Browse stores";
   let me = null, st = ""; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); st = localStorage.getItem("lk-state") || ""; } catch(e) {}
-  EX = { stores: [], me, near: !!me, state: STATES.includes(st) ? st : "", cat: "all", q: "", open: false, ver: false, fav: false, favs: exFavs() };
+  EX = { stores: [], me, near: !!me, state: STATES.includes(st) ? st : "", city: "", cat: "all", q: "", open: false, ver: false, fav: false, favs: exFavs() };
   $("gwrap").innerHTML = `
-    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">For sellers</a></div>
+    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="iconbtn" href="${esc(home())}" aria-label="For sellers" title="For sellers">${ico("store",21)}</a></div>
     <header class="exhead"><h1>Browse stores</h1><p class="exwhere">Home sellers across Malaysia. Order straight on WhatsApp.</p></header>
     <label class="exstate">State<select id="exState"><option value="">All states</option>${STATES.map(x => `<option ${x === EX.state ? "selected" : ""}>${x}</option>`).join("")}</select></label>
+    <div class="excities" id="exCities" hidden></div>
     <input type="search" id="exQ" placeholder="Search shops, items or towns">
     <div class="stalls" id="exCats"><button type="button" data-excat="all"><span class="stall">${stallIcon("all")}</span>All</button>${Object.keys(CATS).map(k => `<button type="button" data-excat="${k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
-    <div class="chips"><button type="button" id="exNear">Nearest first</button><button type="button" id="exOpen">Open now</button><button type="button" id="exVer">Verified</button><button type="button" id="exFav">Favourites</button></div>
+    <div class="chips"><button type="button" id="exNear">Nearest first</button><button type="button" id="exOpen">Open now</button><button type="button" id="exVer">Verified</button></div>
     <div id="exBody" class="exgrid">${loaderHtml("Finding stores...")}</div>
     <button class="btn full exinstall" id="exInstall" hidden>Install the Linkedai app</button>
-    ${legalLinks()}${copyrightLine()}`;
+    ${legalLinks()}${copyrightLine()}
+    <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("search",22)}<span>Browse</span></button><button type="button" id="exFav">${ico("heart",22)}<span>Saved</span></button></nav>`;
+  document.body.classList.add("exploring");
   show("page");
-  $("exState").onchange = () => { EX.state = $("exState").value; try { localStorage.setItem("lk-state", EX.state); } catch(e) {} exRender(); };
+  $("exState").onchange = () => { EX.state = $("exState").value; EX.city = ""; try { localStorage.setItem("lk-state", EX.state); } catch(e) {} exRender(); };
+  $("exCities").onclick = e => { const b = e.target.closest("[data-city]"); if (b){ EX.city = b.dataset.city; exRender(); } };
+  $("exBrowse").onclick = () => { EX.fav = false; exRender(); window.scrollTo({ top: 0, behavior: "smooth" }); };
   $("exQ").oninput = () => { EX.q = $("exQ").value; exRender(); };
   $("exNear").onclick = () => { if (EX.near && EX.me){ EX.near = false; exRender(); } else if (EX.me){ EX.near = true; exRender(); } else exLocate(false); };
   $("exOpen").onclick = () => { EX.open = !EX.open; exRender(); };
   $("exVer").onclick = () => { EX.ver = !EX.ver; exRender(); };
-  $("exFav").onclick = () => { EX.fav = !EX.fav; exRender(); };
+  $("exFav").onclick = () => { EX.fav = true; exRender(); window.scrollTo({ top: 0, behavior: "smooth" }); };
   $("exCats").onclick = e => { const b = e.target.closest("[data-excat]"); if (b){ EX.cat = b.dataset.excat; exRender(); } };
   $("exBody").addEventListener("click", e => {
-    const fav = e.target.closest("[data-fav]"); if (!fav) return;
+    const fav = e.target.closest("[data-fav]");
+    if (!fav){ const card = e.target.closest(".exshop"); if (card && !e.metaKey && !e.ctrlKey){ e.preventDefault(); enterShop(card); } return; }
     e.preventDefault(); e.stopPropagation();
     const id = fav.dataset.fav; EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs();
     fav.setAttribute("aria-pressed", String(EX.favs.has(id))); if (EX.fav) exRender();
@@ -2543,6 +2888,7 @@ let INSTALL_EVT = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); INSTALL_EVT = e; const b = $("exInstall"); if (b) b.hidden = false; });
 
 async function route(){
+  document.body.classList.remove("exploring");
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || "";
   if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
