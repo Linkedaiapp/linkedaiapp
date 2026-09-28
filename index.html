@@ -909,7 +909,8 @@ const SPLASH = (() => {
   try { first = !sessionStorage.getItem("lk-splash"); } catch(e) {}
   // First visit: let the logo finish drawing (a bit shorter before a store). Later visits: go as soon as ready.
   const qs = location.search.slice(1).split("&").filter(x => x && !x.includes("="));
-  const isStore = (qs[0] && !/^(build|edit|signup|admin)$/i.test(qs[0])) || !/\/$/.test(location.pathname);
+  const pw = decodeURIComponent(location.pathname.split("/").pop() || "").toLowerCase(), notStore = /^(build|edit|signup|admin)$/i;
+  const isStore = (qs[0] && !notStore.test(qs[0])) || (!/\/$/.test(location.pathname) && !notStore.test(pw));
   const minMs = first ? (isStore ? 1300 : 1900) : 0;
   const t0 = Date.now();
   let done = false;
@@ -987,6 +988,8 @@ function paypalLink(){
 }
 const signupOpen = () => SITE.signup !== false;
 // Works for yoursite/?shop (old links) and yoursite/shop (new links, served by 404.html on GitHub Pages)
+(function(){ const m = location.pathname.match(/^(.*\/)(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)\/$/i);
+  if (m) try { history.replaceState(null, "", m[1] + m[2] + location.search + location.hash); } catch(e){} })();
 const siteUrl = path => new URL(path, location.href.split("#")[0].split("?")[0]).href;
 const home = () => siteUrl("./");
 const storeLink = id => home() + id;
@@ -1263,7 +1266,7 @@ function wireLogin(){
     try {
       const r = await apiPost({ action: "login", wa, pin });
       SESSION = { id: r.id, pin }; saveSession(); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
-      if (!/^\?(build|edit)\b/.test(location.search)) history.pushState(null, "", home() + "?build");
+      if (!/^\?(build|edit)\b/.test(location.search) && !/\/(build|edit)$/.test(location.pathname)) history.pushState(null, "", home() + "build");
       openEditor();
       clearTimeout(slow);
     } catch(e){ clearTimeout(slow); $("lErr").textContent = e.message; $("lGo").disabled = false; $("lGo").textContent = $("lGo").dataset.label || "Log in and edit my store"; }
@@ -1282,7 +1285,7 @@ function renderStart(msg, mode){
     <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
     <header class="bh"><h1>${signup ? "Sign up" : "Seller login"}</h1><p>${signup ? "Create your store. You can build and preview it for free." : "Log in to edit your store."}</p></header>
     ${signup ? "" : loginCardHtml(msg)}
-    ${!signup && signupOpen() ? `<a class="btn full" href="${esc(home())}?signup">New seller? Sign up</a>` : ""}
+    ${!signup && signupOpen() ? `<a class="btn full" href="${esc(home())}signup">New seller? Sign up</a>` : ""}
     <section class="card" ${signup ? "" : "hidden"}>
       <h2>Your store details</h2>
       <label>Shop name<input type="text" id="cShop" placeholder="e.g. Aurora Boutique"></label>
@@ -1297,7 +1300,7 @@ function renderStart(msg, mode){
         <b>Not allowed on ${esc(APP_NAME)}</b>
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
       </div>
-      <label class="check"><input type="checkbox" id="cAgree"><span>I agree to the <a href="${esc(home())}?terms" target="_blank" rel="noopener">Terms</a> and <a href="${esc(home())}?privacy" target="_blank" rel="noopener">Privacy Policy</a>, and I won't sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</span></label>
+      <label class="check"><input type="checkbox" id="cAgree"><span>I agree to the <a href="${esc(home())}terms" target="_blank" rel="noopener">Terms</a> and <a href="${esc(home())}privacy" target="_blank" rel="noopener">Privacy Policy</a>, and I won't sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</span></label>
       <p class="err" id="cErr"></p>
       <button class="btn solid full" id="cGo">Sign up</button>
     </section>`;
@@ -1330,7 +1333,7 @@ function renderStart(msg, mode){
       const data = normalize({ name, wa });
       await apiPost({ action: "create", id, pin, data });
       SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false;
-      history.replaceState(null, "", home() + "?build");
+      history.replaceState(null, "", home() + "build");
       openEditor("Store created. Choose what you sell, add your items and photos, then tap Save.");
     } catch(e){ $("cErr").textContent = e.message; $("cGo").disabled = false; $("cGo").textContent = "Sign up"; }
   };
@@ -1550,7 +1553,7 @@ function edPlan(){
   return `${edTop("Plan & payment", "home")}
   ${publishCardHtml() || `<section class="card"><div class="between"><h2 style="margin:0">Linkedai store</h2><span class="tag2 paid">${STATUS === "review" ? "Paid" : "Active"}</span></div>
     <p class="hint">One-time payment, no monthly fees and no commission on your sales.</p>
-    <p class="hint"><a href="${esc(home())}?refund" target="_blank" rel="noopener">Refund Policy</a> · <a href="${esc(home())}?terms" target="_blank" rel="noopener">Terms</a></p></section>`}`;
+    <p class="hint"><a href="${esc(home())}refund" target="_blank" rel="noopener">Refund Policy</a> · <a href="${esc(home())}terms" target="_blank" rel="noopener">Terms</a></p></section>`}`;
 }
 function edProducts(){
   const rows = S.items.map((it, i) => {
@@ -1628,7 +1631,7 @@ function edAccount(){
   <section class="card lk-group">
     <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(S.wa || "your WhatsApp number")} and your PIN</span></span></div>
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
-    <a class="lk-row" href="${esc(home())}?terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
+    <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>You can log in again anytime</span></span></button>
   </section>
   <section class="card dangercard">
@@ -1751,7 +1754,7 @@ function renderPayment(){
     ${how}
     <label class="btn wa full filebtn" style="margin-top:14px;padding:15px">I've paid: upload receipt and publish<input type="file" accept="image/*" data-media="receipt" aria-label="Upload payment receipt"></label>
     <p class="status" id="payStatus" role="status"></p>
-    <p class="hint">We check every payment. Stores without a real payment are taken offline. See our <a href="${esc(home())}?refund" target="_blank" rel="noopener">Refund Policy</a>. Problems? ${help}.</p>`;
+    <p class="hint">We check every payment. Stores without a real payment are taken offline. See our <a href="${esc(home())}refund" target="_blank" rel="noopener">Refund Policy</a>. Problems? ${help}.</p>`;
 }
 $("payOverlay").addEventListener("click", e => {
   const b = e.target.closest("[data-paytab]"); if (!b) return;
@@ -1930,7 +1933,7 @@ $("builder").addEventListener("click", async e => {
   else if (a === "publish"){ openPublishCheck(); }
   else if (a === "backadmin"){
     if (DIRTY && !(await ask("You have unsaved changes. Leave anyway?", "Leave", true))) return;
-    DIRTY = false; clearSession(); history.pushState(null, "", home() + "?admin"); renderAdmin();
+    DIRTY = false; clearSession(); history.pushState(null, "", home() + "admin"); renderAdmin();
   }
   else if (a === "deleteacct"){
     if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
@@ -2112,17 +2115,17 @@ async function showStore(data, isPreview){
   $("stPlace").hidden = !plTxt; $("stPlace").innerHTML = plTxt ? ico("pin", 14, 2) + `<span>${esc(plTxt)}</span>` : "";
   $("brandLink").href = home();
   $("stReportWrap").hidden = !!isPreview;
-  $("stTerms").href = home() + "?terms"; $("stPrivacy").href = home() + "?privacy";
+  $("stTerms").href = home() + "terms"; $("stPrivacy").href = home() + "privacy";
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
-  $("stSafeLink").href = home() + "?safe";
-  $("stMore").href = home() + "?explore"; $("stMore").hidden = !!isPreview;
+  $("stSafeLink").href = home() + "safe";
+  $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
   $("stVerified").hidden = !(isPreview ? false : STORE_VERIFIED);
   if (!isPreview) track("view");
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const canSignup = signupOpen(), cta = $("stCta"), btn = $("stCtaBtn");
   cta.hidden = !!isPreview || (!canSignup && !to);
-  if (canSignup){ btn.textContent = "Sign up"; btn.href = home() + "?signup"; btn.removeAttribute("target"); }
+  if (canSignup){ btn.textContent = "Sign up"; btn.href = home() + "signup"; btn.removeAttribute("target"); }
   else if (to){ btn.textContent = "Chat with us"; btn.href = `https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I saw a store made with " + APP_NAME + " and I'd like one too.")}`; btn.target = "_blank"; btn.rel = "noopener"; }
   $("closedOv").hidden = !D.closed;
   $("closedShop").textContent = D.name;
@@ -2421,7 +2424,7 @@ async function adminStores(g, head, wire){
         SESSION = { id, key: ADMIN, admin: true }; saveSession();
         const r = await apiPost({ action: "login", id });
         S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
-        history.pushState(null, "", home() + "?build"); return openEditor();
+        history.pushState(null, "", home() + "build"); return openEditor();
       } catch(e){ clearSession(); return renderAdmin(e.message); }
     }
     let extra = {};
@@ -2517,7 +2520,7 @@ async function adminReview(g, head, wire){
       g.innerHTML = loaderHtml("Opening store...");
       try { SESSION = { id, key: ADMIN, admin: true }; saveSession();
         const r = await apiPost({ action: "login", id }); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
-        history.pushState(null, "", home() + "?build"); return openEditor(); }
+        history.pushState(null, "", home() + "build"); return openEditor(); }
       catch(e){ clearSession(); return renderAdmin(e.message); }
     }
     if (op === "unpublish" && !(await ask(`Take ${id} offline? They won't be able to publish it again themselves.`, "Take offline", true))) return;
@@ -2681,7 +2684,7 @@ function adminSettings(g, head, wire, cfg){
     <section class="card">
       <h2>Sign-ups</h2>
       <label class="check"><input type="checkbox" id="stSignup" ${signup ? "checked" : ""}> Show "New seller? Sign up" to everyone</label>
-      <p class="hint">Turn off to invite sellers privately with ${esc(home())}?signup</p>
+      <p class="hint">Turn off to invite sellers privately with ${esc(home())}signup</p>
     </section>
     <button class="btn solid full" style="padding:15px" id="stSave">Save settings</button>
     <section class="card guard" id="alertsCard" style="margin-top:22px">${loaderHtml("Loading alerts...")}</section>`;
@@ -2705,7 +2708,7 @@ function adminSettings(g, head, wire, cfg){
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
 const LEGAL_UPDATED = "25 September 2026";
 const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
-const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}?terms">Terms</a>·<a href="${esc(home())}?privacy">Privacy</a>·<a href="${esc(home())}?refund">Refunds</a></span>`;
+const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
 function legalContact(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return to ? `WhatsApp <a href="https://wa.me/${to}" target="_blank" rel="noopener">+${esc(to)}</a>` : "the contact details on our home page";
@@ -2782,7 +2785,7 @@ function legalDoc(which){
     <ul>
       <li>Publishing a store costs a one-time fee of ${price}. There are no monthly fees and no commission on your sales.</li>
       <li>Ad banners are sold separately.</li>
-      <li>Refunds follow our <a href="${esc(home())}?refund">Refund Policy</a>.</li>
+      <li>Refunds follow our <a href="${esc(home())}refund">Refund Policy</a>.</li>
     </ul>
     <h2>4. What you can't sell</h2>
     <p>You may not sell or promote:</p>
@@ -2855,7 +2858,7 @@ function exRender(){
   body.innerHTML = list.length ? list.map(exCard).join("") :
     `<section class="card exempty" style="text-align:center"><h2>${EX.stores.length ? `No stores ${EX.state ? "in " + esc(EX.state) + " " : ""}match yet` : "No stores listed yet"}</h2>
      <p class="hint">${EX.stores.length ? "Try another state, category or search." : "Linkedai stores appear here when sellers list them."}</p>
-     ${signupOpen() ? `<a class="btn small" style="margin-top:10px" href="${esc(home())}?signup">Are you a seller? Open a store</a>` : ""}</section>`;
+     ${signupOpen() ? `<a class="btn small" style="margin-top:10px" href="${esc(home())}signup">Are you a seller? Open a store</a>` : ""}</section>`;
 }
 async function enterShop(card){
   const id = card.dataset.store, st = (EX && EX.stores.find(x => x.id === id)) || {};
@@ -3002,8 +3005,8 @@ function renderHome(){
         <button class="btn solid full" id="lGo">Seller log in</button>
         <span class="authlink">Forgot your PIN? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Get help</a>` : "Contact us"}</span>
       </div>
-      ${signupOpen() ? `<a class="signupbox" href="${esc(home())}?signup">New seller? <b>Sign up</b></a>` : ""}
-      <a class="signupbox" style="margin-top:10px" href="${esc(home())}?explore">Shopping? <b>Browse Linkedai stores</b></a>
+      ${signupOpen() ? `<a class="signupbox" href="${esc(home())}signup">New seller? <b>Sign up</b></a>` : ""}
+      <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Browse Linkedai stores</b></a>
       ${legalLinks()}
       ${copyrightLine()}
     </div>
@@ -3024,8 +3027,8 @@ window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); INSTAL
 async function route(){
   document.body.classList.remove("exploring");
   await loadSite();
-  const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || "";
-  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ) && !(!bareQ && pathShop())) await CONFIG_P;
+  const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop();
+  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ)) await CONFIG_P;
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
