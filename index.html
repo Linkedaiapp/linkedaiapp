@@ -154,7 +154,12 @@ textarea{min-height:72px;resize:vertical}
 .stplace{position:absolute;top:14px;right:16px;max-width:calc(100% - 140px);display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:99px;
   background:var(--soft);color:var(--ink);font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stplace svg{width:14px;height:14px;flex:none;color:var(--plum)}
-.stmore{display:block;text-align:center;margin:14px 0 0;font-size:13px;font-weight:700;color:var(--ink)}
+.stmore{position:absolute;top:12px;left:12px;z-index:5;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);
+  background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 14px rgba(20,10,15,.18);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  -webkit-tap-highlight-color:transparent;transition:transform .15s ease}
+.stmore:active{transform:scale(.93)}
+.stmore[hidden]{display:none}
+.stmore svg{width:24px;height:24px;display:block}
 .streport{text-align:center;margin-top:8px}
 .streport .stlegal,.streport .stlegal a{color:var(--muted);font-size:12px}
 .streport button{background:none;border:0;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:6px}
@@ -311,7 +316,7 @@ textarea{min-height:72px;resize:vertical}
 .actions .btn{flex:1}
 
 /* ---------- Store ---------- */
-.st{max-width:720px;margin:0 auto;padding-bottom:130px}
+.st{max-width:720px;margin:0 auto;padding-bottom:130px;position:relative}
 .cover{height:clamp(150px,40vw,250px);background:var(--accent) center/cover no-repeat;position:relative}
 .cover.plain{background-image:radial-gradient(circle at 20% 0%,rgba(255,255,255,.18),transparent 55%),radial-gradient(circle at 90% 120%,rgba(0,0,0,.35),transparent 60%)}
 .back{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:8}
@@ -823,6 +828,7 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 <div id="store" hidden>
   <button class="btn small back" id="backBtn" hidden>Back to editor</button>
   <div class="st" id="stWrap">
+    <a class="stmore" id="stMore" href="#" aria-label="Browse more Linkedai stores" title="Browse more stores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
     <div class="cover" id="stCover" hidden></div>
     <section class="shopcard" id="stCard">
       <div class="st-logo" id="stLogo"></div>
@@ -840,7 +846,6 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
     <div class="safenote" id="stSafe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Safe to use.</b> Linkedai never asks for your bank login, OTP or passwords, and never asks you to install apps. You order on WhatsApp and pay the seller directly. <a href="#" id="stSafeLink">Is this safe?</a></div></div>
-    <a class="stmore" id="stMore" href="#">Browse more Linkedai stores</a>
     <span class="copyright" id="stCopy"></span>
     <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button><span class="stlegal"> · <a href="#" id="stTerms">Terms</a> · <a href="#" id="stPrivacy">Privacy</a></span></div>
     <div class="stcta" id="stCta" hidden>
@@ -2097,7 +2102,7 @@ async function showStore(data, isPreview){
   $("stCover").style.backgroundImage = "";
   $("stCover").innerHTML = cover ? `<img src="${esc(cover)}" alt="">` : "";
   $("stWrap").style.paddingTop = cover ? "0" : "56px";
-  $("stCard").style.marginTop = cover ? "" : "0";
+  $("stCard").style.marginTop = cover ? "" : "104px";   // no cover: leave room for the explore button above the logo
   $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`;
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
