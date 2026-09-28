@@ -1048,7 +1048,7 @@ const RETRY_OK = new Set(["login", "save", "admin"]);
 async function apiPost(body){
   if (SESSION && SESSION.admin && body.id === SESSION.id && !body.key && body.action !== "admin") body.key = SESSION.key;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
-  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }, body.action === "upload" ? 3 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 60000 : 0);
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 40000 : 0);
   if (j.error) throw new Error(j.error);
   return j;
 }
@@ -2014,6 +2014,29 @@ let UPQ = Promise.resolve(), UPN = 0;
 // the status line only exists on the Store home page, so never assume it is there
 function setStatus(t){ const el = $("saveStatus"); if (el) el.textContent = t; }
 function spinOn(box){ if (box && !box.querySelector(".upov")){ const ov = document.createElement("div"); ov.className = "upov"; ov.innerHTML = `<span class="spin"></span>Uploading`; box.appendChild(ov); } }
+// Does this photo address really show an image? (Google Drive can take a moment, or block some address styles)
+function imgLoads(url, ms){
+  return new Promise(res => {
+    const im = new Image(); let done = false;
+    const end = ok => { if (done) return; done = true; clearTimeout(tm); res(ok); };
+    const tm = setTimeout(() => end(false), ms || 8000);
+    im.onload = () => end(im.naturalWidth > 0); im.onerror = () => end(false);
+    im.referrerPolicy = "no-referrer"; im.src = url;
+  });
+}
+async function workingPhotoUrl(r){
+  const m = String(r.url || "").match(/\/d\/([\w-]+)/) || String(r.view || "").match(/\/d\/([\w-]+)/) || String(r.url || "").match(/[?&]id=([\w-]+)/);
+  const id = m && m[1], c = [r.url];
+  if (id) c.push("https://lh3.googleusercontent.com/d/" + id + "=w1200", "https://drive.google.com/thumbnail?id=" + id + "&sz=w1200", "https://drive.google.com/uc?export=view&id=" + id);
+  const list = c.filter((u, i) => u && c.indexOf(u) === i);
+  for (let a = 0; a < 2; a++){
+    for (const u of list){ if (await imgLoads(u)) return u; }
+    await new Promise(x => setTimeout(x, 1500));
+  }
+  return "";
+}
+function spinText(boxId, text){ const b = $(boxId), ov = b && b.querySelector(".upov"); if (ov && ov.lastChild) ov.lastChild.textContent = text; }
+
 $("bwrap").addEventListener("change", e => {
   const t = e.target, kind = t.dataset.media;
   if (!kind) return;
@@ -2025,18 +2048,25 @@ $("bwrap").addEventListener("change", e => {
   spinOn($(boxId)); if (btn) btn.classList.add("busy");
   UPN++; setStatus("Uploading photo...");
   UPQ = UPQ.then(async () => {
+    let step = "reading the photo";
     try {
       const size = kind === "logo" ? 300 : kind === "cover" ? 1200 : 700;
+      spinText(boxId, "Preparing");
       const c = await resizeImage(file, size, kind !== "cover");
       const dataUrl = c.toDataURL("image/jpeg", 0.8);
+      step = "sending to the server"; spinText(boxId, "Uploading");
       const r = await apiPost({ action: "upload", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: dataUrl.split(",")[1] });
-      if (kind === "logo") S.logo = r.url; else if (kind === "cover") S.cover = r.url; else if (S.items[+idx]) S.items[+idx].img = r.url;
+      if (!r || !r.url) throw new Error("The server didn't send back a photo link. Make sure you deployed the new script version.");
+      step = "checking the photo shows"; spinText(boxId, "Checking");
+      const good = await workingPhotoUrl(r);
+      if (!good) throw new Error("Your photo was uploaded, but Google Drive won't show it. Its link: " + r.url);
+      if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (S.items[+idx]) S.items[+idx].img = good;
       PENDING_BOXES.delete(boxId); UPN--; touch(); renderEditor(UPN ? "Photo added. Uploading the next one..." : "Photo added. Tap Save to put it on your store.");
     } catch(err){
       try { t.value = ""; } catch(_){}   // so choosing the same photo again after an error still triggers
       PENDING_BOXES.delete(boxId); UPN--; const b = $(boxId); const ov = b && b.querySelector(".upov"); if (ov) ov.remove();
       if (btn) btn.classList.remove("busy");
-      setStatus(""); notify(err.message || "Photo upload failed. Please try again.");
+      setStatus(""); notify((err.message || "Photo upload failed.") + " [failed while " + step + "]");
     }
     // the editor redraws after each upload, so bring back the spinner on photos still waiting
     PENDING_BOXES.forEach(id => spinOn($(id)));
