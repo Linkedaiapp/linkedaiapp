@@ -376,7 +376,7 @@ textarea{min-height:72px;resize:vertical}
 .cartbtn .cnt{background:rgba(255,255,255,.22);border-radius:8px;padding:2px 9px;min-width:30px;text-align:center}
 .cartbtn .lbl{flex:1;text-align:left}
 
-.overlay{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.overlay{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:30}
 /* ---------- Images: soft shimmer while loading, then fade in ---------- */
 .pimg,.pbig,.st-logo,.media-prev,.adban,.qrbox{position:relative}
 .pimg img,.pbig img,.st-logo img,.media-prev img,.adban img,.qrbox img{opacity:0;transition:opacity .45s ease}
@@ -730,7 +730,7 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
   </div>
 </div>
 <!-- ============ OWN CONFIRM / MESSAGE BOX ============ -->
-<div class="overlay" id="askOverlay" role="alertdialog" aria-modal="true" aria-labelledby="askText" style="align-items:center;z-index:20">
+<div class="overlay" id="askOverlay" role="alertdialog" aria-modal="true" aria-labelledby="askText" style="align-items:center;z-index:40">
   <div class="sheet" style="border-radius:20px;margin:16px;max-width:420px">
     <p id="askText" style="font-size:17px;font-weight:600;margin:0 0 18px"></p>
     <div class="row2">
@@ -1017,9 +1017,9 @@ async function loadSite(){
 
 /* ---------- Talking to your Google script ---------- */
 const SLOW_MSG = "The store server is slow right now. Please try again in a moment.";
-async function fetchJson(url, opts, tries){
+async function fetchJson(url, opts, tries, ms){
   for (let n = 0; n < tries; n++){
-    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 25000);
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), ms || 25000);
     try {
       const r = await fetch(url, { ...opts, signal: ctl.signal });
       const text = await r.text();
@@ -1043,7 +1043,7 @@ const RETRY_OK = new Set(["login", "save", "admin"]);
 async function apiPost(body){
   if (SESSION && SESSION.admin && body.id === SESSION.id && !body.key && body.action !== "admin") body.key = SESSION.key;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
-  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }, RETRY_OK.has(body.action) ? 2 : 1);
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }, body.action === "upload" ? 3 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 60000 : 0);
   if (j.error) throw new Error(j.error);
   return j;
 }
@@ -1150,21 +1150,29 @@ async function copyText(text){
 
 /* ---------- Photos ---------- */
 function resizeImage(file, max, square, type, quality){
-  return new Promise((res, rej) => {
-    const img = new Image();
-    img.onload = () => {
-      let sx=0, sy=0, sw=img.width, sh=img.height, w, h;
-      if (square){ const m=Math.min(sw,sh); sx=(sw-m)/2; sy=(sh-m)/2; sw=sh=m; w=h=Math.min(max, m); }
-      else { const k=Math.min(1, max/Math.max(sw,sh)); w=Math.round(sw*k); h=Math.round(sh*k); }
-      const c=document.createElement("canvas"); c.width=w; c.height=h;
-      const ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-      URL.revokeObjectURL(img.src);
-      res(c);
-    };
-    img.onerror = () => rej(new Error("That file isn't a photo we can read."));
-    img.src = URL.createObjectURL(file);
+  const draw = (src, iw, ih) => {
+    let sx=0, sy=0, sw=iw, sh=ih, w, h;
+    if (square){ const m=Math.min(sw,sh); sx=(sw-m)/2; sy=(sh-m)/2; sw=sh=m; w=h=Math.min(max, m); }
+    else { const k=Math.min(1, max/Math.max(sw,sh)); w=Math.round(sw*k); h=Math.round(sh*k); }
+    const c=document.createElement("canvas"); c.width=w; c.height=h;
+    const ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
+    ctx.imageSmoothingQuality="high";
+    ctx.drawImage(src, sx, sy, sw, sh, 0, 0, w, h);
+    return c;
+  };
+  const viaImg = () => new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { try { res(draw(img, img.naturalWidth || img.width, img.naturalHeight || img.height)); } catch(e){ rej(e); } URL.revokeObjectURL(url); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That file isn't a photo we can read. Try a JPG or PNG.")); };
+    img.src = url;
   });
+  // createImageBitmap copes better with very large phone photos; fall back to <img> if it can't
+  if (window.createImageBitmap){
+    return createImageBitmap(file, { imageOrientation: "from-image" })
+      .then(bm => { const c = draw(bm, bm.width, bm.height); if (bm.close) bm.close(); return c; })
+      .catch(() => viaImg());
+  }
+  return viaImg();
 }
 
 
@@ -1996,28 +2004,40 @@ async function saveStore(){
   btn.disabled = false; btn.textContent = "Save";
 }
 
-$("bwrap").addEventListener("change", async e => {
+// Photos upload one at a time (the Google script can drop parallel uploads), so picking several never loses any
+let UPQ = Promise.resolve(), UPN = 0;
+function spinOn(box){ if (box && !box.querySelector(".upov")){ const ov = document.createElement("div"); ov.className = "upov"; ov.innerHTML = `<span class="spin"></span>Uploading`; box.appendChild(ov); } }
+$("bwrap").addEventListener("change", e => {
   const t = e.target, kind = t.dataset.media;
   if (!kind) return;
   if (kind === "receipt") return publishWithReceipt(t);
   const file = t.files && t.files[0];
+  t.value = "";   // so choosing the same photo again (e.g. after an error) still triggers
   if (!file) return;
-  const st = $("saveStatus");
-  st.textContent = "Uploading photo...";
-  const box = kind === "logo" ? $("logoPrev") : kind === "cover" ? $("coverPrev") : $("imgPrev" + t.dataset.i);
+  const idx = t.dataset.i, boxId = kind === "logo" ? "logoPrev" : kind === "cover" ? "coverPrev" : "imgPrev" + idx;
   const btn = t.closest(".filebtn");
-  let ov = null;
-  if (box){ ov = document.createElement("div"); ov.className = "upov"; ov.innerHTML = `<span class="spin"></span>Uploading`; box.appendChild(ov); }
-  if (btn) btn.classList.add("busy");
-  try {
-    const size = kind === "logo" ? 300 : kind === "cover" ? 1200 : 700;
-    const c = await resizeImage(file, size, kind !== "cover");
-    const dataUrl = c.toDataURL("image/jpeg", 0.8);
-    const r = await apiPost({ action: "upload", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: dataUrl.split(",")[1] });
-    if (kind === "logo") S.logo = r.url; else if (kind === "cover") S.cover = r.url; else S.items[+t.dataset.i].img = r.url;
-    touch(); renderEditor("Photo added. Tap Save to put it on your store.");
-  } catch(err){ st.textContent = ""; if (ov) ov.remove(); if (btn) btn.classList.remove("busy"); notify(err.message); }
+  spinOn($(boxId)); if (btn) btn.classList.add("busy");
+  UPN++; $("saveStatus").textContent = "Uploading photo...";
+  UPQ = UPQ.then(async () => {
+    const st = $("saveStatus");
+    try {
+      const size = kind === "logo" ? 300 : kind === "cover" ? 1200 : 700;
+      const c = await resizeImage(file, size, kind !== "cover");
+      const dataUrl = c.toDataURL("image/jpeg", 0.8);
+      const r = await apiPost({ action: "upload", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: dataUrl.split(",")[1] });
+      if (kind === "logo") S.logo = r.url; else if (kind === "cover") S.cover = r.url; else if (S.items[+idx]) S.items[+idx].img = r.url;
+      PENDING_BOXES.delete(boxId); UPN--; touch(); renderEditor(UPN ? "Photo added. Uploading the next one..." : "Photo added. Tap Save to put it on your store.");
+    } catch(err){
+      PENDING_BOXES.delete(boxId); UPN--; const b = $(boxId); const ov = b && b.querySelector(".upov"); if (ov) ov.remove();
+      if (btn) btn.classList.remove("busy");
+      if (st) st.textContent = ""; notify(err.message || "Photo upload failed. Please try again.");
+    }
+    // the editor redraws after each upload, so bring back the spinner on photos still waiting
+    PENDING_BOXES.forEach(id => spinOn($(id)));
+  });
+  PENDING_BOXES.add(boxId);
 });
+const PENDING_BOXES = new Set();
 window.addEventListener("beforeunload", e => { if (DIRTY){ e.preventDefault(); e.returnValue = ""; } });
 
 /* ============================================================
