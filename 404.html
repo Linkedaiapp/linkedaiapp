@@ -1018,16 +1018,21 @@ async function loadSite(){
 /* ---------- Talking to your Google script ---------- */
 const SLOW_MSG = "The store server is slow right now. Please try again in a moment.";
 async function fetchJson(url, opts, tries, ms){
+  let detail = "";
   for (let n = 0; n < tries; n++){
     const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), ms || 25000);
     try {
       const r = await fetch(url, { ...opts, signal: ctl.signal });
       const text = await r.text();
       clearTimeout(timer);
-      try { return JSON.parse(text); } catch(e) { if (n === tries - 1) throw new Error(SLOW_MSG); }
+      try { return JSON.parse(text); } catch(e) {
+        // Google sent back a web page instead of data: keep a short readable hint so the real cause is visible
+        detail = String(text || "").replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 140);
+        if (n === tries - 1){ const er = new Error(SLOW_MSG + (detail ? " (Server said: " + detail + ")" : "")); er.slow = true; throw er; }
+      }
     } catch(e){
       clearTimeout(timer);
-      if (e.message === SLOW_MSG) throw e;
+      if (e.slow) throw e;
       if (n === tries - 1) throw new Error(e.name === "AbortError" ? SLOW_MSG : "Can't reach the store server. Check your internet and try again.");
     }
     await new Promise(res => setTimeout(res, 1200));
@@ -1946,7 +1951,7 @@ $("builder").addEventListener("click", async e => {
     { enableHighAccuracy: true, timeout: 12000 });
   }
   else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
-  else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); $("saveStatus").textContent = ok ? "Link copied." : "Press and hold the link to copy it."; }
+  else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); setStatus(ok ? "Link copied." : "Press and hold the link to copy it."); }
   else if (a === "preview"){ showStore(S, true); }
   else if (a === "save"){ await saveStore(); }
   else if (a === "recheck"){
@@ -1963,7 +1968,7 @@ async function publishWithReceipt(input){
   const file = input.files && input.files[0];
   input.value = "";
   if (!file) return;
-  const st = $("payStatus") || $("saveStatus");
+  const st = $("payStatus") || $("saveStatus") || document.createElement("p");   // may not exist on every page
   const btn = document.querySelector("#payOverlay .filebtn");
   const oldLabel = btn ? btn.firstChild.textContent : "";
   const busy = on => { if (!btn) return; btn.classList.toggle("busy", on);
@@ -2006,20 +2011,20 @@ async function saveStore(){
 
 // Photos upload one at a time (the Google script can drop parallel uploads), so picking several never loses any
 let UPQ = Promise.resolve(), UPN = 0;
+// the status line only exists on the Store home page, so never assume it is there
+function setStatus(t){ const el = $("saveStatus"); if (el) el.textContent = t; }
 function spinOn(box){ if (box && !box.querySelector(".upov")){ const ov = document.createElement("div"); ov.className = "upov"; ov.innerHTML = `<span class="spin"></span>Uploading`; box.appendChild(ov); } }
 $("bwrap").addEventListener("change", e => {
   const t = e.target, kind = t.dataset.media;
   if (!kind) return;
   if (kind === "receipt") return publishWithReceipt(t);
   const file = t.files && t.files[0];
-  t.value = "";   // so choosing the same photo again (e.g. after an error) still triggers
   if (!file) return;
   const idx = t.dataset.i, boxId = kind === "logo" ? "logoPrev" : kind === "cover" ? "coverPrev" : "imgPrev" + idx;
   const btn = t.closest(".filebtn");
   spinOn($(boxId)); if (btn) btn.classList.add("busy");
-  UPN++; $("saveStatus").textContent = "Uploading photo...";
+  UPN++; setStatus("Uploading photo...");
   UPQ = UPQ.then(async () => {
-    const st = $("saveStatus");
     try {
       const size = kind === "logo" ? 300 : kind === "cover" ? 1200 : 700;
       const c = await resizeImage(file, size, kind !== "cover");
@@ -2028,9 +2033,10 @@ $("bwrap").addEventListener("change", e => {
       if (kind === "logo") S.logo = r.url; else if (kind === "cover") S.cover = r.url; else if (S.items[+idx]) S.items[+idx].img = r.url;
       PENDING_BOXES.delete(boxId); UPN--; touch(); renderEditor(UPN ? "Photo added. Uploading the next one..." : "Photo added. Tap Save to put it on your store.");
     } catch(err){
+      try { t.value = ""; } catch(_){}   // so choosing the same photo again after an error still triggers
       PENDING_BOXES.delete(boxId); UPN--; const b = $(boxId); const ov = b && b.querySelector(".upov"); if (ov) ov.remove();
       if (btn) btn.classList.remove("busy");
-      if (st) st.textContent = ""; notify(err.message || "Photo upload failed. Please try again.");
+      setStatus(""); notify(err.message || "Photo upload failed. Please try again.");
     }
     // the editor redraws after each upload, so bring back the spinner on photos still waiting
     PENDING_BOXES.forEach(id => spinOn($(id)));
