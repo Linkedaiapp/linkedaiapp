@@ -744,6 +744,31 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
   .exgrid > .exshop,.plist > .prow,.exsfav[aria-pressed="true"] svg,.lk-tabs button[aria-current="page"] svg,.status:not(:empty){animation:none}
   .btn:active,.iconbtn:active,.exshop:active,.stalls button:active .stall{transform:none}
 }
+
+/* ---- Browse stores: compact header (v3) ---- */
+.exhead h1{font-size:24px;letter-spacing:-.025em;margin:2px 0 0}
+.exwhere{font-size:12.5px;margin:0 0 10px}
+.exbar2{display:flex;gap:8px;align-items:center}
+.exbar2 input{flex:1;min-width:0;margin:0;height:44px;padding-top:0;padding-bottom:0;font-size:15px}
+.exbar2 input,.exbar2 select{box-sizing:border-box}
+.exbar2 select{flex:none;width:38%;max-width:150px;margin:0;height:44px;padding-top:0;padding-bottom:0;font-size:14px;font-weight:600}
+#exCats{gap:8px;padding:10px 2px 2px}
+#exCats button{width:auto;flex-direction:row;gap:5px;height:38px;padding:0 14px 0 8px;border-radius:99px;background:var(--surface);border:1px solid var(--line2);font-size:13px;font-weight:700;white-space:nowrap}
+#exCats button .stall{width:24px;height:24px;border:0;border-radius:0;background:none;box-shadow:none;color:var(--plum)}
+#exCats button .stall svg{width:20px;height:20px}
+#exCats button[aria-pressed="true"]{background:#18395C;border-color:#18395C;color:#fff}
+#exCats button[aria-pressed="true"] .stall{background:none;border:0;box-shadow:none;color:#fff}
+.stalls+.chips{padding:8px 2px 4px}
+.stalls+.chips button{padding:6px 12px;font-size:12.5px}
+.exgrid{margin-top:4px}
+
+/* ---- Browse stores v4: no big title, sticky auto-hiding filters ---- */
+.exhead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.exfilters{background:var(--bg);padding:4px 0 2px}
+.exfilters.fx{position:fixed;top:env(safe-area-inset-top,0px);z-index:15;padding:6px 0 4px;box-shadow:0 8px 14px -10px rgba(20,10,15,.3);transition:transform .25s ease}
+.exfilters.fx.hide{transform:translateY(-110%)}
+#exCats{padding:8px 2px 0}
+.stalls+.chips{padding:8px 2px 6px}
 </style>
 </head>
 <body>
@@ -2953,18 +2978,26 @@ async function renderExplore(){
   EX = { stores: [], me, near: !!me, state: STATES.includes(st) ? st : "", city: "", cat: "all", q: "", open: false, ver: false, fav: false, favs: exFavs() };
   $("gwrap").innerHTML = `
     <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="iconbtn" href="${esc(home())}" aria-label="For sellers" title="For sellers">${ico("store",21)}</a></div>
-    <header class="exhead"><h1>Browse stores</h1><p class="exwhere">Home sellers across Malaysia. Order straight on WhatsApp.</p></header>
-    <label class="exstate">State<select id="exState"><option value="">All states</option>${STATES.map(x => `<option ${x === EX.state ? "selected" : ""}>${x}</option>`).join("")}</select></label>
+    <header class="exhead"><h1>Browse stores</h1></header>
+    <div class="exfwrap" id="exFwrap"><div class="exfilters" id="exFilters"><div class="exbar2"><input type="search" id="exQ" placeholder="Search stores or items" aria-label="Search"><select id="exState" aria-label="State"><option value="">All states</option>${STATES.map(x => `<option ${x === EX.state ? "selected" : ""}>${x}</option>`).join("")}</select></div>
     <div class="excities" id="exCities" hidden></div>
-    <input type="search" id="exQ" placeholder="Search shops, items or towns">
     <div class="stalls" id="exCats"><button type="button" data-excat="all"><span class="stall">${stallIcon("all")}</span>All</button>${Object.keys(CATS).map(k => `<button type="button" data-excat="${k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
-    <div class="chips"><button type="button" id="exNear">Nearest first</button><button type="button" id="exOpen">Open now</button><button type="button" id="exVer">Verified</button></div>
+    <div class="chips"><button type="button" id="exNear">Nearest first</button><button type="button" id="exOpen">Open now</button><button type="button" id="exVer">Verified</button></div></div></div>
     <div id="exBody" class="exgrid">${loaderHtml("Finding stores...")}</div>
     <button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button>
     ${legalLinks()}${copyrightLine()}
     <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("search",22)}<span>Browse</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart",22)}</span><span>Saved</span></button></nav>`;
   document.body.classList.add("exploring");
   show("page");
+
+  if (!window._exScrollOn){ window._exScrollOn = true; let last = 0;
+    window.addEventListener("scroll", () => { const f = document.getElementById("exFilters"), w = document.getElementById("exFwrap"); if (!f || !w) return;
+      const y = window.scrollY, dy = y - last, top = w.getBoundingClientRect().top + y - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--exsafe")) || 0);
+      if (y >= top){
+        if (!f.classList.contains("fx")){ w.style.height = f.offsetHeight + "px"; const r = w.getBoundingClientRect(); f.style.left = r.left + "px"; f.style.width = r.width + "px"; f.classList.add("fx"); }
+        if (dy > 8 && y > top + 60) f.classList.add("hide"); else if (dy < -8) f.classList.remove("hide");
+      } else if (f.classList.contains("fx")){ f.classList.remove("fx", "hide"); f.style.left = f.style.width = ""; w.style.height = ""; }
+      last = y; }, { passive: true }); }
   $("exState").onchange = () => { EX.state = $("exState").value; EX.city = ""; try { localStorage.setItem("lk-state", EX.state); } catch(e) {} exRender(); };
   $("exCities").onclick = e => { const b = e.target.closest("[data-city]"); if (b){ EX.city = b.dataset.city; exRender(); } };
   $("exBrowse").onclick = () => { EX.fav = false; exRender(); window.scrollTo({ top: 0, behavior: "smooth" }); };
