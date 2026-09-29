@@ -207,6 +207,13 @@ textarea{min-height:72px;resize:vertical}
 .safenote svg{width:22px;height:22px;flex:none;margin-top:1px}
 .safenote b{color:var(--ink)}
 .safenote a{color:var(--ink);font-weight:700}
+.pwabar{position:relative;display:flex;gap:12px;align-items:center;margin:14px 14px 0;padding:12px 40px 12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.pwabar .pwaicon{flex:none;width:38px;height:38px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-size:19px}
+.pwabar .pwatext{flex:1;min-width:0}
+.pwabar b{display:block;font-size:13.5px;line-height:1.3}
+.pwabar span{display:block;font-size:12px;color:var(--muted);margin-top:1px;line-height:1.35}
+.pwabar .btn{flex:none;padding:8px 14px;font-size:12.5px}
+.pwabar .pwax{position:absolute;right:8px;top:8px;width:26px;height:26px;border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
 /* ---------- Seller bulletin board ---------- */
 .topacts{display:flex;align-items:center;gap:8px}
 .bellbtn{position:relative;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
@@ -840,6 +847,7 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
       <span class="vbadge" id="stVerified" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified by Linkedai</span>
       <p class="tag" id="stTag"></p>
     </section>
+    <div class="pwabar" id="stPwaBar" hidden></div>
     <div class="adwrap" id="adWrap" hidden>
       <a class="adban" id="adBan" target="_blank" rel="noopener sponsored"><img id="adImg" alt="Sponsored"></a>
       <span class="adtag">Sponsored</span>
@@ -1483,6 +1491,7 @@ function edHome(msg){
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
   ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="insights" aria-label="Bulletin board">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
+  <div class="pwabar" id="sellerPwaBar" hidden></div>
   <section class="card linkcard">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${status}</div>
     ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link)}</span></p>
@@ -1654,6 +1663,7 @@ let EDOTHER = false;
 function renderEditor(msg){
   if (window.LK_ALLVIEW) return legacyEditor(msg);
   setTimeout(updateBell, 0);
+  if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","insights","account"].includes(EDV);
   const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, product: () => edProduct(EDI), listing: edListing, insights: edInsights, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
@@ -2118,6 +2128,7 @@ async function showStore(data, isPreview){
   $("stCover").innerHTML = cover ? `<img src="${esc(cover)}" alt="">` : "";
   $("stWrap").style.paddingTop = cover ? "0" : "56px";
   $("stCard").style.marginTop = cover ? "" : "104px";   // no cover: leave room for the explore button above the logo
+  if (isPreview) hidePwaBar("stPwaBar"); else showPwaBar("stPwaBar");
   $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`;
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
@@ -3055,7 +3066,36 @@ function showMessage(title, text){
 // Installable Linkedai app: register the offline helper on every page
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 let INSTALL_EVT = null;
-window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); INSTALL_EVT = e; const b = $("exInstall"); if (b) b.hidden = false; });
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); INSTALL_EVT = e;
+  const b = $("exInstall"); if (b) b.hidden = false;
+  showPwaBar("sellerPwaBar"); showPwaBar("stPwaBar");
+});
+window.addEventListener("appinstalled", () => { INSTALL_EVT = null; hidePwaBar("sellerPwaBar"); hidePwaBar("stPwaBar"); });
+
+// --- Custom "Add to home screen" banners (seller dashboard + storefront) ---
+function isStandalone(){ return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true; }
+function isIos(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+function pwaDismissed(key){ try { const t = +localStorage.getItem("pwaDismiss:" + key); return t && Date.now() - t < 14 * 864e5; } catch(e){ return false; } }
+function pwaDismiss(key){ try { localStorage.setItem("pwaDismiss:" + key, String(Date.now())); } catch(e){} hidePwaBar(key === "seller" ? "sellerPwaBar" : "stPwaBar"); }
+function hidePwaBar(id){ const b = $(id); if (b) b.hidden = true; }
+function showPwaBar(id){
+  const b = $(id); if (!b) return;
+  const isStore = id === "stPwaBar", key = isStore ? "store" : "seller";
+  if (isStandalone() || pwaDismissed(key)) { b.hidden = true; return; }
+  if (!INSTALL_EVT && !isIos()) { b.hidden = true; return; }
+  const title = isStore ? "Add " + (D && D.name ? D.name : "this store") + " to your home screen" : "Install the Linkedai app";
+  const body = isIos()
+    ? (isStore ? "Tap the Share icon, then Add to Home Screen, so you can reorder in one tap." : "Tap the Share icon, then Add to Home Screen, for quick access to your dashboard.")
+    : (isStore ? "One tap to reorder next time, no browser tabs to dig through." : "Quick access to your dashboard, right from your home screen.");
+  b.innerHTML = `<button class="pwax" type="button" aria-label="Dismiss">&times;</button>
+    <span class="pwaicon" aria-hidden="true">${ico("ext",19)}</span>
+    <span class="pwatext"><b>${esc(title)}</b><span>${esc(body)}</span></span>
+    ${isIos() ? "" : `<button class="btn small solid" type="button">Install</button>`}`;
+  b.hidden = false;
+  b.querySelector(".pwax").onclick = () => pwaDismiss(key);
+  const go = b.querySelector(".btn"); if (go) go.onclick = async () => { if (!INSTALL_EVT) return; INSTALL_EVT.prompt(); await INSTALL_EVT.userChoice; INSTALL_EVT = null; hidePwaBar(id); };
+}
 
 async function route(){
   document.body.classList.remove("exploring");
