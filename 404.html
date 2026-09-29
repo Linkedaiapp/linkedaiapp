@@ -1,30 +1,30 @@
 <!DOCTYPE html>
 <!--
-  Linkedai
-  Copyright (c) 2026 Linkedai. All rights reserved.
-  This software, its design and its code are the property of Linkedai.
+  Link Kedai App
+  Copyright (c) 2026 Link Kedai App. All rights reserved.
+  This software, its design and its code are the property of Link Kedai App.
   Copying, modifying, reusing or redistributing any part of it without written permission is not allowed.
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Linkedai</title>
-<meta name="copyright" content="© 2026 Linkedai. All rights reserved.">
+<title>Link Kedai App</title>
+<meta name="copyright" content="© 2026 Link Kedai App. All rights reserved.">
 <meta name="color-scheme" content="light only">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#3A1F2B">
+<meta name="theme-color" content="#18395C">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#3A1F2B">
+<meta name="theme-color" content="#18395C">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sacramento&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sora:wght@700;800&family=Sacramento&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#F4F4F2; --surface:#FFFFFF; --ink:#18181B; --muted:#6B6B72; --line:#E6E6E2;
-  --accent:#3A1F2B; --soft:#3A1F2B1F; --wa:#1F9D55; --err:#B3261E; --ok:#1F7A45;
+  --accent:#18395C; --soft:#18395C1F; --wa:#1F9D55; --err:#B3261E; --ok:#1F7A45;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -92,36 +92,45 @@ textarea{min-height:72px;resize:vertical}
 .filebtn{position:relative;overflow:hidden}
 /* ---------- Welcome screen: words written left to right, like the iPhone "hello" ---------- */
 #splash{position:fixed;inset:0;z-index:60;display:grid;place-items:center;color:#fff;overflow:hidden;
-  background:radial-gradient(120% 90% at 25% 15%,#6B3551 0%,#3A1F2B 55%,#1E0F16 100%);
+  background:radial-gradient(120% 90% at 25% 15%,#2E5B8F 0%,#18395C 55%,#0D2038 100%);
   transition:opacity .7s ease,visibility .7s ease}
 #splash.hide{opacity:0;visibility:hidden}
 #splash .sp-logo{display:flex;flex-direction:column;align-items:center;gap:18px}
-#splash .sp-mark{width:118px;height:118px;overflow:visible}
-#splash .sp-l{stroke-dasharray:110;stroke-dashoffset:110;animation:spDraw .7s cubic-bezier(.65,0,.35,1) .15s forwards}
-#splash .sp-dot{transform-box:fill-box;transform-origin:15% 50%;opacity:0;animation:spLink .75s cubic-bezier(.34,1.56,.64,1) .8s forwards}
-#splash .sp-name{font-family:"Figtree",system-ui,sans-serif;font-weight:800;font-size:34px;letter-spacing:-.03em;color:#fff;opacity:0;transform:translateY(10px);animation:spName .6s cubic-bezier(.16,1,.3,1) 1.15s forwards}
+#splash .sp-mark{width:200px;height:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.35));opacity:0;transform:scale(.7);animation:spPop .7s cubic-bezier(.34,1.56,.64,1) .15s forwards,spFloat 2.4s ease-in-out .9s infinite}
+@keyframes spPop{to{opacity:1;transform:none}}
+@keyframes spFloat{50%{transform:translateY(-8px)}}
+#splash .sp-logo::after{content:"";width:120px;height:4px;border-radius:99px;margin-top:6px;opacity:0;background:linear-gradient(90deg,transparent,#8DB6E8,transparent) no-repeat rgba(255,255,255,.16);background-size:45% 100%;animation:spFade .4s ease 1.2s forwards,spBar 1.3s ease-in-out 1.2s infinite}
+@keyframes spFade{to{opacity:1}}
+@keyframes spBar{0%{background-position:-60% 0}100%{background-position:160% 0}}
+#splash .sp-name{font-family:"Sora","Figtree",system-ui,sans-serif;font-weight:700;font-size:28px;letter-spacing:-.03em;color:#fff;opacity:0;transform:translateY(10px);animation:spName .6s cubic-bezier(.16,1,.3,1) 1.15s forwards}
 @keyframes spDraw{to{stroke-dashoffset:0}}
 @keyframes spLink{0%{opacity:0;transform:rotate(-70deg) scale(.4)}60%{opacity:1;transform:rotate(12deg) scale(1.08)}100%{opacity:1;transform:none}}
 @keyframes spName{to{opacity:1;transform:none}}
 /* small version for loading messages inside the app */
 .lkload{display:flex;flex-direction:column;align-items:center;gap:14px;padding:90px 10px;color:var(--muted);font-size:15px}
-.lkload svg{width:56px;height:56px;border-radius:16px;background:#3A1F2B;padding:6px;box-sizing:border-box;box-shadow:0 8px 22px rgba(58,31,43,.22)}
-.lkload .sp-l{stroke-dasharray:110;stroke-dashoffset:110;animation:lkDraw 1.8s cubic-bezier(.65,0,.35,1) infinite}
-.lkload .sp-dot{transform-box:fill-box;transform-origin:15% 50%;animation:lkLink 1.8s cubic-bezier(.34,1.56,.64,1) infinite}
-@keyframes lkDraw{0%{stroke-dashoffset:110}45%,80%{stroke-dashoffset:0}100%{stroke-dashoffset:-110}}
-@keyframes lkLink{0%,38%{opacity:0;transform:rotate(-70deg) scale(.4)}58%{opacity:1;transform:rotate(10deg) scale(1.06)}66%,86%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
+.lkload img{width:104px;height:auto;animation:lkBob 1.6s ease-in-out infinite;-webkit-mask-image:linear-gradient(105deg,#000 35%,rgba(0,0,0,.2) 50%,#000 65%);mask-image:linear-gradient(105deg,#000 35%,rgba(0,0,0,.2) 50%,#000 65%);-webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;animation:lkBob 1.6s ease-in-out infinite,lkShine 1.5s linear infinite}
+@keyframes lkBob{50%{transform:translateY(-6px)}}
+@keyframes lkShine{0%{-webkit-mask-position:100% 0;mask-position:100% 0}100%{-webkit-mask-position:0 0;mask-position:0 0}}
+.lkdots{display:flex;gap:7px}
+.lkdots i{width:8px;height:8px;border-radius:50%;background:#18395C;animation:lkDot 1s ease-in-out infinite}
+.lkdots i:nth-child(2){animation-delay:.15s}.lkdots i:nth-child(3){animation-delay:.3s}
+@keyframes lkDot{0%,80%,100%{transform:scale(.5);opacity:.35}40%{transform:scale(1);opacity:1}}
+:root[data-theme="dark"] .lkdots i{background:#F2F2F3}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lkdots i{background:#F2F2F3}}
 @media (prefers-reduced-motion:reduce){
-  #splash .sp-l,.lkload .sp-l{animation:none;stroke-dashoffset:0}
-  #splash .sp-dot,.lkload .sp-dot{animation:none;opacity:1;transform:none}
+  #splash .sp-mark,.lkload img,.lkdots i{animation:none;opacity:1;transform:none}
+  #splash .sp-logo::after{animation:none;opacity:1}
   #splash .sp-name{animation:none;opacity:1;transform:none}
   #splash{transition:opacity .3s ease,visibility .3s ease}
 }
 
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brandmark img,:root:not([data-theme="light"]) .bulhead img,:root:not([data-theme="light"]) .lkload img,:root:not([data-theme="light"]) .brand::before{filter:brightness(0) invert(1)}}
+:root[data-theme="dark"] .brandmark img,:root[data-theme="dark"] .bulhead img,:root[data-theme="dark"] .lkload img,:root[data-theme="dark"] .brand::before{filter:brightness(0) invert(1)}
 /* ---------- Home: centred brand + login, like Instagram ---------- */
 .auth{max-width:380px;margin:0 auto;padding:8vh 4px 120px;text-align:center}
 .brandmark{display:flex;flex-direction:column;align-items:center;gap:14px}
-.brandmark img{width:76px;height:76px;border-radius:22px;box-shadow:0 10px 28px rgba(58,31,43,.25)}
-.wordmark{font-size:46px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:0;color:var(--ink)}
+.brandmark img{width:132px;height:auto}
+.wordmark{font-family:"Sora","Figtree",system-ui,sans-serif;font-size:clamp(24px,7.6vw,32px);font-weight:700;letter-spacing:-.03em;line-height:1;margin:0;color:var(--ink)}
 .tagline{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:18px 0 6px;color:var(--ink)}
 .subhead{font-size:15px;line-height:1.5;color:var(--muted);margin:0 auto 26px;max-width:330px}
 .authform{text-align:left}
@@ -167,12 +176,12 @@ textarea{min-height:72px;resize:vertical}
 .rules p{margin:4px 0 0;color:var(--muted);line-height:1.45}
 /* short invitation under every store */
 .stcta{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 14px 0;font-size:14px;color:var(--muted)}
-.stcta-btn{display:inline-block;padding:7px 14px;border-radius:99px;background:#3A1F2B;color:#fff;font-weight:700;font-size:13px;text-decoration:none;transition:transform .15s ease}
+.stcta-btn{display:inline-block;padding:7px 14px;border-radius:99px;background:#18395C;color:#fff;font-weight:700;font-size:13px;text-decoration:none;transition:transform .15s ease}
 .stcta-btn:active{transform:scale(.96)}
-/* Linkedai Guard */
-.guard{border-color:#3A1F2B;background:linear-gradient(160deg,var(--surface) 55%,rgba(242,193,78,.12))}
+/* Link Kedai App Guard */
+.guard{border-color:#18395C;background:linear-gradient(160deg,var(--surface) 55%,rgba(141,182,232,.12))}
 .guardhead{display:flex;align-items:center;gap:12px}
-.guardhead svg{width:46px;height:46px;flex:none;filter:drop-shadow(0 4px 10px rgba(58,31,43,.25))}
+.guardhead svg{width:46px;height:46px;flex:none;filter:drop-shadow(0 4px 10px rgba(24,57,92,.25))}
 .guardhead b{display:block;font-size:18px;font-weight:800;letter-spacing:-.01em}
 .guardstate{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#15803D}
 .guardstate::before{content:"";width:8px;height:8px;border-radius:50%;background:#22C55E;box-shadow:0 0 0 3px rgba(34,197,94,.2);animation:guardPulse 2s ease-in-out infinite}
@@ -196,12 +205,12 @@ textarea{min-height:72px;resize:vertical}
 .legal .note{background:var(--soft);border-radius:12px;padding:12px 14px;margin:14px 0;font-size:14px}
 .legalnav{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
 .legalnav a{padding:8px 14px;border-radius:99px;border:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:700;font-size:14px;background:var(--surface)}
-.legalnav a[aria-current="page"]{background:#3A1F2B;border-color:#3A1F2B;color:#fff}
+.legalnav a[aria-current="page"]{background:#18395C;border-color:#18395C;color:#fff}
 .copyright{display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--muted)}
 .legallinks{display:block;text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
 .legallinks a{color:var(--muted);text-decoration:underline;margin:0 6px}
 /* ---------- Verified badge + safety note ---------- */
-.vbadge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px 4px 6px;border-radius:99px;background:rgba(242,193,78,.18);color:#3A1F2B;font-size:12px;font-weight:800}
+.vbadge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px 4px 6px;border-radius:99px;background:rgba(141,182,232,.18);color:#18395C;font-size:12px;font-weight:800}
 .vbadge svg{width:16px;height:16px}
 .safenote{display:flex;gap:10px;align-items:flex-start;margin:16px 14px 0;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;line-height:1.45;color:var(--muted)}
 .safenote svg{width:22px;height:22px;flex:none;margin-top:1px}
@@ -220,12 +229,12 @@ textarea{min-height:72px;resize:vertical}
 .bellbtn svg{width:21px;height:21px}
 .bellcount{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:#DC2626;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px var(--bg);animation:popIn .3s cubic-bezier(.16,1,.3,1) both}
 .bulhead{display:flex;align-items:center;gap:12px;margin:0 44px 14px 0}
-.bulhead img{width:42px;height:42px;border-radius:12px}
+.bulhead img{width:64px;height:auto}
 .bulhead b{display:block;font-size:20px;font-weight:800}
 .bulcard{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:10px;position:relative}
-.bulcard.unread{border-color:#3A1F2B;box-shadow:0 4px 14px rgba(58,31,43,.08)}
+.bulcard.unread{border-color:#18395C;box-shadow:0 4px 14px rgba(24,57,92,.08)}
 .bulcard.unread::after{content:"";position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:#DC2626}
-.bulic{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;background:var(--soft);color:#3A1F2B}
+.bulic{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;background:var(--soft);color:#18395C}
 .bulic svg{width:19px;height:19px}
 .bulbody{flex:1;min-width:0}
 .bulmeta{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
@@ -237,7 +246,7 @@ textarea{min-height:72px;resize:vertical}
 .bulnums .up{color:#15803D;font-weight:700}.bulnums .down{color:#B45309;font-weight:700}
 .bulbars{display:flex;align-items:flex-end;gap:6px;height:56px;margin:10px 0 2px}
 .bulbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
-.bulbars i{display:block;width:100%;border-radius:5px 5px 2px 2px;background:#3A1F2B;min-height:3px}
+.bulbars i{display:block;width:100%;border-radius:5px 5px 2px 2px;background:#18395C;min-height:3px}
 .bulbars i.low{background:var(--line)}
 .bulbars span{font-size:10px;color:var(--muted);font-weight:700}
 .bulcta{margin-top:10px}
@@ -251,7 +260,7 @@ textarea{min-height:72px;resize:vertical}
 .chips{display:flex;flex-wrap:nowrap !important;gap:8px;overflow-x:auto;padding:12px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .chips::-webkit-scrollbar{display:none}
 .chips button{flex:none;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;cursor:pointer;color:var(--ink)}
-.chips button[aria-pressed="true"]{background:#3A1F2B;border-color:#3A1F2B;color:#fff}
+.chips button[aria-pressed="true"]{background:#18395C;border-color:#18395C;color:#fff}
 .exlocbtn{display:flex;align-items:center;justify-content:center;gap:8px}
 .excard{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:10px;text-decoration:none;color:inherit;position:relative}
 .exlogo{width:56px;height:56px;border-radius:50%;flex:none;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;font-size:22px;box-shadow:0 0 0 3px var(--surface),0 4px 10px rgba(20,10,15,.12)}
@@ -271,7 +280,7 @@ textarea{min-height:72px;resize:vertical}
 .stalls button{flex:none;width:74px;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;cursor:pointer;color:var(--ink);font-size:11.5px;font-weight:700;line-height:1.2;text-align:center}
 .stalls button .stall{width:60px;height:60px;border-radius:18px;background:var(--surface);border:1.5px solid var(--line);display:grid;place-items:center;transition:transform .15s ease,border-color .2s ease,box-shadow .2s ease}
 .stalls button .stall svg{width:46px;height:46px}
-.stalls button[aria-pressed="true"] .stall{border-color:#3A1F2B;box-shadow:0 0 0 2px #F2C14E,0 6px 16px rgba(58,31,43,.18)}
+.stalls button[aria-pressed="true"] .stall{border-color:#18395C;box-shadow:0 0 0 2px #8DB6E8,0 6px 16px rgba(24,57,92,.18)}
 .stalls button:active .stall{transform:scale(.95)}
 .stalls.pick{flex-wrap:wrap;overflow:visible}
 .exstate{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-weight:700}
@@ -555,9 +564,9 @@ html,body{overflow-x:hidden}
 .brandbar a{font-weight:800;font-size:13px;letter-spacing:.02em;color:var(--muted);text-decoration:none}
 
 /* =====================================================================
-   Linkedai design system v2: warm neutrals, plum + gold, liquid glass
+   Link Kedai App design system v2: warm neutrals, navy + sky, liquid glass
    ===================================================================== */
-:root{--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#3A1F2B;--gold:#E9B949;
+:root{--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#18395C;--gold:#8DB6E8;
   --glass:rgba(255,255,255,.62);--glass-edge:rgba(255,255,255,.85);--r-card:18px;--r-btn:14px;--r-field:12px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}}
 :root[data-theme="dark"]{--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}
@@ -597,23 +606,23 @@ label{font-weight:600;font-size:13.5px}
 /* ---- badges ---- */
 .tag2{height:24px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border-radius:99px;font-size:12px;font-weight:700;background:#F1EDEA;color:#4A4340;border:0}
 .tag2.paid{background:#E7F4EC;color:#146C36}.tag2.claim{background:#FDF0DC;color:#9A4A06}.tag2.unpaid{background:#F4E4E2;color:#A12C1E}
-/* ---- top bars with the Linkedai mark ---- */
+/* ---- top bars with the Link Kedai App mark ---- */
 .top{min-height:56px}
-.brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em}
-.brand::before{content:"";width:30px;height:30px;border-radius:9px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22hl%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%22.16%22/%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%220%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2227%22%20fill%3D%22%233A1F2B%22/%3E%3Cg%20transform%3D%22translate%2860%2060%29%20scale%28.88%29%20translate%28-67%20-56%29%22%3E%3Cpath%20d%3D%22M40%2030V80a8%208%200%200%200%208%208H76%22%20fill%3D%22none%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%2215%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3Cg%20transform%3D%22translate%2884%2038%29%20rotate%28-45%29%22%3E%3Cg%20transform%3D%22translate%28-11.626%20-0.000%29%22%3E%3Cdefs%3E%3CclipPath%20id%3D%22c0i%22%3E%3Ccircle%20cx%3D%2210.040%22%20cy%3D%22-7.734%22%20r%3D%225.42%22/%3E%3C/clipPath%3E%3CclipPath%20id%3D%22C0i%22%3E%3Ccircle%20cx%3D%2210.040%22%20cy%3D%22-7.734%22%20r%3D%227.92%22/%3E%3C/clipPath%3E%3CclipPath%20id%3D%22c1i%22%3E%3Ccircle%20cx%3D%2214.639%22%20cy%3D%224.462%22%20r%3D%225.26%22/%3E%3C/clipPath%3E%3CclipPath%20id%3D%22C1i%22%3E%3Ccircle%20cx%3D%2214.639%22%20cy%3D%224.462%22%20r%3D%227.76%22/%3E%3C/clipPath%3E%3C/defs%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%280.000%200.000%29%20rotate%280.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%2824.000%200.000%29%20rotate%2825.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3Cg%20clip-path%3D%22url%28%23c0i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%280.000%200.000%29%20rotate%280.00%29%22%20fill%3D%22none%22%20stroke%3D%22%233A1F2B%22%20stroke-width%3D%228.0%22/%3E%3C/g%3E%3Cg%20clip-path%3D%22url%28%23C0i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%280.000%200.000%29%20rotate%280.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3C/g%3E%3Cg%20clip-path%3D%22url%28%23c1i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%2824.000%200.000%29%20rotate%2825.00%29%22%20fill%3D%22none%22%20stroke%3D%22%233A1F2B%22%20stroke-width%3D%228.0%22/%3E%3C/g%3E%3Cg%20clip-path%3D%22url%28%23C1i%29%22%3E%3Crect%20x%3D%22-16.0%22%20y%3D%22-8.0%22%20width%3D%2232.0%22%20height%3D%2216.0%22%20rx%3D%228.0%22%20transform%3D%22translate%2824.000%200.000%29%20rotate%2825.00%29%22%20fill%3D%22none%22%20stroke%3D%22%23E9B949%22%20stroke-width%3D%225.2%22/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20rx%3D%2227%22%20fill%3D%22url%28%23hl%29%22/%3E%3C/svg%3E") center/cover;flex:none;box-shadow:0 3px 8px rgba(58,31,43,.25)}
+.brand{font-family:"Sora","Figtree",system-ui,sans-serif;display:inline-flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em}
+.brand::before{content:"";width:46px;height:28px;background:url(logo.png) center/contain no-repeat;flex:none}
 /* ---- glass icon buttons ---- */
 .bellbtn,.iconbtn{width:42px;height:42px;border-radius:14px;border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.1);display:grid;place-items:center;color:var(--ink);cursor:pointer;padding:0;position:relative;text-decoration:none}
 .iconbtn svg{width:21px;height:21px}
 /* ---- chips ---- */
 .chips button,.chip{border-radius:99px;border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(20,10,15,.06);font-weight:600}
-.chips button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);border-color:rgba(255,255,255,.24);color:#FFFFFF;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 12px rgba(58,31,43,.25)}
+.chips button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);border-color:rgba(255,255,255,.24);color:#FFFFFF;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 12px rgba(24,57,92,.25)}
 /* ---- category tiles (line icons, no stalls) ---- */
 .stalls button .stall{width:58px;height:58px;border-radius:18px;background:var(--surface);border:1px solid var(--line);color:var(--plum);box-shadow:0 1px 2px rgba(20,10,15,.04)}
 .stalls button .stall svg{width:27px;height:27px}
-.stalls button[aria-pressed="true"] .stall{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);color:#FFFFFF;border-color:var(--plum);box-shadow:0 6px 16px rgba(58,31,43,.25)}
+.stalls button[aria-pressed="true"] .stall{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);color:#FFFFFF;border-color:var(--plum);box-shadow:0 6px 16px rgba(24,57,92,.25)}
 /* ---- home page ---- */
-.brandmark img{border-radius:22px;box-shadow:0 12px 30px rgba(58,31,43,.28)}
+.brandmark img{border-radius:0;box-shadow:none}
 .signupbox{border-radius:var(--r-btn);background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.07)}
 .chatfab{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--wa) 92%,transparent);border:1px solid rgba(255,255,255,.3);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 24px rgba(31,157,85,.35)}
 /* ---- sheets ---- */
@@ -740,8 +749,8 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 <body>
 <div id="splash" aria-hidden="true">
   <div class="sp-logo">
-    <svg viewBox="0 0 120 120" class="sp-mark"><g transform="translate(60 60) scale(.88) translate(-67 -56)"><path class="sp-l" d="M40 30V80a8 8 0 0 0 8 8H76" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(84 38) rotate(-45)"><g class="sp-dot"><g transform="translate(-11.626 -0.000)"><defs><clipPath id="c0z0"><circle cx="10.040" cy="-7.734" r="5.42"/></clipPath><clipPath id="C0z0"><circle cx="10.040" cy="-7.734" r="7.92"/></clipPath><clipPath id="c1z0"><circle cx="14.639" cy="4.462" r="5.26"/></clipPath><clipPath id="C1z0"><circle cx="14.639" cy="4.462" r="7.76"/></clipPath></defs><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><g clip-path="url(#c0z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C0z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g><g clip-path="url(#c1z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C1z0)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g></g></g></g></g></svg>
-    <div class="sp-name">Linkedai</div>
+    <img class="sp-mark" src="logo-white.png" alt="">
+    <div class="sp-name">Link Kedai App</div>
   </div>
 </div>
 <!-- ============ OWN CONFIRM / MESSAGE BOX ============ -->
@@ -796,7 +805,7 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 <div class="overlay" id="bulOverlay" role="dialog" aria-modal="true" aria-labelledby="bulTitle">
   <div class="sheet">
     <button class="xmini" data-close="bulOverlay" aria-label="Close">×</button>
-    <div class="bulhead"><img src="icon-192.png" alt=""><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From the Linkedai bot</span></div></div>
+    <div class="bulhead"><img src="logo.png" alt=""><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From the Link Kedai App bot</span></div></div>
     <div id="bulList"></div>
   </div>
 </div>
@@ -838,13 +847,13 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 <div id="store" hidden>
   <button class="btn small back" id="backBtn" hidden>Back to editor</button>
   <div class="st" id="stWrap">
-    <a class="stmore" id="stMore" href="#" aria-label="Browse more Linkedai stores" title="Browse more stores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
+    <a class="stmore" id="stMore" href="#" aria-label="Browse more Link Kedai App stores" title="Browse more stores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
     <div class="cover" id="stCover" hidden></div>
     <section class="shopcard" id="stCard">
       <div class="st-logo" id="stLogo"></div>
       <span class="stplace" id="stPlace" hidden></span>
       <h1 class="stname" id="stName"></h1>
-      <span class="vbadge" id="stVerified" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified by Linkedai</span>
+      <span class="vbadge" id="stVerified" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified by Link Kedai App</span>
       <p class="tag" id="stTag"></p>
     </section>
     <div class="pwabar" id="stPwaBar" hidden></div>
@@ -856,8 +865,8 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
     </div>
     <div class="tabs" id="secTabs" hidden></div>
     <main id="menu" style="margin-top:14px"></main>
-    <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
-    <div class="safenote" id="stSafe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Safe to use.</b> Linkedai never asks for your bank login, OTP or passwords, and never asks you to install apps. You order on WhatsApp and pay the seller directly. <a href="#" id="stSafeLink">Is this safe?</a></div></div>
+    <div class="brandbar"><a id="brandLink" href="#">Made with Link Kedai App</a></div>
+    <div class="safenote" id="stSafe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Safe to use.</b> Link Kedai App never asks for your bank login, OTP or passwords, and never asks you to install apps. You order on WhatsApp and pay the seller directly. <a href="#" id="stSafeLink">Is this safe?</a></div></div>
     <span class="copyright" id="stCopy"></span>
     <div class="streport" id="stReportWrap"><button type="button" id="stReport">Report this store</button><span class="stlegal"> · <a href="#" id="stTerms">Terms</a> · <a href="#" id="stPrivacy">Privacy</a></span></div>
     <div class="stcta" id="stCta" hidden>
@@ -937,14 +946,14 @@ const SPLASH = (() => {
 })();
 
 /* ============================================================
-   LINKEDAI (stores saved online through your Google Apps Script)
+   LINK KEDAI APP (stores saved online through your Google Apps Script)
    Files next to this index.html on your GitHub:
      site.json   { "api": "your Apps Script web app URL", "ownerWa": "60...", "price": "RM79" }
      ads.json    the ad banner on every store (optional)
    ============================================================ */
-const APP_NAME = "Linkedai";
+const APP_NAME = "Link Kedai App";
 
-const COLORS = ["#3A1F2B","#1F5E4A","#1E4D8C","#B03A2E","#8A4B08","#5B3FA8","#0F766E","#27272A"];
+const COLORS = ["#18395C","#1F5E4A","#1E4D8C","#B03A2E","#8A4B08","#5B3FA8","#0F766E","#27272A"];
 const CURRENCIES = "AED AUD BDT BND CAD CHF CNY EUR GBP HKD IDR INR JPY KHR KRW LAK MMK MYR NZD PHP PKR SAR SGD THB TWD USD VND".split(" ");
 const COMMON_CUR = ["MYR","SGD","BND","IDR","THB","PHP","USD"];
 const BLANK = {
@@ -1119,7 +1128,7 @@ const STATES = ["Johor", "Kedah", "Kelantan", "Kuala Lumpur", "Labuan", "Melaka"
 const CITIES = {"Johor": ["Johor Bahru", "Iskandar Puteri", "Pasir Gudang", "Skudai", "Kulai", "Batu Pahat", "Muar", "Kluang", "Segamat", "Pontian", "Kota Tinggi", "Mersing", "Tangkak", "Yong Peng", "Simpang Renggam"], "Kedah": ["Alor Setar", "Sungai Petani", "Kulim", "Langkawi", "Jitra", "Pendang", "Yan", "Baling", "Kuala Kedah", "Gurun", "Pokok Sena", "Bandar Baharu", "Sik"], "Kelantan": ["Kota Bharu", "Pasir Mas", "Tanah Merah", "Machang", "Kuala Krai", "Gua Musang", "Tumpat", "Pasir Puteh", "Bachok", "Jeli"], "Kuala Lumpur": ["Bangsar", "Brickfields", "Bukit Bintang", "Bukit Jalil", "Cheras", "Desa ParkCity", "Kampung Baru", "Kepong", "Mont Kiara", "Segambut", "Sentul", "Setapak", "Setiawangsa", "Sri Petaling", "Titiwangsa", "Wangsa Maju"], "Labuan": ["Labuan"], "Melaka": ["Melaka City", "Ayer Keroh", "Alor Gajah", "Jasin", "Masjid Tanah", "Merlimau", "Batu Berendam", "Bukit Beruang"], "Negeri Sembilan": ["Seremban", "Nilai", "Senawang", "Port Dickson", "Rembau", "Kuala Pilah", "Tampin", "Bahau", "Gemas", "Mantin"], "Pahang": ["Kuantan", "Temerloh", "Mentakab", "Bentong", "Raub", "Jerantut", "Pekan", "Rompin", "Maran", "Kuala Lipis", "Bera", "Cameron Highlands", "Genting Highlands"], "Perak": ["Ipoh", "Taiping", "Teluk Intan", "Sitiawan", "Lumut", "Kampar", "Batu Gajah", "Kuala Kangsar", "Parit Buntar", "Tapah", "Slim River", "Tanjung Malim", "Seri Iskandar", "Gerik"], "Perlis": ["Kangar", "Arau", "Padang Besar", "Kuala Perlis"], "Pulau Pinang": ["George Town", "Bayan Lepas", "Air Itam", "Tanjung Bungah", "Balik Pulau", "Butterworth", "Bukit Mertajam", "Seberang Jaya", "Kepala Batas", "Nibong Tebal", "Simpang Ampat"], "Putrajaya": ["Putrajaya"], "Sabah": ["Kota Kinabalu", "Penampang", "Putatan", "Papar", "Tuaran", "Kota Belud", "Sandakan", "Tawau", "Lahad Datu", "Semporna", "Keningau", "Kudat", "Ranau", "Beaufort"], "Sarawak": ["Kuching", "Samarahan", "Serian", "Sri Aman", "Betong", "Sibu", "Sarikei", "Mukah", "Kapit", "Bintulu", "Miri", "Limbang", "Lawas"], "Selangor": ["Shah Alam", "Petaling Jaya", "Subang Jaya", "Puchong", "Klang", "Port Klang", "Setia Alam", "Kajang", "Bangi", "Semenyih", "Seri Kembangan", "Cyberjaya", "Putra Heights", "Ampang", "Cheras", "Hulu Langat", "Selayang", "Gombak", "Rawang", "Sungai Buloh", "Kota Damansara", "Puncak Alam", "Kuala Selangor", "Tanjong Karang", "Sabak Bernam", "Kuala Kubu Bharu", "Batang Kali", "Sepang", "Dengkil", "Banting"], "Terengganu": ["Kuala Terengganu", "Kuala Nerus", "Kemaman", "Chukai", "Kerteh", "Dungun", "Marang", "Besut", "Setiu", "Hulu Terengganu"]};
 const CATS = { food: "Food", cakes: "Dessert", drinks: "Drinks", fashion: "Fashion", beauty: "Beauty", crafts: "Crafts", homestay: "Homestay", services: "Services", other: "Other" };
 function kmBetween(a, b, c, d){ const t = x => x * Math.PI / 180, h = Math.sin(t(c - a) / 2) ** 2 + Math.cos(t(a)) * Math.cos(t(c)) * Math.sin(t(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
-// ---------- Linkedai icon set: one line style everywhere (24px grid, 1.8 stroke, rounded) ----------
+// ---------- Link Kedai App icon set: one line style everywhere (24px grid, 1.8 stroke, rounded) ----------
 const ICONS = {"chevron": "<path d=\"m9 6 6 6-6 6\"/>", "back": "<path d=\"m15 6-6 6 6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/>", "heart": "<path d=\"M12 20s-7-4.4-9-9a4.6 4.6 0 0 1 9-3 4.6 4.6 0 0 1 9 3c-2 4.6-9 9-9 9z\"/>", "bell": "<path d=\"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.9 1.9 0 0 0 3.4 0\"/>", "chart": "<path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/>", "shield": "<path d=\"M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z\"/><path d=\"m9 12 2 2 4-4\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "chat": "<path d=\"M21 12a8.5 8.5 0 0 1-12.5 7.5L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z\"/>", "sliders": "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><circle cx=\"9\" cy=\"10\" r=\"2\"/><path d=\"m21 16-5-5-9 9\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-1-.9-1.4-.9-2.4 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4.1-4-7.2-9-7.2z\"/><circle cx=\"7.5\" cy=\"11.5\" r=\"1\"/><circle cx=\"10\" cy=\"7.5\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "card": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"2.5\"/><path d=\"M2.5 10h19M6 15h4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "share": "<circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "logout": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3\"/><path d=\"m10 17-5-5 5-5M5 12h11\"/>", "check": "<path d=\"m5 12 5 5 9-10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "box": "<path d=\"M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z\"/><path d=\"m3 7.5 9 4.5 9-4.5M12 12v9\"/>", "grid": "<rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "store": "<path d=\"M4 9.5V20h16V9.5\"/><path d=\"M3 9.5 4.5 4h15L21 9.5c0 1.6-1.3 2.5-2.9 2.5S15.3 11 15.3 9.5c0 1.6-1.4 2.5-3.3 2.5S8.7 11 8.7 9.5C8.7 11 7.5 12 5.9 12S3 11.1 3 9.5z\"/><path d=\"M9.5 20v-5h5v5\"/>", "food": "<path d=\"M3.5 11h17a8.5 8.5 0 0 1-17 0z\"/><path d=\"M9 7.5c0-1.4 1.4-1.4 1.4-3M13.6 7.5c0-1.4 1.4-1.4 1.4-3\"/>", "cake": "<path d=\"M4 21h16M5 21v-8.5h14V21\"/><path d=\"M5 16.5c2.3 1.2 4.7 1.2 7 0s4.7-1.2 7 0\"/><path d=\"M12 12.5V9\"/><path d=\"M12 6.5c.8-.8.8-1.7 0-2.5-.8.8-.8 1.7 0 2.5z\"/>", "cup": "<path d=\"M6 8h12l-1.5 12.5h-9z\"/><path d=\"M5 8h14M12 8V4h4\"/>", "shirt": "<path d=\"M8.5 3.5 3.5 6.5l2 4.5 2.5-1v10.5h8V10l2.5 1 2-4.5-5-3c0 1.6-1.6 2.8-3.5 2.8S8.5 5.1 8.5 3.5z\"/>", "sparkle": "<path d=\"M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z\"/><path d=\"M19 17v4M17 19h4\"/>", "scissors": "<circle cx=\"6\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"6\" cy=\"17.5\" r=\"2.5\"/><path d=\"M8.2 7.8 20 18M8.2 16.2 20 6\"/>", "home": "<path d=\"M3.5 11 12 4l8.5 7\"/><path d=\"M5.5 9.5V20h13V9.5\"/><path d=\"M10 20v-6h4v6\"/>", "wrench": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5v3h3l5.8-5.8a4 4 0 0 0 5.4-5.4L15 12l-2.4-.6L12 9z\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "flag": "<path d=\"M5 21V4M5 4h11l-2 4 2 4H5\"/>", "star": "<path d=\"m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z\"/>", "trend": "<path d=\"m3 17 6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "upload": "<path d=\"M12 16V4M7 9l5-5 5 5\"/><path d=\"M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/>", "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17\"/>", "up": "<path d=\"m6 15 6-6 6 6\"/>", "down": "<path d=\"m6 9 6 6 6-6\"/>", "x": "<path d=\"M6 6l12 12M18 6 6 18\"/>", "ext": "<path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/>"};
 function ico(name, size, sw){ return `<svg width="${size || 22}" height="${size || 22}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw || 1.8}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.box}</svg>`; }
 const CAT_ICON = { all: "grid", food: "food", cakes: "cake", drinks: "cup", fashion: "shirt", beauty: "sparkle", crafts: "scissors", homestay: "home", services: "wrench", other: "box" };
@@ -1135,7 +1144,7 @@ new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
 }))).observe(document.documentElement, { childList: true, subtree: true });
 
 function loaderHtml(text){
-  return `<div class="lkload" role="status"><svg viewBox="0 0 120 120" aria-hidden="true"><g transform="translate(60 60) scale(.88) translate(-67 -56)"><path class="sp-l" d="M40 30V80a8 8 0 0 0 8 8H76" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(84 38) rotate(-45)"><g class="sp-dot"><g transform="translate(-11.626 -0.000)"><defs><clipPath id="c0z1"><circle cx="10.040" cy="-7.734" r="5.42"/></clipPath><clipPath id="C0z1"><circle cx="10.040" cy="-7.734" r="7.92"/></clipPath><clipPath id="c1z1"><circle cx="14.639" cy="4.462" r="5.26"/></clipPath><clipPath id="C1z1"><circle cx="14.639" cy="4.462" r="7.76"/></clipPath></defs><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/><g clip-path="url(#c0z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C0z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(0.000 0.000) rotate(0.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g><g clip-path="url(#c1z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#3A1F2B" stroke-width="8.0"/></g><g clip-path="url(#C1z1)"><rect x="-16.0" y="-8.0" width="32.0" height="16.0" rx="8.0" transform="translate(24.000 0.000) rotate(25.00)" fill="none" stroke="#E9B949" stroke-width="5.2"/></g></g></g></g></g></svg><span>${esc(text)}</span></div>`;
+  return `<div class="lkload" role="status"><img src="logo.png" alt=""><div class="lkdots"><i></i><i></i><i></i></div><span>${esc(text)}</span></div>`;
 }
 function askText(message, value, hint, okLabel){
   return new Promise(res => {
@@ -1354,13 +1363,13 @@ function renderStart(msg, mode){
 /* ============================================================
    SELLER: editor
    ============================================================ */
-// ---------- Bulletin board: everything here is written by the Linkedai bot ----------
-// New Linkedai features are announced to sellers automatically from this list.
+// ---------- Bulletin board: everything here is written by the Link Kedai App bot ----------
+// New Link Kedai App features are announced to sellers automatically from this list.
 const APP_UPDATES = [
-  { id: "u-20260925-browse", at: "2026-09-25", title: "New: get found in Browse stores", body: "Turn on List my store in Browse stores, then pick your state, area and category, so customers can find you in the Linkedai app. You can also add your location for Nearest first. It stays private." },
-  { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Linkedai news now appear here. Look for the red number on the bell." },
-  { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Linkedai Guard now show a Verified badge, so customers can trust your link." },
-  { id: "u-20260924-guard", at: "2026-09-24", title: "Linkedai Guard keeps stores safe", body: "Every store is checked automatically for prohibited items, and customers can report stores. This keeps Linkedai trusted for honest sellers like you." },
+  { id: "u-20260925-browse", at: "2026-09-25", title: "New: get found in Browse stores", body: "Turn on List my store in Browse stores, then pick your state, area and category, so customers can find you in the Link Kedai App. You can also add your location for Nearest first. It stays private." },
+  { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Link Kedai App news now appear here. Look for the red number on the bell." },
+  { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Link Kedai App Guard now show a Verified badge, so customers can trust your link." },
+  { id: "u-20260924-guard", at: "2026-09-24", title: "Link Kedai App Guard keeps stores safe", body: "Every store is checked automatically for prohibited items, and customers can report stores. This keeps Link Kedai App trusted for honest sellers like you." },
   { id: "u-20260924-styles", at: "2026-09-24", title: "Three store styles", body: "Choose List, Photo grid or Minimal under Store style in your editor, to suit food, products or services." }
 ];
 const IC = {
@@ -1380,10 +1389,10 @@ function bulletinItems(){
   const push = (id, kind, label, title, body, cta) => out.push({ id, kind, label, title, body, cta });
   const sum = (arr, f) => arr.reduce((a, x) => a + (x[f] || 0), 0);
   // store status
-  if (b.status === "review") push("st-review-" + b.paidAt, "shield", "Store status", "Linkedai Guard is checking your store", "Thanks for your payment. Your store goes live as soon as it's approved, usually within 24 hours.");
-  else if (b.status === "offline") push("st-offline", "shield", "Store status", "Your store is offline", "Your store isn't visible to customers right now. Please message Linkedai to sort it out.", to ? `<a class="btn small" href="https://wa.me/${to}" target="_blank" rel="noopener">Message Linkedai</a>` : "");
-  else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Linkedai Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
-  else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a Verified by Linkedai badge on your store. It shows your payment was confirmed and your store passed our safety check.");
+  if (b.status === "review") push("st-review-" + b.paidAt, "shield", "Store status", "Link Kedai App Guard is checking your store", "Thanks for your payment. Your store goes live as soon as it's approved, usually within 24 hours.");
+  else if (b.status === "offline") push("st-offline", "shield", "Store status", "Your store is offline", "Your store isn't visible to customers right now. Please message Link Kedai App to sort it out.", to ? `<a class="btn small" href="https://wa.me/${to}" target="_blank" rel="noopener">Message Link Kedai App</a>` : "");
+  else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Link Kedai App Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
+  else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a Verified by Link Kedai App badge on your store. It shows your payment was confirmed and your store passed our safety check.");
   else if (b.status === "live" && b.paid) push("st-paid-" + b.paidAt, "shield", "Store status", "Payment received", "Your store is live. Once your payment is confirmed, you'll get the Verified badge.");
   else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store in your editor to go live.");
   // shop insights, this week vs last week
@@ -1408,22 +1417,22 @@ function bulletinItems(){
     push(`adins-${wk}-${i}`, "ad", "Ad insights · last 7 days", `Your ad was shown ${views} time${views === 1 ? "" : "s"}`,
       `<div class="bulnums"><div><b>${views}</b><span>Times shown</span></div><div><b>${taps}</b><span>Taps</span></div><div><b>${views ? (taps / views * 100).toFixed(1) : 0}%</b><span>Tap rate</span></div></div>
        <p>${left === null ? "Your ad has no end date." : left > 0 ? `Your ad runs for <b>${left} more day${left === 1 ? "" : "s"}</b>.` : "Your ad has ended."}</p>`,
-      to && left !== null && left <= 3 ? `<a class="btn small" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Linkedai, I'd like to extend my ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Extend my ad</a>` : "");
+      to && left !== null && left <= 3 ? `<a class="btn small" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Link Kedai App, I'd like to extend my ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Extend my ad</a>` : "");
   });
   // ad pricing, for sellers who don't advertise yet
-  if (b.adPrice && !(b.ads || []).length) push("adprice-" + shortHash(b.adPrice), "ad", "Advertise", "Put your banner on every Linkedai store",
+  if (b.adPrice && !(b.ads || []).length) push("adprice-" + shortHash(b.adPrice), "ad", "Advertise", "Put your banner on every Link Kedai App store",
     `<p>Your banner rotates with up to 4 others on every store, and you'll get weekly ad insights here. Price: <b>${esc(b.adPrice)}</b>.</p>`,
-    to ? `<a class="btn small solid" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Linkedai, I'd like to book an ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Book an ad</a>` : "");
+    to ? `<a class="btn small solid" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Link Kedai App, I'd like to book an ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Book an ad</a>` : "");
   // smart tips from the store itself
   const named = S.items.filter(it => it.n.trim()), noPhoto = named.filter(it => !safeImg(it.img)).length;
   if (noPhoto && S.layout !== "minimal") push("tip-photos-" + noPhoto, "tip", "Tip", `${noPhoto} item${noPhoto === 1 ? " has" : "s have"} no photo`, "Stores with a photo on every item get more orders. Tap Upload photo on each item in your editor.");
   if (!safeImg(S.logo)) push("tip-logo", "tip", "Tip", "Add your logo", "A logo makes your store look professional and helps customers recognise you.");
   if (named.length === 1) push("tip-more", "tip", "Tip", "Add more items", "Stores with at least 5 items get more visits. Add your other products or services.");
   if (S.closed) push("tip-closed", "tip", "Tip", "Your store shows as Closed", "Customers can't order while your store is closed. Switch it to Open under Store status when you're ready.");
-  // Linkedai updates
+  // Link Kedai App updates
   const since = b.created ? new Date(b.created - 14 * 864e5).toISOString().slice(0, 10) : "";
   APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
-  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Linkedai", "<p>I'm the Linkedai bot. I'll post your shop insights, tips and news here every week.</p>");
+  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm the Link Kedai App bot. I'll post your shop insights, tips and news here every week.</p>");
   return out;
 }
 function updateBell(){
@@ -1487,7 +1496,7 @@ function edHome(msg){
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
   const b = BUL || {}, last = (b.stats || []).slice(-7), sum = f => last.reduce((a, x) => a + (x[f] || 0), 0);
   const v = sum("v"), o = sum("o");
-  const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2" style="background:#F6EEE1;color:#3A1F2B">${ico("shield",14,2)}Verified</span>` : ""}`
+  const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2" style="background:#E8EEF7;color:#18395C">${ico("shield",14,2)}Verified</span>` : ""}`
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
   ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="insights" aria-label="Bulletin board">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
@@ -1564,7 +1573,7 @@ function edStatus(){
 }
 function edPlan(){
   return `${edTop("Plan & payment", "home")}
-  ${publishCardHtml() || `<section class="card"><div class="between"><h2 style="margin:0">Linkedai store</h2><span class="tag2 paid">${STATUS === "review" ? "Paid" : "Active"}</span></div>
+  ${publishCardHtml() || `<section class="card"><div class="between"><h2 style="margin:0">Link Kedai App store</h2><span class="tag2 paid">${STATUS === "review" ? "Paid" : "Active"}</span></div>
     <p class="hint">One-time payment, no monthly fees and no commission on your sales.</p>
     <p class="hint"><a href="${esc(home())}refund" target="_blank" rel="noopener">Refund Policy</a> · <a href="${esc(home())}terms" target="_blank" rel="noopener">Terms</a></p></section>`}`;
 }
@@ -1617,7 +1626,7 @@ function edListingCard(){
   return `
   <section class="card" id="locCard">
     <label class="check" style="margin-top:0"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}><span>List my store in Browse stores</span></label>
-    <p class="hint">Customers using the Linkedai app can find you by state, city and category.</p>
+    <p class="hint">Customers using the Link Kedai App can find you by state, city and category.</p>
     <div id="locBox" ${S.loc.on ? "" : "hidden"}>
       <label>State<select data-floc="state"><option value="">Choose your state</option>${STATES.map(st => `<option ${S.loc.state === st ? "selected" : ""}>${st}</option>`).join("")}</select></label>
       <label>City or town<select data-floc="city" ${S.loc.state ? "" : "disabled"}><option value="">${S.loc.state ? "Choose your city or town" : "Choose a state first"}</option>${cities.map(c => `<option ${S.loc.city === c ? "selected" : ""}>${c}</option>`).join("")}<option value="__other" ${other || EDOTHER ? "selected" : ""}>Other town</option></select></label>
@@ -1637,7 +1646,7 @@ function edInsights(){
   const items = bulletinItems(), seen = bulSeen();
   setTimeout(() => { try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {} }, 0);
   return `${edTop("Insights & news", "")}
-  <p class="hint" style="margin:-4px 2px 14px">Written for you by the Linkedai bot: your shop numbers, tips and updates.</p>
+  <p class="hint" style="margin:-4px 2px 14px">Written for you by the Link Kedai App bot: your shop numbers, tips and updates.</p>
   ${items.length ? items.map(x => `
     <article class="bulcard ${seen.has(x.id) ? "" : "unread"}">
       <div class="bulic">${IC[x.kind] || IC.news}</div>
@@ -2379,7 +2388,7 @@ async function renderAdmin(msg){
   const g = $("gwrap");
   if (!ADMIN){
     g.innerHTML = `<div class="auth" style="padding-top:10vh">
-      <div class="brandmark"><img src="icon-192.png" alt=""><h1 class="wordmark" style="font-size:34px">${esc(APP_NAME)} admin</h1></div>
+      <div class="brandmark"><img src="logo.png" alt=""><h1 class="wordmark" style="font-size:clamp(20px,6.4vw,26px)">${esc(APP_NAME)} admin</h1></div>
       <div class="authform" style="margin-top:26px">
         <label>Admin key<span class="pinwrap"><input type="password" id="admKey" autocomplete="current-password"><button type="button" class="pineye" data-eye="admKey" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
         <p class="err">${esc(msg || "")}</p>
@@ -2448,7 +2457,7 @@ async function adminStores(g, head, wire){
       <div class="stat"><b>${groups[2][1].length}</b><span>Not paid</span></div>
       <div class="stat"><b>${groups[3][1].length}</b><span>Offline</span></div>
     </div>
-    ${needsReview(list).length ? `<button class="btn full" style="margin-bottom:10px;border-color:#B45309;color:#B45309" id="goReview"><span class="guardbtn" style="justify-content:center">${GUARD_SVG}Linkedai Guard: ${needsReview(list).length} store${needsReview(list).length > 1 ? "s" : ""} need${needsReview(list).length > 1 ? "" : "s"} review</span></button>` : ""}
+    ${needsReview(list).length ? `<button class="btn full" style="margin-bottom:10px;border-color:#B45309;color:#B45309" id="goReview"><span class="guardbtn" style="justify-content:center">${GUARD_SVG}Link Kedai App Guard: ${needsReview(list).length} store${needsReview(list).length > 1 ? "s" : ""} need${needsReview(list).length > 1 ? "" : "s"} review</span></button>` : ""}
     <input type="search" id="admFind" placeholder="Search name, link or WhatsApp number" value="${esc(ADMQ)}" style="margin-bottom:6px">
     <p class="hint" style="margin:0 2px 8px">Open each receipt, check the money reached your account, then tap Payment OK. If it didn't, tap Take offline.</p>
     ${groups.filter(([t, arr, empty]) => arr.length || empty).map(([t, arr, empty]) =>
@@ -2490,7 +2499,7 @@ async function adminStores(g, head, wire){
   });
 }
 
-const GUARD_SVG = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 6 10v12c0 11.2 7.7 20.6 18 23 10.3-2.4 18-11.8 18-23V10L24 3z" fill="#3A1F2B"/><path d="M15.5 24.5l6 6 11-12" fill="none" stroke="#F2C14E" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const GUARD_SVG = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 6 10v12c0 11.2 7.7 20.6 18 23 10.3-2.4 18-11.8 18-23V10L24 3z" fill="#18395C"/><path d="M15.5 24.5l6 6 11-12" fill="none" stroke="#8DB6E8" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 // Stores the bot or customers flagged: only these need your eyes
 const needsReview = list => list.filter(x => x.status === "review" || (x.flag && !(x.reviewedAt >= x.updated)) || (x.reports && x.reports.count));
 const REASON_TXT = { drugs: "drugs, vape or cigarettes", alcohol: "alcohol", adult: "adult content", weapons: "weapons", scam: "scam or fake", other: "something else" };
@@ -2531,14 +2540,14 @@ async function adminReview(g, head, wire){
     : `Checked <b>${lastScan.stores}</b> store${lastScan.stores === 1 ? "" : "s"}${lastScan.auto ? " overnight" : ""} at ${esc(whenScan(lastScan.at))}${lastScan.hidden ? ` · hid <b>${lastScan.hidden}</b>` : ""} · <b>${todo.length}</b> need${todo.length === 1 ? "s" : ""} your review`;
   g.innerHTML = head + `
     <section class="card guard">
-      <div class="guardhead">${GUARD_SVG}<div><b>Linkedai Guard</b>
+      <div class="guardhead">${GUARD_SVG}<div><b>Link Kedai App Guard</b>
         ${nightly ? `<span class="guardstate">On duty · checks every save and every night at 3am</span>` : `<span class="guardstate off">Checks every save · nightly check is off</span>`}</div></div>
       <p class="guardline">${line}</p>
       ${nightly ? "" : `<p class="hint" style="margin:8px 0 0">To turn on the nightly check, run <b>setupNightly</b> once in Apps Script.</p>`}
       <button class="btn full guardbtn" style="margin-top:14px;justify-content:center" id="scanNow">Check all stores now</button>
     </section>
     <h2 style="font-size:19px;margin:18px 2px 10px">Needs review (${todo.length})</h2>
-    ${todo.map(card).join("") || `<p class="hint">All clear. Linkedai Guard found nothing that needs you.</p>`}
+    ${todo.map(card).join("") || `<p class="hint">All clear. Link Kedai App Guard found nothing that needs you.</p>`}
     <section class="card" style="margin-top:18px">
       <details class="guardwords">
         <summary>Guard's word lists</summary>
@@ -2551,11 +2560,11 @@ async function adminReview(g, head, wire){
   wire();
   const split = t => t.split(/[,\n]/).map(w => w.trim().toLowerCase()).filter(Boolean);
   $("wSave").onclick = () => apiPost({ action: "admin", key: ADMIN, op: "setwords", words: { block: split($("wBlock").value), check: split($("wCheck").value) } })
-    .then(r => renderAdmin(`Linkedai Guard updated: ${r.words.block.length} blocked words, ${r.words.check.length} check words. Tap Check all stores now to apply them to existing stores.`)).catch(e => notify(e.message));
+    .then(r => renderAdmin(`Link Kedai App Guard updated: ${r.words.block.length} blocked words, ${r.words.check.length} check words. Tap Check all stores now to apply them to existing stores.`)).catch(e => notify(e.message));
   $("scanNow").onclick = async () => {
-    $("scanNow").disabled = true; $("scanNow").innerHTML = `<span class="spin"></span> Linkedai Guard is checking...`;
+    $("scanNow").disabled = true; $("scanNow").innerHTML = `<span class="spin"></span> Link Kedai App Guard is checking...`;
     try { const r = (await apiPost({ action: "admin", key: ADMIN, op: "scanall" })).result;
-      renderAdmin(`Linkedai Guard checked ${r.stores} store${r.stores === 1 ? "" : "s"}. ${r.flagged} flagged${r.hidden ? `, ${r.hidden} hidden until you approve` : ""}.`); }
+      renderAdmin(`Link Kedai App Guard checked ${r.stores} store${r.stores === 1 ? "" : "s"}. ${r.flagged} flagged${r.hidden ? `, ${r.hidden} hidden until you approve` : ""}.`); }
     catch(e){ notify(e.message); $("scanNow").disabled = false; $("scanNow").innerHTML = "Check all stores now"; }
   };
   g.querySelectorAll("[data-op]").forEach(b => b.onclick = async () => {
@@ -2591,7 +2600,7 @@ function adminAds(g, head, wire, cfg){
     <section class="card">
       <h2>Ad price for sellers</h2>
       <label>Shown on sellers' Bulletin board<input type="text" id="adPriceIn" value="${esc(cfg.adPrice || "")}" placeholder="e.g. RM30 per week"></label>
-      <p class="hint">The Linkedai bot shows this with a "Book an ad" button that opens WhatsApp to you. Leave empty to hide it.</p>
+      <p class="hint">The Link Kedai App bot shows this with a "Book an ad" button that opens WhatsApp to you. Leave empty to hide it.</p>
     </section>
     ${list.map((a, k) => `
     <section class="card adslot">
@@ -2634,7 +2643,7 @@ function adminAds(g, head, wire, cfg){
   if ($("adStop")) $("adStop").onclick = async () => { if (await ask("Stop all ads on every store?", "Stop all", true)) adminSaveConfig(cfg, { ad: [] }, "All ads stopped."); };
 }
 
-// ---------- Alerts from Linkedai Guard (Telegram + email) ----------
+// ---------- Alerts from Link Kedai App Guard (Telegram + email) ----------
 async function loadAlertsCard(){
   const box = $("alertsCard"); if (!box) return;
   let al;
@@ -2643,13 +2652,13 @@ async function loadAlertsCard(){
   const on = al.on || {};
   const tick = (k, label) => `<label class="check"><input type="checkbox" data-alon="${k}" ${on[k] !== false ? "checked" : ""}> ${label}</label>`;
   box.innerHTML = `
-    <div class="guardhead">${GUARD_SVG}<div><b>Alerts from Linkedai Guard</b><span class="hint" style="margin:0">Straight to your Telegram and email</span></div></div>
+    <div class="guardhead">${GUARD_SVG}<div><b>Alerts from Link Kedai App Guard</b><span class="hint" style="margin:0">Straight to your Telegram and email</span></div></div>
     <h2 style="margin-top:18px">Telegram</h2>
     ${al.telegram ? `
       <p class="hint" style="margin:4px 0 8px"><span class="guardstate">Connected to @${esc(al.tgBot)}</span></p>
       <button class="btn small dangerline" id="tgOff">Disconnect Telegram</button>` : `
       <ol class="hint" style="padding-left:20px;margin:6px 0 0;line-height:1.55">
-        <li>In Telegram, open <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> and send <b>/newbot</b>. Name it, for example, <b>Linkedai Guard</b>.</li>
+        <li>In Telegram, open <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> and send <b>/newbot</b>. Name it, for example, <b>Link Kedai App Guard</b>.</li>
         <li>BotFather replies with a <b>token</b> (it looks like <code>123456:ABC-xyz...</code>). Copy it and paste it below.</li>
         <li>Open your new bot, tap <b>Start</b>, and send any message, like <b>hi</b>.</li>
         <li>Tap <b>Connect Telegram</b>.</li>
@@ -2690,7 +2699,7 @@ async function loadAlertsCard(){
     $("alErr").textContent = ""; busy($("tgConnect"), "Connecting");
     try {
       const r = await apiPost({ action: "admin", key: ADMIN, op: "tgconnect", token: $("tgToken").value.trim(), site: home() });
-      notify(`Connected to @${r.bot}. Check Telegram: Linkedai Guard just said hello.`);
+      notify(`Connected to @${r.bot}. Check Telegram: Link Kedai App Guard just said hello.`);
       loadAlertsCard();
     } catch(e){ busy($("tgConnect")); $("alErr").textContent = e.message; }
   };
@@ -2874,12 +2883,12 @@ function exList(){
   return list.sort((a, b) => EX.near && EX.me ? ((a._km == null) - (b._km == null)) || ((a._km || 0) - (b._km || 0)) || byName(a, b) : byName(a, b));
 }
 function exCard(st){
-  const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#3A1F2B";
+  const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
   return `<a class="exshop" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}">
     <div class="excover" style="background:${safeImg(st.cover) ? "var(--soft)" : "linear-gradient(135deg," + col + "22," + col + "44)"}">${safeImg(st.cover) ? `<img src="${esc(safeImg(st.cover))}" alt="" loading="lazy">` : stallIcon(st.cat)}</div>
     <span class="exslogo" style="background:${col}">${safeImg(st.logo) ? `<img src="${esc(safeImg(st.logo))}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
     <div class="exsbody">
-      <b><span>${esc(st.name)}</span>${st.v ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}</b>
+      <b><span>${esc(st.name)}</span>${st.v ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}</b>
       <span class="exsmeta">${esc([st.city || st.area, st.state].filter(Boolean).join(", "))}</span>
       <span class="exsmeta">${st._km != null ? esc(exFmt(st._km)) + " · " : ""}${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`} · ${esc(CATS[st.cat] || "Other")}</span>
     </div>
@@ -2901,7 +2910,7 @@ function exRender(){
   const list = exList();
   body.innerHTML = list.length ? list.map(exCard).join("") :
     `<section class="card exempty" style="text-align:center"><h2>${EX.stores.length ? `No stores ${EX.state ? "in " + esc(EX.state) + " " : ""}match yet` : "No stores listed yet"}</h2>
-     <p class="hint">${EX.stores.length ? "Try another state, category or search." : "Linkedai stores appear here when sellers list them."}</p>
+     <p class="hint">${EX.stores.length ? "Try another state, category or search." : "Link Kedai App stores appear here when sellers list them."}</p>
      ${signupOpen() ? `<a class="btn small" style="margin-top:10px" href="${esc(home())}signup">Are you a seller? Open a store</a>` : ""}</section>`;
 }
 async function enterShop(card){
@@ -2911,7 +2920,7 @@ async function enterShop(card){
   const go = async () => { history.pushState(null, "", url.pathname + url.search); document.body.classList.remove("exploring"); await route(); };
   if (reduce || !card.animate){ return go(); }
   const r = card.getBoundingClientRect(), lg = card.querySelector(".exslogo"), lr = lg ? lg.getBoundingClientRect() : null;
-  const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#3A1F2B";
+  const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
   const coverImg = safeImg(st.cover), logoImg = safeImg(st.logo);
   const ov = document.createElement("div"); ov.className = "xfer"; ov.setAttribute("aria-hidden", "true");
   ov.innerHTML = `<div class="xf-cover" style="background:${col}">${coverImg ? `<img src="${esc(coverImg)}" alt="">` : ""}</div>
@@ -2951,7 +2960,7 @@ async function renderExplore(){
     <div class="stalls" id="exCats"><button type="button" data-excat="all"><span class="stall">${stallIcon("all")}</span>All</button>${Object.keys(CATS).map(k => `<button type="button" data-excat="${k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
     <div class="chips"><button type="button" id="exNear">Nearest first</button><button type="button" id="exOpen">Open now</button><button type="button" id="exVer">Verified</button></div>
     <div id="exBody" class="exgrid">${loaderHtml("Finding stores...")}</div>
-    <button class="btn full exinstall" id="exInstall" hidden>Install the Linkedai app</button>
+    <button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button>
     ${legalLinks()}${copyrightLine()}
     <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("search",22)}<span>Browse</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart",22)}</span><span>Saved</span></button></nav>`;
   document.body.classList.add("exploring");
@@ -3037,7 +3046,7 @@ function renderHome(){
   $("gwrap").innerHTML = `
     <div class="auth">
       <div class="brandmark">
-        <img src="icon-192.png" alt="">
+        <img src="logo.png" alt="">
         <h1 class="wordmark">${esc(APP_NAME)}</h1>
       </div>
       <p class="tagline">Your shop, one link.</p>
@@ -3050,7 +3059,7 @@ function renderHome(){
         <span class="authlink">Forgot your PIN? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Get help</a>` : "Contact us"}</span>
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}signup">New seller? <b>Sign up</b></a>` : ""}
-      <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Browse Linkedai stores</b></a>
+      <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Browse Link Kedai App stores</b></a>
       ${legalLinks()}
       ${copyrightLine()}
     </div>
@@ -3063,7 +3072,7 @@ function showMessage(title, text){
   $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><a class="btn solid" href="${esc(home())}">Go to ${esc(APP_NAME)}</a>`;
   show("page");
 }
-// Installable Linkedai app: register the offline helper on every page
+// Installable Link Kedai App: register the offline helper on every page
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 let INSTALL_EVT = null;
 window.addEventListener("beforeinstallprompt", e => {
@@ -3084,7 +3093,7 @@ function showPwaBar(id){
   const isStore = id === "stPwaBar", key = isStore ? "store" : "seller";
   if (isStandalone() || pwaDismissed(key)) { b.hidden = true; return; }
   if (!INSTALL_EVT && !isIos()) { b.hidden = true; return; }
-  const title = isStore ? "Add " + (D && D.name ? D.name : "this store") + " to your home screen" : "Install the Linkedai app";
+  const title = isStore ? "Add " + (D && D.name ? D.name : "this store") + " to your home screen" : "Install the Link Kedai App";
   const body = isIos()
     ? (isStore ? "Tap the Share icon, then Add to Home Screen, so you can reorder in one tap." : "Tap the Share icon, then Add to Home Screen, for quick access to your dashboard.")
     : (isStore ? "One tap to reorder next time, no browser tabs to dig through." : "Quick access to your dashboard, right from your home screen.");

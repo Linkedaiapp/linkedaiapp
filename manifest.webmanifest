@@ -1,12 +1,12 @@
 {
-  "name": "Linkedai",
-  "short_name": "Linkedai",
-  "description": "Find Linkedai home sellers near you and order on WhatsApp.",
+  "name": "Link Kedai App",
+  "short_name": "Link Kedai",
+  "description": "Find Link Kedai App home sellers near you and order on WhatsApp.",
   "start_url": "./?explore",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#3A1F2B",
-  "theme_color": "#3A1F2B",
+  "background_color": "#FFFFFF",
+  "theme_color": "#18395C",
   "icons": [
     {
       "src": "icon-192.png",
