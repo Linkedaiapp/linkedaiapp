@@ -843,6 +843,7 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
       <button class="adx" id="adX" type="button" aria-label="Hide ads">×</button>
       <div class="addots" id="adDots"></div>
     </div>
+    <div class="tabs" id="secTabs" hidden></div>
     <main id="menu" style="margin-top:14px"></main>
     <div class="brandbar"><a id="brandLink" href="#">Made with Linkedai</a></div>
     <div class="safenote" id="stSafe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#3A1F2B"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#F2C14E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Safe to use.</b> Linkedai never asks for your bank login, OTP or passwords, and never asks you to install apps. You order on WhatsApp and pay the seller directly. <a href="#" id="stSafeLink">Is this safe?</a></div></div>
@@ -1075,7 +1076,7 @@ const W = d => KINDS[d && d.kind] || KINDS.products;
 function normalize(d){
   const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
   x.items = (Array.isArray(x.items) ? x.items : []).map(it => ({
-    n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out,
+    n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out, sec: String(it.sec || "").trim().slice(0, 30),
     o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String(o.l || ""), p: Number(o.p) || 0 })) : [{ l: "", p: 0 }]
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
@@ -1558,7 +1559,7 @@ function edPlan(){
 function edProducts(){
   const rows = S.items.map((it, i) => {
     const u = safeImg(it.img);
-    return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(u)}" alt="">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
+    return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(u)}" alt="">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${it.sec ? esc(it.sec) + " · " : ""}${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
   }).join("");
   return `${edTop(W(S).list, "", `<button class="btn small solid" data-act="additem">${ico("plus",16,2.2)}Add</button>`)}
   ${S.items.length ? `<section class="card lk-group">${rows}</section>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button></section>`}`;
@@ -1566,6 +1567,7 @@ function edProducts(){
 function edProduct(i){
   const it = S.items[i];
   if (!it){ EDV = "products"; return edProducts(); }
+  const secs = [...new Set(S.items.map(x => x.sec.trim()).filter(Boolean))];
   return `${edTop("Edit " + W(S).item, "products", `<button class="btn small dangerline" data-act="del" data-i="${i}">${ico("trash",16)}Delete</button>`)}
   <section class="card">
     <label style="margin-top:0">Photo (optional)</label>
@@ -1574,6 +1576,9 @@ function edProduct(i){
   <section class="card">
     <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
     <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
+    <label>Menu section (optional)<input type="text" list="secList" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
+    ${secs.length ? `<datalist id="secList">${secs.map(x => `<option value="${esc(x)}">`).join("")}</datalist>` : ""}
+    <p class="hint">Give items the same section name to group them on your store, like "Drinks" or "Mains".</p>
   </section>
   <section class="card">
     <div class="between"><h2 style="margin:0">Options and prices</h2><span class="hint" style="margin:0">Customers pick one</span></div>
@@ -1867,6 +1872,7 @@ function legacyEditor(msg){
         </div>
         <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
         <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
+        <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains" maxlength="30"></label>
         <label>Photo (optional)</label>
         <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
         <label>Options and prices</label>
@@ -1915,7 +1921,7 @@ $("builder").addEventListener("click", async e => {
   if (!b) return;
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
-  const blankItem = () => ({ n: "", d: "", img: "", out: false, o: [{ l: "", p: 0 }] });
+  const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
   if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
@@ -2235,10 +2241,31 @@ function productRow(i){
 }
 function renderMenu(){
   const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
-  $("menu").innerHTML = list.length
-    ? `<section class="group"><div class="plist${D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : ""}">${list.map(productRow).join("")}</div></section>`
-    : `<p class="empty">${esc(W(D).empty)}</p>`;
+  const tabs = $("secTabs");
+  if (!list.length){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
+  const gridCls = D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
+  const secs = [];
+  list.forEach(i => {
+    const name = String(D.items[i].sec || "").trim();
+    let g = secs.find(x => x.name === name);
+    if (!g){ g = { name, idx: [] }; secs.push(g); }
+    g.idx.push(i);
+  });
+  $("menu").innerHTML = secs.map((g, gi) => `
+    <section class="group" id="sec-${gi}">
+      ${g.name ? `<h2>${esc(g.name)}</h2>` : ""}
+      <div class="plist${gridCls}">${g.idx.map(productRow).join("")}</div>
+    </section>`).join("");
+  const showTabs = secs.length > 1 && secs.some(g => g.name);
+  tabs.hidden = !showTabs;
+  tabs.innerHTML = showTabs ? secs.map((g, gi) => `<button class="tab" type="button" data-sec="${gi}" aria-current="${gi === 0}">${esc(g.name || "Others")}</button>`).join("") : "";
 }
+if ($("secTabs")) $("secTabs").addEventListener("click", e => {
+  const b = e.target.closest("[data-sec]"); if (!b) return;
+  const sec = $("sec-" + b.dataset.sec); if (!sec) return;
+  sec.scrollIntoView({ behavior: "smooth", block: "start" });
+  $("secTabs").querySelectorAll(".tab").forEach(x => x.setAttribute("aria-current", x === b));
+});
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
   pSel = { i, j: 0, q: 1 };
