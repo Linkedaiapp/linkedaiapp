@@ -1570,7 +1570,9 @@ function edProducts(){
 function edProduct(i){
   const it = S.items[i];
   if (!it){ EDV = "products"; return edProducts(); }
-  const secs = [...new Set(S.items.map(x => x.sec.trim()).filter(Boolean))];
+  const STARTER_SECS = { food: ["Mains","Drinks","Desserts","Add-ons","Sides"], products: ["Best sellers","New arrivals","Accessories","Sale"], services: ["Packages","Add-ons"] };
+  const usedSecs = S.items.filter((x, xi) => xi !== i).map(x => x.sec.trim()).filter(Boolean);
+  const secs = [...new Set([...usedSecs, ...(STARTER_SECS[S.kind] || STARTER_SECS.products)])].filter(x => x !== it.sec.trim()).slice(0, 8);
   return `${edTop("Edit " + W(S).item, "products", `<button class="btn small dangerline" data-act="del" data-i="${i}">${ico("trash",16)}Delete</button>`)}
   <section class="card">
     <label style="margin-top:0">Photo (optional)</label>
@@ -1580,7 +1582,7 @@ function edProduct(i){
     <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
     <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
     <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
-    ${secs.length ? `<div class="sechips">${secs.filter(x => x !== it.sec.trim()).map(x => `<button type="button" class="sechip" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
+    ${secs.length ? `<div class="sechips">${secs.map(x => `<button type="button" class="sechip" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
     <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
   </section>
   <section class="card">
