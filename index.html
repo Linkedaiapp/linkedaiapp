@@ -338,6 +338,9 @@ textarea{min-height:72px;resize:vertical}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:none;padding:8px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
 .tab[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sechips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.sechip{padding:6px 12px;border-radius:999px;border:1.3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:12.5px;cursor:pointer}
+.sechip:active{background:var(--soft)}
 .group{padding:0 14px 6px;scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
 .group h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:12px 2px 10px}
 .plist{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -1576,9 +1579,9 @@ function edProduct(i){
   <section class="card">
     <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
     <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
-    <label>Menu section (optional)<input type="text" list="secList" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
-    ${secs.length ? `<datalist id="secList">${secs.map(x => `<option value="${esc(x)}">`).join("")}</datalist>` : ""}
-    <p class="hint">Give items the same section name to group them on your store, like "Drinks" or "Mains".</p>
+    <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
+    ${secs.length ? `<div class="sechips">${secs.filter(x => x !== it.sec.trim()).map(x => `<button type="button" class="sechip" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
+    <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
   </section>
   <section class="card">
     <div class="between"><h2 style="margin:0">Options and prices</h2><span class="hint" style="margin:0">Customers pick one</span></div>
@@ -1923,6 +1926,7 @@ $("builder").addEventListener("click", async e => {
   const redraw = () => { touch(); renderEditor(); };
   const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
   if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
+  if (a === "secpick"){ S.items[i].sec = b.dataset.v; redraw(); return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
   else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem()); if (EDV === "product") EDV = "products"; redraw(); } }
