@@ -368,6 +368,8 @@ textarea{min-height:72px;resize:vertical}
 .sechip{padding:6px 12px;border-radius:999px;border:1.3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:12.5px;cursor:pointer}
 .sechip:active{background:var(--soft)}
 .sechip.on{background:var(--plum);border-color:var(--plum);color:#fff}
+.affbar{display:flex;gap:8px;align-items:flex-start;margin:4px 12px 14px;padding:10px 12px;border-radius:14px;background:var(--soft);font-size:12.5px;line-height:1.5;color:var(--muted)}
+.affbar svg{flex:none;margin-top:2px;color:var(--plum)}
 .group{padding:0 14px 6px;scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
 .group h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:12px 2px 10px}
 .plist{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -1112,7 +1114,7 @@ const COMMON_CUR = ["MYR","SGD","BND","IDR","THB","PHP","USD"];
 const BLANK = {
   name: "", tagline: "", logo: "", cover: "", wa: "",
   cur: "RM", curCode: "MYR", color: COLORS[0], layout: "list",
-  items: [{ n: "", d: "", img: "", out: false, o: [{ l: "", p: 0 }] }],
+  items: [{ n: "", d: "", img: "", out: false, url: "", o: [{ l: "", p: 0 }] }],
   closed: false, closedMsg: ""
 };
 
@@ -1122,6 +1124,25 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const safeUrl = u => /^https:\/\/[^\s"'<>]+$/i.test(u || "") ? u : "";
 const safeImg = u => safeUrl(u) || (/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "");
 const safeLogo = u => /^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "";
+// ----- affiliate / external links (Shopee, TikTok Shop, Lazada ...) -----
+const LINK_BRANDS = [["shopee", "Shopee"], ["shp", "Shopee"], ["tiktok", "TikTok Shop"], ["lazada", "Lazada"], ["amazon", "Amazon"], ["amzn", "Amazon"], ["aliexpress", "AliExpress"], ["temu", "Temu"], ["tokopedia", "Tokopedia"], ["mudah", "Mudah"], ["carousell", "Carousell"], ["involve", "Involve Asia"], ["accesstrade", "AccessTrade"]];
+function linkInfo(u){
+  try {
+    const host = new URL(u).hostname.replace(/^www\./, "").toLowerCase(), parts = host.split(".");
+    const b = LINK_BRANDS.find(x => parts.includes(x[0]) || host === x[0] + ".ee");
+    return { host, brand: b ? b[1] : host };
+  } catch(e){ return { host: "", brand: "" }; }
+}
+function fixUrl(v){ v = String(v || "").trim(); if (!v) return ""; v = v.replace(/^http:\/\//i, "https://"); return /^https:\/\//i.test(v) ? v : (/^[\w-]+(\.[\w-]+)+(\/|$|\?)/.test(v) ? "https://" + v : v); }
+function urlHintText(u){
+  u = String(u || "").trim();
+  if (!u) return "Customers tap <b>Buy on…</b> and go to this link. Your affiliate ID stays inside the link.";
+  if (!safeUrl(u)) return `<span style="color:var(--err)">The link must start with https://</span>`;
+  const b = linkInfo(u).brand; return `Detected: <b>${esc(b)}</b>. Customers will see “Buy on ${esc(b)}”.`;
+}
+function openExternal(url){
+  const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer nofollow sponsored"; document.body.appendChild(a); a.click(); a.remove();
+}
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const smooth = () => reduceMotion() ? "auto" : "smooth";
 const initial = t => esc((String(t).trim()[0] || "•").toUpperCase());
@@ -1242,14 +1263,16 @@ const KINDS = {
   products: { label: "Products", list: "Products", item: "product",   add: "Add to cart", date: "Delivery or pickup date (optional)", dateNeeded: false, empty: "This store hasn't added products yet.",
               ex: { shop: "e.g. Aurora Boutique", tag: "e.g. Modest fashion, delivery across Malaysia", name: "e.g. Satin Blouse", desc: "e.g. Soft satin, 4 colours, sizes S to XL", opt: "e.g. Size M, Dusty Pink", price: "e.g. 59", note: "e.g. Please deliver to my office address" } },
   services: { label: "Services", list: "Services", item: "service",   add: "Book",        date: "Preferred date",                 dateNeeded: true,  empty: "This store hasn't added services yet.",
-              ex: { shop: "e.g. Glow Beauty Studio", tag: "e.g. Hair, nails & bridal makeup by appointment", name: "e.g. Keratin Hair Treatment", desc: "e.g. About 90 minutes, includes wash & blow", opt: "e.g. Long hair", price: "e.g. 180", note: "e.g. Prefer afternoon, around 2pm" } }
+              ex: { shop: "e.g. Glow Beauty Studio", tag: "e.g. Hair, nails & bridal makeup by appointment", name: "e.g. Keratin Hair Treatment", desc: "e.g. About 90 minutes, includes wash & blow", opt: "e.g. Long hair", price: "e.g. 180", note: "e.g. Prefer afternoon, around 2pm" } },
+  affiliate:{ label: "Affiliate", list: "Picks",  item: "link",      add: "Add to cart", date: "Date (optional)",                dateNeeded: false, empty: "This store hasn't added links yet.",
+              ex: { shop: "e.g. Aina's Finds", tag: "e.g. My favourite Shopee & TikTok picks, updated weekly", name: "e.g. Mini Handheld Fan", desc: "e.g. Rechargeable, 3 speeds, my daily bag essential", opt: "e.g. Pink", price: "e.g. 25", note: "e.g. Ask me anything about this product" } }
 };
 const W = d => KINDS[d && d.kind] || KINDS.products;
 
 function normalize(d){
   const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
   x.items = (Array.isArray(x.items) ? x.items : []).map(it => ({
-    n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out, sec: String(it.sec || "").trim().slice(0, 30),
+    n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out, sec: String(it.sec || "").trim().slice(0, 30), url: safeUrl(String(it.url || "").trim()).slice(0, 600),
     o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String(o.l || ""), p: Number(o.p) || 0 })) : [{ l: "", p: 0 }]
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
@@ -1759,7 +1782,12 @@ function edProduct(i){
     <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
   </section>
   <section class="card">
-    <div class="between"><h2 style="margin:0">Options and prices</h2><span class="hint" style="margin:0">Customers pick one</span></div>
+    <h2 style="margin:0 0 4px">${W(S).item === "link" ? "Link to buy" : "Affiliate link (optional)"}</h2>
+    <label>Shopee, TikTok Shop, Lazada or any https link<input type="url" inputmode="url" data-i="${i}" data-f="url" value="${esc(it.url || "")}" placeholder="https://s.shopee.com.my/..." maxlength="600" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    <p class="hint" id="urlHint">${urlHintText(it.url)}</p>
+  </section>
+  <section class="card">
+    <div class="between"><h2 style="margin:0">${it.url || S.kind === "affiliate" ? "Price (optional)" : "Options and prices"}</h2><span class="hint" style="margin:0">${it.url || S.kind === "affiliate" ? "Shown on the card" : "Customers pick one"}</span></div>
     ${it.o.map((o,j)=>`
       <div class="opt">
         <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}" aria-label="Option name">
@@ -1947,7 +1975,7 @@ $("payOverlay").addEventListener("click", e => {
 $("payOverlay").addEventListener("change", e => { if (e.target.dataset.media === "receipt") publishWithReceipt(e.target); });
 
 function openPublishCheck(){
-  const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your WhatsApp number first." : !S.items.some(it => it.n.trim()) ? `Add at least one ${W(S).item} first.` : "";
+  const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your WhatsApp number first." : !S.items.some(it => it.n.trim()) ? `Add at least one ${W(S).item} first.` : (S.items.find(it => (it.url || "").trim() && !safeUrl(it.url.trim())) ? `The link on “${S.items.find(it => (it.url || "").trim() && !safeUrl(it.url.trim())).n.trim() || "an item"}” must start with https://` : (S.kind === "affiliate" && S.items.some(it => it.n.trim() && !(it.url || "").trim())) ? "Add a link to every item first." : "");
   if (bad) return notify(bad);
   const named = S.items.filter(it => it.n.trim());
   const row = (k, v) => `<div class="cline"><div class="cn"><span>${esc(k)}</span><b>${esc(v)}</b></div></div>`;
@@ -2052,6 +2080,7 @@ function legacyEditor(msg){
         <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
         <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
         <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains" maxlength="30"></label>
+        <label>Affiliate link (optional)<input type="url" inputmode="url" data-i="${i}" data-f="url" value="${esc(it.url || "")}" placeholder="https://s.shopee.com.my/..." maxlength="600" autocomplete="off" autocapitalize="off"></label>
         <label>Photo (optional)</label>
         <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
         <label>Options and prices</label>
@@ -2089,6 +2118,10 @@ function onField(e){
   else if (t.dataset.i !== undefined) S.items[+t.dataset.i][f] = v;
   else S[f] = v;
   if (f === "sec") document.querySelectorAll(".sechip").forEach(c => { const on = c.dataset.v === String(v).trim(); c.classList.toggle("on", on); c.setAttribute("aria-pressed", String(on)); });
+  if (f === "url"){
+    if (e.type === "change"){ const fx = fixUrl(v); if (fx !== v){ t.value = fx; S.items[+t.dataset.i].url = fx; } }
+    const h = $("urlHint"); if (h) h.innerHTML = urlHintText(S.items[+t.dataset.i].url);
+  }
   if (f === "wa") S.wa = normWa(v);
   if (f === "curCode") S.cur = curSymbol(v);
   touch();
@@ -2101,7 +2134,7 @@ $("builder").addEventListener("click", async e => {
   if (!b) return;
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
-  const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
+  const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", url: "", o: [{ l: "", p: 0 }] });
   if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
   if (a === "secpick"){ S.items[i].sec = b.dataset.v; redraw(); return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
@@ -2410,15 +2443,15 @@ $("repGo").onclick = async () => {
 
 function productRow(i){
   const p = D.items[i], img = safeImg(p.img), n = inCart(i);
-  return `<button class="prow${p.out ? " out" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
+  return `<button class="prow${p.out ? " out" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}${p.url ? ` aria-label="${esc(p.n)}, opens ${esc(linkInfo(p.url).brand)} in a new tab"` : ""}>
     <div class="ptext">
       <h3>${esc(p.n)}</h3>
       ${p.d ? `<p class="pdesc">${esc(p.d)}</p>` : ""}
-      <div class="pmeta"><span class="pprice">${priceLabel(p)}</span>
-        ${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
+      <div class="pmeta">${p.url && !p.o.some(o => o.p > 0) ? "" : `<span class="pprice">${priceLabel(p)}</span>`}
+        ${p.out ? `<span class="pill dark">Sold out</span>` : p.url ? `<span class="pill">${esc(linkInfo(p.url).brand)}</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
     </div>
     <div class="pimg">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<div class="ph">${initial(p.n)}</div>`}
-      ${p.out ? "" : `<span class="addb" aria-hidden="true">+</span>`}</div>
+      ${p.out ? "" : `<span class="addb" aria-hidden="true">${p.url ? ico("ext", 15, 2.4) : "+"}</span>`}</div>
   </button>`;
 }
 function renderMenu(){
@@ -2433,7 +2466,8 @@ function renderMenu(){
     if (!g){ g = { name, idx: [] }; secs.push(g); }
     g.idx.push(i);
   });
-  $("menu").innerHTML = secs.map((g, gi) => `
+  const hasLinks = list.some(i => D.items[i].url);
+  $("menu").innerHTML = (hasLinks ? `<p class="affbar">${ico("ext", 16, 2)}<span>Items marked with an arrow open another site. Some are affiliate links: the seller may earn a commission if you buy, at no extra cost to you.</span></p>` : "") + secs.map((g, gi) => `
     <section class="group" id="sec-${gi}">
       ${g.name ? `<h2>${esc(g.name)}</h2>` : ""}
       <div class="plist${gridCls}">${g.idx.map(productRow).join("")}</div>
@@ -2449,7 +2483,9 @@ if ($("secTabs")) $("secTabs").addEventListener("click", e => {
   $("secTabs").querySelectorAll(".tab").forEach(x => x.setAttribute("aria-current", x === b));
 });
 function openProduct(i){
-  const p = D.items[i]; if (!p || p.out || D.closed) return;
+  const p = D.items[i]; if (!p || p.out) return;
+  if (p.url){ openExternal(p.url); return; }   // affiliate / external link: go straight to the page
+  if (D.closed) return;
   pSel = { i, j: 0, q: 1 };
   const img = safeImg(p.img);
   $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : `<div class="ph">${initial(p.n)}</div>`;
