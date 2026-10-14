@@ -968,12 +968,43 @@ a.prow{text-decoration:none;color:inherit}
 :root{
   --bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--ink-2:#4A4340;--muted:#6B6360;--faint:#A39A96;
   --line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;
-  --plum:#18395C;--gold:#8DB6E8;--wa:#1F9D55;
-  --ok:#15803D;--ok-bg:#E7F4EC;--warn:#B45309;--warn-bg:#FDF0DC;--err:#B3261E;--err-bg:#F4E4E2;--alert:#DC2626;
+  --plum:#18395C;--gold:#8DB6E8;--wa:#168443;
+  --ok:#13743A;--ok-bg:#E7F4EC;--warn:#A14806;--warn-bg:#FDF0DC;--err:#B3261E;--err-bg:#F4E4E2;--alert:#DC2626;
   --r-xs:8px;--r-sm:12px;--r-md:16px;--r-lg:20px;--r-xl:24px;
   --r-field:var(--r-sm);--r-btn:var(--r-md);--r-card:var(--r-lg);
   --sh-1:0 1px 3px rgba(20,10,15,.07);--sh-2:0 6px 20px rgba(20,10,15,.08);--sh-3:0 14px 40px rgba(20,10,15,.16);
 }
+/* ---- easier to use for everyone ---- */
+/* iPhones zoom the whole page into any text box under 16px: keep every box at 16px */
+input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}
+/* a clear ring shows where you are when using a keyboard or switch control */
+:focus-visible{outline:2.5px solid var(--plum);outline-offset:2px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
+/* small buttons and close buttons big enough for a thumb */
+.btn.small{height:42px}
+.x{width:40px;height:40px}
+.sechip{height:36px}
+/* ---- first run: three short steps for a brand-new store ---- */
+#builder.starting .actions{display:none}
+.fr-head{display:flex;align-items:center;gap:10px;min-height:48px}
+.fr-dots{display:flex;gap:6px;flex:1}
+.fr-dots i{width:28px;height:6px;border-radius:999px;background:var(--line2)}
+.fr-dots i.on{background:var(--plum)}
+.fr-skip{border:0;background:none;color:var(--muted);font:inherit;font-size:14px;font-weight:600;padding:12px 8px;cursor:pointer}
+.fr-title{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:16px 0 6px}
+.fr-sub{color:var(--muted);margin:0 0 20px}
+.fr-kinds{display:grid;gap:12px}
+.fr-kind{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border-radius:var(--r-card);border:1.5px solid var(--line);background:var(--surface);font:inherit;color:var(--ink);text-align:left;cursor:pointer;box-shadow:var(--sh-1)}
+.fr-kind .tile{width:52px;height:52px;border-radius:var(--r-md);background:var(--soft);color:var(--plum);display:grid;place-items:center;flex:none}
+.fr-kind .tt{flex:1;min-width:0}
+.fr-kind b{display:block;font-size:18px}
+.fr-kind .tt span{color:var(--muted);font-size:14px}
+.fr-kind[aria-pressed="true"]{border-color:var(--plum)}
+.fr-kind > svg{color:var(--faint);flex:none}
+.fr-done{display:grid;justify-items:center;gap:6px;padding:26px 16px;text-align:center}
+.fr-done > svg{color:var(--ok);background:var(--ok-bg);border-radius:50%;padding:10px;box-sizing:content-box}
+.fr-done b{font-size:20px}
+.fr-done span{color:var(--muted);font-size:14px;word-break:break-all}
 /* grey outline shown while a page loads for the first time */
 .skel{background:linear-gradient(100deg,var(--line) 20%,var(--soft) 42%,var(--line) 64%) 0 0/300% 100%;animation:shimmer 1.3s ease-in-out infinite;border-radius:var(--r-sm)}
 .skel-store{max-width:720px;margin:-20px -16px 0}
@@ -2084,21 +2115,54 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), product: () => edProduct(EDI), listing: edListing, insights: edInsights, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
-  const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY);
+  const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
 function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
 
+// ---------- First run: three short steps for a brand-new store, instead of a dashboard full of choices ----------
+let EDSTEP = 1;
+const startKey = () => "lk-start:" + (SESSION ? SESSION.id : "");
+const startDone = () => { try { return !!localStorage.getItem(startKey()); } catch(e){ return false; } };
+const markStartDone = () => { try { localStorage.setItem(startKey(), "1"); } catch(e) {} };
+function needsStart(){ return !!(SESSION && !SESSION.admin && STATUS === "pending" && !S.items.some(it => it.n.trim()) && !(S.links || []).some(l => safeUrl(l.u)) && !startDone()); }
+function edStart(){
+  const dots = [1, 2, 3].map(n => `<i class="${n <= EDSTEP ? "on" : ""}"></i>`).join("");
+  const head = (title, sub) => `<div class="fr-head">${EDSTEP > 1 ? `<button class="iconbtn" data-act="frback" aria-label="Back">${ico("back", 20)}</button>` : ""}<div class="fr-dots" role="img" aria-label="Step ${EDSTEP} of 3">${dots}</div>${EDSTEP < 3 ? `<button class="fr-skip" data-act="frskip">Skip for now</button>` : ""}</div>
+    <h1 class="fr-title">${title}</h1><p class="fr-sub">${sub}</p>`;
+  if (EDSTEP === 1) return head("What do you sell?", "This sets the right words for your store, like Menu or Products. You can change it later.") +
+    `<div class="fr-kinds">${[["food", "food", "Food", "Meals, cakes, kuih and drinks"], ["products", "shirt", "Products", "Clothes, beauty, crafts and more"], ["services", "wrench", "Services", "Hair, beauty, repairs, homestay"]]
+      .map(([k, ic, t, d]) => `<button class="fr-kind" data-act="frkind" data-v="${k}" aria-pressed="${S.kind === k}"><span class="tile">${ico(ic, 26)}</span><span class="tt"><b>${t}</b><span>${d}</span></span>${ico("chevron", 18)}</button>`).join("")}</div>`;
+  if (EDSTEP === 2){
+    if (!S.items.length) S.items.push({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
+    const it = S.items[0];
+    return head(`Add your first ${esc(W(S).item)}`, "Just a name and a price. You can add more, and change anything, later.") +
+      `<section class="card">
+        <label style="margin-top:0">Name<input type="text" data-i="0" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
+        <label>Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="0" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
+        <label>Photo (optional)</label><div class="media-row">${photoBox("imgPrev0", it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="0"`)}</div>
+        <p class="err" id="frErr" role="alert"></p>
+      </section>
+      <button class="btn solid full" data-act="frnext">Next</button>`;
+  }
+  return head("Your store is ready to see", "Preview it now. When you're happy, publish it to get your store link to share.") +
+    `<section class="card fr-done">${ico("check", 26, 2.6)}<b>${esc(S.name || "Your store")}</b><span>${esc(storeLink(SESSION.id))}</span></section>
+    <button class="btn solid full" data-act="preview">${ico("eye", 18)}Preview my store</button>
+    <button class="btn full" style="margin-top:10px" data-act="frpublish">Publish my store</button>
+    <button class="btn full" style="margin-top:10px" data-act="frhome">Add more ${esc(W(S).item)}s first</button>`;
+}
 function edTidy(){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
 }
 function openEditor(msg){
   edTidy();
-  if (!window.LK_KEEPVIEW) EDV = "home"; setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
+  if (!window.LK_KEEPVIEW) EDV = "home";
+  if (EDV === "home" && needsStart()){ EDV = "start"; EDSTEP = 1; }
+  setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
 function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
 
 // ---------- Changes save by themselves a moment after the seller stops typing ----------
@@ -2415,6 +2479,18 @@ $("builder").addEventListener("click", async e => {
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
   const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
+  if (a === "frkind"){ S.kind = b.dataset.v; touch(); EDSTEP = 2; renderEditor(); window.scrollTo(0, 0); setTimeout(() => { const el = document.querySelector('[data-f="n"][data-i="0"]'); if (el) el.focus(); }, 60); return; }
+  if (a === "frback"){ EDSTEP = Math.max(1, EDSTEP - 1); renderEditor(); window.scrollTo(0, 0); return; }
+  if (a === "frnext"){
+    const it = S.items[0];
+    if (!it || !it.n.trim() || !(+it.o[0].p > 0)){ $("frErr").textContent = "Add a name and a price, or tap Skip for now."; return; }
+    EDSTEP = 3; renderEditor(); window.scrollTo(0, 0); return;
+  }
+  if (a === "frskip" || a === "frhome" || a === "frpublish"){
+    markStartDone(); edTidy(); EDV = a === "frhome" ? "products" : "home"; renderEditor(); window.scrollTo(0, 0);
+    if (a === "frpublish") openPublishCheck();
+    return;
+  }
   if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); }
     if (EDV === "link" && b.dataset.v !== "link"){ const l = S.links[EDI]; if (l && !l.u.trim()) S.links.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
   if (a === "secpick"){ S.items[i].sec = b.dataset.v; redraw(); return; }
