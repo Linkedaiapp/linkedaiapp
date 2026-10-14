@@ -913,10 +913,34 @@ a.prow{text-decoration:none;color:inherit}
 .lnkcard .lst{font-size:12px}
 .lnkcard .lbtns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 2px}
 /* ---------- UI polish: store page + seller editor ---------- */
-.cover{height:clamp(170px,46vw,280px)}
+/* a shorter top, so the first items show on the first screen */
+.cover{height:clamp(120px,32vw,200px)}
+.shopcard{margin-top:-36px;padding:0 16px 14px}
+.st-logo{width:72px;height:72px;margin-top:-36px;font-size:27px}
+.stname{font-size:clamp(22px,6vw,28px);margin:8px 0 2px}
+/* Menu / Shop links switch and section chips stay at the top while scrolling */
+.stnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg)}
+.stnav .tabs{position:static;padding:10px 14px 6px}
+.stnav .viewtabs{margin:10px 14px 0}
+.stnav .viewtabs:not([hidden]) + .tabs{padding-top:8px}
+.viewtabs button span{font-size:12px;font-weight:700;opacity:.55;margin-left:2px}
+.stsearch{padding:10px 14px 0}
+.stsearch input{padding-top:9px;padding-bottom:9px;font-size:15px;border-radius:12px}
+.stnav .viewtabs{padding:3px}
+.stnav .viewtabs button{min-height:34px;padding:6px 10px}
+/* compact rows: about 7 items per screen instead of 5 */
+.prow{padding:12px;gap:12px}
+.pimg{width:76px;height:76px}
+.ptext h3{font-size:15.5px}
+.pdesc{font-size:13.5px;-webkit-line-clamp:1;line-clamp:1}
+.pmeta{margin-top:6px}
+.addb{width:30px;height:30px;right:-5px;bottom:-5px}
+.plink h3{-webkit-line-clamp:2;line-clamp:2}
+.group{padding:0 14px 4px}
+.group h2{font-size:18px;margin:12px 2px 8px}
 /* items without a photo: no empty letter tile in the list, just the add button */
 .prow.nophoto{align-items:center}
-.prow.nophoto .addb.solo{position:static;flex:none;width:36px;height:36px}
+.prow.nophoto .addb.solo{position:static;flex:none;width:32px;height:32px}
 .plist.grid .prow.nophoto{flex-direction:column;align-items:stretch}
 .plist.grid .prow.nophoto .addb.solo{align-self:flex-end}
 /* product sheet with no photo: room for the close button instead of a big grey box */
@@ -1068,8 +1092,12 @@ a.prow{text-decoration:none;color:inherit}
       <button class="adx" id="adX" type="button" aria-label="Hide ads">×</button>
       <div class="addots" id="adDots"></div>
     </div>
-    <div class="tabs" id="secTabs" hidden></div>
-    <main id="menu" style="margin-top:14px"></main>
+    <div class="search stsearch" id="stSearch" hidden><input type="search" id="stQ" placeholder="Search" aria-label="Search this store" autocomplete="off" enterkeyhint="search"></div>
+    <div class="stnav" id="stNav">
+      <div class="seg viewtabs" id="viewTabs" hidden></div>
+      <div class="tabs" id="secTabs" hidden></div>
+    </div>
+    <main id="menu" style="margin-top:4px"></main>
     <footer class="stfoot">
     <div class="safenote" id="stSafe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Safe to use.</b> Link Kedai App never asks for your bank login, OTP or passwords, and never asks you to install apps. You order on WhatsApp and pay the seller directly. <a href="#" id="stSafeLink">Is this safe?</a></div></div>
     <div class="stcta" id="stCta" hidden>
@@ -2589,6 +2617,7 @@ async function showStore(data, isPreview){
   try { cart = JSON.parse(localStorage.getItem(cartKey()) || "{}") || {}; } catch(e){ cart = {}; }
   Object.keys(cart).forEach(k => { const [i,j] = k.split("|").map(Number); if (!D.items[i] || !D.items[i].o[j] || D.items[i].out) delete cart[k]; });
   $("note").value = "";
+  MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = "";
   renderMenu(); renderBar();
   showAd();
 }
@@ -2695,42 +2724,69 @@ function linkRow(j){
       <span class="addb" aria-hidden="true">${ico("ext", 15, 2.4)}</span></div>
   </a>`;
 }
+// What the customer is looking at: the menu or the shop links, one section or all, and any search words
+let MVIEW = "menu", MSEC = "all", MQ = "";
+const SEARCH_FROM = 12;   // the search box only appears for bigger stores
+function groupBy(idx, secOf){
+  const secs = [];
+  idx.forEach(k => { const name = String(secOf(k) || "").trim(); let g = secs.find(x => x.name === name); if (!g){ g = { name, idx: [] }; secs.push(g); } g.idx.push(k); });
+  return secs;
+}
 function renderMenu(){
   const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
   const linkList = (D.links || []).map((l,j) => l.u ? j : -1).filter(j => j >= 0);
-  const tabs = $("secTabs");
-  if (!list.length && !linkList.length){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
+  const tabs = $("secTabs"), vt = $("viewTabs"), sb = $("stSearch");
+  const both = !!(list.length && linkList.length), total = list.length + linkList.length;
+  if (!both) MVIEW = list.length ? "menu" : "links";
+  vt.hidden = !both || !!MQ.trim();   // a search already looks through both, so the switch steps aside
+  vt.innerHTML = both ? `<button type="button" data-view="menu" aria-pressed="${MVIEW === "menu"}">${esc(W(D).list)} <span>${list.length}</span></button><button type="button" data-view="links" aria-pressed="${MVIEW === "links"}">Shop links <span>${linkList.length}</span></button>` : "";
+  sb.hidden = total < SEARCH_FROM;
+  if (sb.hidden) MQ = "";
+  $("stQ").placeholder = both ? `Search ${W(D).list.toLowerCase()} and shop links` : list.length ? `Search the ${W(D).list.toLowerCase()}` : "Search shop links";
+  if (!total){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
   const gridCls = D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
-  const secs = [];
-  list.forEach(i => {
-    const name = String(D.items[i].sec || "").trim();
-    let g = secs.find(x => x.name === name);
-    if (!g){ g = { name, idx: [] }; secs.push(g); }
-    g.idx.push(i);
-  });
-  linkList.forEach(j => {
-    const name = String(D.links[j].sec || "").trim() || (list.length ? "Links" : "");
-    let g = secs.find(x => x.name === name);
-    if (!g){ g = { name, idx: [] }; secs.push(g); }
-    (g.lk = g.lk || []).push(j);
-  });
-  const firstLk = secs.findIndex(g => g.lk && g.lk.length);
   const affNote = `<p class="affnote">${ico("ext", 13, 2.2)}<span>Opens the shop's own page. The seller may earn a commission, at no extra cost to you.</span></p>`;
-  $("menu").innerHTML = secs.map((g, gi) => `
-    <section class="group" id="sec-${gi}">
-      ${g.name ? `<h2>${esc(g.name)}</h2>` : ""}${gi === firstLk ? affNote : ""}
-      <div class="plist${gridCls}">${g.idx.map(productRow).join("")}${(g.lk || []).map(linkRow).join("")}</div>
-    </section>`).join("");
+  const block = (title, rows, note) => `<section class="group">${title ? `<h2>${esc(title)}</h2>` : ""}${note ? affNote : ""}<div class="plist${gridCls}">${rows}</div></section>`;
+  const q = MQ.trim().toLowerCase();
+  if (q){
+    // searching looks through everything, menu and links together
+    const has = t => String(t || "").toLowerCase().includes(q);
+    const hitI = list.filter(i => { const p = D.items[i]; return has(p.n) || has(p.d) || has(p.sec) || p.o.some(o => has(o.l)); });
+    const hitL = linkList.filter(j => { const l = D.links[j]; return has(tidyName(l.n)) || has(l.sec) || has(linkInfo(l.u).brand); });
+    tabs.hidden = true; tabs.innerHTML = "";
+    $("menu").innerHTML = hitI.length || hitL.length
+      ? (hitI.length ? block(both ? W(D).list : "", hitI.map(productRow).join(""), false) : "") + (hitL.length ? block(both ? "Shop links" : "", hitL.map(linkRow).join(""), true) : "")
+      : `<p class="empty">Nothing matches "${esc(MQ.trim())}". Try another word.</p>`;
+    return;
+  }
+  const isLinks = MVIEW === "links";
+  const secs = isLinks ? groupBy(linkList, j => D.links[j].sec) : groupBy(list, i => D.items[i].sec);
+  const key = g => g.name ? "n:" + g.name : "other";
+  if (MSEC !== "all" && !secs.some(g => key(g) === MSEC)) MSEC = "all";
   const showTabs = secs.length > 1 && secs.some(g => g.name);
+  if (!showTabs) MSEC = "all";
   tabs.hidden = !showTabs;
-  tabs.innerHTML = showTabs ? secs.map((g, gi) => `<button class="tab" type="button" data-sec="${gi}" aria-current="${gi === 0}">${esc(g.name || (gi === 0 ? W(D).list : "More"))}</button>`).join("") : "";
+  tabs.innerHTML = showTabs ? `<button class="tab" type="button" data-sec="all" aria-current="${MSEC === "all"}">All</button>` + secs.map(g => `<button class="tab" type="button" data-sec="${esc(key(g))}" aria-current="${MSEC === key(g)}">${esc(g.name || "Other")}</button>`).join("") : "";
+  const shown = MSEC === "all" ? secs : secs.filter(g => key(g) === MSEC);
+  $("menu").innerHTML = shown.map((g, gi) => block(g.name, g.idx.map(isLinks ? linkRow : productRow).join(""), isLinks && gi === 0)).join("");
 }
-if ($("secTabs")) $("secTabs").addEventListener("click", e => {
+// After switching what's shown, bring the top of the list into view if the customer had scrolled past it
+function menuToTop(){
+  const nav = $("stNav"), top = $("menu").getBoundingClientRect().top - (nav.offsetHeight || 0) - 8;
+  if (top < 0) window.scrollBy({ top, behavior: smooth() });
+}
+$("secTabs").addEventListener("click", e => {
   const b = e.target.closest("[data-sec]"); if (!b) return;
-  const sec = $("sec-" + b.dataset.sec); if (!sec) return;
-  sec.scrollIntoView({ behavior: "smooth", block: "start" });
-  $("secTabs").querySelectorAll(".tab").forEach(x => x.setAttribute("aria-current", x === b));
+  MSEC = b.dataset.sec; renderMenu(); menuToTop();
+  const cur = $("secTabs").querySelector('[aria-current="true"]');   // keep the chosen chip in sight (sideways only)
+  if (cur) $("secTabs").scrollTo({ left: Math.max(0, cur.offsetLeft - 40), behavior: smooth() });
 });
+$("viewTabs").addEventListener("click", e => {
+  const b = e.target.closest("[data-view]"); if (!b || b.dataset.view === MVIEW) return;
+  MVIEW = b.dataset.view; MSEC = "all"; renderMenu(); menuToTop();
+});
+$("stQ").addEventListener("input", () => { MQ = $("stQ").value; renderMenu(); });
+$("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur(); });
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
   pSel = { i, j: 0, q: 1 };
