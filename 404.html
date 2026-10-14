@@ -974,6 +974,17 @@ a.prow{text-decoration:none;color:inherit}
   --r-field:var(--r-sm);--r-btn:var(--r-md);--r-card:var(--r-lg);
   --sh-1:0 1px 3px rgba(20,10,15,.07);--sh-2:0 6px 20px rgba(20,10,15,.08);--sh-3:0 14px 40px rgba(20,10,15,.16);
 }
+/* grey outline shown while a page loads for the first time */
+.skel{background:linear-gradient(100deg,var(--line) 20%,var(--soft) 42%,var(--line) 64%) 0 0/300% 100%;animation:shimmer 1.3s ease-in-out infinite;border-radius:var(--r-sm)}
+.skel-store{max-width:720px;margin:-20px -16px 0}
+.sk-cover{height:clamp(120px,32vw,200px);border-radius:0}
+.sk-card{position:relative;margin:-36px 14px 14px;padding:0 16px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card)}
+.sk-logo{width:72px;height:72px;border-radius:50%;margin:-36px 0 12px;box-shadow:0 0 0 5px var(--surface)}
+.sk-line{height:14px;margin:8px 0}
+.sk-row{display:flex;gap:12px;align-items:center;margin:0 14px 10px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md)}
+.sk-row > div:first-child{flex:1}
+.sk-img{width:76px;height:76px;flex:none}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
 /* one chip look everywhere: store sections, editor sections, filters, towns */
 .tab,.sechip,.chips button,.excities button{flex:none;height:36px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--line2);
   background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -1173,7 +1184,7 @@ const SPLASH = (() => {
   const qs = location.search.slice(1).split("&").filter(x => x && !x.includes("="));
   const pw = decodeURIComponent(location.pathname.split("/").pop() || "").toLowerCase(), notStore = /^(build|edit|signup|admin)$/i;
   const isStore = (qs[0] && !notStore.test(qs[0])) || (!/\/$/.test(location.pathname) && !notStore.test(pw));
-  const minMs = first ? (isStore ? 1300 : 1900) : 0;
+  const minMs = first ? (isStore ? 500 : 900) : 0;   // short: the page itself should be the welcome
   const t0 = Date.now();
   let done = false;
   function hide(){
@@ -1292,8 +1303,16 @@ function applyConfig(c){
     else if (c[k] !== undefined && c[k] !== null) SITE[k] = c[k];
   });
 }
+// Small saved copies on this phone, so pages open at once and refresh quietly in the background
+const keep = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k) || "null"); } catch(e){ return null; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} },
+  del(k){ try { localStorage.removeItem(k); } catch(e) {} }
+};
 async function loadSite(){
-  try { SITE = Object.assign(SITE, await getJson("site.json")); } catch(e) {}
+  const saved = keep.get("lk-site");
+  const freshSite = getJson("site.json").then(j => { keep.set("lk-site", j); SITE = Object.assign(SITE, j); }).catch(() => {});
+  if (saved && safeUrl(saved.api)) SITE = Object.assign(SITE, saved); else await freshSite;
   if (!safeUrl(SITE.api)) { CONFIG_P = Promise.resolve(); return; }
   // Show the page straight away with the settings this phone remembers; fetch fresh ones in the background
   let remembered = null;
@@ -1539,7 +1558,7 @@ document.addEventListener("click", e => {
 let SESSION = null, S = null, STATUS = "pending", DIRTY = false;
 function loadSession(){ try { return JSON.parse(sessionStorage.getItem("lk-session") || "null"); } catch(e){ return null; } }
 function saveSession(){ try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {} }
-function clearSession(){ SESSION = null; try { sessionStorage.removeItem("lk-session"); } catch(e) {} }
+function clearSession(){ SESSION = null; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); } catch(e) {} }
 
 function loginCardHtml(msg){
   return `<section class="card" id="loginCard">
@@ -1563,7 +1582,7 @@ function wireLogin(){
     const slow = setTimeout(() => { if ($("lGo") && $("lGo").disabled) $("lGo").textContent = "Still working, please wait..."; }, 6000);
     try {
       const r = await apiPost({ action: "login", wa, pin });
-      SESSION = { id: r.id, pin }; saveSession(); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
+      SESSION = { id: r.id, pin }; saveSession(); rememberEd(r); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
       if (!/^\?(build|edit)\b/.test(location.search) && !/\/(build|edit)$/.test(location.pathname)) history.pushState(null, "", home() + "build");
       openEditor();
       clearTimeout(slow);
@@ -1630,7 +1649,7 @@ function renderStart(msg, mode){
     try {
       const data = normalize({ name, wa });
       await apiPost({ action: "create", id, pin, data });
-      SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false;
+      SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false; rememberEdNow();
       history.replaceState(null, "", home() + "build");
       openEditor("Store created. Choose what you sell, add your items and photos, then tap Save.");
     } catch(e){ $("cErr").textContent = friendly(e, "Couldn't sign you up right now. Check your internet and try again."); $("cGo").disabled = false; $("cGo").textContent = "Sign up"; }
@@ -2073,9 +2092,12 @@ function renderEditor(msg){
 }
 function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
 
-function openEditor(msg){
+function edTidy(){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
+}
+function openEditor(msg){
+  edTidy();
   if (!window.LK_KEEPVIEW) EDV = "home"; setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
 function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
 
@@ -2109,7 +2131,7 @@ async function autoSave(retry, keepalive){
   SAVING = apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }, keepalive ? { keepalive: true } : null);
   try {
     const r = await SAVING; STATUS = r.status || STATUS;
-    if (EDITV === v){ DIRTY = false; const bl = $("builder"); if (bl) bl.classList.remove("dirty"); const st = $("saveStatus"); if (st) st.textContent = ""; }
+    if (EDITV === v){ DIRTY = false; rememberEdNow(); const bl = $("builder"); if (bl) bl.classList.remove("dirty"); const st = $("saveStatus"); if (st) st.textContent = ""; }
     else scheduleAutosave();
     savePill("saved", r.flagged && STATUS !== "live" ? "Saved. Some words need a quick check by " + APP_NAME + "." : "Saved");
   } catch(e){
@@ -2247,7 +2269,7 @@ $("pubGo").onclick = async () => {
   if (!["pubOk1","pubOk2","pubOk3"].every(id => $(id).checked)) { $("pubErr").textContent = "Tick all three boxes to continue."; return; }
   const btn = $("pubGo"); btn.disabled = true; btn.textContent = "Saving...";
   try {
-    if (DIRTY){ await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
+    if (DIRTY){ await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; rememberEdNow(); }
     closeSheet("pubOverlay");
     renderEditor("Details saved.");
     setTimeout(openPayment, 260);
@@ -2472,7 +2494,7 @@ async function publishWithReceipt(input){
     st.textContent = "Publishing...";
     const c = await resizeImage(file, 1400, false);
     const r = await apiPost({ action: "selfpublish", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: c.toDataURL("image/jpeg", 0.82).split(",")[1] });
-    STATUS = r.status;
+    STATUS = r.status; rememberEdNow();
     closeSheet("payOverlay");
     window.scrollTo(0, 0);
     if (STATUS === "review"){
@@ -2495,7 +2517,7 @@ async function saveStore(){
   clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
   try {
     const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
-    STATUS = r.status || STATUS; DIRTY = false; savePill("");
+    STATUS = r.status || STATUS; DIRTY = false; savePill(""); rememberEdNow();
     renderEditor(r.flagged && STATUS !== "live" ? `Saved. Some words in your store need a quick check by ${APP_NAME} before it can go live.`
       : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
   } catch(e){ notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment.")); }
@@ -2580,20 +2602,21 @@ function saveCart(){ try { localStorage.setItem(cartKey(), JSON.stringify(cart))
 const priceLabel = p => { const ps = p.o.map(o => o.p); const lo = Math.min(...ps); return (ps.length > 1 && Math.max(...ps) !== lo ? "From " : "") + money(lo); };
 const inCart = i => Object.keys(cart).filter(k => k.startsWith(i + "|")).reduce((a,k) => a + cart[k], 0);
 
-async function showStore(data, isPreview){
+// refresh = the same store again with newer details: update in place, keep the customer's place, view and note
+async function showStore(data, isPreview, refresh){
   D = normalize(data);
-  show("store");
+  if (!refresh) show("store");
   $("backBtn").hidden = !isPreview;
   setAccent(D.color);
   document.title = D.name + " · Order on WhatsApp";
-  const cover = safeImg(D.cover);
+  const cover = safeImg(D.cover), setHtml = (el, h) => { if (el.dataset.h !== h){ el.dataset.h = h; el.innerHTML = h; } };   // same picture: don't reload it
   $("stCover").hidden = !cover;
   $("stCover").style.backgroundImage = "";
-  $("stCover").innerHTML = cover ? `<img src="${esc(cover)}" alt="">` : "";
+  setHtml($("stCover"), cover ? `<img src="${esc(cover)}" alt="">` : "");
   $("stWrap").style.paddingTop = cover ? "0" : "56px";
   $("stCard").style.marginTop = cover ? "" : "104px";   // no cover: leave room for the explore button above the logo
   if (isPreview) hidePwaBar("stPwaBar"); else showPwaBar("stPwaBar");
-  $("stLogo").innerHTML = safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`;
+  setHtml($("stLogo"), safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`);
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
   // town + state (the seller's own preview uses what they've set in the editor)
@@ -2607,7 +2630,7 @@ async function showStore(data, isPreview){
   $("stSafeLink").href = home() + "safe";
   $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
   $("stVerified").hidden = !(isPreview ? false : STORE_VERIFIED);
-  if (!isPreview) track("view");
+  if (!isPreview && !refresh) track("view");
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const canSignup = signupOpen(), cta = $("stCta"), btn = $("stCtaBtn");
@@ -2625,10 +2648,9 @@ async function showStore(data, isPreview){
   $("err").textContent = "";
   try { cart = JSON.parse(localStorage.getItem(cartKey()) || "{}") || {}; } catch(e){ cart = {}; }
   Object.keys(cart).forEach(k => { const [i,j] = k.split("|").map(Number); if (!D.items[i] || !D.items[i].o[j] || D.items[i].out) delete cart[k]; });
-  $("note").value = "";
-  MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = "";
+  if (!refresh){ $("note").value = ""; MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
   renderMenu(); renderBar();
-  showAd();
+  if (!refresh) showAd();
 }
 async function loadAd(){
   await CONFIG_P;
@@ -2979,7 +3001,7 @@ async function adminStores(g, head, wire){
       g.innerHTML = loaderHtml("Opening store...");
       try {
         SESSION = { id, key: ADMIN, admin: true }; saveSession();
-        const r = await apiPost({ action: "login", id });
+        const r = await apiPost({ action: "login", id }); rememberEd(r);
         S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
         history.pushState(null, "", home() + "build"); return openEditor();
       } catch(e){ clearSession(); return renderAdmin(e.message); }
@@ -3076,7 +3098,7 @@ async function adminReview(g, head, wire){
     if (op === "edit"){
       g.innerHTML = loaderHtml("Opening store...");
       try { SESSION = { id, key: ADMIN, admin: true }; saveSession();
-        const r = await apiPost({ action: "login", id }); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
+        const r = await apiPost({ action: "login", id }); rememberEd(r); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
         history.pushState(null, "", home() + "build"); return openEditor(); }
       catch(e){ clearSession(); return renderAdmin(e.message); }
     }
@@ -3664,12 +3686,15 @@ async function renderExplore(){
     </section>
     <div class="mxtoast" id="mxToast" role="status"></div>`;
   document.body.classList.add("exploring");
-  show("page");
+  show("page"); SPLASH.ready();
   mxChips();
 
   // stores load in the background while the map opens
   let loadErr = null;
-  const pStores = apiGet({ action: "near" }).then(r => r.stores || []).catch(e => { loadErr = e; return []; });
+  // stores seen last time show at once; the fresh list replaces them when it arrives
+  const savedNear = keep.get("lk-near");
+  const freshNear = apiGet({ action: "near" }).then(r => { const st = r.stores || []; keep.set("lk-near", st); return st; });
+  const pStores = Array.isArray(savedNear) ? Promise.resolve(savedNear) : freshNear.catch(e => { loadErr = e; return []; });
   try { await mxLoadMap(); }
   catch(e){ $("mxMap").innerHTML = `<p class="err mxerr">${esc(e.message)}</p>`; return; }
   if (!$("mxMap")) return;   // the person already left this page
@@ -3734,10 +3759,11 @@ async function renderExplore(){
   const stores = await pStores;
   if (!MX || MX.map !== map) return;
   EX.stores = stores; MX.loaded = true;
-  if (loadErr){ $("mxEmpty").hidden = false; $("mxEmpty").innerHTML = `<b>Couldn't load stores</b><p>${esc(loadErr.message)}</p>`; return; }
+  if (loadErr){ $("mxEmpty").hidden = false; $("mxEmpty").innerHTML = `<b>Couldn't load stores</b><p>${esc(friendly(loadErr, "Check your internet and try again."))}</p>`; return; }
   const list = exList();
   if (!me) mxFit(list, 12);
   mxDraw(true);
+  if (Array.isArray(savedNear)) freshNear.then(st => { if (MX && MX.map === map && JSON.stringify(st) !== JSON.stringify(savedNear)){ EX.stores = st; mxDraw(true); } }).catch(() => {});
   mxGeocode().then(() => { if (MX && MX.map === map && !me) mxFit(exList(), 12); });
   if (me) exLocate(true);
   setTimeout(() => { if (MX && MX.map === map && EX.stores.length) mxToast("Pins show a seller's area, not their exact address"); }, 900);
@@ -3860,8 +3886,27 @@ function showPwaBar(id){
   const go = b.querySelector(".btn"); if (go) go.onclick = async () => { if (!INSTALL_EVT) return; INSTALL_EVT.prompt(); await INSTALL_EVT.userChoice; INSTALL_EVT = null; hidePwaBar(id); };
 }
 
+// ---------- Opening pages at once ----------
+let ROUTE_TOK = 0;   // each page change gets a number, so a late answer for an old page is ignored
+const SHOP_KEEP = 8;   // stores remembered on this phone
+function shopCopy(id){ const all = keep.get("lk-shops") || {}; return all[id] ? all[id].r : null; }
+function rememberShop(id, r){
+  const all = keep.get("lk-shops") || {}; all[id] = { t: Date.now(), r };
+  Object.keys(all).sort((a, b) => all[b].t - all[a].t).slice(SHOP_KEEP).forEach(k => delete all[k]);
+  keep.set("lk-shops", all);
+}
+function forgetShop(id){ const all = keep.get("lk-shops") || {}; delete all[id]; keep.set("lk-shops", all); }
+// The seller's own store, kept for this browser tab only (like the login), so a reload or Back opens the editor at once
+function edCopy(){ try { const c = JSON.parse(sessionStorage.getItem("lk-ed") || "null"); return c && SESSION && c.id === SESSION.id ? c : null; } catch(e){ return null; } }
+function rememberEd(r){ try { if (SESSION) sessionStorage.setItem("lk-ed", JSON.stringify({ id: SESSION.id, data: r.data, loc: r.loc, status: r.status })); } catch(e) {} }
+const rememberEdNow = () => { if (S) rememberEd({ data: normalize(S), loc: S.loc, status: STATUS }); };
+// A grey outline of a store while it loads for the first time
+function storeSkeleton(){
+  const row = `<div class="sk-row"><div><div class="skel sk-line" style="width:70%"></div><div class="skel sk-line" style="width:35%"></div></div><div class="skel sk-img"></div></div>`;
+  return `<div class="skel-store" role="status" aria-label="Opening store"><div class="skel sk-cover"></div><div class="sk-card"><div class="skel sk-logo"></div><div class="skel sk-line" style="width:58%;height:22px"></div><div class="skel sk-line" style="width:38%"></div></div>${row.repeat(5)}</div>`;
+}
 async function route(){
-  document.body.classList.remove("exploring"); mxDestroy();
+  document.body.classList.remove("exploring"); mxDestroy(); ROUTE_TOK++;
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop();
   if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ)) await CONFIG_P;
@@ -3876,22 +3921,44 @@ async function route(){
   if (q === "build" || q === "edit"){
     SESSION = loadSession();
     if (SESSION){
-      $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page");
-      try { const r = await apiPost(SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; return openEditor(); }
+      const req = SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }, saved = edCopy();
+      if (saved){
+        // open at once from this tab's copy, then take the server's newer version if nothing was changed meanwhile
+        S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; openEditor(); SPLASH.ready();
+        apiPost(req).then(r => {
+          if (!SESSION || SESSION.id !== saved.id) return;
+          const same = JSON.stringify(normalize(Object.assign({}, r.data, { loc: r.loc }))) === JSON.stringify(normalize(Object.assign({}, saved.data, { loc: saved.loc }))) && r.status === saved.status;
+          rememberEd(r);
+          if (same || DIRTY || $("builder").hidden) return;
+          S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); renderEditor();
+        }).catch(e => { if (/PIN|WhatsApp number/i.test(e.message || "")){ clearSession(); renderStart(friendly(e, "")); } });
+        return;
+      }
+      $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page"); SPLASH.ready();
+      try { const r = await apiPost(req); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; rememberEd(r); return openEditor(); }
       catch(e){ clearSession(); }
     }
     return renderStart();
   }
   if (/^[a-z0-9-]{2,40}$/.test(q)){
-    $("gwrap").innerHTML = `${loaderHtml("Opening store...")}`; show("page");
+    // A store seen before opens at once from this phone's copy; the newest version replaces it quietly
+    const tok = ++ROUTE_TOK, saved = shopCopy(q), here = () => tok === ROUTE_TOK;
+    const open = r => { STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_PLACE = r.place || null; };
+    if (saved){ open(saved); showStore(saved.data, false); loadAd().then(() => { if (here() && STORE_ID === q) showAd(); }); }
+    else { $("gwrap").innerHTML = storeSkeleton(); show("page"); }
+    SPLASH.ready();
     try {
-      const [r] = await Promise.all([apiGet({ action: "shop", id: q }), loadAd()]);   // loadAd waits for settings in parallel
+      const [r] = await Promise.all([apiGet({ action: "shop", id: q }), saved ? null : loadAd()]);   // loadAd waits for settings in parallel
+      if (!here()) return;
+      if (r.error === "notfound" || r.error === "notlive") forgetShop(q);
       if (r.error === "notfound") return showMessage("Store not found", "Check the link spelling, or ask the shop for their link again.");
       if (r.error === "notlive") return showMessage("Opening soon", "This store isn't live yet. Please check back later.");
       if (r.error) throw new Error(r.error);
-      STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_PLACE = r.place || null;
-      return showStore(r.data, false);
-    } catch(e){ return showMessage("Couldn't open the store", friendly(e, "Check your internet connection and try again.")); }
+      rememberShop(q, r);
+      if (!saved){ open(r); return showStore(r.data, false); }
+      if (JSON.stringify(saved) !== JSON.stringify(r)){ open(r); showStore(r.data, false, true); }
+    } catch(e){ if (!saved && here()) return showMessage("Couldn't open the store", friendly(e, "Check your internet connection and try again.")); }
+    return;
   }
   renderHome();
 }
