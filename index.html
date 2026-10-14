@@ -1731,13 +1731,15 @@ function openBulletin(){
 // ================= Seller: store home + section pages =================
 let EDV = "home", EDI = 0;
 function edGo(v, i){ EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0); }
+// A seller with shop links but nothing of their own to sell: listed under Affiliate Shops, never as a map pin
+function affOnly(d){ return !(d.items || []).some(it => String(it.n || "").trim()) && (d.links || []).some(l => safeUrl(l.u)); }
 function edSteps(){
   const named = S.items.filter(it => it.n.trim());
   return {
     details: !!(S.name.trim() && S.wa),
     products: named.some(it => it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
     look: !!(safeImg(S.logo) || safeImg(S.cover)),
-    listing: !!(S.loc.on && S.loc.state && S.loc.city),
+    listing: !!(S.loc.on && S.loc.state && (S.loc.city || affOnly(S))),
     status: true,
     plan: STATUS === "live"
   };
@@ -2004,23 +2006,23 @@ function edProduct(i){
 function edListing(){ return `${edTop("Browse listing", "home")}${edListingCard()}`; }
 function edListingCard(){
   const cities = CITIES[S.loc.state] || [];
-  const other = S.loc.city && !cities.includes(S.loc.city);
+  const other = S.loc.city && !cities.includes(S.loc.city), aff = affOnly(S);
   return `
   <section class="card" id="locCard">
     <label class="check" style="margin-top:0"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}><span>List my store in Browse stores</span></label>
-    <p class="hint">Customers using the Link Kedai App can find you by state, city and category.</p>
+    <p class="hint">${aff ? "You only share shop links, so customers find you under <b>Affiliate Shops</b> in Browse stores, not as a pin on the map. Just pick your state and category." : "Customers using the Link Kedai App can find you by state, city and category."}</p>
     <div id="locBox" ${S.loc.on ? "" : "hidden"}>
       <label>State<select data-floc="state"><option value="">Choose your state</option>${STATES.map(st => `<option ${S.loc.state === st ? "selected" : ""}>${st}</option>`).join("")}</select></label>
-      <label>City or town<select data-floc="city" ${S.loc.state ? "" : "disabled"}><option value="">${S.loc.state ? "Choose your city or town" : "Choose a state first"}</option>${cities.map(c => `<option ${S.loc.city === c ? "selected" : ""}>${c}</option>`).join("")}<option value="__other" ${other || EDOTHER ? "selected" : ""}>Other town</option></select></label>
+      ${aff ? "" : `<label>City or town<select data-floc="city" ${S.loc.state ? "" : "disabled"}><option value="">${S.loc.state ? "Choose your city or town" : "Choose a state first"}</option>${cities.map(c => `<option ${S.loc.city === c ? "selected" : ""}>${c}</option>`).join("")}<option value="__other" ${other || EDOTHER ? "selected" : ""}>Other town</option></select></label>
       ${other || EDOTHER ? `<label>Your town<input type="text" data-floc="cityOther" value="${esc(other ? S.loc.city : "")}" placeholder="Type your town"></label>` : ""}
-      <label>Neighbourhood (optional)<input type="text" data-floc="area" value="${esc(S.loc.area)}" placeholder="e.g. Taman Prima Saujana"></label>
+      <label>Neighbourhood (optional)<input type="text" data-floc="area" value="${esc(S.loc.area)}" placeholder="e.g. Taman Prima Saujana"></label>`}
       <label>Category</label>
       <div class="stalls pick">${Object.keys(CATS).map(k => `<button type="button" data-act="setcat" data-v="${k}" aria-pressed="${(S.cat ? S.cat : catOf(S)) === k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
-      <div class="nearbox">
+      ${aff ? "" : `<div class="nearbox">
         <b>Nearest first (optional)</b>
         <p class="hint" style="margin:4px 0 8px">Add your location so nearby customers see you first. It stays private: customers only see roughly how far away you are, never where.</p>
         ${S.loc.lat != null ? `<p class="hint" style="margin:0 0 8px;color:#15803D;font-weight:700">Location added</p><button class="btn small" data-act="noloc">Remove my location</button>` : `<button class="btn small" data-act="myloc">${ico("pin",16)}Add my current location</button>`}
-      </div>
+      </div>`}
     </div>
   </section>`;
 }
@@ -2074,7 +2076,7 @@ function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.cla
 let AUTOSAVE_T = 0, EDITV = 0, SAVING = null;
 function saveProblem(){
   if (S.loc.on && !S.loc.state) return "Choose your state under Browse listing.";
-  if (S.loc.on && !S.loc.city) return "Choose your city or town under Browse listing.";
+  if (S.loc.on && !S.loc.city && !affOnly(S)) return "Choose your city or town under Browse listing.";
   if (!S.name.trim()) return "Add your shop name.";
   if (!S.wa || S.wa.length < 9) return "Add your WhatsApp number, so orders can reach you.";
   return "";
@@ -2478,7 +2480,7 @@ async function publishWithReceipt(input){
 
 async function saveStore(){
   if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse listing, so customers can find you.");
-  if (S.loc.on && !S.loc.city) return notify("Choose your city or town under Browse listing, so customers can find you.");
+  if (S.loc.on && !S.loc.city && !affOnly(S)) return notify("Choose your city or town under Browse listing, so customers can find you.");
   if (!S.name.trim()) return notify("Add your shop name first.");
   if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
@@ -3384,6 +3386,7 @@ const mxHasCoords = st => st.lat != null && st.lng != null && st.lat !== "" && s
 const mxPlace = st => [st.city || st.area, st.state].filter(Boolean).join(", ");
 const mxCol = st => /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
 function mxArea(st){
+  if (st.aff) return null;   // Affiliate Shops sell online through Shopee, TikTok Shop and others: never a pin
   if (mxHasCoords(st)){
     // snap to a ~440 m grid, then nudge inside the cell: the true spot is always inside the 650 m circle
     const g = 0.004, snap = v => (Math.floor(v / g) + 0.5) * g;
@@ -3398,7 +3401,8 @@ function exList(){
   const list = EX.stores.filter(st =>
     (EX.cat === "all" || st.cat === EX.cat) &&
     (!q || (st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag).toLowerCase().includes(q)) &&
-    (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)));
+    (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)) &&
+    (EX.aff ? !!st.aff : (!st.aff || !!q || EX.fav)));   // Affiliate Shops show under their own pill, in search and in Saved
   list.forEach(st => { st._a = mxArea(st); st._km = EX.me && st._a ? kmBetween(EX.me.lat, EX.me.lng, st._a.lat, st._a.lng) : null; });
   const byName = (a, b) => (a.closed - b.closed) || (b.v - a.v) || a.name.localeCompare(b.name);
   return list.sort((a, b) => ((a._km == null) - (b._km == null)) || ((a._km || 0) - (b._km || 0)) || byName(a, b));
@@ -3465,7 +3469,7 @@ function mxMarker(el, ll){ return new maplibregl.Marker({ element: el, anchor: "
 function mxDraw(force){
   if (!MX || !MX.map) return;
   const map = MX.map, z = map.getZoom(), all = exList(), list = all.filter(s => s._a);
-  MX.noarea = all.filter(s => !s._a);
+  MX.noarea = all.filter(s => !s._a && !s.aff); MX.affs = all.filter(s => s.aff); MX.mapped = list.length;
   const cl = mxCluster(list);
   const sig = cl.map(c => c.items.map(i => i.id).join(",")).join("|") + "#" + MX.sel + "#" + z.toFixed(1);
   if (force || sig !== MX.sig){
@@ -3495,11 +3499,14 @@ function mxDraw(force){
   MX.view = list.filter(s => b.contains([s._a.lng, s._a.lat]));
   const c = map.getContainer(); c.classList.toggle("mxzoom", z >= 13); c.classList.toggle("mxhassel", !!MX.sel);
   const pill = $("mxPill");
-  pill.innerHTML = `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view</span>`;
+  const na = MX.affs.length;
+  pill.innerHTML = EX.aff ? `${ico("link", 18, 2)}<span>${na} Affiliate ${na === 1 ? "Shop" : "Shops"}</span>` : `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view${na ? ` · ${na} Affiliate` : ""}</span>`;
   pill.classList.toggle("off", !!MX.sel || !all.length);
   const em = $("mxEmpty"), have = EX.stores.length;
   em.hidden = !MX.loaded || !!all.length;
-  if (!em.hidden) em.innerHTML = have
+  if (!em.hidden) em.innerHTML = EX.aff && !EX.stores.some(s => s.aff)
+    ? `<b>No Affiliate Shops yet</b><p>Sellers who share Shopee, TikTok Shop and other shop links appear here.</p><button type="button" class="btn solid" id="mxClear">Back to all stores</button>`
+    : have
     ? `<b>No stores match</b><p>Try another category or clear your filters.</p><button type="button" class="btn solid" id="mxClear">Clear filters</button>`
     : `<b>No stores listed yet</b><p>Link Kedai App stores appear here when sellers list them.</p>${signupOpen() ? `<a class="btn solid" href="${esc(home())}signup">Are you a seller? Open a store</a>` : ""}`;
   if ($("mxSheet").classList.contains("open")) mxRenderSheet();
@@ -3512,18 +3519,31 @@ function mxFit(list, maxZoom){
 
 // ----- store card, list sheet -----
 function mxMeta(st){ return [st.city || st.area, st.state].filter(Boolean).join(", "); }
+// "Shopee · TikTok Shop" from the shop addresses an Affiliate Shop links to
+function affShops(st){ return [...new Set((Array.isArray(st.lh) ? st.lh : []).map(h => linkInfo("https://" + h).brand).filter(Boolean))].slice(0, 3).join(" · "); }
 function mxRow(st, mapped){
-  const logo = safeImg(st.logo);
+  const logo = safeImg(st.logo), n = +st.lk || 0;
   return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}"><span class="mxlogo sm" style="background:${mxCol(st)}">${logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
-    <span class="mxci"><b><span>${esc(st.name)}</span>${st.v ? SHIELD_SVG(15) : ""}</b><span class="mxmeta">${esc(mxMeta(st))} · ${esc(CATS[st.cat] || "Other")}</span>
-    <span class="mxmeta">${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></span>
+    <span class="mxci"><b><span>${esc(st.name)}</span>${st.v ? SHIELD_SVG(15) : ""}</b>${st.aff
+      ? `<span class="mxmeta">${esc(affShops(st) || "Online shop links")}</span>
+    <span class="mxmeta">${n ? `${n} ${n === 1 ? "link" : "links"} · ` : ""}${esc(CATS[st.cat] || "Other")}</span></span>`
+      : `<span class="mxmeta">${esc(mxMeta(st))} · ${esc(CATS[st.cat] || "Other")}</span>
+    <span class="mxmeta">${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></span>`}
     <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></a>`;
 }
 function mxRenderSheet(){
-  const v = MX.view || [], n = v.length;
-  $("mxShTitle").textContent = n ? `${n} ${n === 1 ? "store" : "stores"} in this area` : "In this area";
-  $("mxList").innerHTML = (n ? v.map(s => mxRow(s, true)).join("") : `<p class="mxnone">No stores in this part of the map yet.<br>Zoom out or move the map to see more.</p>`) +
-    (MX.noarea && MX.noarea.length ? `<h3 class="mxh3">Not on the map yet</h3><p class="mxnote">These sellers haven't set a location.</p>${MX.noarea.map(s => mxRow(s, false)).join("")}` : "");
+  const v = MX.view || [], n = v.length, affs = MX.affs || [];
+  const affNote = `<p class="mxnote">Online sellers sharing Shopee, TikTok Shop and other shop links. You buy and pay on those sites, which deliver to you.</p>`;
+  if (EX.aff){
+    $("mxShTitle").textContent = `${affs.length} Affiliate ${affs.length === 1 ? "Shop" : "Shops"}`;
+    $("mxList").innerHTML = affNote + (affs.length ? affs.map(s => mxRow(s, false)).join("") : `<p class="mxnone">No Affiliate Shops match.<br>Try another category.</p>`);
+    return;
+  }
+  const found = n + (MX.noarea || []).length + affs.length;
+  $("mxShTitle").textContent = EX.q.trim() ? `${found} ${found === 1 ? "result" : "results"}` : n ? `${n} ${n === 1 ? "store" : "stores"} in this area` : "In this area";
+  $("mxList").innerHTML = (n ? v.map(s => mxRow(s, true)).join("") : MX.mapped || !affs.length ? `<p class="mxnone">No stores in this part of the map yet.<br>Zoom out or move the map to see more.</p>` : "") +
+    (MX.noarea && MX.noarea.length ? `<h3 class="mxh3">Not on the map yet</h3><p class="mxnote">These sellers haven't set a location.</p>${MX.noarea.map(s => mxRow(s, false)).join("")}` : "") +
+    (affs.length ? `<h3 class="mxh3">Affiliate Shops</h3>${affNote}${affs.map(s => mxRow(s, false)).join("")}` : "");
 }
 function mxShowCard(st){
   const c = $("mxCard"), logo = safeImg(st.logo), blurb = st.tag || st.items || "";
@@ -3555,7 +3575,7 @@ function mxToggleFav(id){
 function mxChips(){
   document.querySelectorAll("[data-excat]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.excat === EX.cat)));
   const t = (id, on) => { const b = $(id); if (b) b.setAttribute("aria-pressed", String(!!on)); };
-  t("exOpen", EX.open); t("exVer", EX.ver);
+  t("exOpen", EX.open); t("exVer", EX.ver); t("exAff", EX.aff);
   const fb = $("exFav"), bb = $("exBrowse"); if (fb && bb){ fb.toggleAttribute("aria-current", EX.fav); bb.toggleAttribute("aria-current", !EX.fav); if (EX.fav) fb.setAttribute("aria-current", "page"); else bb.setAttribute("aria-current", "page"); }
 }
 function exRender(fit){   // re-apply filters; optionally move the map to the results
@@ -3612,7 +3632,7 @@ async function renderExplore(){
   mxDestroy();
   setAccent(COLORS[0]); document.title = APP_NAME + " · Browse stores";
   let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
-  EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
+  EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, aff: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
   $("gwrap").innerHTML = `
     <div id="mxMap" role="application" aria-label="Map showing the areas where sellers sell"></div>
     <div class="mxtop">
@@ -3621,7 +3641,7 @@ async function renderExplore(){
         <label class="mxsearch mxg">${ico("search", 20, 1.8)}<input type="search" id="exQ" placeholder="Search stores or items" aria-label="Search stores or items" autocomplete="off" enterkeyhint="search"><button type="button" class="mxclr" id="mxClr" aria-label="Clear search" hidden>${ico("x", 16, 2)}</button></label>
         <a class="mxib mxg" href="${esc(home())}" aria-label="For sellers" title="For sellers">${ico("store", 21)}</a>
       </div>
-      <div class="mxchips" id="exCats" role="group" aria-label="Filters"><button type="button" class="mxchip mxg" data-excat="all">${ico("grid", 19, 1.9)}All</button>${Object.keys(CATS).map(k => `<button type="button" class="mxchip mxg" data-excat="${k}">${ico(CAT_ICON[k], 19, 1.9)}${CATS[k]}</button>`).join("")}<i class="mxsep"></i><button type="button" class="mxchip t mxg" id="exOpen">Open now</button><button type="button" class="mxchip t mxg" id="exVer">Verified</button></div>
+      <div class="mxchips" id="exCats" role="group" aria-label="Filters"><button type="button" class="mxchip t mxg" id="exAff">${ico("link", 18, 2)}Affiliate Shops</button><i class="mxsep"></i><button type="button" class="mxchip mxg" data-excat="all">${ico("grid", 19, 1.9)}All</button>${Object.keys(CATS).map(k => `<button type="button" class="mxchip mxg" data-excat="${k}">${ico(CAT_ICON[k], 19, 1.9)}${CATS[k]}</button>`).join("")}<i class="mxsep"></i><button type="button" class="mxchip t mxg" id="exOpen">Open now</button><button type="button" class="mxchip t mxg" id="exVer">Verified</button></div>
     </div>
     <div class="mxempty mxg" id="mxEmpty" hidden></div>
     <div class="mxfabs"><button type="button" class="mxib mxg" id="exNear" aria-label="Show stores near me" title="Near me">${ico("locate", 22)}</button></div>
@@ -3673,13 +3693,18 @@ async function renderExplore(){
 
   $("exCats").onclick = e => {
     const b = e.target.closest("button"); if (!b) return;
+    if (b.id === "exAff"){   // Affiliate Shops have no pins, so their list opens straight away
+      EX.aff = !EX.aff; mxDeselect(); exRender(!EX.aff);
+      if (EX.aff && MX.affs && MX.affs.length) mxOpenSheet(); else mxCloseSheet();
+      return;
+    }
     if (b.dataset.excat){ EX.cat = b.dataset.excat; } else if (b.id === "exOpen"){ EX.open = !EX.open; } else if (b.id === "exVer"){ EX.ver = !EX.ver; } else return;
-    exRender(true);
+    exRender(!EX.aff);
   };
   $("exQ").oninput = () => { EX.q = $("exQ").value; $("mxClr").hidden = !EX.q; clearTimeout(MX.qt); MX.qt = setTimeout(() => exRender(true), 350); };
   $("exQ").onkeydown = e => { if (e.key === "Enter") $("exQ").blur(); };
   $("mxClr").onclick = () => { $("exQ").value = ""; EX.q = ""; $("mxClr").hidden = true; exRender(true); };
-  $("mxEmpty").onclick = e => { if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.fav = false; $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
+  $("mxEmpty").onclick = e => { if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.aff = false; EX.fav = false; mxCloseSheet(); $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
   $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(true); } else exLocate(false, true); };
   $("exBrowse").onclick = () => { EX.fav = false; exRender(true); };
   $("exFav").onclick = () => { EX.fav = true; exRender(true); if (!EX.favs.size) mxToast("Tap the heart on a store to save it"); };
