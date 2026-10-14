@@ -1146,6 +1146,14 @@ function linkInfo(u){
     return { host, brand: b ? b[1] : host };
   } catch(e){ return { host: "", brand: "" }; }
 }
+function looksJunk(t){
+  t = String(t || "").trim(); if (!t) return false;
+  const letters = (t.match(/\p{L}/gu) || []).length;
+  return letters < 4 || /[?&]\w+=/.test(t) || /^https?:/i.test(t) || /^[\w.-]+\.[a-z]{2,}\//i.test(t) || /^[\d._-]+$/.test(t);
+}
+function slugName(u){   // Shopee product pages carry the name in the address: /Product-Name-i.123.456
+  try { const seg = decodeURIComponent(new URL(u).pathname.split("/").filter(Boolean).pop() || ""), m = seg.match(/^(.+)-i\.\d+\.\d+$/); return m ? m[1].replace(/-+/g, " ").trim().slice(0, 120) : ""; } catch(e){ return ""; }
+}
 function fixUrl(v){ v = String(v || "").trim(); if (!v) return ""; v = v.replace(/^http:\/\//i, "https://"); return /^https:\/\//i.test(v) ? v : (/^[\w-]+(\.[\w-]+)+(\/|$|\?)/.test(v) ? "https://" + v : v); }
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const smooth = () => reduceMotion() ? "auto" : "smooth";
@@ -1278,8 +1286,8 @@ function normalize(d){
     o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String(o.l || ""), p: Number(o.p) || 0 })) : [{ l: "", p: 0 }]
   }));
   x.links = (Array.isArray(x.links) ? x.links : []).slice(0, 80).map(l => ({
-    u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: String((l && l.n) || "").slice(0, 120),
-    img: safeUrl(String((l && l.img) || "").trim()).slice(0, 600), p: Math.max(0, Number(l && l.p) || 0), pu: safeUrl(String((l && l.pu) || "")).slice(0, 600)
+    u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: looksJunk((l && l.n) || "") ? "" : String((l && l.n) || "").slice(0, 120),
+    img: safeImg(String((l && l.img) || "").trim()), p: Math.max(0, Number(l && l.p) || 0), pu: safeUrl(String((l && l.pu) || "")).slice(0, 600)
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
   if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
@@ -1770,16 +1778,16 @@ function linkPreviewHtml(l){
   if (!l.u.trim()) return `<p class="hint">Paste an https link from Shopee, TikTok Shop, Lazada or any shop. We'll fetch the photo and name for you.</p>`;
   if (!safeUrl(l.u)) return `<p class="hint" style="color:var(--err)">The link must start with https://</p>`;
   const info = linkInfo(l.u), img = safeImg(l.img);
-  const msg = st.s === "loading" ? "Fetching photo and name…" : st.s === "fail" ? (st.m || "Couldn't read this page.") : st.s === "none" ? "Couldn't read this page. Type the name and price below." : st.s === "ok" ? "Fetched from the link" : "";
+  const msg = st.s === "loading" ? "Fetching photo and name…" : st.s === "fail" ? (st.m || "Couldn't read this page.") : st.s === "none" ? (/shopee|tiktok/i.test(info.brand) ? info.brand + " hides product details from preview tools. Add the photo, name and price below." : "Couldn't read this page. Add the photo, name and price below.") : st.s === "partial" ? "Found the name only. Add a photo below." : st.s === "ok" ? "Fetched from the link" : "";
   return `<div class="lprev"><span class="thumb">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ico("image", 20)}</span>
       <span class="tt"><b>${esc(l.n || "No name yet")}</b><span>${esc(info.brand)}${l.p > 0 ? " · " + esc(fmtMoney(S.cur || curSymbol(S.curCode), l.p)) : ""}</span><span class="lst">${esc(msg)}</span></span></div>
-    <div class="lbtns"><button type="button" class="btn small" data-act="lkfetch" data-j="${j}" ${st.s === "loading" ? "disabled" : ""}>Fetch again</button><button type="button" class="btn small" data-act="lkedit" data-j="${j}">${st.edit ? "Hide details" : "Edit name & price"}</button></div>
-    ${st.edit ? `<label>Name<input type="text" data-lf="n" data-j="${j}" value="${esc(l.n)}" maxlength="120" placeholder="e.g. Mini Handheld Fan"></label><label>Price (optional)<input type="number" inputmode="decimal" data-lf="p" data-j="${j}" value="${l.p || ""}" placeholder="e.g. 25"></label>` : ""}`;
+    <div class="lbtns"><button type="button" class="btn small" data-act="lkfetch" data-j="${j}" ${st.s === "loading" ? "disabled" : ""}>Fetch again</button><button type="button" class="btn small" data-act="lkedit" data-j="${j}">${st.edit ? "Hide details" : "Edit photo, name & price"}</button></div>
+    ${st.edit ? `<label>Photo</label><div class="media-row">${photoBox("lkPrev" + j, l.img, "No photo", "sq")}${photoControls("link", l.img, `data-i="${j}"`)}</div><label>Name<input type="text" data-lf="n" data-j="${j}" value="${esc(l.n)}" maxlength="120" placeholder="e.g. Mini Handheld Fan"></label><label>Price (optional)<input type="number" inputmode="decimal" data-lf="p" data-j="${j}" value="${l.p || ""}" placeholder="e.g. 25"></label>` : ""}`;
 }
 function updateLinkPreview(l){ const j = S.links.indexOf(l), el = $("lpv-" + j); if (el) el.innerHTML = linkPreviewHtml(l); }
 async function fetchLinkMeta(l){
   if (!l || !safeUrl(l.u)) return;
-  const st = lkState(l), url = l.u; st.s = "loading"; updateLinkPreview(l);
+  const st = lkState(l), url = l.u; if (looksJunk(l.n)) l.n = ""; st.s = "loading"; updateLinkPreview(l);
   try {
     const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
     const r = await fetch(LINK_PREVIEW(url), { signal: ctl.signal }); clearTimeout(to);
@@ -1788,11 +1796,11 @@ async function fetchLinkMeta(l){
       const body = await r.json().catch(() => ({}));
       if (!S.links.includes(l) || l.u !== url) return;   // link was changed or deleted meanwhile
       const d = body && body.status === "success" ? (body.data || {}) : {};
-      const raw = cleanTitle(d.title), generic = !raw || GENERIC_TITLE.test(raw);
-      const title = generic ? "" : raw, img = !generic && d.image && d.image.url ? safeUrl(d.image.url) : "", price = guessPrice((d.title || "") + " " + (d.description || ""));
+      const raw = cleanTitle(d.title), generic = !raw || GENERIC_TITLE.test(raw) || looksJunk(raw);
+      const title = generic ? slugName(d.url || "") : raw, img = !generic && d.image && d.image.url ? safeUrl(d.image.url) : "", price = guessPrice((d.title || "") + " " + (d.description || ""));
       if (title) l.n = title; if (img) l.img = img; if (price) l.p = price;
       l.pu = url; touch();
-      st.s = title || img ? "ok" : "none"; if (st.s === "none") st.edit = true;
+      st.s = img ? "ok" : title ? "partial" : "none"; if (st.s !== "ok") st.edit = true;
     }
   } catch(e){ st.s = "fail"; st.m = "Couldn't reach the preview service. Check your connection, or type the name and price yourself."; st.edit = true; }
   updateLinkPreview(l);
@@ -2336,7 +2344,7 @@ $("bwrap").addEventListener("change", e => {
   if (kind === "receipt") return publishWithReceipt(t);
   const file = t.files && t.files[0];
   if (!file) return;
-  const idx = t.dataset.i, boxId = kind === "logo" ? "logoPrev" : kind === "cover" ? "coverPrev" : "imgPrev" + idx;
+  const idx = t.dataset.i, boxId = kind === "logo" ? "logoPrev" : kind === "cover" ? "coverPrev" : kind === "link" ? "lkPrev" + idx : "imgPrev" + idx;
   const btn = t.closest(".filebtn");
   spinOn($(boxId)); if (btn) btn.classList.add("busy");
   UPN++; setStatus("Uploading photo...");
@@ -2353,7 +2361,7 @@ $("bwrap").addEventListener("change", e => {
       step = "checking the photo shows"; spinText(boxId, "Checking");
       const good = await workingPhotoUrl(r);
       if (!good) throw new Error("Your photo was uploaded, but Google Drive won't show it. Its link: " + r.url);
-      if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (S.items[+idx]) S.items[+idx].img = good;
+      if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (kind === "link"){ if (S.links[+idx]) S.links[+idx].img = good; } else if (S.items[+idx]) S.items[+idx].img = good;
       PENDING_BOXES.delete(boxId); UPN--; touch(); renderEditor(UPN ? "Photo added. Uploading the next one..." : "Photo added. Tap Save to put it on your store.");
     } catch(err){
       try { t.value = ""; } catch(_){}   // so choosing the same photo again after an error still triggers
