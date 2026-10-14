@@ -367,6 +367,7 @@ textarea{min-height:72px;resize:vertical}
 .sechips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 .sechip{padding:6px 12px;border-radius:999px;border:1.3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:12.5px;cursor:pointer}
 .sechip:active{background:var(--soft)}
+.sechip.on{background:var(--plum);border-color:var(--plum);color:#fff}
 .group{padding:0 14px 6px;scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
 .group h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:12px 2px 10px}
 .plist{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -808,10 +809,10 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxchips{display:flex;gap:8px;overflow-x:auto;margin:0 -12px;padding:2px 12px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .mxchips::-webkit-scrollbar{display:none}
 .mxchip{flex:none;height:38px;display:flex;align-items:center;gap:6px;padding:0 14px 0 10px;border-radius:99px;font:inherit;font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;cursor:pointer;transition:transform .15s ease}
-.mxchip.mxg{-webkit-backdrop-filter:none;backdrop-filter:none;background:color-mix(in srgb,var(--surface) 90%,transparent)}
+.mxchip.mxg{-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;background:color-mix(in srgb,var(--surface) 94%,transparent)}
 .mxchip svg{width:19px;height:19px;color:var(--plum)}
 .mxchip.t{padding:0 14px}
-.mxchip[aria-pressed="true"]{background:var(--plum);border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(24,57,92,.3)}
+.mxchip[aria-pressed="true"]{background:var(--plum);border-color:transparent;color:#fff;box-shadow:none}
 .mxchip[aria-pressed="true"] svg{color:#fff}
 .mxsep{flex:none;width:1px;margin:7px 2px;background:var(--line2)}
 .mxfabs{position:fixed;z-index:10;right:12px;bottom:calc(98px + env(safe-area-inset-bottom,0px))}
@@ -1741,8 +1742,10 @@ function edProduct(i){
   const it = S.items[i];
   if (!it){ EDV = "products"; return edProducts(); }
   const STARTER_SECS = { food: ["Mains","Drinks","Desserts","Add-ons","Sides"], products: ["Best sellers","New arrivals","Accessories","Sale"], services: ["Packages","Add-ons"] };
-  const usedSecs = S.items.filter((x, xi) => xi !== i).map(x => x.sec.trim()).filter(Boolean);
-  const secs = [...new Set([...usedSecs, ...(STARTER_SECS[S.kind] || STARTER_SECS.products)])].filter(x => x !== it.sec.trim()).slice(0, 8);
+  // every section already created and still used by any item (this one included), in menu order, then unused starter ideas
+  const usedSecs = [...new Set(S.items.map(x => x.sec.trim()).filter(Boolean))];
+  const curSec = it.sec.trim();
+  const secs = [...usedSecs, ...(STARTER_SECS[S.kind] || STARTER_SECS.products).filter(x => !usedSecs.includes(x))].slice(0, Math.max(usedSecs.length, 8));
   return `${edTop("Edit " + W(S).item, "products", `<button class="btn small dangerline" data-act="del" data-i="${i}">${ico("trash",16)}Delete</button>`)}
   <section class="card">
     <label style="margin-top:0">Photo (optional)</label>
@@ -1752,7 +1755,7 @@ function edProduct(i){
     <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
     <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
     <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
-    ${secs.length ? `<div class="sechips">${secs.map(x => `<button type="button" class="sechip" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
+    ${secs.length ? `<div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === curSec ? " on" : ""}" aria-pressed="${x === curSec}" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
     <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
   </section>
   <section class="card">
@@ -2085,6 +2088,7 @@ function onField(e){
   if (t.dataset.j !== undefined) S.items[+t.dataset.i].o[+t.dataset.j][f] = f === "p" ? (parseFloat(v) || 0) : v;
   else if (t.dataset.i !== undefined) S.items[+t.dataset.i][f] = v;
   else S[f] = v;
+  if (f === "sec") document.querySelectorAll(".sechip").forEach(c => { const on = c.dataset.v === String(v).trim(); c.classList.toggle("on", on); c.setAttribute("aria-pressed", String(on)); });
   if (f === "wa") S.wa = normWa(v);
   if (f === "curCode") S.cur = curSymbol(v);
   touch();
