@@ -687,7 +687,6 @@ label{font-weight:600;font-size:13.5px}
 .exsfav[aria-pressed="true"]{color:#E0344B}
 .exsfav[aria-pressed="true"] svg path{fill:#E0344B}
 .exsfav:active svg{transform:scale(.8)}
-body.exploring #gwrap{padding-bottom:96px}
 /* ---------- enter-shop transition ---------- */
 .xfer{position:fixed;inset:0;z-index:60;background:var(--bg);overflow:hidden;pointer-events:none}
 .xf-cover{height:clamp(150px,40vw,250px);display:grid;place-items:center;overflow:hidden;color:#fff}
@@ -779,6 +778,121 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 .exfilters.fx.hide{transform:translateY(-110%)}
 #exCats{padding:8px 2px 0}
 .stalls+.chips{padding:8px 2px 6px}
+
+/* ---------- Browse stores: full-screen seller-area map ---------- */
+body.exploring{overflow:hidden}
+body.exploring #gwrap{padding:0;max-width:none}
+#mxMap{position:fixed;inset:0;z-index:1;background:var(--bg);touch-action:none}
+#mxMap.leaflet-container{font-family:inherit;-webkit-tap-highlight-color:transparent}
+#mxMap .leaflet-control-attribution{font-size:10px;background:var(--glass);color:var(--muted);border-radius:8px 0 0 0;padding:1px 6px}
+#mxMap .leaflet-control-attribution a{color:inherit}
+#mxMap .leaflet-bottom{bottom:0}
+.mxerr{position:fixed;left:16px;right:16px;top:40%;z-index:5;text-align:center}
+.mxg{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 4px 16px rgba(20,10,15,.14)}
+.mxtop{position:fixed;z-index:10;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:560px;margin:0 auto}
+.mxtop > *{pointer-events:auto}
+.mxbar{display:flex;gap:8px;align-items:center}
+.mxmark{flex:none;width:58px;height:46px;border-radius:16px;display:grid;place-items:center}
+.mxmark img{width:40px;height:auto;display:block}
+.mxsearch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:46px;border-radius:16px;padding:0 6px 0 14px;color:var(--muted);margin:0}
+.mxsearch{font-weight:500}
+.mxsearch input[type=search],.mxsearch input[type=search]:focus{flex:1;width:auto;min-width:0;margin:0;min-height:0;height:100%;padding:0;border:0;border-radius:0;background:none;box-shadow:none;outline:none;font:inherit;font-size:16px;font-weight:500;color:var(--ink)}
+.mxsearch input::placeholder{color:var(--muted)}
+.mxsearch input::-webkit-search-cancel-button{display:none}
+.mxclr{width:34px;height:34px;border-radius:12px;border:0;background:none;display:grid;place-items:center;color:var(--muted);padding:0;cursor:pointer}
+.mxclr[hidden]{display:none}
+.mxib{flex:none;width:46px;height:46px;border-radius:16px;display:grid;place-items:center;color:var(--ink);padding:0;text-decoration:none;cursor:pointer}
+.mxib:active,.mxchip:active,.mxpill:active{transform:scale(.95)}
+.mxchips{display:flex;gap:8px;overflow-x:auto;margin:0 -12px;padding:2px 12px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mxchips::-webkit-scrollbar{display:none}
+.mxchip{flex:none;height:38px;display:flex;align-items:center;gap:6px;padding:0 14px 0 10px;border-radius:99px;font:inherit;font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;cursor:pointer;transition:transform .15s ease}
+.mxchip.mxg{-webkit-backdrop-filter:none;backdrop-filter:none;background:color-mix(in srgb,var(--surface) 90%,transparent)}
+.mxchip svg{width:19px;height:19px;color:var(--plum)}
+.mxchip.t{padding:0 14px}
+.mxchip[aria-pressed="true"]{background:var(--plum);border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(24,57,92,.3)}
+.mxchip[aria-pressed="true"] svg{color:#fff}
+.mxsep{flex:none;width:1px;margin:7px 2px;background:var(--line2)}
+.mxfabs{position:fixed;z-index:10;right:12px;bottom:calc(98px + env(safe-area-inset-bottom,0px))}
+.mxpill{position:fixed;z-index:10;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);height:42px;padding:0 16px 0 12px;border-radius:99px;display:flex;align-items:center;gap:8px;
+  font:inherit;font-weight:700;font-size:13.5px;color:var(--ink);white-space:nowrap;cursor:pointer;transition:opacity .2s ease,transform .25s ease}
+.mxpill svg{width:18px;height:18px;color:var(--plum)}
+.mxpill.off{opacity:0;pointer-events:none;transform:translate(-50%,12px)}
+.mxempty{position:fixed;z-index:9;left:50%;top:42%;transform:translate(-50%,-50%);width:min(300px,calc(100% - 48px));padding:18px;border-radius:22px;text-align:center}
+.mxempty[hidden]{display:none}
+.mxempty b{display:block;font-size:17px;font-weight:800}
+.mxempty p{margin:4px 0 12px;font-size:13.5px;color:var(--muted)}
+.mxempty .btn{width:100%}
+
+/* markers */
+.mxmk,.mxcl,.mxme{background:none;border:0}
+.mxmk{position:relative}
+.mxpin{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:0 3px 10px rgba(20,10,15,.28);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.mxpin svg{width:17px;height:17px}
+.mxvb{position:absolute;left:25px;top:-6px;width:17px;height:17px;border-radius:50%;background:#18395C;border:2px solid #fff;display:grid;place-items:center;color:#8DB6E8}
+.mxvb svg{width:9px;height:9px}
+.mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05);opacity:.8}
+path.mxarea.closed{filter:saturate(.2)}
+.mxnm{position:absolute;left:50%;top:40px;transform:translateX(-50%);max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px;
+  background:var(--glass);color:var(--ink);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;transition:opacity .2s ease;pointer-events:none}
+#mxMap.mxzoom .mxnm,.mxmk.sel .mxnm{opacity:1}
+.mxmk.sel .mxpin{transform:scale(1.22)}
+#mxMap.mxhassel .mxmk:not(.sel){opacity:.45}
+.mxcl span{position:absolute;left:0;top:0;width:46px;height:46px;border-radius:50%;background:var(--plum);color:#fff;font-weight:800;font-size:16px;display:grid;place-items:center;
+  border:3px solid #fff;box-shadow:0 0 0 9px color-mix(in srgb,var(--plum) 20%,transparent),0 6px 16px rgba(20,10,15,.28);transition:transform .2s ease}
+.mxcl:active span{transform:scale(.92)}
+.mxme b{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;background:rgba(47,128,237,.2);animation:mxPulse 2.2s ease-out infinite}
+.mxme i{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;background:#2F80ED;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+@keyframes mxPulse{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.5);opacity:0}}
+
+/* store card + list sheet */
+.mxcard{position:fixed;z-index:12;left:12px;right:12px;bottom:calc(90px + env(safe-area-inset-bottom,0px));max-width:536px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:14px;
+  box-shadow:0 14px 40px rgba(20,10,15,.25);transform:translateY(28px) scale(.98);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .2s ease}
+.mxcard.show{transform:none;opacity:1;pointer-events:auto}
+.mxcrow{display:flex;gap:12px;align-items:center}
+.mxlogo{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:21px;overflow:hidden;box-shadow:0 0 0 3px var(--surface),0 3px 10px rgba(20,10,15,.18)}
+.mxlogo.sm{width:44px;height:44px;font-size:18px;box-shadow:none}
+.mxlogo img{width:100%;height:100%;object-fit:cover;display:block}
+.mxci{flex:1;min-width:0;display:block}
+.mxci b{display:flex;align-items:center;gap:6px;font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+.mxci b span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mxci b svg{flex:none}
+.mxmeta{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.mxfav{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--muted);padding:0;cursor:pointer}
+.mxfav svg{width:19px;height:19px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.mxfav[aria-pressed="true"]{color:#E0344B}
+.mxfav[aria-pressed="true"] svg path{fill:#E0344B}
+.mxfav:active svg{transform:scale(.8)}
+.mxitems{margin:10px 0 0;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mxgo{margin-top:12px}
+.mxgo .btn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.mxhint{display:flex;align-items:center;gap:6px;margin:10px 2px 0;font-size:12px;color:var(--muted)}
+.mxhint svg{width:14px;height:14px;flex:none;color:var(--plum)}
+.mxscrim{position:fixed;inset:0;z-index:25;background:rgba(10,10,12,.35);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.mxscrim.show{opacity:1;pointer-events:auto}
+.mxsheet{position:fixed;z-index:30;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;height:min(68%,620px);background:var(--surface);border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(20,10,15,.25);
+  display:flex;flex-direction:column;transform:translateY(102%);visibility:hidden;transition:transform .34s cubic-bezier(.2,.8,.2,1),visibility 0s .34s}
+.mxsheet.open{transform:none;visibility:visible;transition:transform .34s cubic-bezier(.2,.8,.2,1)}
+.mxgrab{flex:none;width:40px;height:5px;border-radius:99px;background:var(--line2);margin:9px auto 4px}
+.mxsh{flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 18px 10px}
+.mxsh h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em}
+.mxx{width:38px;height:38px;border-radius:12px;border:0;background:var(--soft);display:grid;place-items:center;color:var(--ink);padding:0;cursor:pointer}
+.mxlist{flex:1;overflow-y:auto;padding:0 12px;-webkit-overflow-scrolling:touch}
+.mxrow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 6px;text-decoration:none;color:inherit;border-radius:16px}
+.mxrow + .mxrow{border-top:1px solid var(--line)}
+.mxrow:active{background:var(--soft)}
+.mxrow .mxci b{font-size:15px}
+.mxnone{padding:30px 14px;text-align:center;color:var(--muted);font-size:14px}
+.mxh3{margin:18px 6px 2px;font-size:15px;font-weight:800}
+.mxnote{margin:0 6px 6px;font-size:12.5px;color:var(--muted)}
+.mxfoot{flex:none;padding:6px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);max-height:34%;overflow-y:auto}
+.mxtoast{position:fixed;z-index:40;left:50%;top:calc(126px + env(safe-area-inset-top,0px));transform:translate(-50%,-10px);max-width:calc(100% - 40px);padding:11px 16px;border-radius:16px;
+  background:rgba(24,24,27,.94);color:#fff;font-size:13.5px;font-weight:600;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+.mxtoast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mxmark img{filter:brightness(0) invert(1)}:root:not([data-theme="light"]) .mxchip svg,:root:not([data-theme="light"]) .mxpill svg,:root:not([data-theme="light"]) .mxhint svg{color:#9CC1EE}}
+:root[data-theme="dark"] .mxmark img{filter:brightness(0) invert(1)}
+:root[data-theme="dark"] .mxchip svg,:root[data-theme="dark"] .mxpill svg,:root[data-theme="dark"] .mxhint svg{color:#9CC1EE}
+@media (prefers-reduced-motion:reduce){.mxcard,.mxsheet,.mxscrim,.mxtoast,.mxpill,.mxpin{transition-duration:.01ms !important}.mxme b{animation:none}}
 </style>
 </head>
 <body>
@@ -2902,51 +3016,199 @@ function legalDoc(which){
     <h2>10. Law and contact</h2>
     <p>These Terms follow the laws of Malaysia. Questions? Contact us on ${legalContact()}.</p>`;
 }
-// ---------- Customer app: Browse stores (yoursite/?explore) ----------
-let EX = null;
+// ---------- Customer app: Browse stores map (yoursite/?explore) ----------
+// A full-screen map of the AREAS where sellers sell. It is not a navigation map: pins are
+// snapped to a ~400 m grid and drawn with a soft circle, so a seller's exact address is never shown.
+let EX = null, MX = null;
+Object.assign(ICONS, {
+  locate: "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"7.5\"/><path d=\"M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3\"/>",
+  list: "<path d=\"M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01\"/>"
+});
+const MX_LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min";
+const SHIELD_SVG = s => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function exFavs(){ try { return new Set(JSON.parse(localStorage.getItem("lk-favs") || "[]")); } catch(e){ return new Set(); } }
 function exSaveFavs(){ try { localStorage.setItem("lk-favs", JSON.stringify([...EX.favs])); } catch(e) {} }
 function exFmt(km){ return km == null ? "" : km < 1 ? "about " + (Math.max(1, Math.round(km * 10)) * 100) + " m" : "about " + (km < 10 ? km.toFixed(1) : Math.round(km)) + " km"; }
+
+// ----- where a store shows on the map (always an approximate area) -----
+const mxHash = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+const mxHasCoords = st => st.lat != null && st.lng != null && st.lat !== "" && st.lng !== "" && isFinite(+st.lat) && isFinite(+st.lng) && !(+st.lat === 0 && +st.lng === 0);
+const mxPlace = st => [st.city || st.area, st.state].filter(Boolean).join(", ");
+const mxCol = st => /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
+function mxArea(st){
+  if (mxHasCoords(st)){
+    // snap to a ~440 m grid, then nudge inside the cell: the true spot is always inside the 650 m circle
+    const g = 0.004, snap = v => (Math.floor(v / g) + 0.5) * g;
+    return { lat: snap(+st.lat) + (mxHash(st.id + "a") - 0.5) * 0.0024, lng: snap(+st.lng) + (mxHash(st.id + "b") - 0.5) * 0.0024, r: 650 };
+  }
+  const p = mxPlace(st), c = p && EX.geo && EX.geo[p];
+  if (c) return { lat: c.lat + (mxHash(st.id + "a") - 0.5) * 0.016, lng: c.lng + (mxHash(st.id + "b") - 0.5) * 0.016, r: 1800 };   // town-level only
+  return null;
+}
 function exList(){
   const q = EX.q.trim().toLowerCase();
-  let list = EX.stores.filter(st =>
-    (!EX.state || st.state === EX.state) && (!EX.city || st.city === EX.city) && (EX.cat === "all" || st.cat === EX.cat) &&
+  const list = EX.stores.filter(st =>
+    (EX.cat === "all" || st.cat === EX.cat) &&
     (!q || (st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag).toLowerCase().includes(q)) &&
     (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)));
-  list.forEach(st => st._km = EX.near && EX.me && st.lat != null ? kmBetween(EX.me.lat, EX.me.lng, st.lat, st.lng) : null);
+  list.forEach(st => { st._a = mxArea(st); st._km = EX.me && st._a ? kmBetween(EX.me.lat, EX.me.lng, st._a.lat, st._a.lng) : null; });
   const byName = (a, b) => (a.closed - b.closed) || (b.v - a.v) || a.name.localeCompare(b.name);
-  return list.sort((a, b) => EX.near && EX.me ? ((a._km == null) - (b._km == null)) || ((a._km || 0) - (b._km || 0)) || byName(a, b) : byName(a, b));
+  return list.sort((a, b) => ((a._km == null) - (b._km == null)) || ((a._km || 0) - (b._km || 0)) || byName(a, b));
 }
-function exCard(st){
-  const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
-  return `<a class="exshop" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}">
-    <div class="excover" style="background:${safeImg(st.cover) ? "var(--soft)" : "linear-gradient(135deg," + col + "22," + col + "44)"}">${safeImg(st.cover) ? `<img src="${esc(safeImg(st.cover))}" alt="" loading="lazy">` : stallIcon(st.cat)}</div>
-    <span class="exslogo" style="background:${col}">${safeImg(st.logo) ? `<img src="${esc(safeImg(st.logo))}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
-    <div class="exsbody">
-      <b><span>${esc(st.name)}</span>${st.v ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}</b>
-      <span class="exsmeta">${esc([st.city || st.area, st.state].filter(Boolean).join(", "))}</span>
-      <span class="exsmeta">${st._km != null ? esc(exFmt(st._km)) + " · " : ""}${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`} · ${esc(CATS[st.cat] || "Other")}</span>
-    </div>
-    <button type="button" class="exsfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart",18,2)}</button>
-  </a>`;
+
+// ----- Leaflet (loaded only when this page opens) -----
+function mxLoadLeaflet(){
+  if (window.L) return Promise.resolve();
+  if (mxLoadLeaflet.p) return mxLoadLeaflet.p;
+  return mxLoadLeaflet.p = new Promise((res, rej) => {
+    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MX_LEAFLET + ".css"; document.head.appendChild(l);
+    const s = document.createElement("script"); s.src = MX_LEAFLET + ".js"; s.onload = () => res(); s.onerror = () => { mxLoadLeaflet.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
+    document.head.appendChild(s);
+  });
 }
-function exRender(){
-  const body = $("exBody"); if (!body) return;
+const mxDark = () => { const t = document.documentElement.getAttribute("data-theme"); return t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches); };
+function mxDestroy(){
+  if (!MX) return;
+  clearTimeout(MX.qt); clearTimeout(MX.tt); document.removeEventListener("keydown", MX.key);
+  try { MX.map.remove(); } catch(e) {}
+  MX = null;
+}
+function mxToast(t){ const el = $("mxToast"); if (!el) return; el.textContent = t; el.classList.add("show"); clearTimeout(MX && MX.tt); if (MX) MX.tt = setTimeout(() => el.classList.remove("show"), 2800); }
+
+// ----- find a town's centre for stores that haven't saved coordinates (free OpenStreetMap lookup, cached on the device) -----
+const mxGeoCache = () => { try { return JSON.parse(localStorage.getItem("lk-geo") || "{}"); } catch(e){ return {}; } };
+async function mxGeocode(){
+  const me = MX; if (!me) return;
+  const cache = EX.geo = mxGeoCache();
+  const need = [...new Set(EX.stores.filter(s => !mxHasCoords(s)).map(mxPlace).filter(Boolean))].filter(k => !(k in cache)).slice(0, 12);
+  for (const k of need){
+    if (MX !== me) return;
+    try {
+      const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=my&q=" + encodeURIComponent(k + ", Malaysia"), { headers: { Accept: "application/json" } });
+      if (!r.ok) continue;
+      const j = await r.json(); cache[k] = j && j[0] ? { lat: +j[0].lat, lng: +j[0].lon } : 0;
+      try { localStorage.setItem("lk-geo", JSON.stringify(cache)); } catch(e) {}
+      if (MX === me) mxDraw(true);
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 1100));   // be polite: one lookup per second
+  }
+}
+
+// ----- markers: clusters when zoomed out, area circle + pin when zoomed in -----
+function mxCluster(list){
+  const out = [], map = MX.map;
+  list.forEach(st => {
+    const p = map.latLngToContainerPoint([st._a.lat, st._a.lng]);
+    if (st.id === MX.sel){ out.push({ items: [st], p, fixed: true }); return; }
+    const hit = out.find(c => !c.fixed && c.p.distanceTo(p) < 46);
+    if (hit){ hit.items.push(st); const n = hit.items.length; hit.p = L.point(hit.p.x + (p.x - hit.p.x) / n, hit.p.y + (p.y - hit.p.y) / n); }
+    else out.push({ items: [st], p });
+  });
+  out.forEach(c => c.ll = c.items.length === 1 ? L.latLng(c.items[0]._a.lat, c.items[0]._a.lng) : map.containerPointToLatLng(c.p));
+  return out;
+}
+function mxDraw(force){
+  if (!MX || !MX.map) return;
+  const map = MX.map, z = map.getZoom(), all = exList(), list = all.filter(s => s._a);
+  MX.noarea = all.filter(s => !s._a);
+  const cl = mxCluster(list);
+  const sig = cl.map(c => c.items.map(i => i.id).join(",")).join("|") + "#" + MX.sel + "#" + z;
+  if (force || sig !== MX.sig){
+    MX.sig = sig; MX.layer.clearLayers();
+    cl.forEach(c => {
+      if (c.items.length > 1){
+        const m = L.marker(c.ll, { icon: L.divIcon({ className: "mxcl", html: `<span>${c.items.length}</span>`, iconSize: [46, 46], iconAnchor: [23, 23] }), keyboard: true, title: c.items.length + " stores, tap to zoom in", alt: c.items.length + " stores" });
+        m.on("click", () => map.fitBounds(L.latLngBounds(c.items.map(i => [i._a.lat, i._a.lng])), { paddingTopLeft: [50, 150], paddingBottomRight: [50, 140], maxZoom: 17 }));
+        MX.layer.addLayer(m); return;
+      }
+      const st = c.items[0], col = mxCol(st), sel = st.id === MX.sel;
+      const mpp = 40075016.686 * Math.cos(c.ll.lat * Math.PI / 180) / (256 * Math.pow(2, z));
+      const style = { color: col, weight: 1.5, opacity: .6, dashArray: sel ? null : "4 5", fillColor: col, fillOpacity: sel ? .26 : .16, bubblingMouseEvents: false, className: "mxarea" + (st.closed ? " closed" : "") };
+      const shape = st._a.r / mpp >= 32 ? L.circle(c.ll, Object.assign({ radius: st._a.r }, style)) : L.circleMarker(c.ll, Object.assign({ radius: 32 }, style));
+      shape.on("click", () => mxSelect(st.id));
+      MX.layer.addLayer(shape);
+      const html = `<span class="mxpin" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
+      const m = L.marker(c.ll, { icon: L.divIcon({ className: "mxmk" + (st.closed ? " closed" : "") + (sel ? " sel" : ""), html, iconSize: [36, 36], iconAnchor: [18, 18] }), keyboard: true, title: st.name, alt: st.name + ", " + (CATS[st.cat] || "Other"), zIndexOffset: sel ? 1000 : 0 });
+      m.on("click", () => mxSelect(st.id));
+      MX.layer.addLayer(m);
+    });
+  }
+  const b = map.getBounds();
+  MX.view = list.filter(s => b.contains([s._a.lat, s._a.lng]));
+  const c = map.getContainer(); c.classList.toggle("mxzoom", z >= 14); c.classList.toggle("mxhassel", !!MX.sel);
+  const pill = $("mxPill");
+  pill.innerHTML = `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view</span>`;
+  pill.classList.toggle("off", !!MX.sel || !all.length);
+  const em = $("mxEmpty"), have = EX.stores.length;
+  em.hidden = !MX.loaded || !!all.length;
+  if (!em.hidden) em.innerHTML = have
+    ? `<b>No stores match</b><p>Try another category or clear your filters.</p><button type="button" class="btn solid" id="mxClear">Clear filters</button>`
+    : `<b>No stores listed yet</b><p>Link Kedai App stores appear here when sellers list them.</p>${signupOpen() ? `<a class="btn solid" href="${esc(home())}signup">Are you a seller? Open a store</a>` : ""}`;
+  if ($("mxSheet").classList.contains("open")) mxRenderSheet();
+}
+function mxFit(list, maxZoom){
+  const pts = list.filter(s => s._a).map(s => [s._a.lat, s._a.lng]);
+  if (!pts.length) return;
+  MX.map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [40, 150], paddingBottomRight: [40, 140], maxZoom: maxZoom || 15 });
+}
+
+// ----- store card, list sheet -----
+function mxMeta(st){ return [st.city || st.area, st.state].filter(Boolean).join(", "); }
+function mxRow(st, mapped){
+  const logo = safeImg(st.logo);
+  return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}"><span class="mxlogo sm" style="background:${mxCol(st)}">${logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
+    <span class="mxci"><b><span>${esc(st.name)}</span>${st.v ? SHIELD_SVG(15) : ""}</b><span class="mxmeta">${esc(mxMeta(st))} · ${esc(CATS[st.cat] || "Other")}</span>
+    <span class="mxmeta">${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></span>
+    <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></a>`;
+}
+function mxRenderSheet(){
+  const v = MX.view || [], n = v.length;
+  $("mxShTitle").textContent = n ? `${n} ${n === 1 ? "store" : "stores"} in this area` : "In this area";
+  $("mxList").innerHTML = (n ? v.map(s => mxRow(s, true)).join("") : `<p class="mxnone">No stores in this part of the map yet.<br>Zoom out or move the map to see more.</p>`) +
+    (MX.noarea && MX.noarea.length ? `<h3 class="mxh3">Not on the map yet</h3><p class="mxnote">These sellers haven't set a location.</p>${MX.noarea.map(s => mxRow(s, false)).join("")}` : "");
+}
+function mxShowCard(st){
+  const c = $("mxCard"), logo = safeImg(st.logo), blurb = st.tag || st.items || "";
+  c.dataset.store = st.id;
+  c.innerHTML = `<div class="mxcrow"><span class="mxlogo" style="background:${mxCol(st)}">${logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
+    <div class="mxci"><b><span>${esc(st.name)}</span>${st.v ? SHIELD_SVG(16) : ""}</b><span class="mxmeta">${esc(mxMeta(st))}</span>
+    <span class="mxmeta">${st.closed ? `<span class="exshut">Closed now</span>` : `<span class="exopen">Open now</span>`} · ${esc(CATS[st.cat] || "Other")}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></div>
+    <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></div>
+    ${blurb ? `<p class="mxitems">${esc(blurb)}</p>` : ""}
+    <div class="mxgo"><a class="btn solid full" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" id="mxVisit">Visit store ${ico("chevron", 18, 2.2)}</a></div>
+    <p class="mxhint">${ico("pin", 14, 2)}<span>${st._a && st._a.r > 1000 ? "Shown at town level, not the exact address." : "Approximate selling area, not the exact address."}</span></p>`;
+  c.classList.add("show");
+}
+function mxSelect(id, fly = true){
+  const st = EX.stores.find(x => x.id === id); if (!st || !MX) return;
+  st._a = st._a || mxArea(st); if (!st._a) return;
+  MX.sel = id; MX.sig = ""; mxShowCard(st); mxCloseSheet();
+  if (fly){
+    const z = Math.max(MX.map.getZoom(), st._a.r > 1000 ? 13 : 14), p = MX.map.project([st._a.lat, st._a.lng], z).add([0, 100]);
+    MX.map.flyTo(MX.map.unproject(p, z), z, { duration: .6 });
+  }
+  mxDraw();
+}
+function mxDeselect(){ if (!MX || !MX.sel) return; MX.sel = null; MX.sig = ""; $("mxCard").classList.remove("show"); mxDraw(); }
+function mxOpenSheet(){ mxRenderSheet(); $("mxSheet").classList.add("open"); $("mxSheet").setAttribute("aria-hidden", "false"); $("mxScrim").classList.add("show"); }
+function mxCloseSheet(){ const s = $("mxSheet"); if (!s) return; s.classList.remove("open"); s.setAttribute("aria-hidden", "true"); $("mxScrim").classList.remove("show"); }
+function mxToggleFav(id){
+  EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs();
+  document.querySelectorAll(`[data-fav="${CSS.escape(id)}"]`).forEach(b => b.setAttribute("aria-pressed", String(EX.favs.has(id))));
+  if (EX.fav){ if (MX.sel && !EX.favs.has(MX.sel)) mxDeselect(); mxDraw(true); }
+}
+function mxChips(){
   document.querySelectorAll("[data-excat]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.excat === EX.cat)));
   const t = (id, on) => { const b = $(id); if (b) b.setAttribute("aria-pressed", String(!!on)); };
-  t("exNear", EX.near && EX.me); t("exOpen", EX.open); t("exVer", EX.ver);
+  t("exOpen", EX.open); t("exVer", EX.ver);
   const fb = $("exFav"), bb = $("exBrowse"); if (fb && bb){ fb.toggleAttribute("aria-current", EX.fav); bb.toggleAttribute("aria-current", !EX.fav); if (EX.fav) fb.setAttribute("aria-current", "page"); else bb.setAttribute("aria-current", "page"); }
-  const cbox = $("exCities");
-  if (cbox){
-    const towns = [...new Set(EX.stores.filter(x => x.state === EX.state && x.city).map(x => x.city))].sort();
-    cbox.hidden = !EX.state || !towns.length;
-    cbox.innerHTML = cbox.hidden ? "" : [`<button type="button" data-city="" aria-pressed="${!EX.city}">All towns</button>`].concat(towns.map(c => `<button type="button" data-city="${esc(c)}" aria-pressed="${EX.city === c}">${esc(c)}</button>`)).join("");
-  }
-  const list = exList();
-  body.innerHTML = list.length ? list.map(exCard).join("") :
-    `<section class="card exempty" style="text-align:center"><h2>${EX.stores.length ? `No stores ${EX.state ? "in " + esc(EX.state) + " " : ""}match yet` : "No stores listed yet"}</h2>
-     <p class="hint">${EX.stores.length ? "Try another state, category or search." : "Link Kedai App stores appear here when sellers list them."}</p>
-     ${signupOpen() ? `<a class="btn small" style="margin-top:10px" href="${esc(home())}signup">Are you a seller? Open a store</a>` : ""}</section>`;
+}
+function exRender(fit){   // re-apply filters; optionally move the map to the results
+  if (!MX) return;
+  mxChips();
+  if (MX.sel && !exList().some(s => s.id === MX.sel)){ MX.sel = null; $("mxCard").classList.remove("show"); }
+  mxDraw(true);
+  if (fit) mxFit(exList());
 }
 async function enterShop(card){
   const id = card.dataset.store, st = (EX && EX.stores.find(x => x.id === id)) || {};
@@ -2967,69 +3229,118 @@ async function enterShop(card){
   ov.querySelector(".xf-cover").animate([{ transform: "scale(1.15)" }, { transform: "none" }], { duration: 700, easing: ease, fill: "both" });
   const fl = ov.querySelector(".xf-logo"), tr = fl.getBoundingClientRect();
   if (lr) fl.animate([{ transform: `translate(${lr.left - tr.left}px,${lr.top - tr.top}px) scale(${lr.width / tr.width})` }, { transform: "none" }], { duration: 620, easing: "cubic-bezier(.2,.9,.3,1.18)", fill: "both" });
-  const page = $("gwrap"), sink = page.animate([{ transform: "none", filter: "none" }, { transform: "scale(.94)", filter: "brightness(.8)" }], { duration: 520, easing: ease, fill: "forwards" });
+  const page = $("mxMap") || $("gwrap"), sink = page.animate([{ transform: "none", filter: "none" }, { transform: "scale(.94)", filter: "brightness(.8)" }], { duration: 520, easing: ease, fill: "forwards" });
   const loaded = go();
   await Promise.all([grow.finished.catch(() => {}), loaded.catch(() => {})]);
   sink.cancel();
   const fade = ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 280, easing: "ease-out", fill: "forwards" });
   fade.onfinish = () => ov.remove(); setTimeout(() => ov.remove(), 900);
 }
-function exLocate(silent){
-  if (!navigator.geolocation){ if (!silent) notify("Your browser can't share location."); return; }
+function mxShowMe(){
+  if (!MX || !EX.me) return;
+  const ll = [EX.me.lat, EX.me.lng];
+  if (MX.me) MX.me.setLatLng(ll);
+  else MX.me = L.marker(ll, { icon: L.divIcon({ className: "mxme", html: "<b></b><i></i>", iconSize: [0, 0] }), interactive: false, keyboard: false, zIndexOffset: -500 }).addTo(MX.map);
+}
+function exLocate(silent, fly){
+  if (!navigator.geolocation){ if (!silent) mxToast("Your browser can't share location."); return; }
   navigator.geolocation.getCurrentPosition(pos => {
     EX.me = { lat: pos.coords.latitude, lng: pos.coords.longitude }; EX.near = true;
     try { localStorage.setItem("lk-me", JSON.stringify(EX.me)); } catch(e) {}
-    exRender();
+    if (!MX) return;
+    mxShowMe();
+    if (fly){ mxDeselect(); MX.map.flyTo([EX.me.lat, EX.me.lng], 13, { duration: .7 }); mxToast("Showing stores around you"); }
+    mxDraw(true);
   }, () => { if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings."); }, { timeout: 12000 });
 }
 async function renderExplore(){
+  mxDestroy();
   setAccent(COLORS[0]); document.title = APP_NAME + " · Browse stores";
-  let me = null, st = ""; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); st = localStorage.getItem("lk-state") || ""; } catch(e) {}
-  EX = { stores: [], me, near: !!me, state: STATES.includes(st) ? st : "", city: "", cat: "all", q: "", open: false, ver: false, fav: false, favs: exFavs() };
+  let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
+  EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
   $("gwrap").innerHTML = `
-    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="iconbtn" href="${esc(home())}" aria-label="For sellers" title="For sellers">${ico("store",21)}</a></div>
-    <header class="exhead"><h1>Browse stores</h1></header>
-    <div class="exfwrap" id="exFwrap"><div class="exfilters" id="exFilters"><div class="exbar2"><input type="search" id="exQ" placeholder="Search stores or items" aria-label="Search"><select id="exState" aria-label="State"><option value="">All states</option>${STATES.map(x => `<option ${x === EX.state ? "selected" : ""}>${x}</option>`).join("")}</select></div>
-    <div class="excities" id="exCities" hidden></div>
-    <div class="stalls" id="exCats"><button type="button" data-excat="all"><span class="stall">${stallIcon("all")}</span>All</button>${Object.keys(CATS).map(k => `<button type="button" data-excat="${k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
-    <div class="chips"><button type="button" id="exNear">Nearest first</button><button type="button" id="exOpen">Open now</button><button type="button" id="exVer">Verified</button></div></div></div>
-    <div id="exBody" class="exgrid">${loaderHtml("Finding stores...")}</div>
-    <button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button>
-    ${legalLinks()}${copyrightLine()}
-    <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("search",22)}<span>Browse</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart",22)}</span><span>Saved</span></button></nav>`;
+    <div id="mxMap" role="application" aria-label="Map showing the areas where sellers sell"></div>
+    <div class="mxtop">
+      <div class="mxbar">
+        <span class="mxmark mxg"><img src="logo.png" alt="${esc(APP_NAME)}"></span>
+        <label class="mxsearch mxg">${ico("search", 20, 1.8)}<input type="search" id="exQ" placeholder="Search stores or items" aria-label="Search stores or items" autocomplete="off" enterkeyhint="search"><button type="button" class="mxclr" id="mxClr" aria-label="Clear search" hidden>${ico("x", 16, 2)}</button></label>
+        <a class="mxib mxg" href="${esc(home())}" aria-label="For sellers" title="For sellers">${ico("store", 21)}</a>
+      </div>
+      <div class="mxchips" id="exCats" role="group" aria-label="Filters"><button type="button" class="mxchip mxg" data-excat="all">${ico("grid", 19, 1.9)}All</button>${Object.keys(CATS).map(k => `<button type="button" class="mxchip mxg" data-excat="${k}">${ico(CAT_ICON[k], 19, 1.9)}${CATS[k]}</button>`).join("")}<i class="mxsep"></i><button type="button" class="mxchip t mxg" id="exOpen">Open now</button><button type="button" class="mxchip t mxg" id="exVer">Verified</button></div>
+    </div>
+    <div class="mxempty mxg" id="mxEmpty" hidden></div>
+    <div class="mxfabs"><button type="button" class="mxib mxg" id="exNear" aria-label="Show stores near me" title="Near me">${ico("locate", 22)}</button></div>
+    <button type="button" class="mxpill mxg off" id="mxPill"><span>${esc("Finding stores...")}</span></button>
+    <section class="mxcard" id="mxCard" aria-live="polite"></section>
+    <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("pin", 22)}<span>Browse</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart", 22)}</span><span>Saved</span></button></nav>
+    <div class="mxscrim" id="mxScrim"></div>
+    <section class="mxsheet" id="mxSheet" aria-label="Stores in this area" aria-hidden="true">
+      <div class="mxgrab"></div>
+      <div class="mxsh"><h2 id="mxShTitle">In this area</h2><button type="button" class="mxx" id="mxShClose" aria-label="Close">${ico("x", 18, 2)}</button></div>
+      <div class="mxlist" id="mxList"></div>
+      <div class="mxfoot"><button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button>${legalLinks()}${copyrightLine()}</div>
+    </section>
+    <div class="mxtoast" id="mxToast" role="status"></div>`;
   document.body.classList.add("exploring");
   show("page");
+  mxChips();
 
-  if (!window._exScrollOn){ window._exScrollOn = true; let last = 0;
-    window.addEventListener("scroll", () => { const f = document.getElementById("exFilters"), w = document.getElementById("exFwrap"); if (!f || !w) return;
-      const y = window.scrollY, dy = y - last, top = w.getBoundingClientRect().top + y - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--exsafe")) || 0);
-      if (y >= top){
-        if (!f.classList.contains("fx")){ w.style.height = f.offsetHeight + "px"; const r = w.getBoundingClientRect(); f.style.left = r.left + "px"; f.style.width = r.width + "px"; f.classList.add("fx"); }
-        if (dy > 8 && y > top + 60) f.classList.add("hide"); else if (dy < -8) f.classList.remove("hide");
-      } else if (f.classList.contains("fx")){ f.classList.remove("fx", "hide"); f.style.left = f.style.width = ""; w.style.height = ""; }
-      last = y; }, { passive: true }); }
-  $("exState").onchange = () => { EX.state = $("exState").value; EX.city = ""; try { localStorage.setItem("lk-state", EX.state); } catch(e) {} exRender(); };
-  $("exCities").onclick = e => { const b = e.target.closest("[data-city]"); if (b){ EX.city = b.dataset.city; exRender(); } };
-  $("exBrowse").onclick = () => { EX.fav = false; exRender(); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  $("exQ").oninput = () => { EX.q = $("exQ").value; exRender(); };
-  $("exNear").onclick = () => { if (EX.near && EX.me){ EX.near = false; exRender(); } else if (EX.me){ EX.near = true; exRender(); } else exLocate(false); };
-  $("exOpen").onclick = () => { EX.open = !EX.open; exRender(); };
-  $("exVer").onclick = () => { EX.ver = !EX.ver; exRender(); };
-  $("exFav").onclick = () => { EX.fav = true; exRender(); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  $("exCats").onclick = e => { const b = e.target.closest("[data-excat]"); if (b){ EX.cat = b.dataset.excat; exRender(); } };
-  $("exBody").addEventListener("click", e => {
+  // stores load in the background while the map opens
+  let loadErr = null;
+  const pStores = apiGet({ action: "near" }).then(r => r.stores || []).catch(e => { loadErr = e; return []; });
+  try { await mxLoadLeaflet(); }
+  catch(e){ $("mxMap").innerHTML = `<p class="err mxerr">${esc(e.message)}</p>`; return; }
+  if (!$("mxMap")) return;   // the person already left this page
+
+  const map = L.map("mxMap", { zoomControl: false, minZoom: 5, maxZoom: 18, zoomSnap: .5, worldCopyJump: false, attributionControl: true, tap: true });
+  map.attributionControl.setPrefix(false);
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${mxDark() ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`, { subdomains: "abcd", maxZoom: 19, attribution: "&copy; OpenStreetMap contributors &copy; CARTO" }).addTo(map);
+  MX = { map, layer: L.layerGroup().addTo(map), sel: null, sig: "", view: [], noarea: [], loaded: false, me: null, qt: 0, tt: 0 };
+  MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
+  document.addEventListener("keydown", MX.key);
+  map.setView(me ? [me.lat, me.lng] : [4.2, 108.3], me ? 12 : 6);   // Malaysia until we know better
+  if (me) mxShowMe();
+  map.on("moveend zoomend", () => mxDraw());
+  map.on("click", mxDeselect);
+
+  $("exCats").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.excat){ EX.cat = b.dataset.excat; } else if (b.id === "exOpen"){ EX.open = !EX.open; } else if (b.id === "exVer"){ EX.ver = !EX.ver; } else return;
+    exRender(true);
+  };
+  $("exQ").oninput = () => { EX.q = $("exQ").value; $("mxClr").hidden = !EX.q; clearTimeout(MX.qt); MX.qt = setTimeout(() => exRender(true), 350); };
+  $("exQ").onkeydown = e => { if (e.key === "Enter") $("exQ").blur(); };
+  $("mxClr").onclick = () => { $("exQ").value = ""; EX.q = ""; $("mxClr").hidden = true; exRender(true); };
+  $("mxEmpty").onclick = e => { if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.fav = false; $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
+  $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo([EX.me.lat, EX.me.lng], 13, { duration: .7 }); mxToast("Showing stores around you"); exLocate(true); } else exLocate(false, true); };
+  $("exBrowse").onclick = () => { EX.fav = false; exRender(true); };
+  $("exFav").onclick = () => { EX.fav = true; exRender(true); if (!EX.favs.size) mxToast("Tap the heart on a store to save it"); };
+  $("mxPill").onclick = mxOpenSheet; $("mxShClose").onclick = mxCloseSheet; $("mxScrim").onclick = mxCloseSheet;
+  $("mxList").addEventListener("click", e => {
     const fav = e.target.closest("[data-fav]");
-    if (!fav){ const card = e.target.closest(".exshop"); if (card && !e.metaKey && !e.ctrlKey){ e.preventDefault(); enterShop(card); } return; }
-    e.preventDefault(); e.stopPropagation();
-    const id = fav.dataset.fav; EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs();
-    fav.setAttribute("aria-pressed", String(EX.favs.has(id))); if (EX.fav) exRender();
+    if (fav){ e.preventDefault(); e.stopPropagation(); mxToggleFav(fav.dataset.fav); return; }
+    const row = e.target.closest(".mxrow"); if (!row || e.metaKey || e.ctrlKey) return;
+    e.preventDefault();
+    if (row.dataset.mapped === "1") mxSelect(row.dataset.store); else enterShop(row);
+  });
+  $("mxCard").addEventListener("click", e => {
+    const fav = e.target.closest("[data-fav]");
+    if (fav){ e.preventDefault(); mxToggleFav(fav.dataset.fav); return; }
+    const go = e.target.closest("#mxVisit"); if (go && !e.metaKey && !e.ctrlKey){ e.preventDefault(); enterShop($("mxCard")); }
   });
   $("exInstall").hidden = !INSTALL_EVT;
   $("exInstall").onclick = () => { if (INSTALL_EVT){ INSTALL_EVT.prompt(); INSTALL_EVT = null; $("exInstall").hidden = true; } };
-  try { EX.stores = (await apiGet({ action: "near" })).stores || []; }
-  catch(e){ $("exBody").innerHTML = `<p class="err exempty">${esc(e.message)}</p>`; return; }
-  exRender();
-  if (EX.me) exLocate(true);
+
+  const stores = await pStores;
+  if (!MX || MX.map !== map) return;
+  EX.stores = stores; MX.loaded = true;
+  if (loadErr){ $("mxEmpty").hidden = false; $("mxEmpty").innerHTML = `<b>Couldn't load stores</b><p>${esc(loadErr.message)}</p>`; return; }
+  const list = exList();
+  if (!me) mxFit(list, 13);
+  mxDraw(true);
+  mxGeocode().then(() => { if (MX && MX.map === map && !me) mxFit(exList(), 13); });
+  if (me) exLocate(true);
+  setTimeout(() => { if (MX && MX.map === map && EX.stores.length) mxToast("Pins show a seller's area, not their exact address"); }, 900);
 }
 
 function renderSafe(){
@@ -3150,7 +3461,7 @@ function showPwaBar(id){
 }
 
 async function route(){
-  document.body.classList.remove("exploring");
+  document.body.classList.remove("exploring"); mxDestroy();
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop();
   if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ)) await CONFIG_P;
