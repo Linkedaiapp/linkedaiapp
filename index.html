@@ -1173,7 +1173,7 @@ function curSymbol(code){
 }
 function curOption(code, sel){ const sym = curSymbol(code).trim(); return `<option value="${code}" ${code===sel?"selected":""}>${code} ${esc(curName(code))}${sym && sym !== code ? " (" + esc(sym) + ")" : ""}</option>`; }
 function slug(t){ return String(t||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40) || "shop"; }
-const fmtMoney = (cur, n) => (cur || "") + (Number.isInteger(n) ? Number(n).toLocaleString("en") : Number(n).toFixed(2));
+const fmtMoney = (cur, n) => esc(cur || "") + (Number.isInteger(n) ? Number(n).toLocaleString("en") : Number(n).toFixed(2));
 
 
 
@@ -1298,6 +1298,10 @@ function normalize(d){
   x.cat = d && CATS[d.cat] ? d.cat : "";
   x.closed = !!x.closed; x.closedMsg = String(x.closedMsg || "");
   x.wa = String(x.wa || "").replace(/\D/g, "");
+  ["name", "tagline", "logo", "cover"].forEach(k => x[k] = String(x[k] || ""));
+  // the currency sign is shown inside the store page's HTML, so it may only ever be a short plain symbol
+  if (!/^[A-Z]{3}$/.test(String(x.curCode || ""))) x.curCode = "MYR";
+  x.cur = String(x.cur || "").replace(/[<>&"'`\\=]/g, "").slice(0, 8) || curSymbol(x.curCode);
   return x;
 }
 function setAccent(c){ document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--soft", c + "1F"); }
@@ -1536,7 +1540,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["terms", "privacy", "refund", "safe", "explore", "near"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (!$("cAgree").checked) return $("cErr").textContent = "Please tick the box to agree to the rules.";
@@ -2488,7 +2492,8 @@ function showAd(){
   const now = Date.now();
   ADS = asList(AD).filter(a => a && safeUrl(a.img)
     && (!a.until || now <= new Date(a.until + "T23:59:59").getTime())
-    && !(a.advertiserWa && normWa(a.advertiserWa) === normWa(D.wa))).slice(0, 5);
+    && !(a.advertiserWa && normWa(a.advertiserWa) === normWa(D.wa))
+    && !(a.advertiserId && a.advertiserId === STORE_ID)).slice(0, 5);
   $("adWrap").hidden = hidden || !ADS.length;
   if ($("adWrap").hidden) return;
   ADS.forEach(a => { const im = new Image(); im.src = safeUrl(a.img); });     // load them all early, so switching is instant
@@ -2541,7 +2546,7 @@ $("repGo").onclick = async () => {
   const pick = document.querySelector('#repOpts input:checked');
   if (!pick) return $("repErr").textContent = "Choose a reason first.";
   const btn = $("repGo"); btn.disabled = true; btn.textContent = "Sending...";
-  const id = (location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop() || "").toLowerCase();
+  const id = (STORE_ID || location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop() || "").toLowerCase();
   try {
     await apiPost({ action: "report", id, reason: pick.value, note: $("repNote").value.trim() });
     closeSheet("repOverlay");
@@ -2757,7 +2762,7 @@ async function adminStores(g, head, wire){
       <p class="hint" style="margin:2px 0 0">Created ${when(x.created)}${x.paidAt ? ` · Paid ${when(x.paidAt)}` : ""}</p>
       <div class="acts">
         ${x.status === "live" ? `<a class="btn small" href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">View</a>` : ""}
-        ${x.receipt ? `<a class="btn small" href="${esc(x.receipt)}" target="_blank" rel="noopener">Receipt</a>` : ""}
+        ${safeUrl(x.receipt) ? `<a class="btn small" href="${esc(x.receipt)}" target="_blank" rel="noopener noreferrer">Receipt</a>` : ""}
         ${isCheck(x) ? `<button class="btn small solid" data-op="verify" data-id="${esc(x.id)}">Payment OK</button>` : ""}
         ${x.status === "live" ? `<button class="btn small" data-op="unpublish" data-id="${esc(x.id)}">Take offline</button>` : `<button class="btn small ${x.status === "pending" ? "" : "solid"}" data-op="approve" data-id="${esc(x.id)}">${x.status === "offline" ? "Put back live" : "Make live"}</button>`}
         <button class="btn small" data-op="edit" data-id="${esc(x.id)}">Edit store</button>
@@ -3110,7 +3115,7 @@ function legalDoc(which){
     </ul>
     <p>We don't sell your information, and we don't use advertising trackers.</p>
     <h2>4. Where it's stored and who helps us</h2>
-    <p>Your information is stored using trusted providers: Google (store data, photos and receipts), GitHub (the website), and WhatsApp/Meta (orders you send). Payments are handled by your bank, DuitNow or PayPal. Each of these follows its own privacy policy.</p>
+    <p>Your information is stored using trusted providers: Google (store data, photos and receipts), GitHub (the website), WhatsApp/Meta (orders you send), and link preview services (Microlink and Jina Reader), which read the public shop pages of affiliate links you paste to fetch their photo and name. Payments are handled by your bank, DuitNow or PayPal. Each of these follows its own privacy policy.</p>
     <h2>5. How long we keep it</h2>
     <ul>
       <li>Store information is kept while your store exists. When you delete your account in the Danger zone, your store and photos are removed.</li>
@@ -3192,6 +3197,7 @@ Object.assign(ICONS, {
   list: "<path d=\"M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01\"/>"
 });
 const MX_LIB = "https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.2.0/maplibre-gl";   // MapLibre GL JS
+const MX_SRI = { js: "sha512-N+AdcGOQwI9qITrl5JwZAvR9657sL+TTNfY6cTjvwft1qhaI3Vfk61Fy+3TPInthrJJ9pT0ZLmT1VUnQlJIO8w==", css: "sha512-ThCFU5nYVz8ubpOnjGHNGrTjZimTQ63X6t4een1DAWfKP8t39iSw2x3WlUr8EkePjBj48HeNkrAg9t9GRu+s2w==" };   // cdnjs hashes: update both if MX_LIB changes
 const MX_STYLE = dark => "https://tiles.openfreemap.org/styles/" + (dark ? "dark" : "positron");   // free OpenFreeMap tiles, no API key
 const SHIELD_SVG = s => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function exFavs(){ try { return new Set(JSON.parse(localStorage.getItem("lk-favs") || "[]")); } catch(e){ return new Set(); } }
@@ -3229,8 +3235,8 @@ function mxLoadMap(){
   if (window.maplibregl) return Promise.resolve();
   if (mxLoadMap.p) return mxLoadMap.p;
   return mxLoadMap.p = new Promise((res, rej) => {
-    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MX_LIB + ".min.css"; document.head.appendChild(l);
-    const s = document.createElement("script"); s.src = MX_LIB + ".min.js"; s.onload = () => res(); s.onerror = () => { mxLoadMap.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
+    const l = document.createElement("link"); l.rel = "stylesheet"; l.crossOrigin = "anonymous"; l.integrity = MX_SRI.css; l.href = MX_LIB + ".min.css"; document.head.appendChild(l);
+    const s = document.createElement("script"); s.crossOrigin = "anonymous"; s.integrity = MX_SRI.js; s.src = MX_LIB + ".min.js"; s.onload = () => res(); s.onerror = () => { mxLoadMap.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
     document.head.appendChild(s);
   });
 }
@@ -3683,7 +3689,12 @@ async function route(){
   }
   renderHome();
 }
-window.addEventListener("popstate", () => { if (!DIRTY) route(); });
+window.addEventListener("popstate", async () => {
+  if (!DIRTY) return route();
+  const here = location.href;
+  history.pushState(null, "", home() + "build");   // stay in the editor while we ask
+  if (await ask("You have unsaved changes. Leave without saving?", "Leave", true)){ DIRTY = false; history.replaceState(null, "", here); route(); }
+});
 route().finally(() => SPLASH.ready());
 
 </script>
