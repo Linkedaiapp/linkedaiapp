@@ -3539,7 +3539,8 @@ function mxRenderSheet(){
     $("mxList").innerHTML = affNote + (affs.length ? affs.map(s => mxRow(s, false)).join("") : `<p class="mxnone">No Affiliate Shops match.<br>Try another category.</p>`);
     return;
   }
-  $("mxShTitle").textContent = n ? `${n} ${n === 1 ? "store" : "stores"} in this area` : "In this area";
+  const found = n + (MX.noarea || []).length + affs.length;
+  $("mxShTitle").textContent = EX.q.trim() ? `${found} ${found === 1 ? "result" : "results"}` : n ? `${n} ${n === 1 ? "store" : "stores"} in this area` : "In this area";
   $("mxList").innerHTML = (n ? v.map(s => mxRow(s, true)).join("") : MX.mapped || !affs.length ? `<p class="mxnone">No stores in this part of the map yet.<br>Zoom out or move the map to see more.</p>` : "") +
     (MX.noarea && MX.noarea.length ? `<h3 class="mxh3">Not on the map yet</h3><p class="mxnote">These sellers haven't set a location.</p>${MX.noarea.map(s => mxRow(s, false)).join("")}` : "") +
     (affs.length ? `<h3 class="mxh3">Affiliate Shops</h3>${affNote}${affs.map(s => mxRow(s, false)).join("")}` : "");
