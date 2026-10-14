@@ -368,8 +368,6 @@ textarea{min-height:72px;resize:vertical}
 .sechip{padding:6px 12px;border-radius:999px;border:1.3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:12.5px;cursor:pointer}
 .sechip:active{background:var(--soft)}
 .sechip.on{background:var(--plum);border-color:var(--plum);color:#fff}
-.affbar{display:flex;gap:8px;align-items:flex-start;margin:4px 12px 14px;padding:10px 12px;border-radius:14px;background:var(--soft);font-size:12.5px;line-height:1.5;color:var(--muted)}
-.affbar svg{flex:none;margin-top:2px;color:var(--plum)}
 .group{padding:0 14px 6px;scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
 .group h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:12px 2px 10px}
 .plist{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -646,7 +644,7 @@ label{font-weight:600;font-size:13.5px}
 .lk-tabs{position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:560px;margin:0 auto;height:64px;border-radius:26px;z-index:20;
   background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 12px 32px rgba(20,10,15,.16);display:flex;justify-content:space-around;align-items:center}
-.lk-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;font:inherit;font-size:11.5px;font-weight:600;color:var(--muted);padding:6px 12px;border-radius:16px;cursor:pointer;position:relative}
+.lk-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;font:inherit;font-size:11.5px;font-weight:600;color:var(--muted);padding:6px 8px;border-radius:16px;cursor:pointer;position:relative}
 .lk-tabs button[aria-current="page"]{color:var(--plum);background:color-mix(in srgb,var(--plum) 9%,transparent)}
 .lk-tabs button[aria-current="page"] .fillme path{fill:currentColor}
 .lk-tabs .dotn{position:absolute;top:0;right:8px;min-width:16px;height:16px;border-radius:99px;background:#C8352A;color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
@@ -899,6 +897,20 @@ body.exploring #gwrap{padding:0;max-width:none}
 :root[data-theme="dark"] .mxmark img{filter:brightness(0) invert(1)}
 :root[data-theme="dark"] .mxchip svg,:root[data-theme="dark"] .mxpill svg,:root[data-theme="dark"] .mxhint svg{color:#9CC1EE}
 @media (prefers-reduced-motion:reduce){.mxcard,.mxsheet,.mxscrim,.mxtoast,.mxpill,.mxpin{transition-duration:.01ms !important}.mxme b{animation:none}}
+
+/* ---------- affiliate links ---------- */
+a.prow{text-decoration:none;color:inherit}
+.plink .pimg img{position:absolute;left:0;top:0}
+.affbar{display:flex;gap:8px;align-items:flex-start;margin:4px 12px 14px;padding:10px 12px;border-radius:14px;background:var(--soft);font-size:12.5px;line-height:1.5;color:var(--muted)}
+.affbar svg{flex:none;margin-top:2px;color:var(--plum)}
+.lnkcard .lprev{display:flex;gap:12px;align-items:center;margin:12px 0 4px}
+.lnkcard .lprev .thumb{flex:none;width:64px;height:64px;border-radius:14px;overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
+.lnkcard .lprev .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.lnkcard .lprev .tt{min-width:0;display:flex;flex-direction:column}
+.lnkcard .lprev .tt b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lnkcard .lprev .tt span{font-size:12.5px;color:var(--muted)}
+.lnkcard .lst{font-size:12px}
+.lnkcard .lbtns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 2px}
 </style>
 </head>
 <body>
@@ -1114,7 +1126,8 @@ const COMMON_CUR = ["MYR","SGD","BND","IDR","THB","PHP","USD"];
 const BLANK = {
   name: "", tagline: "", logo: "", cover: "", wa: "",
   cur: "RM", curCode: "MYR", color: COLORS[0], layout: "list",
-  items: [{ n: "", d: "", img: "", out: false, url: "", o: [{ l: "", p: 0 }] }],
+  items: [{ n: "", d: "", img: "", out: false, o: [{ l: "", p: 0 }] }],
+  links: [],
   closed: false, closedMsg: ""
 };
 
@@ -1124,7 +1137,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const safeUrl = u => /^https:\/\/[^\s"'<>]+$/i.test(u || "") ? u : "";
 const safeImg = u => safeUrl(u) || (/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "");
 const safeLogo = u => /^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "";
-// ----- affiliate / external links (Shopee, TikTok Shop, Lazada ...) -----
+// ----- affiliate links (Shopee, TikTok Shop, Lazada ...) -----
 const LINK_BRANDS = [["shopee", "Shopee"], ["shp", "Shopee"], ["tiktok", "TikTok Shop"], ["lazada", "Lazada"], ["amazon", "Amazon"], ["amzn", "Amazon"], ["aliexpress", "AliExpress"], ["temu", "Temu"], ["tokopedia", "Tokopedia"], ["mudah", "Mudah"], ["carousell", "Carousell"], ["involve", "Involve Asia"], ["accesstrade", "AccessTrade"]];
 function linkInfo(u){
   try {
@@ -1134,15 +1147,6 @@ function linkInfo(u){
   } catch(e){ return { host: "", brand: "" }; }
 }
 function fixUrl(v){ v = String(v || "").trim(); if (!v) return ""; v = v.replace(/^http:\/\//i, "https://"); return /^https:\/\//i.test(v) ? v : (/^[\w-]+(\.[\w-]+)+(\/|$|\?)/.test(v) ? "https://" + v : v); }
-function urlHintText(u){
-  u = String(u || "").trim();
-  if (!u) return "Customers tap <b>Buy on…</b> and go to this link. Your affiliate ID stays inside the link.";
-  if (!safeUrl(u)) return `<span style="color:var(--err)">The link must start with https://</span>`;
-  const b = linkInfo(u).brand; return `Detected: <b>${esc(b)}</b>. Customers will see “Buy on ${esc(b)}”.`;
-}
-function openExternal(url){
-  const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer nofollow sponsored"; document.body.appendChild(a); a.click(); a.remove();
-}
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const smooth = () => reduceMotion() ? "auto" : "smooth";
 const initial = t => esc((String(t).trim()[0] || "•").toUpperCase());
@@ -1263,17 +1267,19 @@ const KINDS = {
   products: { label: "Products", list: "Products", item: "product",   add: "Add to cart", date: "Delivery or pickup date (optional)", dateNeeded: false, empty: "This store hasn't added products yet.",
               ex: { shop: "e.g. Aurora Boutique", tag: "e.g. Modest fashion, delivery across Malaysia", name: "e.g. Satin Blouse", desc: "e.g. Soft satin, 4 colours, sizes S to XL", opt: "e.g. Size M, Dusty Pink", price: "e.g. 59", note: "e.g. Please deliver to my office address" } },
   services: { label: "Services", list: "Services", item: "service",   add: "Book",        date: "Preferred date",                 dateNeeded: true,  empty: "This store hasn't added services yet.",
-              ex: { shop: "e.g. Glow Beauty Studio", tag: "e.g. Hair, nails & bridal makeup by appointment", name: "e.g. Keratin Hair Treatment", desc: "e.g. About 90 minutes, includes wash & blow", opt: "e.g. Long hair", price: "e.g. 180", note: "e.g. Prefer afternoon, around 2pm" } },
-  affiliate:{ label: "Affiliate", list: "Picks",  item: "link",      add: "Add to cart", date: "Date (optional)",                dateNeeded: false, empty: "This store hasn't added links yet.",
-              ex: { shop: "e.g. Aina's Finds", tag: "e.g. My favourite Shopee & TikTok picks, updated weekly", name: "e.g. Mini Handheld Fan", desc: "e.g. Rechargeable, 3 speeds, my daily bag essential", opt: "e.g. Pink", price: "e.g. 25", note: "e.g. Ask me anything about this product" } }
+              ex: { shop: "e.g. Glow Beauty Studio", tag: "e.g. Hair, nails & bridal makeup by appointment", name: "e.g. Keratin Hair Treatment", desc: "e.g. About 90 minutes, includes wash & blow", opt: "e.g. Long hair", price: "e.g. 180", note: "e.g. Prefer afternoon, around 2pm" } }
 };
 const W = d => KINDS[d && d.kind] || KINDS.products;
 
 function normalize(d){
   const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
   x.items = (Array.isArray(x.items) ? x.items : []).map(it => ({
-    n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out, sec: String(it.sec || "").trim().slice(0, 30), url: safeUrl(String(it.url || "").trim()).slice(0, 600),
+    n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out, sec: String(it.sec || "").trim().slice(0, 30),
     o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String(o.l || ""), p: Number(o.p) || 0 })) : [{ l: "", p: 0 }]
+  }));
+  x.links = (Array.isArray(x.links) ? x.links : []).slice(0, 80).map(l => ({
+    u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: String((l && l.n) || "").slice(0, 120),
+    img: safeUrl(String((l && l.img) || "").trim()).slice(0, 600), p: Math.max(0, Number(l && l.p) || 0), pu: safeUrl(String((l && l.pu) || "")).slice(0, 600)
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
   if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
@@ -1641,7 +1647,7 @@ function edSteps(){
   const named = S.items.filter(it => it.n.trim());
   return {
     details: !!(S.name.trim() && S.wa),
-    products: named.some(it => it.o.some(o => +o.p > 0)),
+    products: named.some(it => it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
     look: !!(safeImg(S.logo) || safeImg(S.cover)),
     listing: !!(S.loc.on && S.loc.state && S.loc.city),
     status: true,
@@ -1658,7 +1664,7 @@ function edTop(title, back, right){
 function edTabs(){
   const unread = (() => { try { const seen = bulSeen(); return bulletinItems().filter(x => !seen.has(x.id)).length; } catch(e){ return 0; } })();
   const t = (v, icon, label, n) => `<button data-act="go" data-v="${v}" ${EDV === v ? 'aria-current="page"' : ""}>${ico(icon,22)}<span>${label}</span>${n ? `<span class="dotn">${n > 9 ? "9+" : n}</span>` : ""}</button>`;
-  return `<nav class="lk-tabs" aria-label="Seller menu">${t("home","store","Store")}${t("products","box","Products")}${t("insights","chart","Insights", unread)}${t("account","user","Account")}</nav>`;
+  return `<nav class="lk-tabs" aria-label="Seller menu">${t("home","store","Store")}${t("products","box","Products")}${t("links","link","Links")}${t("insights","chart","Insights", unread)}${t("account","user","Account")}</nav>`;
 }
 function priceText(it){
   const ps = it.o.map(o => +o.p).filter(x => x > 0);
@@ -1753,6 +1759,58 @@ function edPlan(){
     <p class="hint">One-time payment, no monthly fees and no commission on your sales.</p>
     <p class="hint"><a href="${esc(home())}refund" target="_blank" rel="noopener">Refund Policy</a> · <a href="${esc(home())}terms" target="_blank" rel="noopener">Terms</a></p></section>`}`;
 }
+const LKST = new WeakMap();
+const LINK_PREVIEW = u => "https://api.microlink.io/?url=" + encodeURIComponent(u);   // free preview service; swap for your own endpoint if you outgrow it
+const GENERIC_TITLE = /^(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)(?: (?:malaysia|my|online shopping|official site|mobile app))*$|just a moment|access denied|captcha|robot|forbidden|attention required|page not found/i;
+const cleanTitle = t => String(t || "").replace(/\s+/g, " ").trim().replace(/\s*[|\-–—]\s*(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)[^|]*$/i, "").trim().slice(0, 120);
+const guessPrice = txt => { const m = String(txt || "").match(/(?:RM|MYR)\s?(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)/i); return m ? (parseFloat(m[1].replace(/,/g, "")) || 0) : 0; };
+function lkState(l){ let st = LKST.get(l); if (!st){ st = { s: l.n || l.img ? "ok" : "idle", edit: false }; LKST.set(l, st); } return st; }
+function linkPreviewHtml(l){
+  const j = S.links.indexOf(l), st = lkState(l);
+  if (!l.u.trim()) return `<p class="hint">Paste an https link from Shopee, TikTok Shop, Lazada or any shop. We'll fetch the photo and name for you.</p>`;
+  if (!safeUrl(l.u)) return `<p class="hint" style="color:var(--err)">The link must start with https://</p>`;
+  const info = linkInfo(l.u), img = safeImg(l.img);
+  const msg = st.s === "loading" ? "Fetching photo and name…" : st.s === "fail" ? (st.m || "Couldn't read this page.") : st.s === "none" ? "Couldn't read this page. Type the name and price below." : st.s === "ok" ? "Fetched from the link" : "";
+  return `<div class="lprev"><span class="thumb">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ico("image", 20)}</span>
+      <span class="tt"><b>${esc(l.n || "No name yet")}</b><span>${esc(info.brand)}${l.p > 0 ? " · " + esc(fmtMoney(S.cur || curSymbol(S.curCode), l.p)) : ""}</span><span class="lst">${esc(msg)}</span></span></div>
+    <div class="lbtns"><button type="button" class="btn small" data-act="lkfetch" data-j="${j}" ${st.s === "loading" ? "disabled" : ""}>Fetch again</button><button type="button" class="btn small" data-act="lkedit" data-j="${j}">${st.edit ? "Hide details" : "Edit name & price"}</button></div>
+    ${st.edit ? `<label>Name<input type="text" data-lf="n" data-j="${j}" value="${esc(l.n)}" maxlength="120" placeholder="e.g. Mini Handheld Fan"></label><label>Price (optional)<input type="number" inputmode="decimal" data-lf="p" data-j="${j}" value="${l.p || ""}" placeholder="e.g. 25"></label>` : ""}`;
+}
+function updateLinkPreview(l){ const j = S.links.indexOf(l), el = $("lpv-" + j); if (el) el.innerHTML = linkPreviewHtml(l); }
+async function fetchLinkMeta(l){
+  if (!l || !safeUrl(l.u)) return;
+  const st = lkState(l), url = l.u; st.s = "loading"; updateLinkPreview(l);
+  try {
+    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
+    const r = await fetch(LINK_PREVIEW(url), { signal: ctl.signal }); clearTimeout(to);
+    if (r.status === 429){ st.s = "fail"; st.m = "The free preview limit is used up for today. Type the name and price yourself, or try again tomorrow."; st.edit = true; }
+    else {
+      const body = await r.json().catch(() => ({}));
+      if (!S.links.includes(l) || l.u !== url) return;   // link was changed or deleted meanwhile
+      const d = body && body.status === "success" ? (body.data || {}) : {};
+      const raw = cleanTitle(d.title), generic = !raw || GENERIC_TITLE.test(raw);
+      const title = generic ? "" : raw, img = !generic && d.image && d.image.url ? safeUrl(d.image.url) : "", price = guessPrice((d.title || "") + " " + (d.description || ""));
+      if (title) l.n = title; if (img) l.img = img; if (price) l.p = price;
+      l.pu = url; touch();
+      st.s = title || img ? "ok" : "none"; if (st.s === "none") st.edit = true;
+    }
+  } catch(e){ st.s = "fail"; st.m = "Couldn't reach the preview service. Check your connection, or type the name and price yourself."; st.edit = true; }
+  updateLinkPreview(l);
+}
+function edLinks(){
+  const used = [...new Set(S.links.map(l => (l.sec || "").trim()).filter(Boolean))], starters = ["Best picks", "Gadgets", "Fashion", "Beauty", "Home", "Deals"];
+  const secs = [...used, ...starters.filter(x => !used.includes(x))].slice(0, Math.max(used.length, 6));
+  const cards = S.links.map((l, j) => { const cur = (l.sec || "").trim(); return `<section class="card lnkcard">
+      <div class="between"><b>Link ${j + 1}</b><button type="button" class="btn small dangerline" data-act="lkdel" data-j="${j}">${ico("trash", 16)}Delete</button></div>
+      <label>Link<input type="url" inputmode="url" data-lf="u" data-j="${j}" value="${esc(l.u)}" placeholder="https://s.shopee.com.my/..." maxlength="600" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <div id="lpv-${j}">${linkPreviewHtml(l)}</div>
+      <label>Section name (optional)<input type="text" data-lf="sec" data-j="${j}" value="${esc(l.sec)}" placeholder="e.g. Gadgets, Beauty" maxlength="30"></label>
+      <div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === cur ? " on" : ""}" aria-pressed="${x === cur}" data-act="lksecpick" data-j="${j}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+    </section>`; }).join("");
+  return `${edTop("Affiliate links", "", `<button type="button" class="btn small solid" data-act="lkadd">${ico("plus", 16, 2.2)}Add</button>`)}
+  ${S.links.length ? cards : `<section class="card" style="text-align:center"><h2>No links yet</h2><p class="hint">Got Shopee, TikTok Shop or other affiliate links? Add them here. Customers tap a link and go straight to the page. Your products stay separate.</p><button type="button" class="btn solid" style="margin-top:12px" data-act="lkadd">${ico("plus", 16, 2.2)}Add a link</button></section>`}
+  ${S.links.length ? `<p class="hint" style="margin:4px 4px 0">Links open in a new tab. We show a short notice that some links are affiliate links.</p>` : ""}`;
+}
 function edProducts(){
   const rows = S.items.map((it, i) => {
     const u = safeImg(it.img);
@@ -1782,12 +1840,7 @@ function edProduct(i){
     <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
   </section>
   <section class="card">
-    <h2 style="margin:0 0 4px">${W(S).item === "link" ? "Link to buy" : "Affiliate link (optional)"}</h2>
-    <label>Shopee, TikTok Shop, Lazada or any https link<input type="url" inputmode="url" data-i="${i}" data-f="url" value="${esc(it.url || "")}" placeholder="https://s.shopee.com.my/..." maxlength="600" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
-    <p class="hint" id="urlHint">${urlHintText(it.url)}</p>
-  </section>
-  <section class="card">
-    <div class="between"><h2 style="margin:0">${it.url || S.kind === "affiliate" ? "Price (optional)" : "Options and prices"}</h2><span class="hint" style="margin:0">${it.url || S.kind === "affiliate" ? "Shown on the card" : "Customers pick one"}</span></div>
+    <div class="between"><h2 style="margin:0">Options and prices</h2><span class="hint" style="margin:0">Customers pick one</span></div>
     ${it.o.map((o,j)=>`
       <div class="opt">
         <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}" aria-label="Option name">
@@ -1856,8 +1909,8 @@ function renderEditor(msg){
   if (window.LK_ALLVIEW) return legacyEditor(msg);
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
-  const tabbed = ["home","products","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, product: () => edProduct(EDI), listing: edListing, insights: edInsights, account: edAccount }[EDV] || (() => edHome(msg));
+  const tabbed = ["home","products","links","insights","account"].includes(EDV);
+  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, product: () => edProduct(EDI), listing: edListing, insights: edInsights, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY);
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
@@ -1867,6 +1920,7 @@ function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); i
 
 function openEditor(msg){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
+  S.links = (S.links || []).filter(l => l.u.trim());
   if (!window.LK_KEEPVIEW) EDV = "home"; setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
 function touch(){ DIRTY = true; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Not saved yet. Tap Save when you're done."; }
 function photoBox(id, src, empty, shape){ const u = safeImg(src); return `<div class="media-prev ${shape}" id="${id}">${u ? `<img src="${esc(u)}" alt="" onerror="this.parentNode.textContent='Not a photo'">` : empty}</div>`; }
@@ -1975,7 +2029,7 @@ $("payOverlay").addEventListener("click", e => {
 $("payOverlay").addEventListener("change", e => { if (e.target.dataset.media === "receipt") publishWithReceipt(e.target); });
 
 function openPublishCheck(){
-  const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your WhatsApp number first." : !S.items.some(it => it.n.trim()) ? `Add at least one ${W(S).item} first.` : (S.items.find(it => (it.url || "").trim() && !safeUrl(it.url.trim())) ? `The link on “${S.items.find(it => (it.url || "").trim() && !safeUrl(it.url.trim())).n.trim() || "an item"}” must start with https://` : (S.kind === "affiliate" && S.items.some(it => it.n.trim() && !(it.url || "").trim())) ? "Add a link to every item first." : "");
+  const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your WhatsApp number first." : (!S.items.some(it => it.n.trim()) && !(S.links || []).some(l => safeUrl(l.u))) ? `Add at least one ${W(S).item} or link first.` : (S.links || []).some(l => l.u.trim() && !safeUrl(l.u.trim())) ? "One of your links must start with https://." : "";
   if (bad) return notify(bad);
   const named = S.items.filter(it => it.n.trim());
   const row = (k, v) => `<div class="cline"><div class="cn"><span>${esc(k)}</span><b>${esc(v)}</b></div></div>`;
@@ -2080,7 +2134,6 @@ function legacyEditor(msg){
         <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
         <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
         <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains" maxlength="30"></label>
-        <label>Affiliate link (optional)<input type="url" inputmode="url" data-i="${i}" data-f="url" value="${esc(it.url || "")}" placeholder="https://s.shopee.com.my/..." maxlength="600" autocomplete="off" autocapitalize="off"></label>
         <label>Photo (optional)</label>
         <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
         <label>Options and prices</label>
@@ -2112,16 +2165,23 @@ function onField(e){
     if (t.dataset.floc === "cityOther"){ const sel = document.querySelector('[data-floc="city"]'); if (!t.isConnected || (sel && sel.value !== "__other")) return; S.loc.city = t.value.trim().slice(0, 40); touch(); return; }
     if (t.dataset.floc === "area"){ S.loc.area = t.value; touch(); return; }
   }
+  if (t.dataset.lf !== undefined){
+    const l = S.links[+t.dataset.j]; if (!l) return;
+    const lf = t.dataset.lf;
+    if (lf === "p") l.p = Math.max(0, parseFloat(t.value) || 0); else l[lf] = t.value;
+    if (lf === "u"){
+      const st0 = safeUrl(l.u) ? 1 : 0; const startFetch = () => { const fx = fixUrl(l.u); if (safeUrl(fx) && l.pu !== fx){ l.u = fx; l.n = ""; l.img = ""; l.p = 0; l.pu = ""; LKST.delete(l); const inp = t.isConnected ? t : null; if (inp && e.type === "change") inp.value = fx; fetchLinkMeta(l); } else if (!safeUrl(fx) || (st0 !== (safeUrl(l.u) ? 1 : 0))) updateLinkPreview(l); };
+      clearTimeout(onField.lt);
+      if (e.type === "change") startFetch(); else onField.lt = setTimeout(startFetch, 900);
+    }
+    touch(); return;
+  }
   if (!f) return;
   const v = t.type === "checkbox" ? t.checked : t.value;
   if (t.dataset.j !== undefined) S.items[+t.dataset.i].o[+t.dataset.j][f] = f === "p" ? (parseFloat(v) || 0) : v;
   else if (t.dataset.i !== undefined) S.items[+t.dataset.i][f] = v;
   else S[f] = v;
   if (f === "sec") document.querySelectorAll(".sechip").forEach(c => { const on = c.dataset.v === String(v).trim(); c.classList.toggle("on", on); c.setAttribute("aria-pressed", String(on)); });
-  if (f === "url"){
-    if (e.type === "change"){ const fx = fixUrl(v); if (fx !== v){ t.value = fx; S.items[+t.dataset.i].url = fx; } }
-    const h = $("urlHint"); if (h) h.innerHTML = urlHintText(S.items[+t.dataset.i].url);
-  }
   if (f === "wa") S.wa = normWa(v);
   if (f === "curCode") S.cur = curSymbol(v);
   touch();
@@ -2134,9 +2194,14 @@ $("builder").addEventListener("click", async e => {
   if (!b) return;
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
-  const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", url: "", o: [{ l: "", p: 0 }] });
+  const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
   if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
   if (a === "secpick"){ S.items[i].sec = b.dataset.v; redraw(); return; }
+  if (a === "lkadd"){ S.links.push({ u: "", sec: "", n: "", img: "", p: 0, pu: "" }); redraw(); setTimeout(() => { const els = document.querySelectorAll('[data-lf="u"]'); const last = els[els.length - 1]; if (last) last.focus(); }, 30); return; }
+  if (a === "lkdel"){ const l = S.links[j]; if (l && await ask(`Delete ${l.n.trim() ? '"' + l.n.trim() + '"' : "this link"}?`, "Delete", true)){ S.links.splice(j, 1); redraw(); } return; }
+  if (a === "lkfetch"){ const l = S.links[j]; if (l){ l.pu = ""; fetchLinkMeta(l); } return; }
+  if (a === "lkedit"){ const l = S.links[j]; if (l){ const st = lkState(l); st.edit = !st.edit; updateLinkPreview(l); } return; }
+  if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = b.dataset.v; redraw(); } return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
   else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem()); if (EDV === "product") EDV = "products"; redraw(); } }
@@ -2443,21 +2508,33 @@ $("repGo").onclick = async () => {
 
 function productRow(i){
   const p = D.items[i], img = safeImg(p.img), n = inCart(i);
-  return `<button class="prow${p.out ? " out" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}${p.url ? ` aria-label="${esc(p.n)}, opens ${esc(linkInfo(p.url).brand)} in a new tab"` : ""}>
+  return `<button class="prow${p.out ? " out" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
     <div class="ptext">
       <h3>${esc(p.n)}</h3>
       ${p.d ? `<p class="pdesc">${esc(p.d)}</p>` : ""}
-      <div class="pmeta">${p.url && !p.o.some(o => o.p > 0) ? "" : `<span class="pprice">${priceLabel(p)}</span>`}
-        ${p.out ? `<span class="pill dark">Sold out</span>` : p.url ? `<span class="pill">${esc(linkInfo(p.url).brand)}</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
+      <div class="pmeta"><span class="pprice">${priceLabel(p)}</span>
+        ${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
     </div>
     <div class="pimg">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<div class="ph">${initial(p.n)}</div>`}
-      ${p.out ? "" : `<span class="addb" aria-hidden="true">${p.url ? ico("ext", 15, 2.4) : "+"}</span>`}</div>
+      ${p.out ? "" : `<span class="addb" aria-hidden="true">+</span>`}</div>
   </button>`;
+}
+function linkRow(j){
+  const l = D.links[j], info = linkInfo(l.u), img = safeImg(l.img);
+  return `<a class="prow plink" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="${esc(l.n || info.brand)}, opens ${esc(info.brand)} in a new tab">
+    <div class="ptext">
+      <h3>${esc(l.n || "View on " + info.brand)}</h3>
+      <div class="pmeta">${l.p > 0 ? `<span class="pprice">${esc(money(l.p))}</span>` : ""}<span class="pill">${esc(info.brand)}</span></div>
+    </div>
+    <div class="pimg"><div class="ph">${initial(l.n || info.brand)}</div>${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}
+      <span class="addb" aria-hidden="true">${ico("ext", 15, 2.4)}</span></div>
+  </a>`;
 }
 function renderMenu(){
   const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
+  const linkList = (D.links || []).map((l,j) => l.u ? j : -1).filter(j => j >= 0);
   const tabs = $("secTabs");
-  if (!list.length){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
+  if (!list.length && !linkList.length){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
   const gridCls = D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
   const secs = [];
   list.forEach(i => {
@@ -2466,11 +2543,16 @@ function renderMenu(){
     if (!g){ g = { name, idx: [] }; secs.push(g); }
     g.idx.push(i);
   });
-  const hasLinks = list.some(i => D.items[i].url);
-  $("menu").innerHTML = (hasLinks ? `<p class="affbar">${ico("ext", 16, 2)}<span>Items marked with an arrow open another site. Some are affiliate links: the seller may earn a commission if you buy, at no extra cost to you.</span></p>` : "") + secs.map((g, gi) => `
+  linkList.forEach(j => {
+    const name = String(D.links[j].sec || "").trim() || (list.length ? "Links" : "");
+    let g = secs.find(x => x.name === name);
+    if (!g){ g = { name, idx: [] }; secs.push(g); }
+    (g.lk = g.lk || []).push(j);
+  });
+  $("menu").innerHTML = (linkList.length ? `<p class="affbar">${ico("ext", 16, 2)}<span>Items marked with an arrow open another site. Some are affiliate links: the seller may earn a commission if you buy, at no extra cost to you.</span></p>` : "") + secs.map((g, gi) => `
     <section class="group" id="sec-${gi}">
       ${g.name ? `<h2>${esc(g.name)}</h2>` : ""}
-      <div class="plist${gridCls}">${g.idx.map(productRow).join("")}</div>
+      <div class="plist${gridCls}">${g.idx.map(productRow).join("")}${(g.lk || []).map(linkRow).join("")}</div>
     </section>`).join("");
   const showTabs = secs.length > 1 && secs.some(g => g.name);
   tabs.hidden = !showTabs;
@@ -2483,9 +2565,7 @@ if ($("secTabs")) $("secTabs").addEventListener("click", e => {
   $("secTabs").querySelectorAll(".tab").forEach(x => x.setAttribute("aria-current", x === b));
 });
 function openProduct(i){
-  const p = D.items[i]; if (!p || p.out) return;
-  if (p.url){ openExternal(p.url); return; }   // affiliate / external link: go straight to the page
-  if (D.closed) return;
+  const p = D.items[i]; if (!p || p.out || D.closed) return;
   pSel = { i, j: 0, q: 1 };
   const img = safeImg(p.img);
   $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : `<div class="ph">${initial(p.n)}</div>`;
