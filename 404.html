@@ -783,10 +783,11 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 body.exploring{overflow:hidden}
 body.exploring #gwrap{padding:0;max-width:none}
 #mxMap{position:fixed;inset:0;z-index:1;background:var(--bg);touch-action:none}
-#mxMap.leaflet-container{font-family:inherit;-webkit-tap-highlight-color:transparent}
-#mxMap .leaflet-control-attribution{font-size:10px;background:var(--glass);color:var(--muted);border-radius:8px 0 0 0;padding:1px 6px}
-#mxMap .leaflet-control-attribution a{color:inherit}
-#mxMap .leaflet-bottom{bottom:0}
+#mxMap{font-family:inherit;-webkit-tap-highlight-color:transparent}
+#mxMap .maplibregl-canvas{outline:none}
+#mxMap .maplibregl-ctrl-attrib{font-size:10px;background:var(--glass);color:var(--muted);border-radius:8px 0 0 0}
+#mxMap .maplibregl-ctrl-attrib a{color:inherit}
+#mxMap .maplibregl-ctrl-attrib-button{background-color:transparent}
 .mxerr{position:fixed;left:16px;right:16px;top:40%;z-index:5;text-align:center}
 .mxg{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 4px 16px rgba(20,10,15,.14)}
@@ -826,13 +827,15 @@ body.exploring #gwrap{padding:0;max-width:none}
 
 /* markers */
 .mxmk,.mxcl,.mxme{background:none;border:0}
-.mxmk{position:relative}
+.mxmk{width:36px;height:36px;cursor:pointer;outline:none}
+.mxcl{width:46px;height:46px;cursor:pointer;outline:none}
+.mxme{width:18px;height:18px;pointer-events:none}
+.mxmk:focus-visible .mxpin,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
 .mxpin{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:0 3px 10px rgba(20,10,15,.28);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 .mxpin svg{width:17px;height:17px}
 .mxvb{position:absolute;left:25px;top:-6px;width:17px;height:17px;border-radius:50%;background:#18395C;border:2px solid #fff;display:grid;place-items:center;color:#8DB6E8}
 .mxvb svg{width:9px;height:9px}
 .mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05);opacity:.8}
-path.mxarea.closed{filter:saturate(.2)}
 .mxnm{position:absolute;left:50%;top:40px;transform:translateX(-50%);max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px;
   background:var(--glass);color:var(--ink);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;transition:opacity .2s ease;pointer-events:none}
 #mxMap.mxzoom .mxnm,.mxmk.sel .mxnm{opacity:1}
@@ -841,8 +844,8 @@ path.mxarea.closed{filter:saturate(.2)}
 .mxcl span{position:absolute;left:0;top:0;width:46px;height:46px;border-radius:50%;background:var(--plum);color:#fff;font-weight:800;font-size:16px;display:grid;place-items:center;
   border:3px solid #fff;box-shadow:0 0 0 9px color-mix(in srgb,var(--plum) 20%,transparent),0 6px 16px rgba(20,10,15,.28);transition:transform .2s ease}
 .mxcl:active span{transform:scale(.92)}
-.mxme b{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;background:rgba(47,128,237,.2);animation:mxPulse 2.2s ease-out infinite}
-.mxme i{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;background:#2F80ED;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.mxme b{position:absolute;left:-17px;top:-17px;width:52px;height:52px;border-radius:50%;background:rgba(47,128,237,.2);animation:mxPulse 2.2s ease-out infinite}
+.mxme i{position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:#2F80ED;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 @keyframes mxPulse{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.5);opacity:0}}
 
 /* store card + list sheet */
@@ -3024,7 +3027,8 @@ Object.assign(ICONS, {
   locate: "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"7.5\"/><path d=\"M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3\"/>",
   list: "<path d=\"M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01\"/>"
 });
-const MX_LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min";
+const MX_LIB = "https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.2.0/maplibre-gl";   // MapLibre GL JS
+const MX_STYLE = dark => "https://tiles.openfreemap.org/styles/" + (dark ? "dark" : "positron");   // free OpenFreeMap tiles, no API key
 const SHIELD_SVG = s => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function exFavs(){ try { return new Set(JSON.parse(localStorage.getItem("lk-favs") || "[]")); } catch(e){ return new Set(); } }
 function exSaveFavs(){ try { localStorage.setItem("lk-favs", JSON.stringify([...EX.favs])); } catch(e) {} }
@@ -3056,13 +3060,13 @@ function exList(){
   return list.sort((a, b) => ((a._km == null) - (b._km == null)) || ((a._km || 0) - (b._km || 0)) || byName(a, b));
 }
 
-// ----- Leaflet (loaded only when this page opens) -----
-function mxLoadLeaflet(){
-  if (window.L) return Promise.resolve();
-  if (mxLoadLeaflet.p) return mxLoadLeaflet.p;
-  return mxLoadLeaflet.p = new Promise((res, rej) => {
-    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MX_LEAFLET + ".css"; document.head.appendChild(l);
-    const s = document.createElement("script"); s.src = MX_LEAFLET + ".js"; s.onload = () => res(); s.onerror = () => { mxLoadLeaflet.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
+// ----- MapLibre (loaded only when this page opens) -----
+function mxLoadMap(){
+  if (window.maplibregl) return Promise.resolve();
+  if (mxLoadMap.p) return mxLoadMap.p;
+  return mxLoadMap.p = new Promise((res, rej) => {
+    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MX_LIB + ".min.css"; document.head.appendChild(l);
+    const s = document.createElement("script"); s.src = MX_LIB + ".min.js"; s.onload = () => res(); s.onerror = () => { mxLoadMap.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
     document.head.appendChild(s);
   });
 }
@@ -3095,47 +3099,57 @@ async function mxGeocode(){
 }
 
 // ----- markers: clusters when zoomed out, area circle + pin when zoomed in -----
+const mxBounds = pts => pts.reduce((b, p) => b.extend(p), new maplibregl.LngLatBounds(pts[0], pts[0]));
+function mxCircle(lng, lat, r){
+  const ring = [], n = 40, dLat = r / 111320, dLng = r / (111320 * Math.cos(lat * Math.PI / 180));
+  for (let i = 0; i <= n; i++){ const a = i / n * 2 * Math.PI; ring.push([lng + dLng * Math.cos(a), lat + dLat * Math.sin(a)]); }
+  return ring;
+}
 function mxCluster(list){
   const out = [], map = MX.map;
   list.forEach(st => {
-    const p = map.latLngToContainerPoint([st._a.lat, st._a.lng]);
-    if (st.id === MX.sel){ out.push({ items: [st], p, fixed: true }); return; }
-    const hit = out.find(c => !c.fixed && c.p.distanceTo(p) < 46);
-    if (hit){ hit.items.push(st); const n = hit.items.length; hit.p = L.point(hit.p.x + (p.x - hit.p.x) / n, hit.p.y + (p.y - hit.p.y) / n); }
-    else out.push({ items: [st], p });
+    const p = map.project([st._a.lng, st._a.lat]);
+    if (st.id === MX.sel){ out.push({ items: [st], x: p.x, y: p.y, fixed: true }); return; }
+    const hit = out.find(c => !c.fixed && Math.hypot(c.x - p.x, c.y - p.y) < 46);
+    if (hit){ hit.items.push(st); const n = hit.items.length; hit.x += (p.x - hit.x) / n; hit.y += (p.y - hit.y) / n; }
+    else out.push({ items: [st], x: p.x, y: p.y });
   });
-  out.forEach(c => c.ll = c.items.length === 1 ? L.latLng(c.items[0]._a.lat, c.items[0]._a.lng) : map.containerPointToLatLng(c.p));
+  out.forEach(c => { if (c.items.length === 1) c.ll = [c.items[0]._a.lng, c.items[0]._a.lat]; else { const q = map.unproject([c.x, c.y]); c.ll = [q.lng, q.lat]; } });
   return out;
 }
+function mxMarker(el, ll){ return new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(ll).addTo(MX.map); }
 function mxDraw(force){
   if (!MX || !MX.map) return;
   const map = MX.map, z = map.getZoom(), all = exList(), list = all.filter(s => s._a);
   MX.noarea = all.filter(s => !s._a);
   const cl = mxCluster(list);
-  const sig = cl.map(c => c.items.map(i => i.id).join(",")).join("|") + "#" + MX.sel + "#" + z;
+  const sig = cl.map(c => c.items.map(i => i.id).join(",")).join("|") + "#" + MX.sel + "#" + z.toFixed(1);
   if (force || sig !== MX.sig){
-    MX.sig = sig; MX.layer.clearLayers();
+    MX.sig = sig; MX.mk.forEach(m => m.remove()); MX.mk = [];
+    const feats = [];
     cl.forEach(c => {
       if (c.items.length > 1){
-        const m = L.marker(c.ll, { icon: L.divIcon({ className: "mxcl", html: `<span>${c.items.length}</span>`, iconSize: [46, 46], iconAnchor: [23, 23] }), keyboard: true, title: c.items.length + " stores, tap to zoom in", alt: c.items.length + " stores" });
-        m.on("click", () => map.fitBounds(L.latLngBounds(c.items.map(i => [i._a.lat, i._a.lng])), { paddingTopLeft: [50, 150], paddingBottomRight: [50, 140], maxZoom: 17 }));
-        MX.layer.addLayer(m); return;
+        const el = document.createElement("div"); el.className = "mxcl"; el.innerHTML = `<span>${c.items.length}</span>`;
+        el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", c.items.length + " stores, tap to zoom in");
+        const go = () => map.fitBounds(mxBounds(c.items.map(i => [i._a.lng, i._a.lat])), { padding: { top: 150, bottom: 140, left: 50, right: 50 }, maxZoom: 16, duration: 600 });
+        el.addEventListener("click", go); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } });
+        MX.mk.push(mxMarker(el, c.ll)); return;
       }
       const st = c.items[0], col = mxCol(st), sel = st.id === MX.sel;
-      const mpp = 40075016.686 * Math.cos(c.ll.lat * Math.PI / 180) / (256 * Math.pow(2, z));
-      const style = { color: col, weight: 1.5, opacity: .6, dashArray: sel ? null : "4 5", fillColor: col, fillOpacity: sel ? .26 : .16, bubblingMouseEvents: false, className: "mxarea" + (st.closed ? " closed" : "") };
-      const shape = st._a.r / mpp >= 32 ? L.circle(c.ll, Object.assign({ radius: st._a.r }, style)) : L.circleMarker(c.ll, Object.assign({ radius: 32 }, style));
-      shape.on("click", () => mxSelect(st.id));
-      MX.layer.addLayer(shape);
-      const html = `<span class="mxpin" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
-      const m = L.marker(c.ll, { icon: L.divIcon({ className: "mxmk" + (st.closed ? " closed" : "") + (sel ? " sel" : ""), html, iconSize: [36, 36], iconAnchor: [18, 18] }), keyboard: true, title: st.name, alt: st.name + ", " + (CATS[st.cat] || "Other"), zIndexOffset: sel ? 1000 : 0 });
-      m.on("click", () => mxSelect(st.id));
-      MX.layer.addLayer(m);
+      const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
+      feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
+      const el = document.createElement("div"); el.className = "mxmk" + (st.closed ? " closed" : "") + (sel ? " sel" : "");
+      el.innerHTML = `<span class="mxpin" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
+      el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
+      if (sel) el.style.zIndex = 5;
+      el.addEventListener("click", () => mxSelect(st.id)); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); mxSelect(st.id); } });
+      MX.mk.push(mxMarker(el, c.ll));
     });
+    const src = MX.ready && map.getSource("mxareas"); if (src) src.setData({ type: "FeatureCollection", features: feats });
   }
   const b = map.getBounds();
-  MX.view = list.filter(s => b.contains([s._a.lat, s._a.lng]));
-  const c = map.getContainer(); c.classList.toggle("mxzoom", z >= 14); c.classList.toggle("mxhassel", !!MX.sel);
+  MX.view = list.filter(s => b.contains([s._a.lng, s._a.lat]));
+  const c = map.getContainer(); c.classList.toggle("mxzoom", z >= 13); c.classList.toggle("mxhassel", !!MX.sel);
   const pill = $("mxPill");
   pill.innerHTML = `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view</span>`;
   pill.classList.toggle("off", !!MX.sel || !all.length);
@@ -3147,9 +3161,9 @@ function mxDraw(force){
   if ($("mxSheet").classList.contains("open")) mxRenderSheet();
 }
 function mxFit(list, maxZoom){
-  const pts = list.filter(s => s._a).map(s => [s._a.lat, s._a.lng]);
+  const pts = list.filter(s => s._a).map(s => [s._a.lng, s._a.lat]);
   if (!pts.length) return;
-  MX.map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [40, 150], paddingBottomRight: [40, 140], maxZoom: maxZoom || 15 });
+  MX.map.fitBounds(mxBounds(pts), { padding: { top: 150, bottom: 140, left: 40, right: 40 }, maxZoom: maxZoom || 14, duration: 600 });
 }
 
 // ----- store card, list sheet -----
@@ -3183,10 +3197,7 @@ function mxSelect(id, fly = true){
   const st = EX.stores.find(x => x.id === id); if (!st || !MX) return;
   st._a = st._a || mxArea(st); if (!st._a) return;
   MX.sel = id; MX.sig = ""; mxShowCard(st); mxCloseSheet();
-  if (fly){
-    const z = Math.max(MX.map.getZoom(), st._a.r > 1000 ? 13 : 14), p = MX.map.project([st._a.lat, st._a.lng], z).add([0, 100]);
-    MX.map.flyTo(MX.map.unproject(p, z), z, { duration: .6 });
-  }
+  if (fly) MX.map.flyTo({ center: [st._a.lng, st._a.lat], zoom: Math.max(MX.map.getZoom(), st._a.r > 1000 ? 12 : 13), duration: 600, offset: [0, -100] });
   mxDraw();
 }
 function mxDeselect(){ if (!MX || !MX.sel) return; MX.sel = null; MX.sig = ""; $("mxCard").classList.remove("show"); mxDraw(); }
@@ -3238,9 +3249,9 @@ async function enterShop(card){
 }
 function mxShowMe(){
   if (!MX || !EX.me) return;
-  const ll = [EX.me.lat, EX.me.lng];
-  if (MX.me) MX.me.setLatLng(ll);
-  else MX.me = L.marker(ll, { icon: L.divIcon({ className: "mxme", html: "<b></b><i></i>", iconSize: [0, 0] }), interactive: false, keyboard: false, zIndexOffset: -500 }).addTo(MX.map);
+  const ll = [EX.me.lng, EX.me.lat];
+  if (MX.me) MX.me.setLngLat(ll);
+  else { const el = document.createElement("div"); el.className = "mxme"; el.innerHTML = "<b></b><i></i>"; MX.me = mxMarker(el, ll); }
 }
 function exLocate(silent, fly){
   if (!navigator.geolocation){ if (!silent) mxToast("Your browser can't share location."); return; }
@@ -3249,7 +3260,7 @@ function exLocate(silent, fly){
     try { localStorage.setItem("lk-me", JSON.stringify(EX.me)); } catch(e) {}
     if (!MX) return;
     mxShowMe();
-    if (fly){ mxDeselect(); MX.map.flyTo([EX.me.lat, EX.me.lng], 13, { duration: .7 }); mxToast("Showing stores around you"); }
+    if (fly){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); }
     mxDraw(true);
   }, () => { if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings."); }, { timeout: 12000 });
 }
@@ -3288,20 +3299,33 @@ async function renderExplore(){
   // stores load in the background while the map opens
   let loadErr = null;
   const pStores = apiGet({ action: "near" }).then(r => r.stores || []).catch(e => { loadErr = e; return []; });
-  try { await mxLoadLeaflet(); }
+  try { await mxLoadMap(); }
   catch(e){ $("mxMap").innerHTML = `<p class="err mxerr">${esc(e.message)}</p>`; return; }
   if (!$("mxMap")) return;   // the person already left this page
 
-  const map = L.map("mxMap", { zoomControl: false, minZoom: 5, maxZoom: 18, zoomSnap: .5, worldCopyJump: false, attributionControl: true, tap: true });
-  map.attributionControl.setPrefix(false);
-  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${mxDark() ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`, { subdomains: "abcd", maxZoom: 19, attribution: "&copy; OpenStreetMap contributors &copy; CARTO" }).addTo(map);
-  MX = { map, layer: L.layerGroup().addTo(map), sel: null, sig: "", view: [], noarea: [], loaded: false, me: null, qt: 0, tt: 0 };
+  const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: me ? [me.lng, me.lat] : [108.3, 4.2], zoom: me ? 11 : 5, minZoom: 4, maxZoom: 17,
+    attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false });
+  map.touchZoomRotate.disableRotation();
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+  MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0 };
   MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
   document.addEventListener("keydown", MX.key);
-  map.setView(me ? [me.lat, me.lng] : [4.2, 108.3], me ? 12 : 6);   // Malaysia until we know better
   if (me) mxShowMe();
-  map.on("moveend zoomend", () => mxDraw());
-  map.on("click", mxDeselect);
+  map.on("load", () => {
+    if (MX && MX.map === map){
+      map.addSource("mxareas", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "mxfill", type: "fill", source: "mxareas", paint: { "fill-color": ["get", "c"], "fill-opacity": ["case", ["==", ["get", "sel"], 1], .26, .16] } });
+      map.addLayer({ id: "mxline", type: "line", source: "mxareas", paint: { "line-color": ["get", "c"], "line-width": 1.5, "line-opacity": ["case", ["==", ["get", "sel"], 1], .9, .6], "line-dasharray": [3, 3] } });
+      MX.ready = true; mxDraw(true);
+    }
+  });
+  map.on("moveend", () => mxDraw());
+  map.on("click", e => {
+    const t = e.originalEvent && e.originalEvent.target;
+    if (t && t.closest && t.closest(".mxmk,.mxcl")) return;   // a pin was tapped, not the map
+    const hit = MX && MX.ready ? map.queryRenderedFeatures(e.point, { layers: ["mxfill"] }) : [];
+    if (hit.length) mxSelect(hit[0].properties.id); else mxDeselect();
+  });
 
   $("exCats").onclick = e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -3312,7 +3336,7 @@ async function renderExplore(){
   $("exQ").onkeydown = e => { if (e.key === "Enter") $("exQ").blur(); };
   $("mxClr").onclick = () => { $("exQ").value = ""; EX.q = ""; $("mxClr").hidden = true; exRender(true); };
   $("mxEmpty").onclick = e => { if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.fav = false; $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
-  $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo([EX.me.lat, EX.me.lng], 13, { duration: .7 }); mxToast("Showing stores around you"); exLocate(true); } else exLocate(false, true); };
+  $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(true); } else exLocate(false, true); };
   $("exBrowse").onclick = () => { EX.fav = false; exRender(true); };
   $("exFav").onclick = () => { EX.fav = true; exRender(true); if (!EX.favs.size) mxToast("Tap the heart on a store to save it"); };
   $("mxPill").onclick = mxOpenSheet; $("mxShClose").onclick = mxCloseSheet; $("mxScrim").onclick = mxCloseSheet;
@@ -3336,9 +3360,9 @@ async function renderExplore(){
   EX.stores = stores; MX.loaded = true;
   if (loadErr){ $("mxEmpty").hidden = false; $("mxEmpty").innerHTML = `<b>Couldn't load stores</b><p>${esc(loadErr.message)}</p>`; return; }
   const list = exList();
-  if (!me) mxFit(list, 13);
+  if (!me) mxFit(list, 12);
   mxDraw(true);
-  mxGeocode().then(() => { if (MX && MX.map === map && !me) mxFit(exList(), 13); });
+  mxGeocode().then(() => { if (MX && MX.map === map && !me) mxFit(exList(), 12); });
   if (me) exLocate(true);
   setTimeout(() => { if (MX && MX.map === map && EX.stores.length) mxToast("Pins show a seller's area, not their exact address"); }, 900);
 }
