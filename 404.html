@@ -939,6 +939,15 @@ a.prow{text-decoration:none;color:inherit}
 .opt input:nth-child(2){flex:0 0 92px;width:92px;min-width:0}
 .bulcard.unread{border-color:var(--line);box-shadow:0 4px 14px rgba(24,57,92,.06)}
 .lk-row .tag2{flex:none}
+.savepill{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:30;max-width:calc(100% - 32px);display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(20,10,15,.12);transition:transform .3s cubic-bezier(.2,.8,.2,1);pointer-events:none;text-align:left}
+.savepill.show{transform:translate(-50%,0)}
+.savepill[data-state="saved"]{color:var(--ok)}
+.savepill[data-state="bad"]{color:var(--err);border-color:color-mix(in srgb,var(--err) 35%,transparent);pointer-events:auto;cursor:pointer}
+.savepill .spin{width:14px;height:14px}
+.opthead{display:flex;gap:8px;margin:12px 0 -2px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.opthead span:first-child{flex:2}
+.opthead span:nth-child(2){flex:0 0 92px}
+.opthead i{flex:none;width:36px}
 .lk-row .tt b{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;line-height:1.3}
 </style>
 </head>
@@ -1283,6 +1292,13 @@ async function fetchJson(url, opts, tries, ms){
     await new Promise(res => setTimeout(res, 1200));
   }
 }
+// Server and Google errors are written for us, not for sellers: show a plain sentence instead
+const TECH_ERR = /google drive|apps script|deploy|server error|exception|typeerror|referenceerror|undefined|json|https?:\/\/|\[failed/i;
+function friendly(e, fallback){
+  let m = String((e && e.message) || e || "").replace(/\s*\(Server said:[^)]*\)\s*$/, "").trim();
+  if (!m || TECH_ERR.test(m)){ if (m) console.warn("Link Kedai App:", (e && e.message) || e); return fallback; }
+  return m;
+}
 async function apiGet(params){
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
   const q = new URLSearchParams({ ...params, t: Date.now() }).toString();
@@ -1290,10 +1306,11 @@ async function apiGet(params){
 }
 // Actions that are safe to repeat get one quiet retry if Google hiccups
 const RETRY_OK = new Set(["login", "save", "admin"]);
-async function apiPost(body){
+async function apiPost(body, extra){
   if (SESSION && SESSION.admin && body.id === SESSION.id && !body.key && body.action !== "admin") body.key = SESSION.key;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
-  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 40000 : 0);
+  const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 40000 : 0);
   if (j.error) throw new Error(j.error);
   return j;
 }
@@ -1397,6 +1414,7 @@ function openSheet(id){
 }
 function show(id){
   ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
+  if (id !== "builder" && $("savePill")) $("savePill").classList.remove("show");
   const el = $(id); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
   clearTimeout(el._enterT); el._enterT = setTimeout(() => el.classList.remove("enter"), 800);   // only animate when a page opens, not on every redraw
   window.scrollTo(0,0);
@@ -1514,7 +1532,7 @@ function wireLogin(){
       if (!/^\?(build|edit)\b/.test(location.search) && !/\/(build|edit)$/.test(location.pathname)) history.pushState(null, "", home() + "build");
       openEditor();
       clearTimeout(slow);
-    } catch(e){ clearTimeout(slow); $("lErr").textContent = e.message; $("lGo").disabled = false; $("lGo").textContent = $("lGo").dataset.label || "Log in and edit my store"; }
+    } catch(e){ clearTimeout(slow); $("lErr").textContent = friendly(e, "Couldn't log in right now. Check your internet and try again."); $("lGo").disabled = false; $("lGo").textContent = $("lGo").dataset.label || "Log in and edit my store"; }
   };
   $("lGo").onclick = go;
   $("lPin").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
@@ -1557,7 +1575,7 @@ function renderStart(msg, mode){
     $("cHint").textContent = storeLink(v) + " … checking";
     timer = setTimeout(async () => {
       try { const r = await apiGet({ action: "check", id: v }); if ($("cId").value !== v) return; $("cHint").innerHTML = r.error ? "Couldn't check the name right now. It will be checked again when you tap Create." : r.available ? `<span class="okmsg">${esc(storeLink(v))} is free</span>` : esc(r.reason || "That name is taken."); }
-      catch(e){ $("cHint").textContent = e.message; }
+      catch(e){ $("cHint").textContent = friendly(e, "Couldn't check the name right now. It will be checked again when you tap Sign up."); }
     }, 500);
   };
   $("cShop").oninput = () => { if (!touched){ $("cId").value = slug($("cShop").value) === "shop" ? "" : slug($("cShop").value); idHint(); } };
@@ -1580,7 +1598,7 @@ function renderStart(msg, mode){
       SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false;
       history.replaceState(null, "", home() + "build");
       openEditor("Store created. Choose what you sell, add your items and photos, then tap Save.");
-    } catch(e){ $("cErr").textContent = e.message; $("cGo").disabled = false; $("cGo").textContent = "Sign up"; }
+    } catch(e){ $("cErr").textContent = friendly(e, "Couldn't sign you up right now. Check your internet and try again."); $("cGo").disabled = false; $("cGo").textContent = "Sign up"; }
   };
 }
 
@@ -1731,7 +1749,7 @@ function edHome(msg){
       <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
     : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
     ${live ? "" : `<button class="btn small" style="margin-top:12px" data-act="preview">${ico("eye",16)}Preview my store</button>`}
-    <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
+    <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Saving your changes..." : ""))}</p>
   </section>
   ${SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : ""}
   ${SESSION.admin ? "" : tipHtml()}
@@ -1928,19 +1946,26 @@ function edProduct(i){
   <section class="card">
     <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
     <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
-    <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
-    ${secs.length ? `<div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === curSec ? " on" : ""}" aria-pressed="${x === curSec}" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
-    <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
   </section>
-  <section class="card">
-    <div class="between"><h2 style="margin:0">Options and prices</h2><span class="hint" style="margin:0">Customers pick one</span></div>
+  ${it.o.length === 1 && !it.o[0].l.trim() ? `<section class="card">
+    <label style="margin-top:0">Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="${i}" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
+    <button class="btn small" style="margin-top:12px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add sizes or flavours</button>
+    <p class="hint">Only if customers choose between versions with different prices, like Small and Large, or Chocolate and Pandan.</p>
+  </section>` : `<section class="card">
+    <div class="between"><h2 style="margin:0">Sizes or flavours</h2><span class="hint" style="margin:0">Customers pick one</span></div>
+    <div class="opthead"><span>Name</span><span>Price (${esc(S.cur || curSymbol(S.curCode))})</span><i></i></div>
     ${it.o.map((o,j)=>`
       <div class="opt">
         <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}" aria-label="Option name">
         <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p||""}" placeholder="${esc(W(S).ex.price)}" aria-label="Price">
         <button data-act="delopt" data-i="${i}" data-j="${j}" aria-label="Remove option">${ico("x",18)}</button>
       </div>`).join("")}
-    <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add option</button>
+    <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add another</button>
+  </section>`}
+  <section class="card">
+    <label style="margin-top:0">Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
+    ${secs.length ? `<div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === curSec ? " on" : ""}" aria-pressed="${x === curSec}" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
+    <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
   </section>
   <section class="card">
     <label class="check" style="margin-top:0"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>Sold out for now</span></label>
@@ -2015,7 +2040,50 @@ function openEditor(msg){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
   if (!window.LK_KEEPVIEW) EDV = "home"; setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
-function touch(){ DIRTY = true; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Not saved yet. Tap Save when you're done."; }
+function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
+
+// ---------- Changes save by themselves a moment after the seller stops typing ----------
+let AUTOSAVE_T = 0, EDITV = 0, SAVING = null;
+function saveProblem(){
+  if (S.loc.on && !S.loc.state) return "Choose your state under Browse listing.";
+  if (S.loc.on && !S.loc.city) return "Choose your city or town under Browse listing.";
+  if (!S.name.trim()) return "Add your shop name.";
+  if (!S.wa || S.wa.length < 9) return "Add your WhatsApp number, so orders can reach you.";
+  return "";
+}
+function savePill(state, text){
+  let el = $("savePill");
+  if (!el){ el = document.createElement("button"); el.type = "button"; el.id = "savePill"; el.className = "savepill"; el.setAttribute("aria-live", "polite"); el.onclick = () => { if (el.dataset.state === "bad") autoSave(true); }; document.body.appendChild(el); }
+  clearTimeout(el._t);
+  if (!state || $("builder").hidden){ el.classList.remove("show"); return; }
+  el.dataset.state = state;
+  el.innerHTML = state === "saving" ? `<span class="spin"></span><span>Saving...</span>` : state === "saved" ? `${ico("check", 15, 2.6)}<span>${esc(text || "Saved")}</span>` : `<span><b>Not saved:</b> ${esc(text)} <u>Try again</u></span>`;
+  el.classList.add("show");
+  if (state === "saved") el._t = setTimeout(() => el.classList.remove("show"), 2200);
+}
+function scheduleAutosave(ms){ clearTimeout(AUTOSAVE_T); if (SESSION) AUTOSAVE_T = setTimeout(() => autoSave(), ms == null ? 2500 : ms); }
+async function autoSave(retry, keepalive){
+  clearTimeout(AUTOSAVE_T);
+  if (!SESSION || !S || !DIRTY) return;
+  if (UPN) return scheduleAutosave(2000);   // a photo is still uploading: save once it's in
+  const bad = saveProblem(); if (bad) return savePill("bad", bad);   // tells the seller exactly what's missing
+  if (SAVING){ try { await SAVING; } catch(e) {} if (DIRTY) scheduleAutosave(300); return; }
+  const v = EDITV; savePill("saving");
+  SAVING = apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }, keepalive ? { keepalive: true } : null);
+  try {
+    const r = await SAVING; STATUS = r.status || STATUS;
+    if (EDITV === v){ DIRTY = false; const bl = $("builder"); if (bl) bl.classList.remove("dirty"); const st = $("saveStatus"); if (st) st.textContent = ""; }
+    else scheduleAutosave();
+    savePill("saved", r.flagged && STATUS !== "live" ? "Saved. Some words need a quick check by " + APP_NAME + "." : "Saved");
+  } catch(e){
+    const m = friendly(e, "No internet right now. Your changes are still here.");
+    savePill("bad", /can't reach/i.test(m) ? "No internet right now. Your changes are still here." : /slow right now/i.test(m) ? "The server is busy. Your changes are still here." : m);
+    scheduleAutosave(15000);
+  }
+  finally { SAVING = null; }
+}
+// Switching to WhatsApp or closing the app: save straight away instead of waiting
+document.addEventListener("visibilitychange", () => { if (document.hidden && DIRTY && SESSION && !$("builder").hidden) autoSave(false, true); });
 function photoBox(id, src, empty, shape){ const u = safeImg(src); return `<div class="media-prev ${shape}" id="${id}">${u ? `<img src="${esc(u)}" alt="" onerror="this.parentNode.textContent='Not a photo'">` : empty}</div>`; }
 function photoControls(kind, src, extra){
   return `<label class="btn small filebtn" style="margin:0">${safeImg(src) ? "Change" : "Upload"} photo<input type="file" accept="image/*" data-media="${kind}" ${extra || ""}></label>
@@ -2146,7 +2214,7 @@ $("pubGo").onclick = async () => {
     closeSheet("pubOverlay");
     renderEditor("Details saved.");
     setTimeout(openPayment, 260);
-  } catch(e){ $("pubErr").textContent = e.message; }
+  } catch(e){ $("pubErr").textContent = friendly(e, "Couldn't save your store right now. Check your internet and try again."); }
   btn.disabled = false; btn.textContent = "Continue to payment";
 };
 
@@ -2166,11 +2234,11 @@ function legacyEditor(msg){
       <a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Open</a>
       <a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">Share</a>
     </div>
-    <p class="hint">This link never changes. Tap Save and your store updates straight away.</p>` : `
+    <p class="hint">This link never changes. Your changes save by themselves and show on your store straight away.</p>` : `
     <div class="between"><h2>Your store</h2>${STATUS === "review" ? `<span class="tag2 claim">In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
     <p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Build your store and tap Preview to see it. Your store link appears here once you publish."}</p>`}
     <p class="hint">You log in with <b>${esc(S.wa || "your WhatsApp number")}</b> and your PIN.</p>
-    <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Not saved yet. Tap Save when you're done." : ""))}</p>
+    <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Saving your changes..." : ""))}</p>
   </section>
 
   ${adminBar}
@@ -2299,7 +2367,7 @@ $("builder").addEventListener("click", async e => {
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
   else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem()); if (EDV === "product") EDV = "products"; redraw(); } }
-  else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); }
+  else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); setTimeout(() => { const el = document.querySelector(`.opt input[data-i="${i}"][data-f="l"]`); if (el && !el.value) el.focus(); }, 30); }
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
   else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ EDV = "product"; EDI = S.items.length - 1; window.scrollTo(0, 0); } redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
@@ -2323,17 +2391,17 @@ $("builder").addEventListener("click", async e => {
       history.replaceState(null, "", home());
       renderHome();
       notify("Your store and account have been deleted.");
-    } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(err.message); }
+    } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
   }
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("insights"); }
   else if (a === "setcat"){ S.cat = b.dataset.v; touch(); renderEditor(); }
-  else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed. Tap Save to keep the change."); }
+  else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed."); }
   else if (a === "myloc"){
     if (!navigator.geolocation) return notify("Your phone's browser can't share location. You can still be listed by state and area.");
     b.disabled = true; b.textContent = "Finding you...";
     navigator.geolocation.getCurrentPosition(pos => {
       S.loc.lat = Math.round(pos.coords.latitude * 1e6) / 1e6; S.loc.lng = Math.round(pos.coords.longitude * 1e6) / 1e6; S.loc.on = true;
-      touch(); renderEditor("Location added. Tap Save to keep it.");
+      touch(); renderEditor("Location added.");
     }, () => { b.disabled = false; b.textContent = "Add my current location"; notify("Couldn't get your location. Allow location for this site in your browser settings and try again."); },
     { enableHighAccuracy: true, timeout: 12000 });
   }
@@ -2343,11 +2411,11 @@ $("builder").addEventListener("click", async e => {
   else if (a === "save"){ await saveStore(); }
   else if (a === "recheck"){
     try { const r = await apiPost({ action: "login", id: SESSION.id, pin: SESSION.pin }); STATUS = r.status; renderEditor(STATUS === "live" ? "Your store is live!" : "Not approved yet. Try again after sending your receipt."); }
-    catch(err){ notify(err.message); }
+    catch(err){ notify(friendly(err, "Couldn't check right now. Check your internet and try again.")); }
   }
   else if (a === "logout"){
     if (DIRTY && !(await ask("You have unsaved changes. Log out anyway?", "Log out", true))) return;
-    DIRTY = false; clearSession(); renderStart();
+    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); renderStart();
   }
 });
 
@@ -2377,7 +2445,7 @@ async function publishWithReceipt(input){
       renderEditor("Your store is live! Copy or share your link above.");
       notify("Your store is live! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok.");
     }
-  } catch(err){ st.textContent = ""; busy(false); notify(err.message); }
+  } catch(err){ st.textContent = ""; busy(false); notify(friendly(err, "Your receipt didn't upload. Check your internet and try again. If it keeps happening, take a new screenshot and try that.")); }
 }
 
 async function saveStore(){
@@ -2387,12 +2455,13 @@ async function saveStore(){
   if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
   btn.disabled = true; btn.textContent = "Saving...";
+  clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
   try {
     const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
-    STATUS = r.status || STATUS; DIRTY = false;
+    STATUS = r.status || STATUS; DIRTY = false; savePill("");
     renderEditor(r.flagged && STATUS !== "live" ? `Saved. Some words in your store need a quick check by ${APP_NAME} before it can go live.`
       : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
-  } catch(e){ notify(e.message); }
+  } catch(e){ notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment.")); }
   btn.disabled = false; btn.textContent = "Save";
 }
 
@@ -2448,12 +2517,13 @@ $("bwrap").addEventListener("change", e => {
       const good = await workingPhotoUrl(r);
       if (!good) throw new Error("Your photo was uploaded, but Google Drive won't show it. Its link: " + r.url);
       if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (kind === "link"){ if (S.links[+idx]) S.links[+idx].img = good; } else if (S.items[+idx]) S.items[+idx].img = good;
-      PENDING_BOXES.delete(boxId); UPN--; touch(); renderEditor(UPN ? "Photo added. Uploading the next one..." : "Photo added. Tap Save to put it on your store.");
+      PENDING_BOXES.delete(boxId); UPN--; touch(); renderEditor(UPN ? "Photo added. Uploading the next one..." : "Photo added.");
     } catch(err){
       try { t.value = ""; } catch(_){}   // so choosing the same photo again after an error still triggers
       PENDING_BOXES.delete(boxId); UPN--; const b = $(boxId); const ov = b && b.querySelector(".upov"); if (ov) ov.remove();
       if (btn) btn.classList.remove("busy");
-      setStatus(""); notify((err.message || "Photo upload failed.") + " [failed while " + step + "]");
+      console.warn("Link Kedai App: photo upload stopped while " + step);
+      setStatus(""); notify(friendly(err, "Your photo didn't upload. Check your internet and try again. If it keeps happening, try a different photo."));
     }
     // the editor redraws after each upload, so bring back the spinner on photos still waiting
     PENDING_BOXES.forEach(id => spinOn($(id)));
@@ -2597,7 +2667,7 @@ $("repGo").onclick = async () => {
     await apiPost({ action: "report", id, reason: pick.value, note: $("repNote").value.trim() });
     closeSheet("repOverlay");
     notify("Thanks for telling us. We'll check this store.");
-  } catch(e){ $("repErr").textContent = e.message; }
+  } catch(e){ $("repErr").textContent = friendly(e, "Couldn't send your report right now. Check your internet and try again."); }
   btn.disabled = false; btn.textContent = "Send report";
 };
 
@@ -3733,7 +3803,7 @@ async function route(){
       if (r.error) throw new Error(r.error);
       STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_PLACE = r.place || null;
       return showStore(r.data, false);
-    } catch(e){ return showMessage("Couldn't open the store", e.message || "Check your internet connection and try again."); }
+    } catch(e){ return showMessage("Couldn't open the store", friendly(e, "Check your internet connection and try again.")); }
   }
   renderHome();
 }
