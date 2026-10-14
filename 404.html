@@ -900,6 +900,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 
 /* ---------- affiliate links ---------- */
 a.prow{text-decoration:none;color:inherit}
+.plink h3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
 .plink .pimg img{position:absolute;left:0;top:0}
 .affbar{display:flex;gap:8px;align-items:flex-start;margin:4px 12px 14px;padding:10px 12px;border-radius:14px;background:var(--soft);font-size:12.5px;line-height:1.5;color:var(--muted)}
 .affbar svg{flex:none;margin-top:2px;color:var(--plum)}
@@ -1770,7 +1771,8 @@ function edPlan(){
 const LKST = new WeakMap();
 const LINK_PREVIEW = u => "https://api.microlink.io/?url=" + encodeURIComponent(u);   // free preview service; swap for your own endpoint if you outgrow it
 const GENERIC_TITLE = /^(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)(?: (?:malaysia|my|online shopping|official site|mobile app))*$|just a moment|access denied|captcha|robot|forbidden|attention required|page not found/i;
-const cleanTitle = t => String(t || "").replace(/\s+/g, " ").trim().replace(/\s*[|\-–—]\s*(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)[^|]*$/i, "").trim().slice(0, 120);
+const cleanTitle = t => String(t || "").replace(/\s+/g, " ").trim().replace(/\s*[|\-–—]\s*(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)[^|]*$/i, "").trim();
+const shortTitle = t => t.length <= 90 ? t : t.slice(0, 90).replace(/\s+\S*$/, "") + "…";
 const guessPrice = txt => { const m = String(txt || "").match(/(?:RM|MYR)\s?(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)/i); return m ? (parseFloat(m[1].replace(/,/g, "")) || 0) : 0; };
 function lkState(l){ let st = LKST.get(l); if (!st){ st = { s: l.n || l.img ? "ok" : "idle", edit: false }; LKST.set(l, st); } return st; }
 function linkPreviewHtml(l){
@@ -1785,19 +1787,29 @@ function linkPreviewHtml(l){
     ${st.edit ? `<label>Photo</label><div class="media-row">${photoBox("lkPrev" + j, l.img, "No photo", "sq")}${photoControls("link", l.img, `data-i="${j}"`)}</div><label>Name<input type="text" data-lf="n" data-j="${j}" value="${esc(l.n)}" maxlength="120" placeholder="e.g. Mini Handheld Fan"></label><label>Price (optional)<input type="number" inputmode="decimal" data-lf="p" data-j="${j}" value="${l.p || ""}" placeholder="e.g. 25"></label>` : ""}`;
 }
 function updateLinkPreview(l){ const j = S.links.indexOf(l), el = $("lpv-" + j); if (el) el.innerHTML = linkPreviewHtml(l); }
+async function linkPreviewData(url){
+  try {   // 1) your own server: reads the page the way WhatsApp's crawler does, so Shopee works
+    const r = await apiPost({ action: "linkpreview", id: SESSION.id, pin: SESSION.pin, url });
+    if (r && r.ok && (r.title || r.image)) return { title: r.title || "", image: r.image || "", price: Number(r.price) || 0, url: r.url || url, text: (r.title || "") + " " + (r.desc || "") };
+  } catch(e) {}
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);   // 2) free preview service as a backup
+  try {
+    const r = await fetch(LINK_PREVIEW(url), { signal: ctl.signal });
+    if (r.status === 429) return { limited: true };
+    const body = await r.json().catch(() => ({})), d = body && body.status === "success" ? (body.data || {}) : {};
+    return { title: d.title || "", image: (d.image && d.image.url) || "", price: 0, url: d.url || url, text: (d.title || "") + " " + (d.description || "") };
+  } finally { clearTimeout(to); }
+}
 async function fetchLinkMeta(l){
   if (!l || !safeUrl(l.u)) return;
   const st = lkState(l), url = l.u; if (looksJunk(l.n)) l.n = ""; st.s = "loading"; updateLinkPreview(l);
   try {
-    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
-    const r = await fetch(LINK_PREVIEW(url), { signal: ctl.signal }); clearTimeout(to);
-    if (r.status === 429){ st.s = "fail"; st.m = "The free preview limit is used up for today. Type the name and price yourself, or try again tomorrow."; st.edit = true; }
+    const d = await linkPreviewData(url);
+    if (!S.links.includes(l) || l.u !== url) return;   // link was changed or deleted meanwhile
+    if (d.limited){ st.s = "fail"; st.m = "The free preview limit is used up for today. Type the name and price yourself, or try again tomorrow."; st.edit = true; }
     else {
-      const body = await r.json().catch(() => ({}));
-      if (!S.links.includes(l) || l.u !== url) return;   // link was changed or deleted meanwhile
-      const d = body && body.status === "success" ? (body.data || {}) : {};
-      const raw = cleanTitle(d.title), generic = !raw || GENERIC_TITLE.test(raw) || looksJunk(raw);
-      const title = generic ? slugName(d.url || "") : raw, img = !generic && d.image && d.image.url ? safeUrl(d.image.url) : "", price = guessPrice((d.title || "") + " " + (d.description || ""));
+      const raw = shortTitle(cleanTitle(d.title)), generic = !raw || GENERIC_TITLE.test(raw) || looksJunk(raw);
+      const title = generic ? slugName(d.url || "") : raw, img = !generic && d.image ? safeUrl(d.image) : "", price = d.price || guessPrice(d.text);
       if (title) l.n = title; if (img) l.img = img; if (price) l.p = price;
       l.pu = url; touch();
       st.s = img ? "ok" : title ? "partial" : "none"; if (st.s !== "ok") st.edit = true;
