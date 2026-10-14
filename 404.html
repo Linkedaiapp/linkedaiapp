@@ -1770,7 +1770,12 @@ function edPlan(){
 }
 const LKST = new WeakMap();
 const LINK_PREVIEW = u => "https://api.microlink.io/?url=" + encodeURIComponent(u);   // free preview service; swap for your own endpoint if you outgrow it
-const GENERIC_TITLE = /^(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)(?: (?:malaysia|my|online shopping|official site|mobile app))*$|just a moment|access denied|captcha|robot|forbidden|attention required|page not found/i;
+const LINK_READER = u => "https://r.jina.ai/" + u;   // free page reader that can visit as WhatsApp's crawler, which Shopee still shows the photo and name to
+const GENERIC_TITLE = /^(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)(?: (?:malaysia|my|online shopping|official site|mobile app))*$|free shipping across|just a moment|access denied|captcha|robot|forbidden|attention required|page not found/i;
+function shopeeProduct(u){   // short links land on /opaanlp/<shop>/<item>, which only shows a blank page; /product/<shop>/<item> shows the real one
+  const m = String(u || "").match(/^https:\/\/(?:www\.)?shopee\.([a-z.]+)\/(?:(?:opaanlp|product)\/(\d+)\/(\d+)|[^?#]*-i\.(\d+)\.(\d+))/i);
+  return m ? `https://shopee.${m[1]}/product/${m[2] || m[4]}/${m[3] || m[5]}` : "";
+}
 const cleanTitle = t => String(t || "").replace(/\s+/g, " ").trim().replace(/\s*[|\-–—]\s*(shopee|lazada|tiktok(?: shop)?|amazon|aliexpress|temu)[^|]*$/i, "").trim();
 const shortTitle = t => t.length <= 90 ? t : t.slice(0, 90).replace(/\s+\S*$/, "") + "…";
 const guessPrice = txt => { const m = String(txt || "").match(/(?:RM|MYR)\s?(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)/i); return m ? (parseFloat(m[1].replace(/,/g, "")) || 0) : 0; };
@@ -1787,18 +1792,37 @@ function linkPreviewHtml(l){
     ${st.edit ? `<label>Photo</label><div class="media-row">${photoBox("lkPrev" + j, l.img, "No photo", "sq")}${photoControls("link", l.img, `data-i="${j}"`)}</div><label>Name<input type="text" data-lf="n" data-j="${j}" value="${esc(l.n)}" maxlength="120" placeholder="e.g. Mini Handheld Fan"></label><label>Price (optional)<input type="number" inputmode="decimal" data-lf="p" data-j="${j}" value="${l.p || ""}" placeholder="e.g. 25"></label>` : ""}`;
 }
 function updateLinkPreview(l){ const j = S.links.indexOf(l), el = $("lpv-" + j); if (el) el.innerHTML = linkPreviewHtml(l); }
+async function readerData(url){
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 25000);
+  try {
+    const r = await fetch(LINK_READER(url), { signal: ctl.signal, headers: { accept: "application/json", "x-user-agent": "WhatsApp/2.23.20.0" } });
+    if (!r.ok) return null;
+    const body = await r.json().catch(() => ({})), d = (body && body.data) || {}, m = d.metadata || {};
+    return { title: m["og:title"] || d.title || "", image: m["og:image"] || "", price: 0, url: d.url || url, text: (m["og:title"] || d.title || "") + " " + (m["og:description"] || d.description || "") };
+  } catch(e){ return null; } finally { clearTimeout(to); }
+}
+const goodPreview = d => !!(d && d.image && d.title && !GENERIC_TITLE.test(cleanTitle(d.title)));
 async function linkPreviewData(url){
   try {   // 1) your own server: reads the page the way WhatsApp's crawler does, so Shopee works
     const r = await apiPost({ action: "linkpreview", id: SESSION.id, pin: SESSION.pin, url });
     if (r && r.ok && (r.title || r.image)) return { title: r.title || "", image: r.image || "", price: Number(r.price) || 0, url: r.url || url, text: (r.title || "") + " " + (r.desc || "") };
   } catch(e) {}
-  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);   // 2) free preview service as a backup
+  const sp = shopeeProduct(url), rd = await readerData(sp || url);   // 2) free reader posing as WhatsApp's crawler
+  if (goodPreview(rd) && !/(\.\.\.|…)$/.test(rd.title.trim())) return rd;   // a name cut short with "..." means a short link: look up the full one below
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);   // 3) free preview service as a backup
+  let ml;
   try {
     const r = await fetch(LINK_PREVIEW(url), { signal: ctl.signal });
-    if (r.status === 429) return { limited: true };
-    const body = await r.json().catch(() => ({})), d = body && body.status === "success" ? (body.data || {}) : {};
-    return { title: d.title || "", image: (d.image && d.image.url) || "", price: 0, url: d.url || url, text: (d.title || "") + " " + (d.description || "") };
-  } finally { clearTimeout(to); }
+    if (r.status === 429) ml = { limited: true };
+    else {
+      const body = await r.json().catch(() => ({})), d = body && body.status === "success" ? (body.data || {}) : {};
+      ml = { title: d.title || "", image: (d.image && d.image.url) || "", price: 0, url: d.url || url, text: (d.title || "") + " " + (d.description || "") };
+    }
+  } catch(e){ if (!rd) throw e; ml = null; } finally { clearTimeout(to); }
+  const sp2 = ml && shopeeProduct(ml.url);   // a Shopee short link: now we know the real product, read that page instead
+  if (sp2 && sp2 !== sp){ const r2 = await readerData(sp2); if (goodPreview(r2)) return r2; }
+  if (goodPreview(rd)) return rd;
+  return ml && !ml.limited && (ml.title || ml.image) ? ml : rd && (rd.title || rd.image) ? rd : ml || rd;
 }
 async function fetchLinkMeta(l){
   if (!l || !safeUrl(l.u)) return;
