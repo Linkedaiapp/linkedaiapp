@@ -1807,10 +1807,12 @@ async function readerData(url){
 }
 const goodPreview = d => !!(d && d.image && d.title && !GENERIC_TITLE.test(cleanTitle(d.title)));
 async function linkPreviewData(url){
-  try {   // 1) your own server: reads the page the way WhatsApp's crawler does, so Shopee works
+  let srv = null;
+  try {   // 1) your own server: reads the page the way WhatsApp's crawler does
     const r = await apiPost({ action: "linkpreview", id: SESSION.id, pin: SESSION.pin, url });
-    if (r && r.ok && (r.title || r.image)) return { title: r.title || "", image: r.image || "", price: Number(r.price) || 0, url: r.url || url, text: (r.title || "") + " " + (r.desc || "") };
+    if (r && r.ok && (r.title || r.image)) srv = { title: r.title || "", image: r.image || "", price: Number(r.price) || 0, url: r.url || url, text: (r.title || "") + " " + (r.desc || "") };
   } catch(e) {}
+  if (goodPreview(srv)) return srv;   // a bare "Shopee Malaysia" page from the server isn't good enough: try the readers below
   const sp = shopeeProduct(url), rd = await readerData(sp || url);   // 2) free reader posing as WhatsApp's crawler
   if (goodPreview(rd) && !/(\.\.\.|…)$/.test(rd.title.trim())) return rd;   // a name cut short with "..." means a short link: look up the full one below
   const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);   // 3) free preview service as a backup
@@ -1826,7 +1828,8 @@ async function linkPreviewData(url){
   const sp2 = ml && shopeeProduct(ml.url);   // a Shopee short link: now we know the real product, read that page instead
   if (sp2 && sp2 !== sp){ const r2 = await readerData(sp2); if (goodPreview(r2)) return r2; }
   if (goodPreview(rd)) return rd;
-  return ml && !ml.limited && (ml.title || ml.image) ? ml : rd && (rd.title || rd.image) ? rd : ml || rd;
+  if (srv && srv.title && !GENERIC_TITLE.test(cleanTitle(srv.title))) return srv;
+  return ml && !ml.limited && (ml.title || ml.image) ? ml : rd && (rd.title || rd.image) ? rd : ml || rd || srv;
 }
 async function fetchLinkMeta(l){
   if (!l || !safeUrl(l.u)) return;
