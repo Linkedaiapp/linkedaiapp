@@ -822,7 +822,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxmk:focus-visible .mxpin,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
 .mxpin{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 .mxpin svg{width:17px;height:17px}
-.mxvb{position:absolute;left:25px;top:-6px;width:17px;height:17px;border-radius:50%;background:var(--plum);border:2px solid #fff;display:grid;place-items:center;color:var(--gold)}
+.mxvb{position:absolute;left:24px;top:22px;width:17px;height:17px;border-radius:50%;background:var(--verify);border:2px solid #fff;display:grid;place-items:center;color:#fff}
 .mxvb svg{width:9px;height:9px}
 .mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05);opacity:.8}
 .mxnm{position:absolute;left:50%;top:40px;transform:translateX(-50%);max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
@@ -911,6 +911,13 @@ a.prow{text-decoration:none;color:inherit}
 .st-logowrap.verified .st-logo{box-shadow:0 0 0 3px var(--surface),0 0 0 6px var(--verify),0 8px 22px rgba(20,10,15,.16)}
 .vtick{position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;padding:0;border-radius:50%;border:2.5px solid var(--surface);background:var(--verify);display:grid;place-items:center;cursor:pointer;z-index:1}
 .vtick svg{width:15px;height:15px;display:block}
+/* the same Verified mark on every store logo outside the store page (Browse map list and card) */
+.vlogo{position:relative;flex:none;display:inline-grid}
+.vlogo.verified .mxlogo{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--verify)}
+.vlogo .vtick{width:20px;height:20px;right:-4px;bottom:-4px;border-width:2px;cursor:default}
+.vlogo .vtick svg{width:12px;height:12px}
+.vlabel{display:block;font-size:12px;font-weight:700;color:#0B6BB0;margin-top:1px}   /* darker blue: readable small text */
+.tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:#0B6BB0}
 /* browse-stores button in the top-right corner, clear of the logo */
 .stmore{left:auto;right:12px}
 .stname{font-size:clamp(22px,6vw,28px);margin:8px 0 2px}
@@ -1705,7 +1712,7 @@ function renderStart(msg, mode){
 const APP_UPDATES = [
   { id: "u-20260925-browse", at: "2026-09-25", title: "New: get found in Browse stores", body: "Turn on List my store in Browse stores, then pick your state, area and category, so customers can find you in the Link Kedai App. You can also add your location for Nearest first. It stays private." },
   { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Link Kedai App news now appear here. Look for the red number on the bell." },
-  { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Link Kedai App Guard now show a Verified badge, so customers can trust your link." },
+  { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Link Kedai App Guard now show a blue Verified tick on their logo, so customers can trust your link." },
   { id: "u-20260924-guard", at: "2026-09-24", title: "Link Kedai App Guard keeps stores safe", body: "Every store is checked automatically for prohibited items, and customers can report stores. This keeps Link Kedai App trusted for honest sellers like you." },
   { id: "u-20260924-styles", at: "2026-09-24", title: "Three store styles", body: "Choose List, Photo grid or Minimal under Store style in your editor, to suit food, products or services." }
 ];
@@ -1729,7 +1736,7 @@ function bulletinItems(){
   if (b.status === "review") push("st-review-" + b.paidAt, "shield", "Store status", "Link Kedai App Guard is checking your store", "Thanks for your payment. Your store goes live as soon as it's approved, usually within 24 hours.");
   else if (b.status === "offline") push("st-offline", "shield", "Store status", "Your store is offline", "Your store isn't visible to customers right now. Please message Link Kedai App to sort it out.", to ? `<a class="btn small" href="https://wa.me/${to}" target="_blank" rel="noopener">Message Link Kedai App</a>` : "");
   else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Link Kedai App Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
-  else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a Verified by Link Kedai App badge on your store. It shows your payment was confirmed and your store passed our safety check.");
+  else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a blue Verified tick on your store logo. It shows your payment was confirmed and your store passed our safety check.");
   else if (b.status === "live" && b.paid) push("st-paid-" + b.paidAt, "shield", "Store status", "Payment received", "Your store is live. Once your payment is confirmed, you'll get the Verified badge.");
   else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store in your editor to go live.");
   // shop insights, this week vs last week
@@ -1835,7 +1842,7 @@ function edHome(msg){
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
   const b = BUL || {}, last = (b.stats || []).slice(-7), sum = f => last.reduce((a, x) => a + (x[f] || 0), 0);
   const v = sum("v"), o = sum("o");
-  const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2" style="background:#E8EEF7;color:#18395C">${ico("shield",14,2)}Verified</span>` : ""}`
+  const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
   ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="insights" aria-label="Bulletin board">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
@@ -3492,7 +3499,9 @@ Object.assign(ICONS, {
 const MX_LIB = "https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.2.0/maplibre-gl";   // MapLibre GL JS
 const MX_SRI = { js: "sha512-N+AdcGOQwI9qITrl5JwZAvR9657sL+TTNfY6cTjvwft1qhaI3Vfk61Fy+3TPInthrJJ9pT0ZLmT1VUnQlJIO8w==", css: "sha512-ThCFU5nYVz8ubpOnjGHNGrTjZimTQ63X6t4een1DAWfKP8t39iSw2x3WlUr8EkePjBj48HeNkrAg9t9GRu+s2w==" };   // cdnjs hashes: update both if MX_LIB changes
 const MX_STYLE = dark => "https://tiles.openfreemap.org/styles/" + (dark ? "dark" : "positron");   // free OpenFreeMap tiles, no API key
-const SHIELD_SVG = s => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const TICK_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 12.5 3.6 3.6 7.4-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// a store logo with the Verified ring and tick when the store is verified (the same look as on the store page)
+const vLogo = (st, inner, cls) => `<span class="vlogo${st.v ? " verified" : ""}"><span class="mxlogo ${cls || ""}" style="background:${mxCol(st)}">${inner}</span>${st.v ? `<span class="vtick" role="img" aria-label="Verified">${TICK_SVG}</span>` : ""}</span>`;
 function exFavs(){ try { return new Set(JSON.parse(localStorage.getItem("lk-favs") || "[]")); } catch(e){ return new Set(); } }
 function exSaveFavs(){ try { localStorage.setItem("lk-favs", JSON.stringify([...EX.favs])); } catch(e) {} }
 function exFmt(km){ return km == null ? "" : km < 1 ? "about " + (Math.max(1, Math.round(km * 10)) * 100) + " m" : "about " + (km < 10 ? km.toFixed(1) : Math.round(km)) + " km"; }
@@ -3640,8 +3649,8 @@ function mxMeta(st){ return [st.city || st.area, st.state].filter(Boolean).join(
 function affShops(st){ return [...new Set((Array.isArray(st.lh) ? st.lh : []).map(h => linkInfo("https://" + h).brand).filter(Boolean))].slice(0, 3).join(" · "); }
 function mxRow(st, mapped){
   const logo = safeImg(st.logo), n = +st.lk || 0;
-  return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}"><span class="mxlogo sm" style="background:${mxCol(st)}">${logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
-    <span class="mxci"><b><span>${esc(st.name)}</span>${st.v ? SHIELD_SVG(15) : ""}</b>${st.aff
+  return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name)), "sm")}
+    <span class="mxci"><b><span>${esc(st.name)}</span></b>${st.aff
       ? `<span class="mxmeta">${esc(affShops(st) || "Online shop links")}</span>
     <span class="mxmeta">${n ? `${n} ${n === 1 ? "link" : "links"} · ` : ""}${esc(CATS[st.cat] || "Other")}</span></span>`
       : `<span class="mxmeta">${esc(mxMeta(st))} · ${esc(CATS[st.cat] || "Other")}</span>
@@ -3665,8 +3674,8 @@ function mxRenderSheet(){
 function mxShowCard(st){
   const c = $("mxCard"), logo = safeImg(st.logo), blurb = st.tag || st.items || "";
   c.dataset.store = st.id;
-  c.innerHTML = `<div class="mxcrow"><span class="mxlogo" style="background:${mxCol(st)}">${logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name))}</span>
-    <div class="mxci"><b><span>${esc(st.name)}</span>${st.v ? SHIELD_SVG(16) : ""}</b><span class="mxmeta">${esc(mxMeta(st))}</span>
+  c.innerHTML = `<div class="mxcrow">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name)))}
+    <div class="mxci"><b><span>${esc(st.name)}</span></b>${st.v ? `<span class="vlabel">Verified by ${esc(APP_NAME)}</span>` : ""}<span class="mxmeta">${esc(mxMeta(st))}</span>
     <span class="mxmeta">${st.closed ? `<span class="exshut">Closed now</span>` : `<span class="exopen">Open now</span>`} · ${esc(CATS[st.cat] || "Other")}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></div>
     <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></div>
     ${blurb ? `<p class="mxitems">${esc(blurb)}</p>` : ""}
@@ -3880,8 +3889,8 @@ function renderSafe(){
         <li>Send you messages first</li>
       </ul>
       <p>If anyone asks you for these while using a ${A} link, stop. It's not us.</p>
-      <h2>What the Verified badge means</h2>
-      <p>Stores marked <b>Verified by ${A}</b> have paid to publish, had their payment confirmed, and passed ${A} Guard, our automatic safety check for prohibited items.</p>
+      <h2>What the blue tick means</h2>
+      <p>Stores with a <b>blue tick on their logo</b> are Verified by ${A}. They have paid to publish, had their payment confirmed, and passed ${A} Guard, our automatic safety check for prohibited items.</p>
       <h2>Tips for safe buying</h2>
       <ul>
         <li>Check the store link starts with this site's address.</li>
