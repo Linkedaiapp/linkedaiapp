@@ -1504,6 +1504,7 @@ async function apiGet(params){
 const RETRY_OK = new Set(["login", "save", "admin"]);
 async function apiPost(body, extra){
   if (SESSION && SESSION.admin && body.id === SESSION.id && !body.key && body.action !== "admin") body.key = SESSION.key;
+  if (SESSION && SESSION.tok && body.id === SESSION.id && !body.pin && !body.key) body.tok = SESSION.tok;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
   const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
   const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 40000 : 0);
@@ -1698,9 +1699,21 @@ document.addEventListener("click", e => {
    SELLER: log in or create (yoursite/?build)
    ============================================================ */
 let SESSION = null, S = null, STATUS = "pending", DIRTY = false, ME_EMAIL = "";
-function loadSession(){ try { return JSON.parse(sessionStorage.getItem("lk-session") || "null"); } catch(e){ return null; } }
-function saveSession(){ try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {} }
-function clearSession(){ SESSION = null; ME_EMAIL = ""; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); } catch(e) {} }
+// The home-screen shortcut "Open or close shop" (?build&status) opens the editor straight on Store status
+let PENDING_VIEW = "";
+const urlFlag = w => location.search.slice(1).split("&").includes(w);
+// "Keep me logged in on this phone" keeps a login key from the server (never the PIN) on this phone.
+// Logging out, changing the PIN or resetting it makes the key stop working.
+function loadSession(){
+  try { const s = JSON.parse(sessionStorage.getItem("lk-session") || "null"); if (s) return s; } catch(e) {}
+  const k = keep.get("lk-keep"); return k && k.id && k.tok ? { id: k.id, tok: k.tok } : null;
+}
+function saveSession(){
+  try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {}
+  if (SESSION && SESSION.tok && !SESSION.admin) keep.set("lk-keep", { id: SESSION.id, tok: SESSION.tok });
+}
+function clearSession(){ SESSION = null; ME_EMAIL = ""; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); localStorage.removeItem("lk-keep"); } catch(e) {} }
+const authErr = e => /PIN|WhatsApp number|logged out on this phone/i.test((e && e.message) || "");
 
 function loginCardHtml(msg){
   return `<section class="card" id="loginCard">
@@ -1709,6 +1722,7 @@ function loginCardHtml(msg){
       <label>WhatsApp number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
       <p class="hint">The number your store gets orders on, or the email you added.</p>
       <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+      <label class="check keepme"><input type="checkbox" id="lKeep"><span>Keep me logged in on this phone</span></label>
       <p class="err" id="lErr">${esc(msg || "")}</p>
       <button class="btn solid full" id="lGo">Log in and edit my store</button>
       <p class="hint" style="margin-top:12px">Forgot your PIN? <button type="button" class="linkbtn" id="lForgot">Reset it</button></p>
@@ -1723,7 +1737,8 @@ function wireLogin(){
     $("lGo").disabled = true; $("lGo").textContent = "Logging in...";
     const slow = setTimeout(() => { if ($("lGo") && $("lGo").disabled) $("lGo").textContent = "Still working, please wait..."; }, 6000);
     try {
-      const r = await apiPost(byEmail ? { action: "login", email, pin } : { action: "login", wa, pin });
+      const keepMe = $("lKeep").checked;
+      const r = await apiPost(byEmail ? { action: "login", email, pin, keep: keepMe } : { action: "login", wa, pin, keep: keepMe });
       clearTimeout(slow); enterEditor(r, pin);
     } catch(e){
       clearTimeout(slow);
@@ -1738,7 +1753,7 @@ function wireLogin(){
 }
 // After logging in (or resetting the PIN by email): remember this tab's login and open the editor
 function enterEditor(r, pin){
-  SESSION = { id: r.id, pin }; saveSession(); rememberEd(r); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
+  SESSION = r.tok ? { id: r.id, tok: r.tok } : { id: r.id, pin }; saveSession(); rememberEd(r); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
   if (!/^\?(build|edit)\b/.test(location.search) && !/\/(build|edit)$/.test(location.pathname)) history.pushState(null, "", home() + "build");
   openEditor();
 }
@@ -1772,7 +1787,7 @@ $("fpSave").onclick = async () => {
   if (weakPin(np)) return sayErr("fpErr2", "Pick a PIN that's harder to guess than 111111 or 123456.");
   btn.disabled = true; btn.textContent = "Saving..."; sayErr("fpErr2");
   try {
-    const r = await apiPost({ action: "forgotreset", email, code, newPin: np });
+    const r = await apiPost({ action: "forgotreset", email, code, newPin: np, keep: !!($("lKeep") && $("lKeep").checked) });
     closeSheet("fpOverlay"); enterEditor(r, np);
     notify("Done. Your new PIN is saved.");
   } catch(e){ sayErr("fpErr2", friendly(e, "Couldn't reset your PIN right now. Check your internet and try again.")); }
@@ -1787,7 +1802,7 @@ function renderStart(msg, mode){
   setAccent(COLORS[0]); document.title = APP_NAME + (signup ? " · Sign up" : " · Seller login");
   $("gwrap").innerHTML = `
     <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
-    <header class="bh"><h1>${signup ? "Sign up" : "Seller login"}</h1><p>${signup ? "Create your store. You can build and preview it for free." : "Log in to edit your store."}</p></header>
+    <header class="bh"><h1>${signup ? "Sign up" : "Seller login"}</h1><p>${signup ? "Create your store. You can build and preview it for free." : PENDING_VIEW === "status" ? "Log in to open or close your shop." : "Log in to edit your store."}</p></header>
     ${signup ? "" : loginCardHtml(msg)}
     ${!signup && signupOpen() ? `<a class="btn full" href="${esc(home())}signup">New seller? Sign up</a>` : ""}
     <section class="card" ${signup ? "" : "hidden"}>
@@ -2262,7 +2277,7 @@ function edAccount(){
     ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chpin"><span class="tile">${ico("lock")}</span><span class="tt"><b>Change PIN</b><span>The 6-digit PIN you log in with</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
-    <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>You can log in again anytime</span></span></button>
+    <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in until you log out" : "You can log in again anytime"}</span></span></button>
   </section>
   <section class="card dangercard">
     <h2>Danger zone</h2>
@@ -2355,9 +2370,10 @@ $("pinSave").onclick = async () => {
   if (weakPin(np)) return err("Pick a PIN that's harder to guess than 111111 or 123456.");
   const btn = $("pinSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
   try {
-    await apiPost({ action: "changepin", id: SESSION.id, pin: old, newPin: np });
-    SESSION.pin = np; saveSession(); closeSheet("pinOverlay");
-    notify("Done. Use your new PIN next time you log in.");
+    const r = await apiPost({ action: "changepin", id: SESSION.id, pin: old, newPin: np, keep: !!SESSION.tok });
+    if (r.tok) SESSION.tok = r.tok; else if (SESSION.tok){ delete SESSION.tok; SESSION.pin = np; try { localStorage.removeItem("lk-keep"); } catch(e) {} } else SESSION.pin = np;
+    saveSession(); closeSheet("pinOverlay");
+    notify("Done. Use your new PIN next time you log in. Any other phone that stayed logged in has been logged out.");
   } catch(e){
     const m = String(e.message || "");
     err(/Wrong WhatsApp number or PIN/i.test(m) ? "Your current PIN isn't right. Please check it and try again."
@@ -2415,6 +2431,8 @@ function openEditor(msg){
   edTidy();
   if (!window.LK_KEEPVIEW) EDV = "home";
   if (EDV === "home" && needsStart()){ EDV = "start"; EDSTEP = 1; }
+  else if (PENDING_VIEW && EDV === "home"){ EDV = PENDING_VIEW; history.replaceState(null, "", home() + "build"); }
+  PENDING_VIEW = "";
   setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
 function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
 
@@ -2775,9 +2793,16 @@ $("builder").addEventListener("click", async e => {
   }
   else if (a === "deleteacct"){
     if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
+    let pin = SESSION.pin;
+    if (!pin && !SESSION.admin){
+      $("promptInput").type = "password"; $("promptInput").inputMode = "numeric"; $("promptInput").maxLength = 6;
+      pin = await askText("Type your 6-digit PIN to delete your account.", "", "", "Delete");
+      $("promptInput").type = "text"; $("promptInput").inputMode = ""; $("promptInput").removeAttribute("maxlength");
+      if (!pin) return;
+    }
     b.disabled = true; b.textContent = "Deleting...";
     try {
-      await apiPost({ action: "delete", id: SESSION.id, pin: SESSION.pin });
+      await apiPost({ action: "delete", id: SESSION.id, pin });
       DIRTY = false; clearSession();
       history.replaceState(null, "", home());
       renderHome();
@@ -2806,6 +2831,7 @@ $("builder").addEventListener("click", async e => {
   }
   else if (a === "logout"){
     if (DIRTY && !(await ask("You have unsaved changes. Log out anyway?", "Log out", true))) return;
+    if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
     DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); renderStart();
   }
 });
@@ -3634,6 +3660,7 @@ function legalDoc(which){
     <h2>1. Information from sellers</h2>
     <ul>
       <li><b>Account:</b> your shop name, store link name, WhatsApp number and PIN. Your PIN is stored scrambled, so no one can read it, including us.</li>
+      <li><b>Keep me logged in (optional):</b> your phone keeps a login key, never your PIN. Logging out, changing your PIN or resetting it ends it, and it expires after 90 days without use.</li>
       <li><b>Email (optional):</b> if you add one, we use it only to let you log in and to send you codes, for example to reset your PIN. It is never shown on your store.</li>
       <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
       <li><b>Payment receipts:</b> the receipt screenshot you upload when you publish. Receipts are private and only seen by us.</li>
@@ -4100,6 +4127,7 @@ async function renderExplore(){
   const list = exList();
   if (!me) mxFit(list, 12);
   mxDraw(true);
+  if (urlFlag("affiliate") && !EX.aff){ $("exAff").click(); history.replaceState(null, "", home() + "explore"); }
   if (Array.isArray(savedNear)) freshNear.then(st => { if (MX && MX.map === map && JSON.stringify(st) !== JSON.stringify(savedNear)){ EX.stores = st; mxDraw(true); } }).catch(() => {});
   mxGeocode().then(() => { if (MX && MX.map === map && !me) mxFit(exList(), 12); });
   if (me) exLocate(true);
@@ -4171,6 +4199,7 @@ function renderHome(){
       <div class="authform" id="loginCard">
         <label>WhatsApp number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
         <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
+        <label class="check keepme"><input type="checkbox" id="lKeep"><span>Keep me logged in on this phone</span></label>
         <p class="err" id="lErr"></p>
         <button class="btn solid full" id="lGo">Seller log in</button>
         <span class="authlink">Forgot your PIN? <button type="button" class="linkbtn" id="lForgot">Reset it</button></span>
@@ -4256,6 +4285,7 @@ async function route(){
   if (q === "explore" || q === "near") return renderExplore();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
+    PENDING_VIEW = urlFlag("status") ? "status" : "";
     SESSION = loadSession();
     if (SESSION){
       const req = SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }, saved = edCopy();
@@ -4268,12 +4298,16 @@ async function route(){
           rememberEd(r);
           if (same || DIRTY || $("builder").hidden) return;
           S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); renderEditor();
-        }).catch(e => { if (/PIN|WhatsApp number/i.test(e.message || "")){ clearSession(); renderStart(friendly(e, "")); } });
+        }).catch(e => { if (authErr(e)){ clearSession(); renderStart(friendly(e, "")); } });
         return;
       }
       $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page"); SPLASH.ready();
       try { const r = await apiPost(req); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; rememberEd(r); return openEditor(); }
-      catch(e){ clearSession(); }
+      catch(e){
+        if (authErr(e)){ clearSession(); return renderStart(friendly(e, "")); }
+        if (SESSION.tok) return renderStart("Couldn't open your store. Check your internet, then open the app again.");   // keep this phone's login for next time
+        clearSession();
+      }
     }
     return renderStart();
   }

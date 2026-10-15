@@ -26,5 +26,59 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open or close my shop",
+      "short_name": "Open / close",
+      "description": "Switch your shop between Open and Closed",
+      "url": "./?build&status",
+      "icons": [
+        {
+          "src": "sc-status.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "My store",
+      "short_name": "My store",
+      "description": "Edit your items, prices and photos",
+      "url": "./?build",
+      "icons": [
+        {
+          "src": "sc-store.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Browse stores",
+      "short_name": "Browse",
+      "description": "Find sellers near you on the map",
+      "url": "./?explore",
+      "icons": [
+        {
+          "src": "sc-browse.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Affiliate Shops",
+      "short_name": "Affiliate",
+      "description": "Sellers who share Shopee, TikTok Shop and other shop links",
+      "url": "./?explore&affiliate",
+      "icons": [
+        {
+          "src": "sc-affiliate.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
