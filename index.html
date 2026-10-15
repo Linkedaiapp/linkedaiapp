@@ -1839,6 +1839,7 @@ function priceText(it){
 function edHome(msg){
   const link = storeLink(SESSION.id), live = STATUS === "live", st = edSteps();
   const done = Object.values(st).filter(Boolean).length, total = Object.keys(st).length;
+  const allDone = done === total, mark = v => allDone ? null : v;   // all set up: no progress bar or Done tags, just a clean menu
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
   const b = BUL || {}, last = (b.stats || []).slice(-7), sum = f => last.reduce((a, x) => a + (x[f] || 0), 0);
   const v = sum("v"), o = sum("o");
@@ -1858,17 +1859,17 @@ function edHome(msg){
   ${SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : ""}
   ${SESSION.admin ? "" : tipHtml()}
   ${SESSION.admin ? "" : publishCardHtml()}
-  <section class="card">
+  ${allDone ? "" : `<section class="card">
     <div class="between"><h2 style="margin:0">Store setup</h2><span class="hint" style="margin:0">${done} of ${total} done</span></div>
     <div class="lk-prog"><i style="width:${Math.round(done / total * 100)}%"></i></div>
-  </section>
+  </section>`}
   <section class="card lk-group">
-    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet"].join(" · "), st.details)}
-    ${edRow("products","box", W(S).list, named.length ? `${named.length} ${named.length === 1 ? W(S).item : W(S).item + "s"}${out ? ` · ${out} sold out` : ""}` : "Nothing added yet", st.products)}
-    ${edRow("look","palette","Appearance","Logo, cover, colour and layout", st.look)}
-    ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", st.listing)}
+    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet"].join(" · "), mark(st.details))}
+    ${edRow("products","box", W(S).list, named.length ? `${named.length} ${named.length === 1 ? W(S).item : W(S).item + "s"}${out ? ` · ${out} sold out` : ""}` : "Nothing added yet", mark(st.products))}
+    ${edRow("look","palette","Appearance","Logo, cover, colour and layout", mark(st.look))}
+    ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
-    ${edRow("plan","card","Plan & payment", live ? "Paid · one-time" : STATUS === "review" ? "Paid · being checked" : "Not published yet", st.plan)}
+    ${edRow("plan","card","Plan & payment", live ? "Paid · one-time" : STATUS === "review" ? "Paid · being checked" : "Not published yet", mark(st.plan))}
   </section>
   ${live ? `<section class="card">
     <div class="between"><h2 style="margin:0">This week</h2><button class="btn small" data-act="go" data-v="insights">See insights</button></div>
