@@ -147,6 +147,8 @@ textarea{min-height:72px;resize:vertical}
 .authform .err:empty{margin:0;min-height:0}
 .authlink{display:block;text-align:center;margin-top:14px;font-size:14px;color:var(--muted)}
 .authlink a{color:var(--ink);font-weight:700}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--ink);font-weight:700;text-decoration:underline;cursor:pointer}
+.codein{letter-spacing:.35em;font-size:22px;font-weight:800;text-align:center}
 .signupbox{display:block;margin-top:26px;padding:16px;text-align:center;
   font-size:15px;color:var(--muted);text-decoration:none}
 .signupbox b{color:var(--accent)}
@@ -917,6 +919,8 @@ a.prow{text-decoration:none;color:inherit}
 .vlogo .vtick{width:20px;height:20px;right:-4px;bottom:-4px;border-width:2px;cursor:default}
 .vlogo .vtick svg{width:12px;height:12px}
 .vlabel{display:block;font-size:12px;font-weight:700;color:#0B6BB0;margin-top:1px}   /* darker blue: readable small text */
+.warow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;padding:10px 10px 10px 14px;border:1px solid var(--line2);border-radius:var(--r-field);background:var(--surface)}
+.warow b{font-size:16px}
 .tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:#0B6BB0}
 /* browse-stores button in the top-right corner, clear of the logo */
 .stmore{left:auto;right:12px}
@@ -1101,6 +1105,96 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <button class="xmini" data-close="bulOverlay" aria-label="Close">×</button>
     <div class="bulhead"><img src="logo.png" alt=""><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From the Link Kedai App bot</span></div></div>
     <div id="bulList"></div>
+  </div>
+</div>
+
+<!-- ============ ADD OR CHANGE EMAIL ============ -->
+<div class="overlay" id="emOverlay" role="dialog" aria-modal="true" aria-labelledby="emTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="emOverlay" aria-label="Close">×</button>
+    <h2 id="emTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Add email</h2>
+    <div id="emStep1">
+      <p class="hint" style="margin:0 0 4px">You can log in with this email, and reset your PIN yourself if you forget it. We never show it on your store.</p>
+      <label>Your email<input type="email" id="emAddr" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="e.g. you@gmail.com"></label>
+      <p class="err" id="emErr1" role="alert"></p>
+      <div class="row2" style="margin-top:6px">
+        <div><button class="btn full" type="button" data-close="emOverlay">Cancel</button></div>
+        <div><button class="btn solid full" type="button" id="emSend">Send code</button></div>
+      </div>
+      <p class="hint" id="emRemoveWrap" style="text-align:center;margin-top:14px" hidden><button type="button" class="linkbtn" id="emRemove">Remove my email</button></p>
+    </div>
+    <div id="emStep2" hidden>
+      <p class="hint" style="margin:0 0 4px">We sent a 6-digit code to <b id="emTo"></b>. It can take a minute. Check your spam folder too.</p>
+      <label>Code from the email<input type="text" id="emCode" class="codein" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"></label>
+      <p class="err" id="emErr2" role="alert"></p>
+      <div class="row2" style="margin-top:6px">
+        <div><button class="btn full" type="button" id="emBack">Back</button></div>
+        <div><button class="btn solid full" type="button" id="emConfirm">Confirm</button></div>
+      </div>
+      <p class="hint" style="text-align:center;margin-top:14px">No email? <button type="button" class="linkbtn" id="emResend">Send it again</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FORGOT PIN ============ -->
+<div class="overlay" id="fpOverlay" role="dialog" aria-modal="true" aria-labelledby="fpTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="fpOverlay" aria-label="Close">×</button>
+    <h2 id="fpTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Reset your PIN</h2>
+    <div id="fpStep1">
+      <p class="hint" style="margin:0 0 4px">Type the email you added to your store. We'll send you a code.</p>
+      <label>Your email<input type="email" id="fpEmail" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="e.g. you@gmail.com"></label>
+      <p class="err" id="fpErr1" role="alert"></p>
+      <div class="row2" style="margin-top:6px">
+        <div><button class="btn full" type="button" data-close="fpOverlay">Cancel</button></div>
+        <div><button class="btn solid full" type="button" id="fpSend">Send code</button></div>
+      </div>
+      <p class="hint" id="fpHelp" style="text-align:center;margin-top:14px"></p>
+    </div>
+    <div id="fpStep2" hidden>
+      <p class="hint" style="margin:0 0 4px">If <b id="fpTo"></b> belongs to a store, we've sent it a 6-digit code. It can take a minute. Check your spam folder too.</p>
+      <label>Code from the email<input type="text" id="fpCode" class="codein" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"></label>
+      <label>New 6-digit PIN<span class="pinwrap"><input type="password" id="fpPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="fpPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+      <label>Type the new PIN again<span class="pinwrap"><input type="password" id="fpPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="fpPin2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+      <p class="err" id="fpErr2" role="alert"></p>
+      <div class="row2" style="margin-top:6px">
+        <div><button class="btn full" type="button" id="fpBack">Back</button></div>
+        <div><button class="btn solid full" type="button" id="fpSave">Save and log in</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CHANGE PIN ============ -->
+<div class="overlay" id="pinOverlay" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="pinOverlay" aria-label="Close">×</button>
+    <h2 id="pinTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Change PIN</h2>
+    <p class="hint" style="margin:0 0 4px">Your PIN keeps your store safe. Don't share it with anyone.</p>
+    <label>Current PIN<span class="pinwrap"><input type="password" id="pinOld" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="pinOld" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+    <label>New 6-digit PIN<span class="pinwrap"><input type="password" id="pinNew" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="pinNew" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+    <label>Type the new PIN again<span class="pinwrap"><input type="password" id="pinNew2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="pinNew2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+    <p class="err" id="pinErr" role="alert"></p>
+    <div class="row2" style="margin-top:6px">
+      <div><button class="btn full" type="button" data-close="pinOverlay">Cancel</button></div>
+      <div><button class="btn solid full" type="button" id="pinSave">Save new PIN</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CHANGE WHATSAPP NUMBER ============ -->
+<div class="overlay" id="waOverlay" role="dialog" aria-modal="true" aria-labelledby="waTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="waOverlay" aria-label="Close">×</button>
+    <h2 id="waTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Change WhatsApp number</h2>
+    <p class="hint" style="margin:0 0 4px">Now: <b id="waNow"></b>. After the change, orders go to the new number and you log in with it.</p>
+    <label>New WhatsApp number<input type="tel" id="waNew" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
+    <label>Type it again<input type="tel" id="waNew2" autocomplete="off" placeholder="e.g. 012-345 6789"></label>
+    <p class="err" id="waErr" role="alert"></p>
+    <div class="row2" style="margin-top:6px">
+      <div><button class="btn full" type="button" data-close="waOverlay">Cancel</button></div>
+      <div><button class="btn solid full" type="button" id="waSave">Save new number</button></div>
+    </div>
   </div>
 </div>
 
@@ -1472,7 +1566,7 @@ const CITIES = {"Johor": ["Johor Bahru", "Iskandar Puteri", "Pasir Gudang", "Sku
 const CATS = { food: "Food", cakes: "Dessert", drinks: "Drinks", fashion: "Fashion", beauty: "Beauty", crafts: "Crafts", homestay: "Homestay", services: "Services", other: "Other" };
 function kmBetween(a, b, c, d){ const t = x => x * Math.PI / 180, h = Math.sin(t(c - a) / 2) ** 2 + Math.cos(t(a)) * Math.cos(t(c)) * Math.sin(t(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
 // ---------- Link Kedai App icon set: one line style everywhere (24px grid, 1.8 stroke, rounded) ----------
-const ICONS = {"chevron": "<path d=\"m9 6 6 6-6 6\"/>", "back": "<path d=\"m15 6-6 6 6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/>", "heart": "<path d=\"M12 20s-7-4.4-9-9a4.6 4.6 0 0 1 9-3 4.6 4.6 0 0 1 9 3c-2 4.6-9 9-9 9z\"/>", "bell": "<path d=\"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.9 1.9 0 0 0 3.4 0\"/>", "chart": "<path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/>", "shield": "<path d=\"M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z\"/><path d=\"m9 12 2 2 4-4\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "chat": "<path d=\"M21 12a8.5 8.5 0 0 1-12.5 7.5L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z\"/>", "sliders": "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><circle cx=\"9\" cy=\"10\" r=\"2\"/><path d=\"m21 16-5-5-9 9\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-1-.9-1.4-.9-2.4 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4.1-4-7.2-9-7.2z\"/><circle cx=\"7.5\" cy=\"11.5\" r=\"1\"/><circle cx=\"10\" cy=\"7.5\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "card": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"2.5\"/><path d=\"M2.5 10h19M6 15h4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "share": "<circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "logout": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3\"/><path d=\"m10 17-5-5 5-5M5 12h11\"/>", "check": "<path d=\"m5 12 5 5 9-10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "box": "<path d=\"M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z\"/><path d=\"m3 7.5 9 4.5 9-4.5M12 12v9\"/>", "grid": "<rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "store": "<path d=\"M4 9.5V20h16V9.5\"/><path d=\"M3 9.5 4.5 4h15L21 9.5c0 1.6-1.3 2.5-2.9 2.5S15.3 11 15.3 9.5c0 1.6-1.4 2.5-3.3 2.5S8.7 11 8.7 9.5C8.7 11 7.5 12 5.9 12S3 11.1 3 9.5z\"/><path d=\"M9.5 20v-5h5v5\"/>", "food": "<path d=\"M3.5 11h17a8.5 8.5 0 0 1-17 0z\"/><path d=\"M9 7.5c0-1.4 1.4-1.4 1.4-3M13.6 7.5c0-1.4 1.4-1.4 1.4-3\"/>", "cake": "<path d=\"M4 21h16M5 21v-8.5h14V21\"/><path d=\"M5 16.5c2.3 1.2 4.7 1.2 7 0s4.7-1.2 7 0\"/><path d=\"M12 12.5V9\"/><path d=\"M12 6.5c.8-.8.8-1.7 0-2.5-.8.8-.8 1.7 0 2.5z\"/>", "cup": "<path d=\"M6 8h12l-1.5 12.5h-9z\"/><path d=\"M5 8h14M12 8V4h4\"/>", "shirt": "<path d=\"M8.5 3.5 3.5 6.5l2 4.5 2.5-1v10.5h8V10l2.5 1 2-4.5-5-3c0 1.6-1.6 2.8-3.5 2.8S8.5 5.1 8.5 3.5z\"/>", "sparkle": "<path d=\"M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z\"/><path d=\"M19 17v4M17 19h4\"/>", "scissors": "<circle cx=\"6\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"6\" cy=\"17.5\" r=\"2.5\"/><path d=\"M8.2 7.8 20 18M8.2 16.2 20 6\"/>", "home": "<path d=\"M3.5 11 12 4l8.5 7\"/><path d=\"M5.5 9.5V20h13V9.5\"/><path d=\"M10 20v-6h4v6\"/>", "wrench": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5v3h3l5.8-5.8a4 4 0 0 0 5.4-5.4L15 12l-2.4-.6L12 9z\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "flag": "<path d=\"M5 21V4M5 4h11l-2 4 2 4H5\"/>", "star": "<path d=\"m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z\"/>", "trend": "<path d=\"m3 17 6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "upload": "<path d=\"M12 16V4M7 9l5-5 5 5\"/><path d=\"M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/>", "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17\"/>", "up": "<path d=\"m6 15 6-6 6 6\"/>", "down": "<path d=\"m6 9 6 6 6-6\"/>", "x": "<path d=\"M6 6l12 12M18 6 6 18\"/>", "ext": "<path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/>"};
+const ICONS = {"chevron": "<path d=\"m9 6 6 6-6 6\"/>", "back": "<path d=\"m15 6-6 6 6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/>", "heart": "<path d=\"M12 20s-7-4.4-9-9a4.6 4.6 0 0 1 9-3 4.6 4.6 0 0 1 9 3c-2 4.6-9 9-9 9z\"/>", "bell": "<path d=\"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.9 1.9 0 0 0 3.4 0\"/>", "chart": "<path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/>", "shield": "<path d=\"M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z\"/><path d=\"m9 12 2 2 4-4\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "chat": "<path d=\"M21 12a8.5 8.5 0 0 1-12.5 7.5L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z\"/>", "sliders": "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><circle cx=\"9\" cy=\"10\" r=\"2\"/><path d=\"m21 16-5-5-9 9\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-1-.9-1.4-.9-2.4 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4.1-4-7.2-9-7.2z\"/><circle cx=\"7.5\" cy=\"11.5\" r=\"1\"/><circle cx=\"10\" cy=\"7.5\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "card": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"2.5\"/><path d=\"M2.5 10h19M6 15h4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "share": "<circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "mail": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2.5\"/><path d=\"m3.5 7 8.5 6 8.5-6\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "logout": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3\"/><path d=\"m10 17-5-5 5-5M5 12h11\"/>", "check": "<path d=\"m5 12 5 5 9-10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "box": "<path d=\"M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z\"/><path d=\"m3 7.5 9 4.5 9-4.5M12 12v9\"/>", "grid": "<rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "store": "<path d=\"M4 9.5V20h16V9.5\"/><path d=\"M3 9.5 4.5 4h15L21 9.5c0 1.6-1.3 2.5-2.9 2.5S15.3 11 15.3 9.5c0 1.6-1.4 2.5-3.3 2.5S8.7 11 8.7 9.5C8.7 11 7.5 12 5.9 12S3 11.1 3 9.5z\"/><path d=\"M9.5 20v-5h5v5\"/>", "food": "<path d=\"M3.5 11h17a8.5 8.5 0 0 1-17 0z\"/><path d=\"M9 7.5c0-1.4 1.4-1.4 1.4-3M13.6 7.5c0-1.4 1.4-1.4 1.4-3\"/>", "cake": "<path d=\"M4 21h16M5 21v-8.5h14V21\"/><path d=\"M5 16.5c2.3 1.2 4.7 1.2 7 0s4.7-1.2 7 0\"/><path d=\"M12 12.5V9\"/><path d=\"M12 6.5c.8-.8.8-1.7 0-2.5-.8.8-.8 1.7 0 2.5z\"/>", "cup": "<path d=\"M6 8h12l-1.5 12.5h-9z\"/><path d=\"M5 8h14M12 8V4h4\"/>", "shirt": "<path d=\"M8.5 3.5 3.5 6.5l2 4.5 2.5-1v10.5h8V10l2.5 1 2-4.5-5-3c0 1.6-1.6 2.8-3.5 2.8S8.5 5.1 8.5 3.5z\"/>", "sparkle": "<path d=\"M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z\"/><path d=\"M19 17v4M17 19h4\"/>", "scissors": "<circle cx=\"6\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"6\" cy=\"17.5\" r=\"2.5\"/><path d=\"M8.2 7.8 20 18M8.2 16.2 20 6\"/>", "home": "<path d=\"M3.5 11 12 4l8.5 7\"/><path d=\"M5.5 9.5V20h13V9.5\"/><path d=\"M10 20v-6h4v6\"/>", "wrench": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5v3h3l5.8-5.8a4 4 0 0 0 5.4-5.4L15 12l-2.4-.6L12 9z\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "flag": "<path d=\"M5 21V4M5 4h11l-2 4 2 4H5\"/>", "star": "<path d=\"m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z\"/>", "trend": "<path d=\"m3 17 6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "upload": "<path d=\"M12 16V4M7 9l5-5 5 5\"/><path d=\"M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/>", "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17\"/>", "up": "<path d=\"m6 15 6-6 6 6\"/>", "down": "<path d=\"m6 9 6 6 6-6\"/>", "x": "<path d=\"M6 6l12 12M18 6 6 18\"/>", "ext": "<path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/>"};
 function ico(name, size, sw){ return `<svg width="${size || 22}" height="${size || 22}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw || 1.8}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.box}</svg>`; }
 const CAT_ICON = { all: "grid", food: "food", cakes: "cake", drinks: "cup", fashion: "shirt", beauty: "sparkle", crafts: "scissors", homestay: "home", services: "wrench", other: "box" };
 function stallIcon(cat){ return ico(CAT_ICON[cat] || "box", 27); }
@@ -1603,42 +1697,87 @@ document.addEventListener("click", e => {
 /* ============================================================
    SELLER: log in or create (yoursite/?build)
    ============================================================ */
-let SESSION = null, S = null, STATUS = "pending", DIRTY = false;
+let SESSION = null, S = null, STATUS = "pending", DIRTY = false, ME_EMAIL = "";
 function loadSession(){ try { return JSON.parse(sessionStorage.getItem("lk-session") || "null"); } catch(e){ return null; } }
 function saveSession(){ try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {} }
-function clearSession(){ SESSION = null; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); } catch(e) {} }
+function clearSession(){ SESSION = null; ME_EMAIL = ""; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); } catch(e) {} }
 
 function loginCardHtml(msg){
   return `<section class="card" id="loginCard">
       <h2>Seller login</h2>
       <p class="hint">Edit your store: items, prices, photos, open or closed.</p>
-      <label>Your WhatsApp number<input type="tel" id="lWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
-      <p class="hint">The number your store gets orders on.</p>
+      <label>WhatsApp number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
+      <p class="hint">The number your store gets orders on, or the email you added.</p>
       <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="err" id="lErr">${esc(msg || "")}</p>
       <button class="btn solid full" id="lGo">Log in and edit my store</button>
-      <p class="hint" style="margin-top:12px">Forgot your PIN? ${String(SITE.ownerWa || "").replace(/\D/g, "") ? `<a href="https://wa.me/${String(SITE.ownerWa).replace(/\D/g, "")}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us"} and we'll reset it.</p>
+      <p class="hint" style="margin-top:12px">Forgot your PIN? <button type="button" class="linkbtn" id="lForgot">Reset it</button></p>
     </section>`;
 }
 function wireLogin(){
   const go = async () => {
-    const wa = normWa($("lWa").value), pin = $("lPin").value;
+    const who = $("lWa").value.trim(), pin = $("lPin").value, byEmail = who.includes("@"), wa = byEmail ? "" : normWa(who), email = byEmail ? who.toLowerCase() : "";
     $("lErr").textContent = "";
-    if (wa.length < 9 || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your WhatsApp number and 6-digit PIN.";
+    if ((byEmail ? !EMAIL_RE.test(email) : wa.length < 9) || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your WhatsApp number or email, and your 6-digit PIN.";
     $("lGo").dataset.label = $("lGo").dataset.label || $("lGo").textContent;
     $("lGo").disabled = true; $("lGo").textContent = "Logging in...";
     const slow = setTimeout(() => { if ($("lGo") && $("lGo").disabled) $("lGo").textContent = "Still working, please wait..."; }, 6000);
     try {
-      const r = await apiPost({ action: "login", wa, pin });
-      SESSION = { id: r.id, pin }; saveSession(); rememberEd(r); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
-      if (!/^\?(build|edit)\b/.test(location.search) && !/\/(build|edit)$/.test(location.pathname)) history.pushState(null, "", home() + "build");
-      openEditor();
+      const r = await apiPost(byEmail ? { action: "login", email, pin } : { action: "login", wa, pin });
+      clearTimeout(slow); enterEditor(r, pin);
+    } catch(e){
       clearTimeout(slow);
-    } catch(e){ clearTimeout(slow); $("lErr").textContent = friendly(e, "Couldn't log in right now. Check your internet and try again."); $("lGo").disabled = false; $("lGo").textContent = $("lGo").dataset.label || "Log in and edit my store"; }
+      // an older server script doesn't know email login yet and asks for a link name instead
+      $("lErr").textContent = byEmail && /link name/i.test(e.message || "") ? "Logging in with email isn't ready yet. Use your WhatsApp number for now." : friendly(e, "Couldn't log in right now. Check your internet and try again.");
+      $("lGo").disabled = false; $("lGo").textContent = $("lGo").dataset.label || "Log in and edit my store";
+    }
   };
   $("lGo").onclick = go;
   $("lPin").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  $("lForgot").onclick = () => openForgot($("lWa").value.trim().includes("@") ? $("lWa").value.trim() : "");
 }
+// After logging in (or resetting the PIN by email): remember this tab's login and open the editor
+function enterEditor(r, pin){
+  SESSION = { id: r.id, pin }; saveSession(); rememberEd(r); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
+  if (!/^\?(build|edit)\b/.test(location.search) && !/\/(build|edit)$/.test(location.pathname)) history.pushState(null, "", home() + "build");
+  openEditor();
+}
+const EMAIL_RE = /^[^\s@<>"',;:()\[\]\\]+@[^\s@<>"',;:()\[\]\\]+\.[a-z]{2,}$/i;
+const sayErr = (id, t) => { $(id).textContent = t || ""; };
+// Forgot PIN: email a code, then the code + a new PIN logs the seller in
+function openForgot(email){
+  const to = String(SITE.ownerWa || "").replace(/\D/g, "");
+  $("fpStep1").hidden = false; $("fpStep2").hidden = true; $("fpEmail").value = email || ""; sayErr("fpErr1"); sayErr("fpErr2");
+  ["fpCode", "fpPin", "fpPin2"].forEach(id => { $(id).value = ""; if (id !== "fpCode") $(id).type = "password"; });
+  $("fpHelp").innerHTML = `No email on your store? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us"} and we'll reset it.`;
+  openSheet("fpOverlay"); setTimeout(() => $("fpEmail").focus(), 300);
+}
+const notReady = m => /Unknown action|link name/i.test(m || "");
+$("fpSend").onclick = async () => {
+  const email = $("fpEmail").value.trim().toLowerCase(), btn = $("fpSend");
+  if (!EMAIL_RE.test(email)) return sayErr("fpErr1", "Type the email you added to your store, like you@gmail.com.");
+  btn.disabled = true; btn.textContent = "Sending..."; sayErr("fpErr1");
+  try {
+    await apiPost({ action: "forgotpin", email });
+    $("fpTo").textContent = email; $("fpStep1").hidden = true; $("fpStep2").hidden = false; setTimeout(() => $("fpCode").focus(), 50);
+  } catch(e){ sayErr("fpErr1", notReady(e.message) ? "Resetting by email isn't ready yet. Please message us on WhatsApp and we'll reset it." : friendly(e, "Couldn't send the code right now. Check your internet and try again.")); }
+  btn.disabled = false; btn.textContent = "Send code";
+};
+$("fpBack").onclick = () => { $("fpStep2").hidden = true; $("fpStep1").hidden = false; sayErr("fpErr2"); };
+$("fpSave").onclick = async () => {
+  const email = $("fpTo").textContent, code = $("fpCode").value.replace(/\D/g, ""), np = $("fpPin").value, btn = $("fpSave");
+  if (!/^\d{6}$/.test(code)) return sayErr("fpErr2", "Type the 6-digit code from the email.");
+  if (!/^\d{6}$/.test(np)) return sayErr("fpErr2", "Your new PIN must be exactly 6 digits.");
+  if (np !== $("fpPin2").value) return sayErr("fpErr2", "The two new PINs don't match. Please type them again.");
+  if (weakPin(np)) return sayErr("fpErr2", "Pick a PIN that's harder to guess than 111111 or 123456.");
+  btn.disabled = true; btn.textContent = "Saving..."; sayErr("fpErr2");
+  try {
+    const r = await apiPost({ action: "forgotreset", email, code, newPin: np });
+    closeSheet("fpOverlay"); enterEditor(r, np);
+    notify("Done. Your new PIN is saved.");
+  } catch(e){ sayErr("fpErr2", friendly(e, "Couldn't reset your PIN right now. Check your internet and try again.")); }
+  btn.disabled = false; btn.textContent = "Save and log in";
+};
 
 function normWa(v){ let d = String(v || "").replace(/\D/g, ""); if (d.startsWith("0")) d = "6" + d; return d; }
 
@@ -1881,7 +2020,8 @@ function edDetails(){
   <section class="card">
     <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}" placeholder="${esc(W(S).ex.shop)}"></label>
     <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="${esc(W(S).ex.tag)}"></label>
-    <label>WhatsApp number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="e.g. 012-345 6789"></label>
+    <label>WhatsApp number</label>
+    <div class="warow"><b>${esc(fmtWa(S.wa) || "Not added yet")}</b><button type="button" class="btn small" data-act="chwa">Change number</button></div>
     <p class="hint">Orders are sent here, and you log in with this number.</p>
     <label>What do you sell?</label>
     <div class="seg">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
@@ -2116,7 +2256,10 @@ function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
-    <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(S.wa || "your WhatsApp number")} and your PIN</span></span></div>
+    <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(fmtWa(S.wa) || "your WhatsApp number")}${ME_EMAIL ? " or " + esc(ME_EMAIL) : ""} and your PIN</span></span></div>
+    <button class="lk-row" data-act="chwa"><span class="tile">${ico("chat")}</span><span class="tt"><b>Change WhatsApp number</b><span>Orders go to this number, and you log in with it</span></span><span class="chev">${ico("chevron",18)}</span></button>
+    ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chemail"><span class="tile">${ico("mail")}</span><span class="tt"><b>${ME_EMAIL ? "Change email" : "Add email"}</b><span>${ME_EMAIL ? esc(ME_EMAIL) : "So you can reset your PIN yourself if you forget it"}</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
+    ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chpin"><span class="tile">${ico("lock")}</span><span class="tt"><b>Change PIN</b><span>The 6-digit PIN you log in with</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>You can log in again anytime</span></span></button>
@@ -2172,6 +2315,98 @@ function edStart(){
     <button class="btn full" style="margin-top:10px" data-act="frpublish">Publish my store</button>
     <button class="btn full" style="margin-top:10px" data-act="frhome">Add more ${esc(W(S).item)}s first</button>`;
 }
+// 60123456789 -> 012-345 6789 (other countries: +65 ...)
+function fmtWa(wa){
+  wa = String(wa || ""); if (!wa) return "";
+  if (!/^60\d{8,10}$/.test(wa)) return "+" + wa;
+  const l = "0" + wa.slice(2); return l.slice(0, 3) + "-" + l.slice(3, 6) + " " + l.slice(6);
+}
+function openWaChange(){
+  $("waNew").value = ""; $("waNew2").value = ""; $("waErr").textContent = ""; $("waNow").textContent = fmtWa(S.wa) || "none yet";
+  openSheet("waOverlay"); setTimeout(() => $("waNew").focus(), 300);
+}
+$("waSave").onclick = async () => {
+  const a = normWa($("waNew").value), b = normWa($("waNew2").value), err = t => { $("waErr").textContent = t; };
+  if (a.length < 9 || a.length > 15) return err("Type your full WhatsApp number, like 012-345 6789.");
+  if (a !== b) return err("The two numbers don't match. Please check and type them again.");
+  if (a === S.wa) return err("That's already your number.");
+  const btn = $("waSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
+  clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
+  const old = S.wa; S.wa = a;
+  try {
+    const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
+    STATUS = r.status || STATUS; DIRTY = false; rememberEdNow();
+    closeSheet("waOverlay"); renderEditor();
+    notify(`Done. From now on, orders go to ${fmtWa(a)}, and you log in with this number.`);
+  } catch(e){ S.wa = old; err(friendly(e, "Couldn't change your number right now. Check your internet and try again.")); }
+  btn.disabled = false; btn.textContent = "Save new number";
+};
+function openPinChange(){
+  ["pinOld", "pinNew", "pinNew2"].forEach(id => { $(id).value = ""; $(id).type = "password"; }); $("pinErr").textContent = "";
+  openSheet("pinOverlay"); setTimeout(() => $("pinOld").focus(), 300);
+}
+const weakPin = p => /^(\d)\1{5}$/.test(p) || "01234567890".includes(p) || "09876543210".includes(p);
+$("pinSave").onclick = async () => {
+  const old = $("pinOld").value, np = $("pinNew").value, np2 = $("pinNew2").value, err = t => { $("pinErr").textContent = t; };
+  if (!/^\d{6}$/.test(old)) return err("Type your current 6-digit PIN.");
+  if (!/^\d{6}$/.test(np)) return err("Your new PIN must be exactly 6 digits.");
+  if (np !== np2) return err("The two new PINs don't match. Please type them again.");
+  if (np === old) return err("Your new PIN is the same as your current one.");
+  if (weakPin(np)) return err("Pick a PIN that's harder to guess than 111111 or 123456.");
+  const btn = $("pinSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
+  try {
+    await apiPost({ action: "changepin", id: SESSION.id, pin: old, newPin: np });
+    SESSION.pin = np; saveSession(); closeSheet("pinOverlay");
+    notify("Done. Use your new PIN next time you log in.");
+  } catch(e){
+    const m = String(e.message || "");
+    err(/Wrong WhatsApp number or PIN/i.test(m) ? "Your current PIN isn't right. Please check it and try again."
+      : /Unknown action/i.test(m) ? "Changing your PIN isn't ready yet. Please message us and we'll change it for you."
+      : friendly(e, "Couldn't change your PIN right now. Check your internet and try again."));
+  }
+  btn.disabled = false; btn.textContent = "Save new PIN";
+};
+// Add or change email: we email a code, and the email is only saved once the seller types it back
+function openEmailChange(){
+  $("emTitle").textContent = ME_EMAIL ? "Change email" : "Add email";
+  $("emStep1").hidden = false; $("emStep2").hidden = true; $("emRemoveWrap").hidden = !ME_EMAIL;
+  $("emAddr").value = ""; $("emCode").value = ""; sayErr("emErr1"); sayErr("emErr2");
+  openSheet("emOverlay"); setTimeout(() => $("emAddr").focus(), 300);
+}
+async function emSendCode(btn, errId){
+  const email = $("emAddr").value.trim().toLowerCase();
+  if (!EMAIL_RE.test(email)) return sayErr(errId, "Type your full email, like you@gmail.com.");
+  if (email === ME_EMAIL) return sayErr(errId, "That's already your email.");
+  const label = btn.textContent; btn.disabled = true; btn.textContent = "Sending..."; sayErr(errId);
+  try {
+    await apiPost({ action: "emailcode", id: SESSION.id, pin: SESSION.pin, email });
+    $("emTo").textContent = email; $("emStep1").hidden = true; $("emStep2").hidden = false; $("emCode").value = "";
+    if (errId === "emErr2") notify("We sent a new code.");
+    setTimeout(() => $("emCode").focus(), 50);
+  } catch(e){ sayErr(errId, notReady(e.message) ? "Adding an email isn't ready yet. Please try again in a few days." : friendly(e, "Couldn't send the code right now. Check your internet and try again.")); }
+  btn.disabled = false; btn.textContent = label;
+}
+$("emSend").onclick = () => emSendCode($("emSend"), "emErr1");
+$("emResend").onclick = () => emSendCode($("emResend"), "emErr2");
+$("emBack").onclick = () => { $("emStep2").hidden = true; $("emStep1").hidden = false; sayErr("emErr2"); };
+$("emConfirm").onclick = async () => {
+  const code = $("emCode").value.replace(/\D/g, ""), btn = $("emConfirm");
+  if (!/^\d{6}$/.test(code)) return sayErr("emErr2", "Type the 6-digit code from the email.");
+  btn.disabled = true; btn.textContent = "Checking..."; sayErr("emErr2");
+  try {
+    const r = await apiPost({ action: "emailconfirm", id: SESSION.id, pin: SESSION.pin, code });
+    ME_EMAIL = r.email || ""; rememberEdNow(); closeSheet("emOverlay"); renderEditor();
+    notify(`Done. You can now log in with ${ME_EMAIL}, and reset your PIN by email.`);
+  } catch(e){ sayErr("emErr2", friendly(e, "Couldn't check the code right now. Check your internet and try again.")); }
+  btn.disabled = false; btn.textContent = "Confirm";
+};
+$("emRemove").onclick = async () => {
+  if (!(await ask("Remove your email? You won't be able to log in with it or reset your PIN by email.", "Remove", true))) return;
+  try {
+    await apiPost({ action: "emailremove", id: SESSION.id, pin: SESSION.pin });
+    ME_EMAIL = ""; rememberEdNow(); closeSheet("emOverlay"); renderEditor(); notify("Your email was removed.");
+  } catch(e){ sayErr("emErr1", friendly(e, "Couldn't remove your email right now. Check your internet and try again.")); }
+};
 function edTidy(){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
@@ -2497,6 +2732,9 @@ $("builder").addEventListener("click", async e => {
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
   const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
+  if (a === "chwa"){ openWaChange(); return; }
+  if (a === "chpin"){ openPinChange(); return; }
+  if (a === "chemail"){ openEmailChange(); return; }
   if (a === "frkind"){ S.kind = b.dataset.v; touch(); EDSTEP = 2; renderEditor(); window.scrollTo(0, 0); setTimeout(() => { const el = document.querySelector('[data-f="n"][data-i="0"]'); if (el) el.focus(); }, 60); return; }
   if (a === "frback"){ EDSTEP = Math.max(1, EDSTEP - 1); renderEditor(); window.scrollTo(0, 0); return; }
   if (a === "frnext"){
@@ -3381,7 +3619,7 @@ function adminSettings(g, head, wire, cfg){
    HOME + ROUTER
    ============================================================ */
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
-const LEGAL_UPDATED = "25 September 2026";
+const LEGAL_UPDATED = "15 October 2026";
 const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
 const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
 function legalContact(){
@@ -3396,6 +3634,7 @@ function legalDoc(which){
     <h2>1. Information from sellers</h2>
     <ul>
       <li><b>Account:</b> your shop name, store link name, WhatsApp number and PIN. Your PIN is stored scrambled, so no one can read it, including us.</li>
+      <li><b>Email (optional):</b> if you add one, we use it only to let you log in and to send you codes, for example to reset your PIN. It is never shown on your store.</li>
       <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
       <li><b>Payment receipts:</b> the receipt screenshot you upload when you publish. Receipts are private and only seen by us.</li>
       <li><b>Store listing (optional):</b> if you list your store in Browse stores, customers see your state, the area name you write and your category. If you also add your location for "Nearest first", it stays private: customers only see roughly how far away you are, never where.</li>
@@ -3930,11 +4169,11 @@ function renderHome(){
       <p class="tagline">Your shop, one link.</p>
       <p class="subhead">Take orders on WhatsApp through one simple store link. No app. No commission.${shownPrice() ? ` One-time fee of ${esc(shownPrice())}.` : ""}</p>
       <div class="authform" id="loginCard">
-        <label>WhatsApp number<input type="tel" id="lWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
+        <label>WhatsApp number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
         <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
         <p class="err" id="lErr"></p>
         <button class="btn solid full" id="lGo">Seller log in</button>
-        <span class="authlink">Forgot your PIN? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I forgot my store PIN.")}" target="_blank" rel="noopener">Get help</a>` : "Contact us"}</span>
+        <span class="authlink">Forgot your PIN? <button type="button" class="linkbtn" id="lForgot">Reset it</button></span>
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}signup">New seller? <b>Sign up</b></a>` : ""}
       <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Browse Link Kedai App stores</b></a>
@@ -3996,7 +4235,7 @@ function rememberShop(id, r){
 function forgetShop(id){ const all = keep.get("lk-shops") || {}; delete all[id]; keep.set("lk-shops", all); }
 // The seller's own store, kept for this browser tab only (like the login), so a reload or Back opens the editor at once
 function edCopy(){ try { const c = JSON.parse(sessionStorage.getItem("lk-ed") || "null"); return c && SESSION && c.id === SESSION.id ? c : null; } catch(e){ return null; } }
-function rememberEd(r){ try { if (SESSION) sessionStorage.setItem("lk-ed", JSON.stringify({ id: SESSION.id, data: r.data, loc: r.loc, status: r.status })); } catch(e) {} }
+function rememberEd(r){ if (r && "email" in r) ME_EMAIL = r.email || ""; try { if (SESSION) sessionStorage.setItem("lk-ed", JSON.stringify({ id: SESSION.id, data: r.data, loc: r.loc, status: r.status, email: ME_EMAIL })); } catch(e) {} }
 const rememberEdNow = () => { if (S) rememberEd({ data: normalize(S), loc: S.loc, status: STATUS }); };
 // A grey outline of a store while it loads for the first time
 function storeSkeleton(){
@@ -4022,7 +4261,7 @@ async function route(){
       const req = SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }, saved = edCopy();
       if (saved){
         // open at once from this tab's copy, then take the server's newer version if nothing was changed meanwhile
-        S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; openEditor(); SPLASH.ready();
+        S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; ME_EMAIL = saved.email || ""; openEditor(); SPLASH.ready();
         apiPost(req).then(r => {
           if (!SESSION || SESSION.id !== saved.id) return;
           const same = JSON.stringify(normalize(Object.assign({}, r.data, { loc: r.loc }))) === JSON.stringify(normalize(Object.assign({}, saved.data, { loc: saved.loc }))) && r.status === saved.status;
