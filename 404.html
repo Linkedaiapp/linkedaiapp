@@ -917,6 +917,8 @@ a.prow{text-decoration:none;color:inherit}
 .vlogo .vtick{width:20px;height:20px;right:-4px;bottom:-4px;border-width:2px;cursor:default}
 .vlogo .vtick svg{width:12px;height:12px}
 .vlabel{display:block;font-size:12px;font-weight:700;color:#0B6BB0;margin-top:1px}   /* darker blue: readable small text */
+.warow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;padding:10px 10px 10px 14px;border:1px solid var(--line2);border-radius:var(--r-field);background:var(--surface)}
+.warow b{font-size:16px}
 .tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:#0B6BB0}
 /* browse-stores button in the top-right corner, clear of the logo */
 .stmore{left:auto;right:12px}
@@ -1101,6 +1103,22 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <button class="xmini" data-close="bulOverlay" aria-label="Close">×</button>
     <div class="bulhead"><img src="logo.png" alt=""><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From the Link Kedai App bot</span></div></div>
     <div id="bulList"></div>
+  </div>
+</div>
+
+<!-- ============ CHANGE WHATSAPP NUMBER ============ -->
+<div class="overlay" id="waOverlay" role="dialog" aria-modal="true" aria-labelledby="waTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="waOverlay" aria-label="Close">×</button>
+    <h2 id="waTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Change WhatsApp number</h2>
+    <p class="hint" style="margin:0 0 4px">Now: <b id="waNow"></b>. After the change, orders go to the new number and you log in with it.</p>
+    <label>New WhatsApp number<input type="tel" id="waNew" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
+    <label>Type it again<input type="tel" id="waNew2" autocomplete="off" placeholder="e.g. 012-345 6789"></label>
+    <p class="err" id="waErr" role="alert"></p>
+    <div class="row2" style="margin-top:6px">
+      <div><button class="btn full" type="button" data-close="waOverlay">Cancel</button></div>
+      <div><button class="btn solid full" type="button" id="waSave">Save new number</button></div>
+    </div>
   </div>
 </div>
 
@@ -1881,7 +1899,8 @@ function edDetails(){
   <section class="card">
     <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}" placeholder="${esc(W(S).ex.shop)}"></label>
     <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="${esc(W(S).ex.tag)}"></label>
-    <label>WhatsApp number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="e.g. 012-345 6789"></label>
+    <label>WhatsApp number</label>
+    <div class="warow"><b>${esc(fmtWa(S.wa) || "Not added yet")}</b><button type="button" class="btn small" data-act="chwa">Change number</button></div>
     <p class="hint">Orders are sent here, and you log in with this number.</p>
     <label>What do you sell?</label>
     <div class="seg">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
@@ -2116,7 +2135,8 @@ function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
-    <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(S.wa || "your WhatsApp number")} and your PIN</span></span></div>
+    <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(fmtWa(S.wa) || "your WhatsApp number")} and your PIN</span></span></div>
+    <button class="lk-row" data-act="chwa"><span class="tile">${ico("chat")}</span><span class="tt"><b>Change WhatsApp number</b><span>Orders go to this number, and you log in with it</span></span><span class="chev">${ico("chevron",18)}</span></button>
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>You can log in again anytime</span></span></button>
@@ -2172,6 +2192,32 @@ function edStart(){
     <button class="btn full" style="margin-top:10px" data-act="frpublish">Publish my store</button>
     <button class="btn full" style="margin-top:10px" data-act="frhome">Add more ${esc(W(S).item)}s first</button>`;
 }
+// 60123456789 -> 012-345 6789 (other countries: +65 ...)
+function fmtWa(wa){
+  wa = String(wa || ""); if (!wa) return "";
+  if (!/^60\d{8,10}$/.test(wa)) return "+" + wa;
+  const l = "0" + wa.slice(2); return l.slice(0, 3) + "-" + l.slice(3, 6) + " " + l.slice(6);
+}
+function openWaChange(){
+  $("waNew").value = ""; $("waNew2").value = ""; $("waErr").textContent = ""; $("waNow").textContent = fmtWa(S.wa) || "none yet";
+  openSheet("waOverlay"); setTimeout(() => $("waNew").focus(), 300);
+}
+$("waSave").onclick = async () => {
+  const a = normWa($("waNew").value), b = normWa($("waNew2").value), err = t => { $("waErr").textContent = t; };
+  if (a.length < 9 || a.length > 15) return err("Type your full WhatsApp number, like 012-345 6789.");
+  if (a !== b) return err("The two numbers don't match. Please check and type them again.");
+  if (a === S.wa) return err("That's already your number.");
+  const btn = $("waSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
+  clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
+  const old = S.wa; S.wa = a;
+  try {
+    const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
+    STATUS = r.status || STATUS; DIRTY = false; rememberEdNow();
+    closeSheet("waOverlay"); renderEditor();
+    notify(`Done. From now on, orders go to ${fmtWa(a)}, and you log in with this number.`);
+  } catch(e){ S.wa = old; err(friendly(e, "Couldn't change your number right now. Check your internet and try again.")); }
+  btn.disabled = false; btn.textContent = "Save new number";
+};
 function edTidy(){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
@@ -2497,6 +2543,7 @@ $("builder").addEventListener("click", async e => {
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
   const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
+  if (a === "chwa"){ openWaChange(); return; }
   if (a === "frkind"){ S.kind = b.dataset.v; touch(); EDSTEP = 2; renderEditor(); window.scrollTo(0, 0); setTimeout(() => { const el = document.querySelector('[data-f="n"][data-i="0"]'); if (el) el.focus(); }, 60); return; }
   if (a === "frback"){ EDSTEP = Math.max(1, EDSTEP - 1); renderEditor(); window.scrollTo(0, 0); return; }
   if (a === "frnext"){
