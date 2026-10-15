@@ -1106,6 +1106,23 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
   </div>
 </div>
 
+<!-- ============ CHANGE PIN ============ -->
+<div class="overlay" id="pinOverlay" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="pinOverlay" aria-label="Close">×</button>
+    <h2 id="pinTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Change PIN</h2>
+    <p class="hint" style="margin:0 0 4px">Your PIN keeps your store safe. Don't share it with anyone.</p>
+    <label>Current PIN<span class="pinwrap"><input type="password" id="pinOld" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="pinOld" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+    <label>New 6-digit PIN<span class="pinwrap"><input type="password" id="pinNew" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="pinNew" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+    <label>Type the new PIN again<span class="pinwrap"><input type="password" id="pinNew2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="pinNew2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+    <p class="err" id="pinErr" role="alert"></p>
+    <div class="row2" style="margin-top:6px">
+      <div><button class="btn full" type="button" data-close="pinOverlay">Cancel</button></div>
+      <div><button class="btn solid full" type="button" id="pinSave">Save new PIN</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- ============ CHANGE WHATSAPP NUMBER ============ -->
 <div class="overlay" id="waOverlay" role="dialog" aria-modal="true" aria-labelledby="waTitle">
   <div class="sheet">
@@ -2137,6 +2154,7 @@ function edAccount(){
   <section class="card lk-group">
     <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(fmtWa(S.wa) || "your WhatsApp number")} and your PIN</span></span></div>
     <button class="lk-row" data-act="chwa"><span class="tile">${ico("chat")}</span><span class="tt"><b>Change WhatsApp number</b><span>Orders go to this number, and you log in with it</span></span><span class="chev">${ico("chevron",18)}</span></button>
+    ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chpin"><span class="tile">${ico("lock")}</span><span class="tt"><b>Change PIN</b><span>The 6-digit PIN you log in with</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>You can log in again anytime</span></span></button>
@@ -2217,6 +2235,31 @@ $("waSave").onclick = async () => {
     notify(`Done. From now on, orders go to ${fmtWa(a)}, and you log in with this number.`);
   } catch(e){ S.wa = old; err(friendly(e, "Couldn't change your number right now. Check your internet and try again.")); }
   btn.disabled = false; btn.textContent = "Save new number";
+};
+function openPinChange(){
+  ["pinOld", "pinNew", "pinNew2"].forEach(id => { $(id).value = ""; $(id).type = "password"; }); $("pinErr").textContent = "";
+  openSheet("pinOverlay"); setTimeout(() => $("pinOld").focus(), 300);
+}
+const weakPin = p => /^(\d)\1{5}$/.test(p) || "01234567890".includes(p) || "09876543210".includes(p);
+$("pinSave").onclick = async () => {
+  const old = $("pinOld").value, np = $("pinNew").value, np2 = $("pinNew2").value, err = t => { $("pinErr").textContent = t; };
+  if (!/^\d{6}$/.test(old)) return err("Type your current 6-digit PIN.");
+  if (!/^\d{6}$/.test(np)) return err("Your new PIN must be exactly 6 digits.");
+  if (np !== np2) return err("The two new PINs don't match. Please type them again.");
+  if (np === old) return err("Your new PIN is the same as your current one.");
+  if (weakPin(np)) return err("Pick a PIN that's harder to guess than 111111 or 123456.");
+  const btn = $("pinSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
+  try {
+    await apiPost({ action: "changepin", id: SESSION.id, pin: old, newPin: np });
+    SESSION.pin = np; saveSession(); closeSheet("pinOverlay");
+    notify("Done. Use your new PIN next time you log in.");
+  } catch(e){
+    const m = String(e.message || "");
+    err(/Wrong WhatsApp number or PIN/i.test(m) ? "Your current PIN isn't right. Please check it and try again."
+      : /Unknown action/i.test(m) ? "Changing your PIN isn't ready yet. Please message us and we'll change it for you."
+      : friendly(e, "Couldn't change your PIN right now. Check your internet and try again."));
+  }
+  btn.disabled = false; btn.textContent = "Save new PIN";
 };
 function edTidy(){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
@@ -2544,6 +2587,7 @@ $("builder").addEventListener("click", async e => {
   const redraw = () => { touch(); renderEditor(); };
   const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
   if (a === "chwa"){ openWaChange(); return; }
+  if (a === "chpin"){ openPinChange(); return; }
   if (a === "frkind"){ S.kind = b.dataset.v; touch(); EDSTEP = 2; renderEditor(); window.scrollTo(0, 0); setTimeout(() => { const el = document.querySelector('[data-f="n"][data-i="0"]'); if (el) el.focus(); }, 60); return; }
   if (a === "frback"){ EDSTEP = Math.max(1, EDSTEP - 1); renderEditor(); window.scrollTo(0, 0); return; }
   if (a === "frnext"){
