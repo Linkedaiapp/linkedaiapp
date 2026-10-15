@@ -232,7 +232,7 @@ textarea{min-height:72px;resize:vertical}
 .pwabar b{display:block;font-size:14px;line-height:1.3}
 .pwabar span{display:block;font-size:12px;color:var(--muted);margin-top:1px;line-height:1.35}
 .pwabar .btn{flex:none;padding:8px 14px;font-size:13px}
-.pwabar .pwax{position:absolute;right:8px;top:8px;width:26px;height:26px;border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
+.pwabar .pwax{position:absolute;right:0;top:0;width:44px;height:44px;border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
 /* ---------- Seller bulletin board ---------- */
 .topacts{display:flex;align-items:center;gap:8px}
 .bellbtn{position:relative;width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
@@ -560,6 +560,7 @@ html,body{overflow-x:hidden}
 .addots{display:flex;justify-content:center;gap:6px;margin-top:8px}
 .addots:empty{display:none}
 .addots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:var(--line);cursor:pointer;transition:width .3s ease,background .3s ease}
+.addots button{position:relative}.addots button::after{content:"";position:absolute;inset:-12px -4px}
 .addots button[aria-current="true"]{width:18px;background:var(--ink)}
 .adtag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;pointer-events:none}
 .adx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}
@@ -779,7 +780,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 #mxMap .maplibregl-ctrl-attrib{font-size:11px;background:var(--glass);color:var(--muted);border-radius:var(--r-xs) 0 0 0}
 #mxMap .maplibregl-ctrl-attrib a{color:inherit}
 #mxMap .maplibregl-ctrl-attrib-button{background-color:transparent}
-.mxerr{position:fixed;left:16px;right:16px;top:40%;z-index:5;text-align:center}
+.mxerr{position:fixed;left:16px;right:16px;top:40%;z-index:5;text-align:center;display:grid;gap:12px;justify-items:center}
 .mxg{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 4px 16px rgba(20,10,15,.14)}
 .mxtop{position:fixed;z-index:10;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:560px;margin:0 auto}
@@ -1116,6 +1117,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <div id="emStep1">
       <p class="hint" style="margin:0 0 4px">You can log in with this email, and reset your PIN yourself if you forget it. We never show it on your store.</p>
       <label>Your email<input type="email" id="emAddr" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="e.g. you@gmail.com"></label>
+      <label id="emPinWrap" hidden>Your 6-digit PIN<span class="pinwrap"><input type="password" id="emPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="emPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="err" id="emErr1" role="alert"></p>
       <div class="row2" style="margin-top:6px">
         <div><button class="btn full" type="button" data-close="emOverlay">Cancel</button></div>
@@ -1275,6 +1277,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <p class="shopn" id="closedShop"></p>
       <h2>Store closed</h2>
       <p id="closedMsg">We're not taking orders right now. Please check back later.</p>
+      <a class="btn" id="closedMore" href="./?explore" style="margin-top:18px">Browse other stores</a>
     </div>
   </div>
 
@@ -1324,7 +1327,8 @@ const SPLASH = (() => {
   try { first = !sessionStorage.getItem("lk-splash"); } catch(e) {}
   // First visit: let the logo finish drawing (a bit shorter before a store). Later visits: go as soon as ready.
   const qs = location.search.slice(1).split("&").filter(x => x && !x.includes("="));
-  const pw = decodeURIComponent(location.pathname.split("/").pop() || "").toLowerCase(), notStore = /^(build|edit|signup|admin)$/i;
+  let pw = location.pathname.split("/").pop() || ""; try { pw = decodeURIComponent(pw).toLowerCase(); } catch(e) {}
+  const notStore = /^(build|edit|signup|admin)$/i;
   const isStore = (qs[0] && !notStore.test(qs[0])) || (!/\/$/.test(location.pathname) && !notStore.test(pw));
   const minMs = first ? (isStore ? 500 : 900) : 0;   // short: the page itself should be the welcome
   const t0 = Date.now();
@@ -1399,7 +1403,7 @@ function curSymbol(code){
 }
 function curOption(code, sel){ const sym = curSymbol(code).trim(); return `<option value="${code}" ${code===sel?"selected":""}>${code} ${esc(curName(code))}${sym && sym !== code ? " (" + esc(sym) + ")" : ""}</option>`; }
 function slug(t){ return String(t||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40) || "shop"; }
-const fmtMoney = (cur, n) => esc(cur || "") + (Number.isInteger(n) ? Number(n).toLocaleString("en") : Number(n).toFixed(2));
+const fmtMoney = (cur, n) => { n = Number(n) || 0; return esc(cur || "") + n.toLocaleString("en", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }); };
 
 
 
@@ -1427,8 +1431,14 @@ const signupOpen = () => SITE.signup !== false;
 const siteUrl = path => new URL(path, location.href.split("#")[0].split("?")[0]).href;
 const home = () => siteUrl("./");
 const storeLink = id => home() + id;
+// yoursite/shop-name/ (with a slash at the end) opens the store too
+(function(){ try {
+  const base = new URL(document.querySelector('meta[property="og:url"]').content).pathname, p = location.pathname;
+  if (p.length > base.length && p.startsWith(base) && p.endsWith("/")) history.replaceState(null, "", p.replace(/\/+$/, "") + location.search + location.hash);
+} catch(e){} })();
 function pathShop(){
-  const last = decodeURIComponent(location.pathname.split("/").pop() || "").toLowerCase();   // "" when the address ends in "/"
+  let last = location.pathname.split("/").pop() || "";   // "" when the address ends in "/"
+  try { last = decodeURIComponent(last).toLowerCase(); } catch(e){ return ""; }
   return /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(last) && !/\.html?$/.test(last) ? last : "";
 }
 async function getJson(path){
@@ -1453,7 +1463,7 @@ const keep = {
 };
 async function loadSite(){
   const saved = keep.get("lk-site");
-  const freshSite = getJson("site.json").then(j => { keep.set("lk-site", j); SITE = Object.assign(SITE, j); }).catch(() => {});
+  const freshSite = getJson("site.json").then(j => { keep.set("lk-site", j); SITE = Object.assign(SITE, j); applyConfig(keep.get("lk-config")); }).catch(() => {});
   if (saved && safeUrl(saved.api)) SITE = Object.assign(SITE, saved); else await freshSite;
   if (!safeUrl(SITE.api)) { CONFIG_P = Promise.resolve(); return; }
   // Show the page straight away with the settings this phone remembers; fetch fresh ones in the background
@@ -1525,9 +1535,9 @@ const W = d => KINDS[d && d.kind] || KINDS.products;
 
 function normalize(d){
   const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
-  x.items = (Array.isArray(x.items) ? x.items : []).map(it => ({
+  x.items = (Array.isArray(x.items) ? x.items : []).filter(it => it && typeof it === "object").map(it => ({
     n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out, sec: String(it.sec || "").trim().slice(0, 30),
-    o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String(o.l || ""), p: Number(o.p) || 0 })) : [{ l: "", p: 0 }]
+    o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String((o && o.l) || ""), p: Math.min(Math.max(0, Number(o && o.p) || 0), 1e9) })) : [{ l: "", p: 0 }]
   }));
   x.links = (Array.isArray(x.links) ? x.links : []).slice(0, 80).map(l => ({
     u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: looksJunk((l && l.n) || "") ? "" : String((l && l.n) || "").slice(0, 120),
@@ -1584,18 +1594,39 @@ new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
 function loaderHtml(text){
   return `<div class="lkload" role="status"><img src="logo.png" alt=""><div class="lkdots"><i></i><i></i><i></i></div><span>${esc(text)}</span></div>`;
 }
-function askText(message, value, hint, okLabel){
+function askText(message, value, hint, okLabel, pin){
   return new Promise(res => {
+    const inp = $("promptInput");
     $("promptText").textContent = message; $("promptHint").textContent = hint || "";
-    $("promptInput").value = value || ""; $("promptYes").textContent = okLabel || "Save";
-    openSheet("promptOverlay"); setTimeout(() => $("promptInput").focus(), 300);
-    const done = v => { closeSheet("promptOverlay"); $("promptYes").onclick = $("promptNo").onclick = null; res(v); };
+    inp.type = pin ? "password" : "text"; inp.inputMode = pin ? "numeric" : ""; if (pin) inp.maxLength = 6; else inp.removeAttribute("maxlength");
+    inp.value = value || ""; $("promptYes").textContent = okLabel || "Save";
+    openSheet("promptOverlay"); $("promptOverlay")._res = res; setTimeout(() => inp.focus(), 300);
+    const done = v => { $("promptOverlay")._res = null; dismissSheet("promptOverlay"); $("promptYes").onclick = $("promptNo").onclick = null; res(v); };
     $("promptYes").onclick = () => done($("promptInput").value.trim());
     $("promptNo").onclick = () => done(null);
   });
 }
+// ---------- Phone Back button: closes the open pop-up, or steps back inside the editor or preview, before leaving the page ----------
+// Every history entry gets a number, so a Back press knows whether it left one of our in-page steps.
+let HIST_N = (history.state && history.state._n) || 0, HIST_CUR = HIST_N;
+const INPAGE_N = new Map();   // history number -> what that step opened ({ sheet } / { ed } / { preview })
+(function(){
+  const push = history.pushState.bind(history), repl = history.replaceState.bind(history);
+  history.pushState = (st, t, u) => { HIST_CUR = ++HIST_N; push(Object.assign({}, st, { _n: HIST_CUR }), t, u); };
+  history.replaceState = (st, t, u) => repl(Object.assign({}, st, { _n: HIST_CUR }), t, u);
+})();
+function inpagePush(st){ history.pushState(st, "", location.href); INPAGE_N.set(HIST_CUR, st); }
+// A pop-up closed by the person (X, Cancel, tapping outside) or after it finished its job, with nothing else
+// opening next: its Back step is removed too, so the next Back press isn't wasted
+function dismissSheet(o){
+  o = typeof o === "string" ? $(o) : o; if (!o) return;
+  const top = INPAGE_N.get(HIST_CUR);
+  if (o._hist && top && top.sheet === o.id){ top.self = true; history.back(); } else closeSheet(o);
+}
 function closeSheet(id){
   const o = typeof id === "string" ? $(id) : id;
+  if (o && o.id === "promptOverlay" && o._res){ const r = o._res; o._res = null; r(null); }   // a prompt closed any other way counts as Cancel
+  if (o) o._hist = false;
   if (!o || !o.classList.contains("open") || o.classList.contains("closing")) return;
   if (matchMedia("(prefers-reduced-motion: reduce)").matches){ o.classList.remove("open"); return; }
   o.classList.add("closing");
@@ -1603,8 +1634,10 @@ function closeSheet(id){
   o._closeT = setTimeout(() => o.classList.remove("open", "closing"), 230);
 }
 // Opening cancels any close still in progress, so a new pop-up never vanishes
+const BACK_SHEETS = ["pOverlay", "overlay", "repOverlay", "pinOverlay", "waOverlay", "emOverlay", "fpOverlay", "payOverlay", "pubOverlay", "bulOverlay", "promptOverlay"];
 function openSheet(id){
   const o = $(id); if (!o) return;
+  if (BACK_SHEETS.includes(id) && !o.classList.contains("open") && !o._hist){ inpagePush(Object.assign({}, history.state, { sheet: id })); o._hist = true; }
   clearTimeout(o._closeT);
   o.classList.remove("closing");
   o.classList.add("open");
@@ -1712,7 +1745,7 @@ function saveSession(){
   try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {}
   if (SESSION && SESSION.tok && !SESSION.admin) keep.set("lk-keep", { id: SESSION.id, tok: SESSION.tok });
 }
-function clearSession(){ SESSION = null; ME_EMAIL = ""; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); localStorage.removeItem("lk-keep"); } catch(e) {} }
+function clearSession(){ SESSION = null; ME_EMAIL = ""; BUL = null; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); localStorage.removeItem("lk-keep"); } catch(e) {} }
 const authErr = e => /PIN|WhatsApp number|logged out on this phone/i.test((e && e.message) || "");
 
 function loginCardHtml(msg){
@@ -1730,6 +1763,7 @@ function loginCardHtml(msg){
 }
 function wireLogin(){
   const go = async () => {
+    if ($("lGo").disabled) return;
     const who = $("lWa").value.trim(), pin = $("lPin").value, byEmail = who.includes("@"), wa = byEmail ? "" : normWa(who), email = byEmail ? who.toLowerCase() : "";
     $("lErr").textContent = "";
     if ((byEmail ? !EMAIL_RE.test(email) : wa.length < 9) || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your WhatsApp number or email, and your 6-digit PIN.";
@@ -1752,7 +1786,14 @@ function wireLogin(){
   $("lForgot").onclick = () => openForgot($("lWa").value.trim().includes("@") ? $("lWa").value.trim() : "");
 }
 // After logging in (or resetting the PIN by email): remember this tab's login and open the editor
+function dropKeptLogin(){
+  const k = keep.get("lk-keep");
+  if (k && k.tok) apiPost({ action: "forget", id: k.id, tok: k.tok }).catch(() => {});
+  try { localStorage.removeItem("lk-keep"); } catch(e) {}
+}
 function enterEditor(r, pin){
+  if (!r.tok) dropKeptLogin();
+  ME_EMAIL = ""; BUL = null;
   SESSION = r.tok ? { id: r.id, tok: r.tok } : { id: r.id, pin }; saveSession(); rememberEd(r); S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; DIRTY = false;
   if (!/^\?(build|edit)\b/.test(location.search) && !/\/(build|edit)$/.test(location.pathname)) history.pushState(null, "", home() + "build");
   openEditor();
@@ -1838,7 +1879,7 @@ function renderStart(msg, mode){
   $("cId").oninput = () => { touched = true; $("cId").value = $("cId").value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-{2,}/g, "-").replace(/^-/, "").slice(0, 40); idHint(); };
   if (!signup) wireLogin();
   $("cGo").onclick = async () => {
-    const name = $("cShop").value.trim(), id = slug($("cId").value), pin = $("cPin").value, wa = normWa($("cWa").value);
+    const name = $("cShop").value.trim(), rawId = $("cId").value.trim(), id = rawId ? slug(rawId) : "", pin = $("cPin").value, wa = normWa($("cWa").value);
     $("cErr").textContent = "";
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
@@ -1846,11 +1887,13 @@ function renderStart(msg, mode){
     if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
+    if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
     if (!$("cAgree").checked) return $("cErr").textContent = "Please tick the box to agree to the rules.";
     $("cGo").disabled = true; $("cGo").textContent = "Signing up...";
     try {
       const data = normalize({ name, wa });
       await apiPost({ action: "create", id, pin, data });
+      dropKeptLogin(); ME_EMAIL = ""; BUL = null;
       SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false; rememberEdNow();
       history.replaceState(null, "", home() + "build");
       openEditor("Store created. Choose what you sell, add your items and photos, then tap Save.");
@@ -1958,7 +2001,7 @@ function openBulletin(){
 
 // ================= Seller: store home + section pages =================
 let EDV = "home", EDI = 0;
-function edGo(v, i){ EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0); }
+function edGo(v, i){ if (v !== EDV && !$("builder").hidden) inpagePush({ ed: v, i: i == null ? null : i }); EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0); }
 // A seller with shop links but nothing of their own to sell: listed under Affiliate Shops, never as a map pin
 function affOnly(d){ return !(d.items || []).some(it => String(it.n || "").trim()) && (d.links || []).some(l => safeUrl(l.u)); }
 function edSteps(){
@@ -2297,7 +2340,7 @@ function renderEditor(msg){
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
-function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
+function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); clearTimeout(notifyQuiet.t); notifyQuiet.t = setTimeout(() => { const x = $("edToast"); if (x) x.textContent = ""; }, 6000); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
 
 // ---------- First run: three short steps for a brand-new store, instead of a dashboard full of choices ----------
 let EDSTEP = 1;
@@ -2346,12 +2389,10 @@ $("waSave").onclick = async () => {
   if (a !== b) return err("The two numbers don't match. Please check and type them again.");
   if (a === S.wa) return err("That's already your number.");
   const btn = $("waSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
-  clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
   const old = S.wa; S.wa = a;
   try {
-    const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
-    STATUS = r.status || STATUS; DIRTY = false; rememberEdNow();
-    closeSheet("waOverlay"); renderEditor();
+    await saveNow();
+    dismissSheet("waOverlay"); renderEditor();
     notify(`Done. From now on, orders go to ${fmtWa(a)}, and you log in with this number.`);
   } catch(e){ S.wa = old; err(friendly(e, "Couldn't change your number right now. Check your internet and try again.")); }
   btn.disabled = false; btn.textContent = "Save new number";
@@ -2372,7 +2413,7 @@ $("pinSave").onclick = async () => {
   try {
     const r = await apiPost({ action: "changepin", id: SESSION.id, pin: old, newPin: np, keep: !!SESSION.tok });
     if (r.tok) SESSION.tok = r.tok; else if (SESSION.tok){ delete SESSION.tok; SESSION.pin = np; try { localStorage.removeItem("lk-keep"); } catch(e) {} } else SESSION.pin = np;
-    saveSession(); closeSheet("pinOverlay");
+    saveSession(); dismissSheet("pinOverlay");
     notify("Done. Use your new PIN next time you log in. Any other phone that stayed logged in has been logged out.");
   } catch(e){
     const m = String(e.message || "");
@@ -2386,20 +2427,23 @@ $("pinSave").onclick = async () => {
 function openEmailChange(){
   $("emTitle").textContent = ME_EMAIL ? "Change email" : "Add email";
   $("emStep1").hidden = false; $("emStep2").hidden = true; $("emRemoveWrap").hidden = !ME_EMAIL;
-  $("emAddr").value = ""; $("emCode").value = ""; sayErr("emErr1"); sayErr("emErr2");
+  $("emAddr").value = ""; $("emCode").value = ""; $("emPin").value = ""; $("emPin").type = "password"; $("emPinWrap").hidden = !SESSION.tok; sayErr("emErr1"); sayErr("emErr2");
   openSheet("emOverlay"); setTimeout(() => $("emAddr").focus(), 300);
 }
+// A phone that stays logged in has no PIN with it, and changing the email needs one
+const emPin = () => SESSION.pin || $("emPin").value;
 async function emSendCode(btn, errId){
   const email = $("emAddr").value.trim().toLowerCase();
   if (!EMAIL_RE.test(email)) return sayErr(errId, "Type your full email, like you@gmail.com.");
   if (email === ME_EMAIL) return sayErr(errId, "That's already your email.");
+  if (!/^\d{6}$/.test(emPin())) return sayErr(errId, "Type your 6-digit PIN.");
   const label = btn.textContent; btn.disabled = true; btn.textContent = "Sending..."; sayErr(errId);
   try {
-    await apiPost({ action: "emailcode", id: SESSION.id, pin: SESSION.pin, email });
+    await apiPost({ action: "emailcode", id: SESSION.id, pin: emPin(), email });
     $("emTo").textContent = email; $("emStep1").hidden = true; $("emStep2").hidden = false; $("emCode").value = "";
     if (errId === "emErr2") notify("We sent a new code.");
     setTimeout(() => $("emCode").focus(), 50);
-  } catch(e){ sayErr(errId, notReady(e.message) ? "Adding an email isn't ready yet. Please try again in a few days." : friendly(e, "Couldn't send the code right now. Check your internet and try again.")); }
+  } catch(e){ sayErr(errId, /Wrong WhatsApp number or PIN/.test(e.message || "") ? "That PIN isn't right. Please check it and try again." : notReady(e.message) ? "Adding an email isn't ready yet. Please try again in a few days." : friendly(e, "Couldn't send the code right now. Check your internet and try again.")); }
   btn.disabled = false; btn.textContent = label;
 }
 $("emSend").onclick = () => emSendCode($("emSend"), "emErr1");
@@ -2410,21 +2454,22 @@ $("emConfirm").onclick = async () => {
   if (!/^\d{6}$/.test(code)) return sayErr("emErr2", "Type the 6-digit code from the email.");
   btn.disabled = true; btn.textContent = "Checking..."; sayErr("emErr2");
   try {
-    const r = await apiPost({ action: "emailconfirm", id: SESSION.id, pin: SESSION.pin, code });
-    ME_EMAIL = r.email || ""; rememberEdNow(); closeSheet("emOverlay"); renderEditor();
+    const r = await apiPost({ action: "emailconfirm", id: SESSION.id, pin: emPin(), code });
+    ME_EMAIL = r.email || ""; rememberEdNow(); dismissSheet("emOverlay"); renderEditor();
     notify(`Done. You can now log in with ${ME_EMAIL}, and reset your PIN by email.`);
   } catch(e){ sayErr("emErr2", friendly(e, "Couldn't check the code right now. Check your internet and try again.")); }
   btn.disabled = false; btn.textContent = "Confirm";
 };
 $("emRemove").onclick = async () => {
+  if (!/^\d{6}$/.test(emPin())) return sayErr("emErr1", "Type your 6-digit PIN first.");
   if (!(await ask("Remove your email? You won't be able to log in with it or reset your PIN by email.", "Remove", true))) return;
   try {
-    await apiPost({ action: "emailremove", id: SESSION.id, pin: SESSION.pin });
-    ME_EMAIL = ""; rememberEdNow(); closeSheet("emOverlay"); renderEditor(); notify("Your email was removed.");
+    await apiPost({ action: "emailremove", id: SESSION.id, pin: emPin() });
+    ME_EMAIL = ""; rememberEdNow(); dismissSheet("emOverlay"); renderEditor(); notify("Your email was removed.");
   } catch(e){ sayErr("emErr1", friendly(e, "Couldn't remove your email right now. Check your internet and try again.")); }
 };
 function edTidy(){
-  if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
+  if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || UP_ITEMS.has(it) || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
 }
 function openEditor(msg){
@@ -2460,7 +2505,7 @@ async function autoSave(retry, keepalive){
   clearTimeout(AUTOSAVE_T);
   if (!SESSION || !S || !DIRTY) return;
   if (UPN) return scheduleAutosave(2000);   // a photo is still uploading: save once it's in
-  const bad = saveProblem(); if (bad) return savePill("bad", bad);   // tells the seller exactly what's missing
+  const bad = saveProblem(); if (bad){ setStatus(bad); return savePill("bad", bad); }   // tells the seller exactly what's missing
   if (SAVING){ try { await SAVING; } catch(e) {} if (DIRTY) scheduleAutosave(300); return; }
   const v = EDITV; savePill("saving");
   SAVING = apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }, keepalive ? { keepalive: true } : null);
@@ -2604,7 +2649,7 @@ $("pubGo").onclick = async () => {
   if (!["pubOk1","pubOk2","pubOk3"].every(id => $(id).checked)) { $("pubErr").textContent = "Tick all three boxes to continue."; return; }
   const btn = $("pubGo"); btn.disabled = true; btn.textContent = "Saving...";
   try {
-    if (DIRTY){ await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; rememberEdNow(); }
+    if (DIRTY || SAVING) await saveNow();
     closeSheet("pubOverlay");
     renderEditor("Details saved.");
     setTimeout(openPayment, 260);
@@ -2788,18 +2833,14 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
   else if (a === "backadmin"){
-    if (DIRTY && !(await ask("You have unsaved changes. Leave anyway?", "Leave", true))) return;
+    if (DIRTY) await autoSave();
+    if (DIRTY && !(await ask("Your changes couldn't be saved. Leave anyway?", "Leave", true))) return;
     DIRTY = false; clearSession(); history.pushState(null, "", home() + "admin"); renderAdmin();
   }
   else if (a === "deleteacct"){
     if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
     let pin = SESSION.pin;
-    if (!pin && !SESSION.admin){
-      $("promptInput").type = "password"; $("promptInput").inputMode = "numeric"; $("promptInput").maxLength = 6;
-      pin = await askText("Type your 6-digit PIN to delete your account.", "", "", "Delete");
-      $("promptInput").type = "text"; $("promptInput").inputMode = ""; $("promptInput").removeAttribute("maxlength");
-      if (!pin) return;
-    }
+    if (!pin && !SESSION.admin){ pin = await askText("Type your 6-digit PIN to delete your account.", "", "", "Delete", true); if (!pin) return; }
     b.disabled = true; b.textContent = "Deleting...";
     try {
       await apiPost({ action: "delete", id: SESSION.id, pin });
@@ -2823,14 +2864,15 @@ $("builder").addEventListener("click", async e => {
   }
   else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
   else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); setStatus(ok ? "Link copied." : "Press and hold the link to copy it."); }
-  else if (a === "preview"){ showStore(S, true); }
+  else if (a === "preview"){ inpagePush({ preview: 1, ed: EDV }); showStore(S, true); }
   else if (a === "save"){ await saveStore(); }
   else if (a === "recheck"){
     try { const r = await apiPost({ action: "login", id: SESSION.id, pin: SESSION.pin }); STATUS = r.status; renderEditor(STATUS === "live" ? "Your store is live!" : "Not approved yet. Try again after sending your receipt."); }
     catch(err){ notify(friendly(err, "Couldn't check right now. Check your internet and try again.")); }
   }
   else if (a === "logout"){
-    if (DIRTY && !(await ask("You have unsaved changes. Log out anyway?", "Log out", true))) return;
+    if (DIRTY) await autoSave();
+    if (DIRTY && !(await ask("Your changes couldn't be saved. Log out anyway?", "Log out", true))) return;
     if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
     DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); renderStart();
   }
@@ -2848,12 +2890,12 @@ async function publishWithReceipt(input){
     else { btn.firstChild.textContent = oldLabel; const sp = btn.querySelector(".spin"); if (sp) sp.remove(); } };
   busy(true);
   try {
-    if (DIRTY){ st.textContent = "Saving your store..."; await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) }); DIRTY = false; }
+    if (DIRTY || SAVING){ st.textContent = "Saving your store..."; await saveNow(); }
     st.textContent = "Publishing...";
     const c = await resizeImage(file, 1400, false);
     const r = await apiPost({ action: "selfpublish", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: c.toDataURL("image/jpeg", 0.82).split(",")[1] });
     STATUS = r.status; rememberEdNow();
-    closeSheet("payOverlay");
+    dismissSheet("payOverlay");
     window.scrollTo(0, 0);
     if (STATUS === "review"){
       renderEditor("Payment received. Your store is being checked.");
@@ -2865,6 +2907,18 @@ async function publishWithReceipt(input){
   } catch(err){ st.textContent = ""; busy(false); notify(friendly(err, "Your receipt didn't upload. Check your internet and try again. If it keeps happening, take a new screenshot and try that.")); }
 }
 
+// Saves right now. Edits made while it's on its way stay marked unsaved, and autosave sends them next.
+async function saveNow(){
+  clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
+  const v = EDITV;
+  SAVING = apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
+  try {
+    const r = await SAVING; STATUS = r.status || STATUS;
+    if (EDITV === v){ DIRTY = false; rememberEdNow(); const bl = $("builder"); if (bl) bl.classList.remove("dirty"); }
+    else scheduleAutosave();
+    return r;
+  } finally { SAVING = null; }
+}
 async function saveStore(){
   if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse listing, so customers can find you.");
   if (S.loc.on && !S.loc.city && !affOnly(S)) return notify("Choose your city or town under Browse listing, so customers can find you.");
@@ -2872,10 +2926,8 @@ async function saveStore(){
   if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
   btn.disabled = true; btn.textContent = "Saving...";
-  clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
   try {
-    const r = await apiPost({ action: "save", id: SESSION.id, pin: SESSION.pin, data: normalize(S) });
-    STATUS = r.status || STATUS; DIRTY = false; savePill(""); rememberEdNow();
+    const r = await saveNow(); savePill("");
     renderEditor(r.flagged && STATUS !== "live" ? `Saved. Some words in your store need a quick check by ${APP_NAME} before it can go live.`
       : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
   } catch(e){ notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment.")); }
@@ -2917,6 +2969,8 @@ $("bwrap").addEventListener("change", e => {
   const file = t.files && t.files[0];
   if (!file) return;
   const idx = t.dataset.i, boxId = kind === "logo" ? "logoPrev" : kind === "cover" ? "coverPrev" : kind === "link" ? "lkPrev" + idx : "imgPrev" + idx;
+  const target = kind === "link" ? S.links[+idx] : kind === "item" || (kind !== "logo" && kind !== "cover") ? S.items[+idx] : null, sid = SESSION.id;   // the item itself, not its place in the list
+  if (target) UP_ITEMS.add(target);
   const btn = t.closest(".filebtn");
   spinOn($(boxId)); if (btn) btn.classList.add("busy");
   UPN++; setStatus("Uploading photo...");
@@ -2933,11 +2987,14 @@ $("bwrap").addEventListener("change", e => {
       step = "checking the photo shows"; spinText(boxId, "Checking");
       const good = await workingPhotoUrl(r);
       if (!good) throw new Error("Your photo was uploaded, but Google Drive won't show it. Its link: " + r.url);
-      if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (kind === "link"){ if (S.links[+idx]) S.links[+idx].img = good; } else if (S.items[+idx]) S.items[+idx].img = good;
-      PENDING_BOXES.delete(boxId); UPN--; touch(); renderEditor(UPN ? "Photo added. Uploading the next one..." : "Photo added.");
+      if (!SESSION || SESSION.id !== sid) throw new Error("You switched stores, so this photo wasn't added.");
+      const still = !target || S.items.includes(target) || S.links.includes(target);
+      if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (still) target.img = good;
+      PENDING_BOXES.delete(boxId); UPN--; if (target) UP_ITEMS.delete(target);
+      touch(); renderEditor(!still ? "That item was removed, so its photo wasn't added." : UPN ? "Photo added. Uploading the next one..." : "Photo added.");
     } catch(err){
       try { t.value = ""; } catch(_){}   // so choosing the same photo again after an error still triggers
-      PENDING_BOXES.delete(boxId); UPN--; const b = $(boxId); const ov = b && b.querySelector(".upov"); if (ov) ov.remove();
+      PENDING_BOXES.delete(boxId); UPN--; if (target) UP_ITEMS.delete(target); const b = $(boxId); const ov = b && b.querySelector(".upov"); if (ov) ov.remove();
       if (btn) btn.classList.remove("busy");
       console.warn("Link Kedai App: photo upload stopped while " + step);
       setStatus(""); notify(friendly(err, "Your photo didn't upload. Check your internet and try again. If it keeps happening, try a different photo."));
@@ -2947,7 +3004,7 @@ $("bwrap").addEventListener("change", e => {
   });
   PENDING_BOXES.add(boxId);
 });
-const PENDING_BOXES = new Set();
+const PENDING_BOXES = new Set(), UP_ITEMS = new Set();
 window.addEventListener("beforeunload", e => { if (DIRTY){ e.preventDefault(); e.returnValue = ""; } });
 
 /* ============================================================
@@ -2956,7 +3013,15 @@ window.addEventListener("beforeunload", e => { if (DIRTY){ e.preventDefault(); e
 let D = null, cart = {}, pSel = { i: 0, j: 0, q: 1 }, AD = null;
 const money = n => fmtMoney(D.cur, n);
 function cartKey(){ return "lk-cart:" + D.wa; }
-function saveCart(){ try { localStorage.setItem(cartKey(), JSON.stringify(cart)); } catch(e) {} }
+// Each line also remembers its name, option and price, so a seller reordering or changing items never swaps what's in a cart
+function cartSig(k){ const [i, j] = k.split("|").map(Number), it = D.items[i], o = it && it.o[j]; return it && o ? it.n + "\u0001" + o.l + "\u0001" + o.p : ""; }
+function saveCart(){ try { const s = {}; Object.keys(cart).forEach(k => s[k] = cartSig(k)); localStorage.setItem(cartKey(), JSON.stringify({ q: cart, s })); } catch(e) {} }
+function loadCart(){
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem(cartKey()) || "{}") || {}; } catch(e) {}
+  const q = saved.q && typeof saved.q === "object" ? saved.q : {}, sg = saved.s || {};
+  cart = {};
+  Object.keys(q).forEach(k => { const [i, j] = k.split("|").map(Number), it = D.items[i]; if (it && it.o[j] && !it.out && sg[k] && sg[k] === cartSig(k) && q[k] > 0) cart[k] = Math.min(99, Math.floor(q[k])); });
+}
 const priceLabel = p => { const ps = p.o.map(o => o.p); const lo = Math.min(...ps); return (ps.length > 1 && Math.max(...ps) !== lo ? "From " : "") + money(lo); };
 const inCart = i => Object.keys(cart).filter(k => k.startsWith(i + "|")).reduce((a,k) => a + cart[k], 0);
 
@@ -2997,6 +3062,7 @@ async function showStore(data, isPreview, refresh){
   if (canSignup){ btn.textContent = "Get your own store"; btn.href = home() + "signup"; btn.removeAttribute("target"); }
   else if (to){ btn.textContent = "Chat with us"; btn.href = `https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I saw a store made with " + APP_NAME + " and I'd like one too.")}`; btn.target = "_blank"; btn.rel = "noopener"; }
   $("closedOv").hidden = !D.closed;
+  $("closedMore").href = home() + "explore"; $("closedMore").hidden = !!isPreview;
   $("closedShop").textContent = D.name;
   $("closedMsg").textContent = D.closedMsg.trim() || "We're not taking orders right now. Please check back later.";
   const t = new Date();
@@ -3005,8 +3071,10 @@ async function showStore(data, isPreview, refresh){
   $("note").placeholder = W(D).ex.note;
   $("send").textContent = D.kind === "services" ? "Send booking on WhatsApp" : "Send order on WhatsApp";
   $("err").textContent = "";
-  try { cart = JSON.parse(localStorage.getItem(cartKey()) || "{}") || {}; } catch(e){ cart = {}; }
-  Object.keys(cart).forEach(k => { const [i,j] = k.split("|").map(Number); if (!D.items[i] || !D.items[i].o[j] || D.items[i].out) delete cart[k]; });
+  loadCart();
+  // C2: a product sheet from another store, or for an item that changed, never stays open
+  if (!refresh){ closeSheet("pOverlay"); closeSheet("overlay"); ORDER_SENT = false; }
+  else if ($("pOverlay").classList.contains("open") && (!D.items[pSel.i] || D.items[pSel.i].n !== $("pTitle").textContent || !D.items[pSel.i].o[pSel.j])) closeSheet("pOverlay");
   if (!refresh){ $("note").value = ""; MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
   renderMenu(); renderBar();
   if (!refresh) showAd();
@@ -3085,7 +3153,7 @@ $("repGo").onclick = async () => {
   const id = (STORE_ID || location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop() || "").toLowerCase();
   try {
     await apiPost({ action: "report", id, reason: pick.value, note: $("repNote").value.trim() });
-    closeSheet("repOverlay");
+    dismissSheet("repOverlay");
     notify("Thanks for telling us. We'll check this store.");
   } catch(e){ $("repErr").textContent = friendly(e, "Couldn't send your report right now. Check your internet and try again."); }
   btn.disabled = false; btn.textContent = "Send report";
@@ -3190,12 +3258,12 @@ function openProduct(i){
   updateProduct();
   openSheet("pOverlay");
 }
-function updateProduct(){ const o = D.items[pSel.i].o[pSel.j]; $("pQty").textContent = pSel.q; $("pAdd").textContent = W(D).add + " · " + money(o.p * pSel.q); }
+function updateProduct(){ const p = D.items[pSel.i], o = p && p.o[pSel.j]; if (!o) return closeSheet("pOverlay"); $("pQty").textContent = pSel.q; $("pAdd").textContent = W(D).add + " · " + money(o.p * pSel.q); }
 $("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openProduct(+b.dataset.p); });
 $("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
 $("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
 $("pPlus").onclick = () => { pSel.q = Math.min(99, pSel.q + 1); updateProduct(); };
-$("pAdd").onclick = () => { const k = pSel.i + "|" + pSel.j; cart[k] = (cart[k] || 0) + pSel.q; saveCart(); closeSheet("pOverlay"); renderMenu(); renderBar(); };
+$("pAdd").onclick = () => { const k = pSel.i + "|" + pSel.j; cart[k] = (cart[k] || 0) + pSel.q; saveCart(); dismissSheet("pOverlay"); renderMenu(); renderBar(); };
 
 function items(){
   const out = [];
@@ -3228,7 +3296,7 @@ function renderBar(){
       <div class="step"><button data-k="${x.k}" data-d="-1" aria-label="One less ${esc(x.name)}">−</button><span class="q">${x.q}</span><button data-k="${x.k}" data-d="1" aria-label="One more ${esc(x.name)}">+</button></div>
     </div>`).join("") + `<div class="ctotal"><span>Total</span><span>${money(total)}</span></div>`;
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
-  if (!n) closeSheet("overlay");
+  if (!n) dismissSheet("overlay");
 }
 $("lines").addEventListener("click", e => {
   const b = e.target.closest("button[data-k]"); if (!b) return;
@@ -3245,20 +3313,27 @@ $("send").addEventListener("click", e => {
   if (msg){ e.preventDefault(); $("err").textContent = msg; return; }
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   if ($("backBtn").hidden) track("order");
-  setTimeout(() => { cart = {}; saveCart(); renderMenu(); renderBar(); }, 800);
+  ORDER_SENT = true;   // the cart stays until they come back and say the order went through
+});
+let ORDER_SENT = false;
+document.addEventListener("visibilitychange", async () => {
+  if (document.hidden || !ORDER_SENT || $("store").hidden || !Object.keys(cart).length) return;
+  ORDER_SENT = false;
+  if (await ask("Did your order go through on WhatsApp?", "Yes, clear my cart")){ cart = {}; saveCart(); renderMenu(); renderBar(); }
 });
 $("viewCart").onclick = () => openSheet("overlay");
 document.addEventListener("click", e => {
   const c = e.target.closest("[data-close]");
-  if (c) closeSheet(c.dataset.close);
-  if (e.target.classList && e.target.classList.contains("overlay") && e.target.id !== "askOverlay") closeSheet(e.target);
+  if (c) dismissSheet(c.dataset.close);
+  if (e.target.classList && e.target.classList.contains("overlay") && e.target.id !== "askOverlay") dismissSheet(e.target);
 });
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if ($("askOverlay").classList.contains("open")) return closeAsk(false);
-  document.querySelectorAll(".overlay.open").forEach(o => closeSheet(o));
+  document.querySelectorAll(".overlay.open").forEach(o => dismissSheet(o));
 });
-$("backBtn").onclick = () => { renderEditor(); show("builder"); };
+function leavePreview(){ renderEditor(); show("builder"); }
+$("backBtn").onclick = () => { const top = INPAGE_N.get(HIST_CUR); if (top && top.preview) history.back(); else leavePreview(); };
 
 
 
@@ -3267,7 +3342,9 @@ $("backBtn").onclick = () => { renderEditor(); show("builder"); };
    ============================================================ */
 let ADMIN = "", ADMTAB = "stores", ADMQ = "";
 try { ADMIN = sessionStorage.getItem("lk-admin") || ""; } catch(e) {}
-function adminLock(){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} }
+function adminLock(){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} if (SESSION && SESSION.admin) clearSession(); }
+// Only a wrong or blocked key locks the dashboard; a slow connection just shows the error
+const adminKeyErr = e => /admin key|ADMIN_KEY|Too many wrong tries/i.test((e && e.message) || "");
 
 async function renderAdmin(msg){
   setAccent(COLORS[0]); document.title = APP_NAME + " admin"; show("page");
@@ -3301,15 +3378,20 @@ async function renderAdmin(msg){
   g.innerHTML = head + loaderHtml("Loading settings..."); wire();
   let cfg;
   try { cfg = (await apiPost({ action: "admin", key: ADMIN, op: "getconfig" })).config || {}; }
-  catch(e){ adminLock(); return renderAdmin(e.message); }
+  catch(e){ if (adminKeyErr(e)){ adminLock(); return renderAdmin(e.message); } return adminOffline(g, head, wire, e); }
   if (ADMTAB === "ads") adminAds(g, head, wire, cfg); else adminSettings(g, head, wire, cfg);
 }
 
+let ADMLIST = null;
+function adminOffline(g, head, wire, e){
+  g.innerHTML = head + `<section class="card"><h2>Couldn't load</h2><p class="hint">${esc(friendly(e, "Check your internet and try again."))}</p><button class="btn solid" id="admRetry">Try again</button></section>`;
+  wire(); $("admRetry").onclick = () => renderAdmin();
+}
 async function adminStores(g, head, wire){
   g.innerHTML = head + loaderHtml("Loading stores..."); wire();
   let list;
-  try { list = (await apiPost({ action: "admin", key: ADMIN, op: "list" })).stores; }
-  catch(e){ adminLock(); return renderAdmin(e.message); }
+  try { list = ADMLIST = (await apiPost({ action: "admin", key: ADMIN, op: "list" })).stores; }
+  catch(e){ if (adminKeyErr(e)){ adminLock(); return renderAdmin(e.message); } return adminOffline(g, head, wire, e); }
   const isCheck = x => x.status === "live" && x.receipt && !x.checked;
   const groups = [
     ["Check payment", list.filter(isCheck), "Nothing to check."],
@@ -3341,7 +3423,7 @@ async function adminStores(g, head, wire){
       <div class="stat"><b>${groups[1][1].length + groups[0][1].length}</b><span>Live</span></div>
       <div class="stat ${groups[0][1].length ? "hot" : ""}"><b>${groups[0][1].length}</b><span>Check</span></div>
       <div class="stat"><b>${groups[2][1].length}</b><span>Not paid</span></div>
-      <div class="stat"><b>${groups[3][1].length}</b><span>Offline</span></div>
+      <div class="stat"><b>${groups[4][1].length}</b><span>Offline</span></div>
     </div>
     ${needsReview(list).length ? `<button class="btn full" style="margin-bottom:10px;border-color:#B45309;color:#B45309" id="goReview"><span class="guardbtn" style="justify-content:center">${GUARD_SVG}Link Kedai App Guard: ${needsReview(list).length} store${needsReview(list).length > 1 ? "s" : ""} need${needsReview(list).length > 1 ? "" : "s"} review</span></button>` : ""}
     <input type="search" id="admFind" placeholder="Search name, link or WhatsApp number" value="${esc(ADMQ)}" style="margin-bottom:6px">
@@ -3375,6 +3457,8 @@ async function adminStores(g, head, wire){
     if (op === "delete" && !(await ask(`Delete "${b.dataset.name}" for good? Their link stops working and this can't be undone.`, "Delete", true))) return;
     if (op === "resetpin" && !(await ask(`Reset the PIN for ${id}? Their old PIN stops working.`, "Reset", true))) return;
     if (op === "unpublish" && !(await ask(`Take ${id} offline? They won't be able to publish it again themselves.`, "Take offline", true))) return;
+    if (op === "approve"){ const x = (ADMLIST || []).find(s => s.id === id) || {};
+      if (!(await ask(`Make ${id} live?${x.paidAt ? "" : " They haven't paid yet, so it won't get the Verified tick."}`, "Make live"))) return; }
     b.disabled = true;
     try {
       const r = await apiPost({ action: "admin", key: ADMIN, op, id, ...extra });
@@ -3399,7 +3483,7 @@ async function adminReview(g, head, wire){
       apiPost({ action: "admin", key: ADMIN, op: "getwords" })
     ]);
     words = w.words; lastScan = w.lastScan || null; nightly = !!w.nightly;
-  } catch(e){ adminLock(); return renderAdmin(e.message); }
+  } catch(e){ if (adminKeyErr(e)) { adminLock(); return renderAdmin(e.message); } return adminOffline(g, head, wire, e); }
   const todo = needsReview(list);
   const card = x => {
     const rep = x.reports && x.reports.count ? `<p class="hint" style="margin:6px 0 0;color:#B45309"><b>Reported ${x.reports.count}×:</b> ${Object.entries(x.reports.reasons || {}).map(([k, n]) => `${esc(REASON_TXT[k] || k)} (${n})`).join(", ")}${(x.reports.notes || []).length ? `<br>"${(x.reports.notes || []).map(esc).join('", "')}"` : ""}</p>` : "";
@@ -3463,6 +3547,7 @@ async function adminReview(g, head, wire){
       catch(e){ clearSession(); return renderAdmin(e.message); }
     }
     if (op === "unpublish" && !(await ask(`Take ${id} offline? They won't be able to publish it again themselves.`, "Take offline", true))) return;
+    if (op === "reviewok" && !(await ask(`Mark ${id} as OK? This clears its Guard warning and customer reports, and puts it back live if it was hidden.`, "Looks OK"))) return;
     b.disabled = true;
     try { await apiPost({ action: "admin", key: ADMIN, op, id }); renderAdmin(op === "reviewok" ? `${id} approved.` : `${id} is offline.`); }
     catch(err){ b.disabled = false; notify(err.message); }
@@ -3806,8 +3891,9 @@ function mxLoadMap(){
   if (window.maplibregl) return Promise.resolve();
   if (mxLoadMap.p) return mxLoadMap.p;
   return mxLoadMap.p = new Promise((res, rej) => {
-    const l = document.createElement("link"); l.rel = "stylesheet"; l.crossOrigin = "anonymous"; l.integrity = MX_SRI.css; l.href = MX_LIB + ".min.css"; document.head.appendChild(l);
-    const s = document.createElement("script"); s.crossOrigin = "anonymous"; s.integrity = MX_SRI.js; s.src = MX_LIB + ".min.js"; s.onload = () => res(); s.onerror = () => { mxLoadMap.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
+    if (!$("mxCss")){ const l = document.createElement("link"); l.id = "mxCss"; l.rel = "stylesheet"; l.crossOrigin = "anonymous"; l.integrity = MX_SRI.css; l.href = MX_LIB + ".min.css"; document.head.appendChild(l); }
+    const old = $("mxJs"); if (old) old.remove();   // a retry replaces the failed script instead of adding another
+    const s = document.createElement("script"); s.id = "mxJs"; s.crossOrigin = "anonymous"; s.integrity = MX_SRI.js; s.src = MX_LIB + ".min.js"; s.onload = () => res(); s.onerror = () => { mxLoadMap.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
     document.head.appendChild(s);
   });
 }
@@ -3826,17 +3912,20 @@ async function mxGeocode(){
   const me = MX; if (!me) return;
   const cache = EX.geo = mxGeoCache();
   const need = [...new Set(EX.stores.filter(s => !mxHasCoords(s)).map(mxPlace).filter(Boolean))].filter(k => !(k in cache)).slice(0, 12);
+  let found = 0;
   for (const k of need){
-    if (MX !== me) return;
+    if (MX !== me) return found;
     try {
       const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=my&q=" + encodeURIComponent(k + ", Malaysia"), { headers: { Accept: "application/json" } });
-      if (!r.ok) continue;
+      if (!r.ok) return found;   // busy or blocked: stop for now and try again on the next visit
       const j = await r.json(); cache[k] = j && j[0] ? { lat: +j[0].lat, lng: +j[0].lon } : 0;
+      if (cache[k]) found++;
       try { localStorage.setItem("lk-geo", JSON.stringify(cache)); } catch(e) {}
       if (MX === me) mxDraw(true);
-    } catch(e) {}
+    } catch(e){ return found; }
     await new Promise(r => setTimeout(r, 1100));   // be polite: one lookup per second
   }
+  return found;
 }
 
 // ----- markers: clusters when zoomed out, area circle + pin when zoomed in -----
@@ -3897,7 +3986,9 @@ function mxDraw(force){
   pill.classList.toggle("off", !!MX.sel || !all.length);
   const em = $("mxEmpty"), have = EX.stores.length;
   em.hidden = !MX.loaded || !!all.length;
-  if (!em.hidden) em.innerHTML = EX.aff && !EX.stores.some(s => s.aff)
+  if (!em.hidden) em.innerHTML = MX.err
+    ? `<b>Couldn't load stores</b><p>${esc(friendly(MX.err, "Check your internet and try again."))}</p><button type="button" class="btn solid" id="mxRetry">Try again</button>`
+    : EX.aff && !EX.stores.some(s => s.aff)
     ? `<b>No Affiliate Shops yet</b><p>Sellers who share Shopee, TikTok Shop and other shop links appear here.</p><button type="button" class="btn solid" id="mxClear">Back to all stores</button>`
     : have
     ? `<b>No stores match</b><p>Try another category or clear your filters.</p><button type="button" class="btn solid" id="mxClear">Clear filters</button>`
@@ -3916,7 +4007,7 @@ function mxMeta(st){ return [st.city || st.area, st.state].filter(Boolean).join(
 function affShops(st){ return [...new Set((Array.isArray(st.lh) ? st.lh : []).map(h => linkInfo("https://" + h).brand).filter(Boolean))].slice(0, 3).join(" · "); }
 function mxRow(st, mapped){
   const logo = safeImg(st.logo), n = +st.lk || 0;
-  return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name)), "sm")}
+  return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : initial(st.name), "sm")}
     <span class="mxci"><b><span>${esc(st.name)}</span></b>${st.aff
       ? `<span class="mxmeta">${esc(affShops(st) || "Online shop links")}</span>
     <span class="mxmeta">${n ? `${n} ${n === 1 ? "link" : "links"} · ` : ""}${esc(CATS[st.cat] || "Other")}</span></span>`
@@ -3941,7 +4032,7 @@ function mxRenderSheet(){
 function mxShowCard(st){
   const c = $("mxCard"), logo = safeImg(st.logo), blurb = st.tag || st.items || "";
   c.dataset.store = st.id;
-  c.innerHTML = `<div class="mxcrow">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : esc(initial(st.name)))}
+  c.innerHTML = `<div class="mxcrow">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : initial(st.name))}
     <div class="mxci"><b><span>${esc(st.name)}</span></b>${st.v ? `<span class="vlabel">Verified by ${esc(APP_NAME)}</span>` : ""}<span class="mxmeta">${esc(mxMeta(st))}</span>
     <span class="mxmeta">${st.closed ? `<span class="exshut">Closed now</span>` : `<span class="exopen">Open now</span>`} · ${esc(CATS[st.cat] || "Other")}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></div>
     <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></div>
@@ -3989,7 +4080,7 @@ async function enterShop(card){
   const coverImg = safeImg(st.cover), logoImg = safeImg(st.logo);
   const ov = document.createElement("div"); ov.className = "xfer"; ov.setAttribute("aria-hidden", "true");
   ov.innerHTML = `<div class="xf-cover" style="background:${col}">${coverImg ? `<img src="${esc(coverImg)}" alt="">` : ""}</div>
-    <div class="xf-logo" style="background:${col}">${logoImg ? `<img src="${esc(logoImg)}" alt="">` : esc(initial(st.name || id))}</div>
+    <div class="xf-logo" style="background:${col}">${logoImg ? `<img src="${esc(logoImg)}" alt="">` : initial(st.name || id)}</div>
     <div class="xf-body"><i style="width:62%;height:22px"></i><i style="width:84%"></i><i style="width:40%"></i><i style="width:100%;height:76px;margin-top:14px"></i><i style="width:100%;height:76px"></i></div>`;
   document.body.appendChild(ov);
   const W = innerWidth, H = innerHeight, ease = "cubic-bezier(.2,.8,.2,1)";
@@ -4023,6 +4114,7 @@ function exLocate(silent, fly){
 }
 async function renderExplore(){
   mxDestroy();
+  const rtok = ROUTE_TOK;
   setAccent(COLORS[0]); document.title = APP_NAME + " · Browse stores";
   let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
   EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, aff: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
@@ -4058,16 +4150,18 @@ async function renderExplore(){
   // stores seen last time show at once; the fresh list replaces them when it arrives
   const savedNear = keep.get("lk-near");
   const freshNear = apiGet({ action: "near" }).then(r => { const st = r.stores || []; keep.set("lk-near", st); return st; });
+  freshNear.catch(() => {});   // a failure is handled below; never an unhandled error
   const pStores = Array.isArray(savedNear) ? Promise.resolve(savedNear) : freshNear.catch(e => { loadErr = e; return []; });
   try { await mxLoadMap(); }
-  catch(e){ $("mxMap").innerHTML = `<p class="err mxerr">${esc(e.message)}</p>`; return; }
-  if (!$("mxMap")) return;   // the person already left this page
+  catch(e){ if (rtok === ROUTE_TOK && $("mxMap")){ $("mxMap").innerHTML = `<div class="mxerr"><p class="err">${esc(e.message)}</p><button type="button" class="btn solid" id="mxLibRetry">Try again</button></div>`; $("mxLibRetry").onclick = () => renderExplore(); } return; }
+  if (!$("mxMap") || rtok !== ROUTE_TOK || MX) return;   // the person already left this page, or it opened again meanwhile
 
   const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: me ? [me.lng, me.lat] : [108.3, 4.2], zoom: me ? 11 : 5, minZoom: 4, maxZoom: 17,
     attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false });
   map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
-  MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0 };
+  MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0, err: null, moved: false };
+  map.on("movestart", e => { if (e.originalEvent && MX && MX.map === map) MX.moved = true; });   // the person moved the map themselves
   MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
   document.addEventListener("keydown", MX.key);
   if (me) mxShowMe();
@@ -4100,7 +4194,7 @@ async function renderExplore(){
   $("exQ").oninput = () => { EX.q = $("exQ").value; $("mxClr").hidden = !EX.q; clearTimeout(MX.qt); MX.qt = setTimeout(() => exRender(true), 350); };
   $("exQ").onkeydown = e => { if (e.key === "Enter") $("exQ").blur(); };
   $("mxClr").onclick = () => { $("exQ").value = ""; EX.q = ""; $("mxClr").hidden = true; exRender(true); };
-  $("mxEmpty").onclick = e => { if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.aff = false; EX.fav = false; mxCloseSheet(); $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
+  $("mxEmpty").onclick = e => { if (e.target.id === "mxRetry") return renderExplore(); if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.aff = false; EX.fav = false; mxCloseSheet(); $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
   $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(true); } else exLocate(false, true); };
   $("exBrowse").onclick = () => { EX.fav = false; exRender(true); };
   $("exFav").onclick = () => { EX.fav = true; exRender(true); if (!EX.favs.size) mxToast("Tap the heart on a store to save it"); };
@@ -4122,14 +4216,14 @@ async function renderExplore(){
 
   const stores = await pStores;
   if (!MX || MX.map !== map) return;
-  EX.stores = stores; MX.loaded = true;
-  if (loadErr){ $("mxEmpty").hidden = false; $("mxEmpty").innerHTML = `<b>Couldn't load stores</b><p>${esc(friendly(loadErr, "Check your internet and try again."))}</p>`; return; }
+  EX.stores = stores; MX.loaded = true; MX.err = loadErr;
+  if (loadErr) return mxDraw(true);
   const list = exList();
   if (!me) mxFit(list, 12);
   mxDraw(true);
   if (urlFlag("affiliate") && !EX.aff){ $("exAff").click(); history.replaceState(null, "", home() + "explore"); }
   if (Array.isArray(savedNear)) freshNear.then(st => { if (MX && MX.map === map && JSON.stringify(st) !== JSON.stringify(savedNear)){ EX.stores = st; mxDraw(true); } }).catch(() => {});
-  mxGeocode().then(() => { if (MX && MX.map === map && !me) mxFit(exList(), 12); });
+  mxGeocode().then(found => { if (found && MX && MX.map === map && !me && !MX.moved && !MX.sel) mxFit(exList(), 12); });
   if (me) exLocate(true);
   setTimeout(() => { if (MX && MX.map === map && EX.stores.length) mxToast("Pins show a seller's area, not their exact address"); }, 900);
 }
@@ -4239,10 +4333,10 @@ function showPwaBar(id){
   const isStore = id === "stPwaBar", key = isStore ? "store" : "seller";
   if (isStandalone() || pwaDismissed(key)) { b.hidden = true; return; }
   if (!INSTALL_EVT && !isIos()) { b.hidden = true; return; }
-  const title = isStore ? "Add " + (D && D.name ? D.name : "this store") + " to your home screen" : "Install the Link Kedai App";
+  const title = "Install the Link Kedai App";
   const body = isIos()
-    ? (isStore ? "Tap the Share icon, then Add to Home Screen, so you can reorder in one tap." : "Tap the Share icon, then Add to Home Screen, for quick access to your dashboard.")
-    : (isStore ? "One tap to reorder next time, no browser tabs to dig through." : "Quick access to your dashboard, right from your home screen.");
+    ? (isStore ? "Tap the Share icon, then Add to Home Screen, to find your favourite stores fast." : "Tap the Share icon, then Add to Home Screen, for quick access to your dashboard.")
+    : (isStore ? "Find your favourite stores fast, right from your home screen." : "Quick access to your dashboard, right from your home screen.");
   b.innerHTML = `<button class="pwax" type="button" aria-label="Dismiss">&times;</button>
     <span class="pwaicon" aria-hidden="true">${ico("ext",19)}</span>
     <span class="pwatext"><b>${esc(title)}</b><span>${esc(body)}</span></span>
@@ -4319,7 +4413,8 @@ async function route(){
     else { $("gwrap").innerHTML = storeSkeleton(); show("page"); }
     SPLASH.ready();
     try {
-      const [r] = await Promise.all([apiGet({ action: "shop", id: q }), saved ? null : loadAd()]);   // loadAd waits for settings in parallel
+      if (!saved) loadAd().then(() => { if (here() && STORE_ID === q) showAd(); });   // ads never hold up the store
+      const r = await apiGet({ action: "shop", id: q });
       if (!here()) return;
       if (r.error === "notfound" || r.error === "notlive") forgetShop(q);
       if (r.error === "notfound") return showMessage("Store not found", "Check the link spelling, or ask the shop for their link again.");
@@ -4333,11 +4428,24 @@ async function route(){
   }
   renderHome();
 }
-window.addEventListener("popstate", async () => {
+window.addEventListener("popstate", async e => {
+  const left = HIST_CUR, st = e.state || {};
+  HIST_CUR = st._n || 0;
+  if (INPAGE_N.has(left) && HIST_CUR < left){   // Back from one of our in-page steps: stay on this page
+    const step = INPAGE_N.get(left); INPAGE_N.delete(left);
+    if (step.self){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }   // our own close: a message shown meanwhile stays
+    if ($("askOverlay").classList.contains("open")) return closeAsk(false);
+    if (step.sheet){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }
+    if (step.preview){ if (!$("store").hidden && !$("backBtn").hidden) leavePreview(); return; }
+    if (!$("builder").hidden && SESSION){ const v = st.ed || "home"; if (v !== EDV){ EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); } }
+    return;
+  }
+  document.querySelectorAll(".overlay.open").forEach(o => closeSheet(o));   // a real page change never keeps a pop-up open
+  if (DIRTY) await autoSave();
   if (!DIRTY) return route();
   const here = location.href;
   history.pushState(null, "", home() + "build");   // stay in the editor while we ask
-  if (await ask("You have unsaved changes. Leave without saving?", "Leave", true)){ DIRTY = false; history.replaceState(null, "", here); route(); }
+  if (await ask("Your changes couldn't be saved. Leave without saving?", "Leave", true)){ DIRTY = false; history.replaceState(null, "", here); route(); }
 });
 route().finally(() => SPLASH.ready());
 
