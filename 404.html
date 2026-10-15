@@ -905,6 +905,14 @@ a.prow{text-decoration:none;color:inherit}
 .cover{height:clamp(120px,32vw,200px)}
 .shopcard{margin-top:-36px;padding:0 16px 14px}
 .st-logo{width:72px;height:72px;margin-top:-36px;font-size:28px}
+/* the logo sits in a frame so a Verified store can get a blue ring and a tick badge on the bottom right */
+.st-logowrap{position:relative;width:72px;height:72px;margin-top:-36px}
+.st-logowrap .st-logo{margin-top:0}
+.st-logowrap.verified .st-logo{box-shadow:0 0 0 3px var(--surface),0 0 0 6px var(--verify),0 8px 22px rgba(20,10,15,.16)}
+.vtick{position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;padding:0;border-radius:50%;border:2.5px solid var(--surface);background:var(--verify);display:grid;place-items:center;cursor:pointer;z-index:1}
+.vtick svg{width:15px;height:15px;display:block}
+/* browse-stores button in the top-right corner, clear of the logo */
+.stmore{left:auto;right:12px}
 .stname{font-size:clamp(22px,6vw,28px);margin:8px 0 2px}
 /* Menu / Shop links switch and section chips stay at the top while scrolling */
 .stnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg)}
@@ -969,7 +977,7 @@ a.prow{text-decoration:none;color:inherit}
 :root{
   --bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--ink-2:#4A4340;--muted:#6B6360;--faint:#A39A96;
   --line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;
-  --plum:#18395C;--gold:#8DB6E8;--wa:#168443;
+  --plum:#18395C;--gold:#8DB6E8;--wa:#168443;--verify:#1D9BF0;
   --ok:#13743A;--ok-bg:#E7F4EC;--warn:#A14806;--warn-bg:#FDF0DC;--err:#B3261E;--err-bg:#F4E4E2;--alert:#DC2626;
   --r-xs:8px;--r-sm:12px;--r-md:16px;--r-lg:20px;--r-xl:24px;
   --r-field:var(--r-sm);--r-btn:var(--r-md);--r-card:var(--r-lg);
@@ -1129,10 +1137,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <a class="stmore" id="stMore" href="#" aria-label="Browse more Link Kedai App stores" title="Browse more stores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
     <div class="cover" id="stCover" hidden></div>
     <section class="shopcard" id="stCard">
-      <div class="st-logo" id="stLogo"></div>
+      <div class="st-logowrap" id="stLogoWrap">
+        <div class="st-logo" id="stLogo"></div>
+        <button type="button" class="vtick" id="stVerified" hidden aria-label="Verified by Link Kedai App" title="Verified by Link Kedai App"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 12.5 3.6 3.6 7.4-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
       <span class="stplace" id="stPlace" hidden></span>
       <h1 class="stname" id="stName"></h1>
-      <span class="vbadge" id="stVerified" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" fill="#18395C"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#8DB6E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified by Link Kedai App</span>
       <p class="tag" id="stTag"></p>
     </section>
     <div class="pwabar" id="stPwaBar" hidden></div>
@@ -2691,7 +2701,7 @@ async function showStore(data, isPreview, refresh){
   $("stCover").style.backgroundImage = "";
   setHtml($("stCover"), cover ? `<img src="${esc(cover)}" alt="">` : "");
   $("stWrap").style.paddingTop = cover ? "0" : "56px";
-  $("stCard").style.marginTop = cover ? "" : "104px";   // no cover: leave room for the explore button above the logo
+  $("stCard").style.marginTop = cover ? "" : "52px";   // no cover: the browse button sits top-right, so the logo only needs a little room
   if (isPreview) hidePwaBar("stPwaBar"); else showPwaBar("stPwaBar");
   setHtml($("stLogo"), safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`);
   $("stName").textContent = D.name;
@@ -2706,7 +2716,8 @@ async function showStore(data, isPreview, refresh){
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   $("stSafeLink").href = home() + "safe";
   $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
-  $("stVerified").hidden = !(isPreview ? false : STORE_VERIFIED);
+  const verified = !isPreview && STORE_VERIFIED;   // blue ring + tick on the logo, like verified accounts elsewhere
+  $("stVerified").hidden = !verified; $("stLogoWrap").classList.toggle("verified", verified);
   if (!isPreview && !refresh) track("view");
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -2790,6 +2801,7 @@ $("adBan").addEventListener("click", () => { const a = ADS[adI]; if (a && $("bac
 $("adDots").addEventListener("click", e => { const b = e.target.closest("[data-ad]"); if (!b) return; goAd(+b.dataset.ad); startAds(); });
 $("adX").onclick = () => { try { sessionStorage.setItem("lk-adx", "1"); } catch(e) {} clearInterval(adTimer); $("adWrap").hidden = true; };
 
+$("stVerified").onclick = () => notify(`Verified by ${APP_NAME}. This store's payment was confirmed and it passed our safety check for prohibited items.`);
 $("stReport").onclick = () => {
   document.querySelectorAll('#repOpts input').forEach(r => r.checked = false);
   $("repNote").value = ""; $("repErr").textContent = "";
