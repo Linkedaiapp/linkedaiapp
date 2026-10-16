@@ -268,6 +268,27 @@ textarea{min-height:72px;resize:vertical}
 .exbar .seg button{padding:10px 12px}
 .chips{flex-wrap:nowrap !important;overflow-x:auto;padding:12px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .chips::-webkit-scrollbar{display:none}
+.cal{margin-top:8px;border:1px solid var(--line);border-radius:var(--r-md);padding:10px;background:var(--surface)}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.calhead b{font-size:15px}
+.calhead button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
+.calhead button:disabled{opacity:.3;cursor:default}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.calgrid .dow{font-size:11px;font-weight:700;color:var(--muted);padding:4px 0}
+.calday{aspect-ratio:1;min-height:38px;border:0;border-radius:10px;background:none;color:var(--ink);font:600 15px/1 inherit;cursor:pointer;position:relative}
+.calday:disabled{cursor:default}
+.calday.past{opacity:.3}
+.calday.off{color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in srgb,var(--err) 12%,transparent) 5px 7px);text-decoration:line-through}
+.calday.weekly{text-decoration:line-through;color:var(--muted)}
+.calday.today{box-shadow:inset 0 0 0 1.5px var(--line)}
+.calday.sel{background:var(--accent);color:#fff;text-decoration:none}
+.callegend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:12px;color:var(--muted)}
+.callegend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;background:repeating-linear-gradient(135deg,transparent 0 3px,color-mix(in srgb,var(--err) 30%,transparent) 3px 5px)}
+.datebtn,#overlay .datebtn{width:100%;height:52px;min-height:0;margin-top:6px;padding:0 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--ink);font:500 16px inherit;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.datebtn.empty{color:var(--muted)}
+.daychips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.daychips button{min-width:44px;height:40px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;color:var(--ink);cursor:pointer}
+.daychips button[aria-pressed="true"]{background:var(--err);border-color:var(--err);color:#fff;text-decoration:line-through}
 .chips button{flex:none;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;cursor:pointer;color:var(--ink)}
 .exlocbtn{display:flex;align-items:center;justify-content:center;gap:8px}
 .excard{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);margin-bottom:10px;text-decoration:none;color:inherit;position:relative}
@@ -1318,8 +1339,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <div class="lines" id="lines"></div>
       <label for="cName">Your name</label>
       <input type="text" id="cName" autocomplete="name">
-      <label for="date" id="dateLabel">Date you want it</label>
-      <input type="date" id="date">
+      <label for="dateBtn" id="dateLabel">Date you want it</label>
+      <input type="hidden" id="date">
+      <button type="button" class="datebtn empty" id="dateBtn" aria-expanded="false"><span id="dateTxt">Pick a date</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
+      <div class="cal" id="dateCal" hidden></div>
       <label for="note">Note to the shop (optional)</label>
       <textarea id="note" placeholder="e.g. Pickup Saturday 3pm"></textarea>
       <p class="err" id="err" role="alert"></p>
@@ -1556,6 +1579,28 @@ const KINDS = {
 };
 const W = d => KINDS[d && d.kind] || KINDS.products;
 
+// ---------- Calendar: the seller marks days off; customers can't pick them ----------
+const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+function dayOff(off, s){ if (!off || !s) return false; const d = new Date(s + "T00:00"); return (off.days || []).includes(d.getDay()) || (off.dates || []).includes(s); }
+// mode "pick": customer chooses a day (days off and past days can't be tapped)
+// mode "mark": seller taps specific days on and off (weekly days off are shown but set with the day chips)
+function calHtml(y, m, off, mode, sel, min){
+  const now = new Date(), today = ymd(now), first = new Date(y, m, 1), n = new Date(y, m + 1, 0).getDate();
+  const atStart = y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth());
+  const title = first.toLocaleDateString("en-MY", { month: "long", year: "numeric" });
+  let cells = DOW.map(d => `<span class="dow">${d}</span>`).join("") + "<span></span>".repeat(first.getDay());
+  for (let d = 1; d <= n; d++){
+    const s = ymd(new Date(y, m, d)), past = s < (min || today), weekly = (off.days || []).includes(new Date(y, m, d).getDay()), spec = (off.dates || []).includes(s);
+    const cls = ["calday", past ? "past" : spec ? "off" : weekly ? (mode === "mark" ? "weekly" : "off") : "", s === today ? "today" : "", s === sel ? "sel" : ""].filter(Boolean).join(" ");
+    const dis = past || (mode === "pick" && (spec || weekly)) || (mode === "mark" && weekly);
+    const lab = new Date(y, m, d).toLocaleDateString("en-MY", { weekday: "long", day: "numeric", month: "long" }) + (spec || weekly ? ", not taking orders" : "");
+    cells += `<button type="button" class="${cls}" data-day="${s}" ${dis ? "disabled" : ""} aria-label="${esc(lab)}" ${mode === "mark" && !weekly && !past ? `aria-pressed="${spec}"` : ""}>${d}</button>`;
+  }
+  return `<div class="calhead"><button type="button" data-calnav="-1" aria-label="Previous month" ${atStart ? "disabled" : ""}>‹</button><b>${esc(title)}</b><button type="button" data-calnav="1" aria-label="Next month">›</button></div>
+    <div class="calgrid">${cells}</div>
+    <div class="callegend"><span><i></i>Not taking orders</span></div>`;
+}
 function normalize(d){
   const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
   x.items = (Array.isArray(x.items) ? x.items : []).filter(it => it && typeof it === "object").map(it => ({
@@ -1574,6 +1619,10 @@ function normalize(d){
     pub: !!l.pub, addr: String(l.addr || "").replace(/[<>"`]/g, "").slice(0, 120) };
   x.cat = d && CATS[d.cat] ? d.cat : "";
   x.closed = !!x.closed; x.closedMsg = String(x.closedMsg || "");
+  // Days the seller isn't taking orders: every week (0 = Sunday) and specific dates; past dates drop off by themselves
+  const off = x.off && typeof x.off === "object" ? x.off : {}, today = ymd(new Date());
+  x.off = { days: [...new Set((Array.isArray(off.days) ? off.days : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n <= 6))].sort(),
+    dates: [...new Set((Array.isArray(off.dates) ? off.dates : []).map(String).filter(d => /^\d{4}-\d\d-\d\d$/.test(d) && d >= today))].sort().slice(0, 366) };
   x.wa = String(x.wa || "").replace(/\D/g, "");
   ["name", "tagline", "logo", "cover"].forEach(k => x[k] = String(x[k] || ""));
   // the currency sign is shown inside the store page's HTML, so it may only ever be a short plain symbol
@@ -2138,6 +2187,21 @@ function edStatus(){
     </div>
     <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Closed for Hari Raya. Back on 5 April, 9am"></label>
     <p class="hint">While closed, customers can still see your store, but can't send orders.</p>
+  </section>
+  ${offCardHtml()}`;
+}
+let OFFCAL = null;
+function offCardHtml(){
+  const now = new Date(); OFFCAL = OFFCAL || { y: now.getFullYear(), m: now.getMonth() };
+  const n = S.off.dates.length, w = S.off.days.length;
+  return `<section class="card" id="offCard">
+    <h2>Days you're not taking orders</h2>
+    <p class="hint">Customers can't pick these days when they choose a date for their order.</p>
+    <label style="margin-top:12px">Every week</label>
+    <div class="daychips">${DOW.map((d, i) => `<button type="button" data-act="offday" data-v="${i}" aria-pressed="${S.off.days.includes(i)}">${d}</button>`).join("")}</div>
+    <label style="margin-top:14px">Specific days (tap to mark or unmark)</label>
+    <div class="cal" id="offCal">${calHtml(OFFCAL.y, OFFCAL.m, S.off, "mark")}</div>
+    <p class="hint" style="margin-top:8px">${w ? `Closed every ${S.off.days.map(i => DOW[i]).join(", ")}. ` : ""}${n ? `${n} other day${n === 1 ? "" : "s"} marked. <button type="button" class="linkbtn" data-act="offclear">Clear them</button>` : w ? "" : "No days off marked."}</p>
   </section>`;
 }
 function edPlan(){
@@ -2533,6 +2597,13 @@ $("emRemove").onclick = async () => {
     ME_EMAIL = ""; rememberEdNow(); dismissSheet("emOverlay"); renderEditor(); notify("Your email was removed.");
   } catch(e){ sayErr("emErr1", friendly(e, "Couldn't remove your email right now. Check your internet and try again.")); }
 };
+function redrawOff(){ touch(); const c = $("offCard"); if (c) c.outerHTML = offCardHtml(); }
+$("bwrap").addEventListener("click", e => {
+  const cal = e.target.closest("#offCal"); if (!cal) return;
+  const nav = e.target.closest("[data-calnav]"), day = e.target.closest("[data-day]");
+  if (nav && !nav.disabled){ const d = new Date(OFFCAL.y, OFFCAL.m + +nav.dataset.calnav, 1); OFFCAL = { y: d.getFullYear(), m: d.getMonth() }; cal.innerHTML = calHtml(OFFCAL.y, OFFCAL.m, S.off, "mark"); return; }
+  if (day && !day.disabled){ const s = day.dataset.day; S.off.dates = S.off.dates.includes(s) ? S.off.dates.filter(x => x !== s) : [...S.off.dates, s].sort(); redrawOff(); }
+});
 function edTidy(){
   if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || UP_ITEMS.has(it) || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
@@ -2758,6 +2829,7 @@ function legacyEditor(msg){
     </div>
     <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Closed for Hari Raya. Back on 5 April, 9am"></label>
   </section>
+  ${offCardHtml()}
 
   <section class="card">
     <h2>Shop</h2>
@@ -2896,6 +2968,8 @@ $("builder").addEventListener("click", async e => {
   else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
   else if (a === "kind"){ S.kind = b.dataset.v; redraw(); }
   else if (a === "open"){ S.closed = b.dataset.v === "0"; redraw(); }
+  else if (a === "offday"){ const i = +b.dataset.v; S.off.days = S.off.days.includes(i) ? S.off.days.filter(x => x !== i) : [...S.off.days, i].sort(); redrawOff(); }
+  else if (a === "offclear"){ S.off.dates = []; redrawOff(); }
   else if (a === "rm-logo"){ S.logo = ""; redraw(); }
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
@@ -3144,6 +3218,8 @@ async function showStore(data, isPreview, refresh){
   $("closedMsg").textContent = D.closedMsg.trim() || "We're not taking orders right now. Please check back later.";
   const t = new Date();
   $("date").min = new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  if (!refresh || dayOff(D.off, $("date").value)) setDate("");   // a day the shop has since marked off can't stay picked
+  $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false");
   $("dateLabel").textContent = W(D).date;
   $("note").placeholder = W(D).ex.note;
   $("send").textContent = D.kind === "services" ? "Send booking on WhatsApp" : "Send order on WhatsApp";
@@ -3380,6 +3456,25 @@ $("lines").addEventListener("click", e => {
   const k = b.dataset.k; cart[k] = Math.max(0, (cart[k] || 0) + Number(b.dataset.d)); if (!cart[k]) delete cart[k];
   saveCart(); renderBar(); renderMenu();
 });
+// Customer date picker: the seller's days off are crossed out and can't be picked
+let DATECAL = null;
+function setDate(s){
+  $("date").value = s || "";
+  $("dateTxt").textContent = s ? new Date(s + "T00:00").toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Pick a date";
+  $("dateBtn").classList.toggle("empty", !s);
+  $("date").dispatchEvent(new Event("input"));
+}
+function drawDateCal(){ $("dateCal").innerHTML = calHtml(DATECAL.y, DATECAL.m, D.off, "pick", $("date").value, $("date").min); }
+$("dateBtn").onclick = () => {
+  const open = $("dateCal").hidden;
+  if (open){ const base = $("date").value ? new Date($("date").value + "T00:00") : new Date(); DATECAL = { y: base.getFullYear(), m: base.getMonth() }; drawDateCal(); }
+  $("dateCal").hidden = !open; $("dateBtn").setAttribute("aria-expanded", String(open));
+};
+$("dateCal").addEventListener("click", e => {
+  const nav = e.target.closest("[data-calnav]"), day = e.target.closest("[data-day]");
+  if (nav && !nav.disabled){ const d = new Date(DATECAL.y, DATECAL.m + +nav.dataset.calnav, 1); DATECAL = { y: d.getFullYear(), m: d.getMonth() }; return drawDateCal(); }
+  if (day && !day.disabled){ setDate(day.dataset.day); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); $("err").textContent = ""; }
+});
 ["note","cName","date"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
   let msg = "";
@@ -3387,6 +3482,7 @@ $("send").addEventListener("click", e => {
   else if (!$("cName").value.trim()) msg = "Add your name so the shop knows who the order is for.";
   else if (W(D).dateNeeded && !$("date").value) msg = "Pick a date first.";
   else if ($("date").value && $("date").value < $("date").min) msg = "Pick today or a later date.";
+  else if (dayOff(D.off, $("date").value)) msg = "The shop isn't taking orders on that day. Please pick another date.";
   if (msg){ e.preventDefault(); $("err").textContent = msg; return; }
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   if ($("backBtn").hidden) track("order");
