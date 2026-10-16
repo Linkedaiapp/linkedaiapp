@@ -704,6 +704,7 @@ label{font-weight:600;font-size:14px}
 #builder.tabbed:not(.dirty) .actions{display:none}
 .lk-bar{display:flex;align-items:center;gap:10px;min-height:56px;margin:0 0 6px}
 .lk-bar h1{flex:1;font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0}
+.edsub{font-size:15px;font-weight:700;color:var(--muted);margin:18px 4px 8px}
 .lk-group{padding:0;overflow:hidden}
 .lk-row{display:flex;align-items:center;gap:14px;padding:14px 16px;width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .lk-row + .lk-row{border-top:1px solid var(--line)}
@@ -1673,9 +1674,13 @@ function setAccent(c){ document.documentElement.style.setProperty("--accent", c)
 // Every picture fades in once it has loaded; broken ones stop shimmering too
 // ---------- Counting for shop and ad insights (anonymous, no personal data) ----------
 let STORE_ID = "", STORE_VERIFIED = false, STORE_PLACE = null;
+// Stores this phone has edited: opening them here (the storefront button, the Open link, or the link itself) isn't a customer visit
+function ownStores(){ try { return JSON.parse(localStorage.getItem("lk-own") || "[]"); } catch(e){ return []; } }
+function markOwn(id){ try { const a = ownStores().filter(x => x !== id); a.unshift(id); localStorage.setItem("lk-own", JSON.stringify(a.slice(0, 10))); } catch(e) {} }
 function track(t, img){
   try {
     if (!safeUrl(SITE.api) || (!STORE_ID && !img)) return;
+    if (STORE_ID && (ownStores().includes(STORE_ID) || (SESSION && SESSION.id === STORE_ID))) return;   // the seller's own phone: only customers count
     const day = new Date().toISOString().slice(0, 10), once = t === "view" ? `lk-v:${STORE_ID}:${day}` : t === "adview" ? `lk-av:${img}:${day}:${STORE_ID}` : "";
     if (once){ if (sessionStorage.getItem(once)) return; sessionStorage.setItem(once, "1"); }
     const q = new URLSearchParams({ action: "hit", t, id: STORE_ID || "", img: img || "" });
@@ -2076,6 +2081,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-front", at: "2026-10-17", title: "See your store as customers do", body: "Tap the shop icon next to the bell to open your store front, exactly as customers see it. Your own visits never count in Insights, only customers' do. Your logo, colour and store style are now under Shop details." },
   { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Link Kedai App now goes dark when your phone is in dark mode, and light when it isn't. Your store does the same for your customers." },
   { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Browse stores has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
   { id: "u-20261017-look", at: "2026-10-17", title: "Your logo on the map, and PIN dots", body: "Browse stores now shows each shop's own logo on its map pin. Your 6-digit PIN shows as six dots as you type, like a phone lock screen. Deleting your account now waits 5 seconds before the Delete button works, so it can't happen by accident." },
@@ -2213,7 +2219,6 @@ function edSteps(){
   return {
     details: !!(S.name.trim() && S.wa),
     products: named.some(it => it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
-    look: !!(safeImg(S.logo) || safeImg(S.cover)),
     listing: !!(S.loc.on && S.loc.state && (S.loc.city || affOnly(S))),
     status: true
   };
@@ -2255,7 +2260,7 @@ function edHome(msg){
   const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
-  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
+  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
   ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
@@ -2274,9 +2279,8 @@ function edHome(msg){
     <div class="lk-prog"><i style="width:${Math.round(done / total * 100)}%"></i></div>
   </section>`}
   <section class="card lk-group">
-    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet"].join(" · "), mark(st.details))}
+    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet", safeImg(S.logo) ? "Logo added" : "Logo, colour and style"].join(" · "), mark(st.details))}
     ${edRow("products","box", W(S).list, named.length ? `${named.length} ${named.length === 1 ? W(S).item : W(S).item + "s"}${out ? ` · ${out} sold out` : ""}` : "Nothing added yet", mark(st.products))}
-    ${edRow("look","palette","Appearance","Logo, cover, colour and layout", mark(st.look))}
     ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
   </section>
@@ -2293,10 +2297,11 @@ function edDetails(){
     <label>What do you sell?</label>
     <div class="seg">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
     <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
-  </section>`;
+  </section>
+  ${edLook()}`;
 }
-function edLook(){
-  return `${edTop("Appearance", "home")}
+function edLook(){   // the logo, cover, colour and style cards, shown on Shop details
+  return `<h2 class="edsub" id="lookSec">Look</h2>
   <section class="card">
     <label>Logo</label>
     <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
@@ -2617,7 +2622,7 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
   bld.classList.toggle("noactions", EDV === "news");   // nothing to save or preview on News
@@ -2784,6 +2789,7 @@ function edTidy(){
 }
 function openEditor(msg){
   edTidy();
+  if (SESSION && SESSION.id && !SESSION.admin) markOwn(SESSION.id);
   if (!window.LK_KEEPVIEW) EDV = "home";
   if (EDV === "home" && needsStart()){ EDV = "start"; EDSTEP = 1; }
   else if (PENDING_VIEW && EDV === "home"){ EDV = PENDING_VIEW; history.replaceState(null, "", home() + "build"); }
