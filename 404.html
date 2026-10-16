@@ -356,7 +356,8 @@ textarea{min-height:72px;resize:vertical}
 .pineye svg{width:22px;height:22px}
 /* A 6-digit PIN shows as six dots that fill as you type, like a phone's lock screen. The real box stays underneath
    (its text hidden), so typing, pasting and password autofill all keep working. */
-.pinwrap.dots input{color:transparent;caret-color:transparent;-webkit-text-fill-color:transparent;letter-spacing:0}
+.pinwrap.dots input{color:transparent;caret-color:transparent;-webkit-text-fill-color:transparent;letter-spacing:0;
+  border-color:transparent !important;background:transparent !important;box-shadow:none !important;outline:none}   /* just the dots, no box */
 .pinwrap.dots input::selection{background:transparent}
 .pdots{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:18px;padding-right:44px;pointer-events:none}
 .pdots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);opacity:.28;transition:transform .15s,opacity .15s,background-color .15s;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:19px;line-height:1}
@@ -4343,9 +4344,9 @@ function mxDraw(force){
       const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
       if (!st._a.exact) feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
       const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
-      // the shop's own logo on its pin (the category icon shows if there's no logo, or it doesn't load)
+      // the shop's own logo on its pin (the shop icon shows if there's no logo, or it doesn't load)
       const lg = safeImg(st.logo);
-      el.innerHTML = `<span class="mxpin${lg ? " haslogo" : ""}" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
+      el.innerHTML = `<span class="mxpin${lg ? " haslogo" : ""}" style="--c:${col}">${ico("store", 17, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
       el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
       if (sel) el.style.zIndex = 5;
       el.addEventListener("click", () => mxSelect(st.id)); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); mxSelect(st.id); } });
