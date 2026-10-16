@@ -3935,7 +3935,7 @@ async function loadPushCard(){
     const title = $("pnTitle").value.trim(), body = $("pnBody").value.trim(); $("pnErr").textContent = "";
     if (!title) return $("pnErr").textContent = "Add a title.";
     if (!(await ask(`Send "${title}" to ${st.phones} phone${st.phones === 1 ? "" : "s"}?`, "Send"))) return;
-    try { const r = await apiPost({ action: "admin", key: ADMIN, op: "pushall", title, body }); notify(`Sending to ${r.queued} phone${r.queued === 1 ? "" : "s"}. Big lists go out over a few minutes.`); loadPushCard(); }
+    try { const r = await apiPost({ action: "admin", key: ADMIN, op: "pushall", title, body }); notify(`Sending to ${r.queued} phone${r.queued === 1 ? "" : "s"}. On the free plan they go out at about 360 an hour.`); loadPushCard(); }
     catch(e){ $("pnErr").textContent = e.message; }
   };
 }
