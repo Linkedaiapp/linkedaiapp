@@ -12,8 +12,7 @@
 <title>Link Kedai App</title>
 <meta name="copyright" content="© 2026 Link Kedai App. All rights reserved.">
 <meta name="color-scheme" content="light dark">
-<!-- Theme: Light, Dark or Follow system (the default), chosen in Account, About us or Browse. Set first, so there's no flash. -->
-<script>(function(){ try { var t = localStorage.getItem("lk-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch(e){} })();</script>
+<!-- Light or dark: always the same as the phone -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F7F5F3" class="lktc">
@@ -84,8 +83,7 @@ textarea{min-height:72px;resize:vertical}
 .seg{display:flex;margin-top:6px}
 .seg button{flex:1;padding:11px;cursor:pointer;}
 .seg button[aria-pressed="true"]{border-color:var(--ink);}
-.themebox{margin:18px 0 6px}.themebox b{display:block;margin-bottom:2px}
-.themeseg{gap:6px}.themeseg button{font-size:14px;padding:10px 6px}
+
 .check{margin-top:12px}
 .err{color:var(--err);font-size:14px;min-height:20px;margin:14px 0 8px}
 .status{color:var(--ok);font-size:14px;min-height:20px;margin:8px 0 0}
@@ -1832,20 +1830,11 @@ $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay"
 
 
 
-// ---------- Theme: light, dark or follow the phone ----------
-const themeNow = () => { try { const t = localStorage.getItem("lk-theme"); return t === "light" || t === "dark" ? t : "system"; } catch(e){ return "system"; } };
-const isDark = () => document.documentElement.getAttribute("data-theme") === "dark" || (!document.documentElement.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+// ---------- Light or dark: always the same as the phone (no setting) ----------
+const isDark = () => matchMedia("(prefers-color-scheme: dark)").matches;
 function paintBars(){ document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.content = isDark() ? "#141112" : "#F7F5F3"); }   // the phone's bars match the page
-function setTheme(t){
-  try { if (t === "system") localStorage.removeItem("lk-theme"); else localStorage.setItem("lk-theme", t); } catch(e) {}
-  if (t === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t);
-  paintBars();
-  document.querySelectorAll("[data-themes]").forEach(g => g.querySelectorAll("[data-theme-set]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeSet === t))));
-  if (MX && $("mxMap")){ exRemember(); EX_BACK = true; renderExplore(); }   // the map has its own light and dark style
-}
-const themeSeg = () => { const t = themeNow(); return `<div class="seg themeseg" data-themes role="group" aria-label="Theme">${[["system", "System"], ["light", "Light"], ["dark", "Dark"]].map(([k, l]) => `<button type="button" data-theme-set="${k}" aria-pressed="${t === k}">${l}</button>`).join("")}</div>`; };
-document.addEventListener("click", e => { const b = e.target.closest("[data-theme-set]"); if (b){ e.preventDefault(); setTheme(b.dataset.themeSet); } });
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paintBars(); if (themeNow() === "system" && MX && $("mxMap")){ exRemember(); EX_BACK = true; renderExplore(); } });
+try { localStorage.removeItem("lk-theme"); } catch(e) {}   // a choice saved by an earlier version
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paintBars(); if (MX && $("mxMap")){ exRemember(); EX_BACK = true; renderExplore(); } });   // the map has its own light and dark style
 paintBars();
 // iPhones ignore "no zoom" in the page settings: stop the pinch gesture too, except on a map (it zooms itself)
 ["gesturestart", "gesturechange"].forEach(t => document.addEventListener(t, e => { if (!(e.target.closest && e.target.closest(".maplibregl-map"))) e.preventDefault(); }, { passive: false }));
@@ -2080,7 +2069,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Choose Light, Dark or System (the same as your phone) under Account > Theme. Customers can choose it in Browse stores and About us too." },
+  { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Link Kedai App now goes dark when your phone is in dark mode, and light when it isn't. Your store does the same for your customers." },
   { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Browse stores has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
   { id: "u-20261017-look", at: "2026-10-17", title: "Your logo on the map, and PIN dots", body: "Browse stores now shows each shop's own logo on its map pin. Your 6-digit PIN shows as six dots as you type, like a phone lock screen. Deleting your account now waits 5 seconds before the Delete button works, so it can't happen by accident." },
   { id: "u-20261017-fixes", at: "2026-10-17", title: "Smoother editing and ordering", body: "The phone's Back button now steps back through your editor properly. Links pasted without https:// and short link names are saved. If your PIN was changed on another phone, we ask for it instead of failing to save. Customers can clear an optional date, and Browse search finds every word you type." },
@@ -2607,7 +2596,6 @@ function edAccount(){
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in until you log out" : "You can log in again anytime"}</span></span></button>
   </section>
-  <section class="card"><h2 style="margin-bottom:2px">Theme</h2><p class="hint" style="margin:0 0 4px">Light, dark, or the same as your phone.</p>${themeSeg()}</section>
   <section class="card dangercard">
     <h2>Danger zone</h2>
     <p class="hint">Delete your store and account. Your store link stops working, and your items and photos are removed. This can't be undone.</p>
@@ -4571,7 +4559,7 @@ async function renderExplore(){
       <div class="mxgrab"></div>
       <div class="mxsh"><h2 id="mxShTitle">In this area</h2><button type="button" class="mxx" id="mxShClose" aria-label="Close">${ico("x", 18, 2)}</button></div>
       <div class="mxlist" id="mxList"></div>
-      <div class="mxfoot"><button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button><div class="themebox"><b>Theme</b>${themeSeg()}</div>${legalLinks()}${copyrightLine()}</div>
+      <div class="mxfoot"><button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button>${legalLinks()}${copyrightLine()}</div>
     </section>
     <div class="mxtoast" id="mxToast" role="status"></div>`;
   document.body.classList.add("exploring");
@@ -4730,9 +4718,6 @@ function renderAbout(){
         <li>Orders open in WhatsApp. WhatsApp, Shopee, TikTok Shop and other brands named in stores belong to their owners. ${A} isn't part of them.</li>
       </ul>
       <p>Thank you to everyone who helped make ${A} what it is.</p>
-      <h2>Theme</h2>
-      <p>Choose light or dark, or follow your phone's setting.</p>
-      ${themeSeg()}
     </article>
     ${legalLinks()}${copyrightLine()}`;
   show("page");
