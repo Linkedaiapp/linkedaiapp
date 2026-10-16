@@ -1474,7 +1474,8 @@ const keep = {
 };
 async function loadSite(){
   const saved = keep.get("lk-site");
-  const freshSite = getJson("site.json").then(j => { keep.set("lk-site", j); SITE = Object.assign(SITE, j); applyConfig(keep.get("lk-config")); }).catch(() => {});
+  const moved = j => { const mv = keep.get("lk-moved"); if (mv && mv.from === j.api && safeUrl(mv.to)) j.api = mv.to; return j; };
+  const freshSite = getJson("site.json").then(j => { j = moved(j); keep.set("lk-site", j); SITE = Object.assign(SITE, j); applyConfig(keep.get("lk-config")); }).catch(() => {});
   if (saved && safeUrl(saved.api)) SITE = Object.assign(SITE, saved); else await freshSite;
   if (!safeUrl(SITE.api)) { CONFIG_P = Promise.resolve(); return; }
   // Show the page straight away with the settings this phone remembers; fetch fresh ones in the background
@@ -1516,19 +1517,30 @@ function friendly(e, fallback){
   if (!m || TECH_ERR.test(m)){ if (m) console.warn("Link Kedai App:", (e && e.message) || e); return fallback; }
   return m;
 }
-async function apiGet(params){
-  if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
+// The server moved (Google script -> Cloudflare): remember the new address and ask again there
+function serverMoved(j){
+  if (!j || j.error !== "moved" || !safeUrl(j.api) || j.api === SITE.api) return false;
+  keep.set("lk-moved", { from: SITE.api, to: j.api });   // until site.json names the new server, keep using it
+  SITE.api = j.api;
+  const ks = keep.get("lk-site"); if (ks){ ks.api = j.api; keep.set("lk-site", ks); }
+  return true;
+}
+async function apiGet(params, again){
+  if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the server link to site.json.");
   const q = new URLSearchParams({ ...params, t: Date.now() }).toString();
-  return fetchJson(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q, {}, 2);
+  const j = await fetchJson(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q, {}, 2);
+  if (!again && serverMoved(j)) return apiGet(params, true);
+  return j;
 }
 // Actions that are safe to repeat get one quiet retry if Google hiccups
 const RETRY_OK = new Set(["login", "save", "admin"]);
 async function apiPost(body, extra){
   if (SESSION && SESSION.admin && body.id === SESSION.id && !body.key && body.action !== "admin") body.key = SESSION.key;
   if (SESSION && SESSION.tok && body.id === SESSION.id && !body.pin && !body.key) body.tok = SESSION.tok;
-  if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the Google script link to site.json.");
+  if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the server link to site.json.");
   const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
   const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 40000 : 0);
+  if (!(extra && extra.again) && serverMoved(j)) return apiPost(body, Object.assign({}, extra, { again: true }));
   if (j.error) throw new Error(j.error);
   return j;
 }
