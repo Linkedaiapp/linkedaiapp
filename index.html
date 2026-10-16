@@ -243,6 +243,9 @@ textarea{min-height:72px;resize:vertical}
 .bulhead b{display:block;font-size:20px;font-weight:800}
 .bulcard{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);margin-bottom:10px;position:relative}
 .bulcard.unread::after{content:"";position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--alert)}
+.bulcard.canx .bulbody{padding-right:30px}.bulcard.canx.unread::after{right:52px;top:26px}
+.bulcard .xmini{top:10px;right:10px}
+.bulshout{display:flex;gap:12px;position:relative;border-color:var(--plum)}.bulshout .bulbody{padding-right:34px}.bulshout p{margin:4px 0 10px}
 .bulic{width:36px;height:36px;border-radius:var(--r-sm);flex:none;display:grid;place-items:center;background:var(--soft);color:var(--plum)}
 .bulic svg{width:19px;height:19px}
 .bulbody{flex:1;min-width:0}
@@ -1979,8 +1982,19 @@ function renderStart(msg, mode){
    ============================================================ */
 // ---------- Bulletin board: everything here is written by the Link Kedai App bot ----------
 // New Link Kedai App features are announced to sellers automatically from this list.
+// Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are here in News. Tap the bell to open News." },
+  { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
+  { id: "u-20261016-daysoff", at: "2026-10-16", title: "New: mark your days off", body: "Under Store status, tap the dates you aren't taking orders, or pick a day of the week that's always off. Customers can't choose those dates when they order." },
+  { id: "u-20261016-faster", at: "2026-10-16", title: "Your store now opens faster", body: "Link Kedai App moved to a faster server. Your store page and your editor now load in a second or two, even when nobody has visited for a while." },
+  { id: "u-20261016-pin", at: "2026-10-16", title: "New: show customers where your shop is", body: "Have a real shop? In Browse listing, drag the pin to your door and turn on Show my exact location. Customers can get directions straight to you. If you leave it off, your exact spot stays private." },
+  { id: "u-20261015-keepme", at: "2026-10-15", title: "Stay logged in on your phone", body: "Tick Keep me logged in on this phone when you log in, and you won't need your PIN on that phone for 90 days. Log out anytime under Account." },
+  { id: "u-20261015-shortcuts", at: "2026-10-15", title: "New: open or close your shop in one tap", body: "Add Link Kedai App to your home screen. On Android, press and hold the icon to open or close your shop, or jump to My store, Browse or Affiliate Shops." },
+  { id: "u-20261015-email", at: "2026-10-15", title: "New: add your email", body: "Under Account, add your email. You can then log in with it, and if you forget your PIN you can reset it yourself with a code we email you." },
+  { id: "u-20261015-account", at: "2026-10-15", title: "Change your WhatsApp number or PIN", body: "Under Account, you can now change the WhatsApp number your orders go to, and the PIN you log in with. Your store link stays the same." },
+  { id: "u-20261015-verified", at: "2026-10-15", title: "A new Verified look", body: "Verified stores now show a blue ring and tick around their logo, everywhere in Link Kedai App." },
+  { id: "u-20261014-affiliate", at: "2026-10-14", title: "New: Affiliate Shops", body: "Sell with Shopee or other shop links? Paste your affiliate link and we fill in the photo and name for you. Stores with only shop links are listed under Affiliate Shops in Browse stores." },
+  { id: "u-20261014-bigstores", at: "2026-10-14", title: "Big stores are easier to shop", body: "Stores with lots of items now show filters and a search box, so customers find what they want faster. Pages also open instantly from a saved copy." },
   { id: "u-20260925-browse", at: "2026-09-25", title: "New: get found in Browse stores", body: "Turn on List my store in Browse stores, then pick your state, area and category, so customers can find you in the Link Kedai App. You can also add your location for Nearest first. It stays private." },
   { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Link Kedai App news now appear here. Look for the red number on the bell." },
   { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Link Kedai App Guard now show a blue Verified tick on their logo, so customers can trust your link." },
@@ -1999,9 +2013,12 @@ const bulSeenKey = () => "lk-bul:" + (SESSION ? SESSION.id : "");
 function bulSeen(){ try { return new Set(JSON.parse(localStorage.getItem(bulSeenKey()) || "[]")); } catch(e){ return new Set(); } }
 function weekKey(){ const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); }
 function shortHash(t){ let h = 0; for (const c of String(t)) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); }
+const bulGoneKey = () => "lk-bulx:" + (SESSION ? SESSION.id : "");
+function bulGone(){ try { return new Set(JSON.parse(localStorage.getItem(bulGoneKey()) || "[]")); } catch(e){ return new Set(); } }
+function bulRemove(ids){ const g = bulGone(); ids.forEach(i => g.add(i)); try { localStorage.setItem(bulGoneKey(), JSON.stringify([...g].slice(-300))); } catch(e) {} }
 function bulletinItems(){
   const out = [], b = BUL || {}, wk = weekKey(), to = String(b.ownerWa || SITE.ownerWa || "").replace(/\D/g, "");
-  const push = (id, kind, label, title, body, cta) => out.push({ id, kind, label, title, body, cta, ins: /^(ins|adins)-/.test(id) });
+  const push = (id, kind, label, title, body, cta) => out.push({ id, kind, label, title, body, cta, ins: /^(ins|adins)-/.test(id), keep: id === "st-offline" || id === "st-unpaid" });
   const sum = (arr, f) => arr.reduce((a, x) => a + (x[f] || 0), 0);
   // store status
   if (b.status === "review") push("st-review-" + b.paidAt, "shield", "Store status", "Link Kedai App Guard is checking your store", "Thanks for your payment. Your store goes live as soon as it's approved, usually within 24 hours.");
@@ -2048,16 +2065,17 @@ function bulletinItems(){
   const since = b.created ? new Date(b.created - 14 * 864e5).toISOString().slice(0, 10) : "";
   APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
   if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm the Link Kedai App bot. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights.</p>");
-  return out;
+  const gone = bulGone();   // posts the seller removed; insights and must-act status posts always stay
+  return out.filter(x => x.ins || x.keep || !gone.has(x.id));
 }
 // News (bell) and Insights (tab) are separate: each has its own unread count
 function newsItems(){ return bulletinItems().filter(x => !x.ins); }
 function insItems(){ return bulletinItems().filter(x => x.ins); }
 function unreadOf(items){ try { const seen = bulSeen(); return items.filter(x => !seen.has(x.id)).length; } catch(e){ return 0; } }
 function markSeen(items){ const seen = bulSeen(); try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {} }
-function bulCards(items, seen){
+function bulCards(items, seen, canx){
   return items.map(x => `
-    <article class="bulcard ${seen.has(x.id) ? "" : "unread"}">
+    <article class="bulcard ${seen.has(x.id) ? "" : "unread"} ${canx && !x.keep ? "canx" : ""}">${canx && !x.keep ? `<button class="xmini" data-act="bulx" data-v="${esc(x.id)}" aria-label="Remove this post">×</button>` : ""}
       <div class="bulic">${IC[x.kind] || IC.news}</div>
       <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
     </article>`).join("");
@@ -2085,7 +2103,8 @@ function openBulletin(){
 
 // ================= Seller: store home + section pages =================
 let EDV = "home", EDI = 0;
-function edGo(v, i){ if (v !== EDV && !$("builder").hidden) inpagePush({ ed: v, i: i == null ? null : i }); EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0); }
+let NEWSBACK = "home";
+function edGo(v, i){ if (v === "news" && EDV !== "news") NEWSBACK = EDV === "account" ? "account" : "home"; if (v !== EDV && !$("builder").hidden) inpagePush({ ed: v, i: i == null ? null : i }); EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0); }
 // A seller with shop links but nothing of their own to sell: listed under Affiliate Shops, never as a map pin
 function affOnly(d){ return !(d.items || []).some(it => String(it.n || "").trim()) && (d.links || []).some(l => safeUrl(l.u)); }
 function edSteps(){
@@ -2102,6 +2121,16 @@ function edSteps(){
 function edRow(v, icon, title, sub, done, i){
   const b = done === true ? `<span class="tag2 paid">Done</span>` : done === false ? `<span class="tag2 claim">To do</span>` : "";
   return `<button class="lk-row" data-act="go" data-v="${v}" ${i != null ? `data-i="${i}"` : ""}><span class="tile">${ico(icon)}</span><span class="tt"><b>${esc(title)}</b><span>${esc(sub)}</span></span>${b}<span class="chev">${ico("chevron",18)}</span></button>`;
+}
+// The newest update the seller hasn't read yet, shown on their store home until they read or close it
+function shoutHtml(){
+  const seen = bulSeen(), fresh = newsItems().filter(x => /^u-/.test(x.id) && !seen.has(x.id));
+  if (!fresh.length) return "";
+  const x = fresh[0], u = APP_UPDATES.find(u => u.id === x.id);
+  return `<section class="card bulshout" id="bulShout"><div class="bulic">${IC.ad}</div>
+    <div class="bulbody"><div class="bulmeta">${fresh.length > 1 ? `What's new · ${fresh.length} updates` : "What's new"}</div><h3 style="margin:2px 0 0">${esc(x.title)}</h3><p class="hint">${esc(u ? u.body : "")}</p>
+    <button class="btn small solid" data-act="go" data-v="news">${fresh.length > 1 ? "See all updates" : "See news"}</button></div>
+    <button class="xmini" data-act="shoutx" data-v="${esc(x.id)}" aria-label="Close">×</button></section>`;
 }
 function edTop(title, back, right){
   return `<div class="lk-bar">${back ? `<button class="iconbtn" data-act="go" data-v="${back}" aria-label="Back">${ico("back",20)}</button>` : ""}<h1>${esc(title)}</h1>${right || ""}</div>`;
@@ -2129,6 +2158,7 @@ function edHome(msg){
   return `
   ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
+  ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${status}</div>
     ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link)}</span></p>
@@ -2460,9 +2490,10 @@ function edInsights(){
 function edNews(){
   const items = newsItems(), seen = bulSeen();
   setTimeout(() => { markSeen(items); updateBell(); }, 0);
-  return `${edTop("News", "home")}
-  <p class="hint" style="margin:-4px 2px 14px">From the Link Kedai App bot: your store status, tips and what's new.</p>
-  ${items.length ? bulCards(items, seen) : `<p class="hint">Nothing here yet. Check back soon.</p>`}`;
+  const canClear = items.some(x => !x.keep);
+  return `${edTop("News", NEWSBACK, canClear ? `<button class="btn small" data-act="bulclear">Clear all</button>` : "")}
+  <p class="hint" style="margin:-4px 2px 14px">From the Link Kedai App bot: your store status, tips and what's new. Tap × to remove a post you've read.</p>
+  ${items.length ? bulCards(items, seen, true) : `<section class="card"><p class="hint" style="margin:0">You're all caught up. New tips and updates will show here.</p></section>`}`;
 }
 function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -2473,6 +2504,7 @@ function edAccount(){
     ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chemail"><span class="tile">${ico("mail")}</span><span class="tt"><b>${ME_EMAIL ? "Change email" : "Add email"}</b><span>${ME_EMAIL ? esc(ME_EMAIL) : "So you can reset your PIN yourself if you forget it"}</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chpin"><span class="tile">${ico("lock")}</span><span class="tt"><b>Change PIN</b><span>The 6-digit PIN you log in with</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
+    ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new from ${esc(APP_NAME)}</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in until you log out" : "You can log in again anytime"}</span></span></button>
   </section>
@@ -3018,6 +3050,9 @@ $("builder").addEventListener("click", async e => {
     } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
   }
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
+  else if (a === "bulx"){ const y = window.scrollY; bulRemove([b.dataset.v]); renderEditor(); window.scrollTo(0, y); }
+  else if (a === "bulclear"){ if (!(await ask("Remove all these posts? Status posts you still need to act on stay.", "Clear all"))) return; bulRemove(newsItems().filter(x => !x.keep).map(x => x.id)); renderEditor(); }
+  else if (a === "shoutx"){ const y = window.scrollY; markSeen([{ id: b.dataset.v }]); renderEditor(); window.scrollTo(0, y); }
   else if (a === "setcat"){ S.cat = b.dataset.v; touch(); renderEditor(); }
   else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed."); }
   else if (a === "pinme"){
