@@ -308,6 +308,16 @@ textarea{min-height:72px;resize:vertical}
 
 .exempty{grid-column:1/-1}
 .nearbox{margin-top:16px;padding:12px 14px;border-radius:var(--r-md);background:var(--soft)}
+.pinmap{height:280px;margin:10px 0 6px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);background:var(--surface);position:relative}
+.pinmap .maplibregl-ctrl-attrib{font-size:10px}
+.pinstate{font-size:13px;font-weight:700;margin:4px 0 8px}
+.pinstate.ok{color:#15803D}.pinstate.need{color:var(--warn,#B45309)}
+.stvisit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.stvisit .addr{flex:1 1 100%;display:flex;gap:6px;align-items:flex-start;font-size:14px;color:var(--muted);line-height:1.35}
+.stvisit .addr svg{flex:none;margin-top:1px}
+.mxmk.exact .mxpin{border-radius:50% 50% 50% 4px;transform:rotate(-45deg)}.mxmk.exact .mxpin>svg{transform:rotate(45deg)}
+.mxdir{display:flex;gap:8px;margin-top:8px}.mxdir .btn{flex:1;white-space:nowrap}.stvisit .mxdir{flex:1 1 100%;margin-top:0}
+.shoptag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--ink);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:1px}
 .exinstall{margin-top:12px}.dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);}
@@ -1247,6 +1257,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <span class="stplace" id="stPlace" hidden></span>
       <h1 class="stname" id="stName"></h1>
       <p class="tag" id="stTag"></p>
+      <div class="stvisit" id="stVisit" hidden></div>
     </section>
     <div class="pwabar" id="stPwaBar" hidden></div>
     <div class="adwrap" id="adWrap" hidden>
@@ -1547,7 +1558,8 @@ function normalize(d){
   if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
   if (!KINDS[x.kind]) x.kind = "products";
   const l = d && d.loc && typeof d.loc === "object" ? d.loc : {};
-  x.loc = { on: !!l.on, state: STATES.includes(l.state) ? l.state : "", city: String(l.city || "").slice(0, 40), lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60) };
+  x.loc = { on: !!l.on, state: STATES.includes(l.state) ? l.state : "", city: String(l.city || "").slice(0, 40), lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60),
+    pub: !!l.pub, addr: String(l.addr || "").replace(/[<>"`]/g, "").slice(0, 120) };
   x.cat = d && CATS[d.cat] ? d.cat : "";
   x.closed = !!x.closed; x.closedMsg = String(x.closedMsg || "");
   x.wa = String(x.wa || "").replace(/\D/g, "");
@@ -2276,7 +2288,7 @@ function edProduct(i){
       <span class="ctl"><button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button><button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button></span></div>
   </section>`;
 }
-function edListing(){ return `${edTop("Browse listing", "home")}${edListingCard()}`; }
+function edListing(){ setTimeout(initPinMap, 0); return `${edTop("Browse listing", "home")}${edListingCard()}`; }
 function edListingCard(){
   const cities = CITIES[S.loc.state] || [];
   const other = S.loc.city && !cities.includes(S.loc.city), aff = affOnly(S);
@@ -2292,13 +2304,54 @@ function edListingCard(){
       <label>Category</label>
       <div class="stalls pick">${Object.keys(CATS).map(k => `<button type="button" data-act="setcat" data-v="${k}" aria-pressed="${(S.cat ? S.cat : catOf(S)) === k}"><span class="stall">${stallIcon(k)}</span>${CATS[k]}</button>`).join("")}</div>
       ${aff ? "" : `<div class="nearbox">
+        <label class="check" style="margin-top:0"><input type="checkbox" data-floc="pub" ${S.loc.pub ? "checked" : ""}><span><b>I have a shop customers can visit</b><br>Show my exact shop location and address on the map, with directions</span></label>
+        ${S.loc.pub ? `<div class="pinmap" id="pinMap" role="application" aria-label="Map: drag the pin onto your shop"></div>
+        <p class="pinstate ${S.loc.lat != null ? "ok" : "need"}" id="pinState">${S.loc.lat != null ? "Pin set. Drag it to adjust." : "Drag the pin onto your shop, or tap the map."}</p>
+        <button class="btn small" data-act="pinme">${ico("pin",16)}Use my current location</button>
+        <label>Shop address (optional)<input type="text" data-floc="addr" value="${esc(S.loc.addr)}" maxlength="120" placeholder="e.g. No 12, Jalan Mawar 7/2, Seksyen 7"></label>
+        <p class="hint" style="margin:6px 0 0">Customers see this exact spot and can get directions on Google Maps or Waze. Turn this off any time to go back to showing only your area.</p>` : ""}
+      </div>
+      ${S.loc.pub ? "" : `<div class="nearbox">
         <b>Nearest first (optional)</b>
         <p class="hint" style="margin:4px 0 8px">Add your location so nearby customers see you first. It stays private: customers only see roughly how far away you are, never where.</p>
         ${S.loc.lat != null ? `<p class="hint" style="margin:0 0 8px;color:#15803D;font-weight:700">Location added</p><button class="btn small" data-act="noloc">Remove my location</button>` : `<button class="btn small" data-act="myloc">${ico("pin",16)}Add my current location</button>`}
-      </div>`}
+      </div>`}`}
     </div>
   </section>`;
 }
+// ---------- Shop pin: the seller drags it onto their shop ----------
+let PINMAP = null;
+function pinSet(lat, lng, fly){
+  S.loc.lat = Math.round(lat * 1e6) / 1e6; S.loc.lng = Math.round(lng * 1e6) / 1e6; touch();
+  if (PINMAP){ PINMAP.mk.setLngLat([S.loc.lng, S.loc.lat]); if (fly) PINMAP.map.flyTo({ center: [S.loc.lng, S.loc.lat], zoom: 17, duration: 600 }); }
+  const st = $("pinState"); if (st){ st.className = "pinstate ok"; st.textContent = "Pin set. Drag it to adjust."; }
+  const pill = $("savePill"); if (pill && pill.dataset.state === "bad") savePill("saving");   // the "drag the pin" warning is answered
+}
+async function initPinMap(){
+  const box = $("pinMap"); if (!box || box.dataset.ready) return;
+  box.dataset.ready = "1";
+  if (PINMAP){ try { PINMAP.map.remove(); } catch(e) {} PINMAP = null; }
+  try { await mxLoadMap(); } catch(e){ box.innerHTML = `<p class="hint" style="padding:12px">${esc(e.message)}</p>`; return; }
+  if (!box.isConnected) return;
+  const has = S.loc.lat != null && S.loc.lng != null, town = mxGeoCache()[[S.loc.city, S.loc.state].filter(Boolean).join(", ")];
+  const center = has ? [S.loc.lng, S.loc.lat] : town ? [town.lng, town.lat] : [101.6869, 3.139];
+  const map = new maplibregl.Map({ container: box, style: MX_STYLE(mxDark()), center, zoom: has ? 17 : town ? 13 : 11, attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false });
+  map.touchZoomRotate.disableRotation();
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+  const mk = new maplibregl.Marker({ draggable: true, color: S.color || "#18395C" }).setLngLat(center).addTo(map);
+  mk.on("dragend", () => { const p = mk.getLngLat(); pinSet(p.lat, p.lng); });
+  map.on("click", e => pinSet(e.lngLat.lat, e.lngLat.lng));
+  PINMAP = { map, mk };
+  // no pin yet: start on the seller's own town, so the shop is a short drag away
+  const place = [S.loc.city, S.loc.state].filter(Boolean).join(", ");
+  if (!has && !town && S.loc.city) try {
+    const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=my&q=" + encodeURIComponent(place + ", Malaysia"), { headers: { Accept: "application/json" } });
+    const j = r.ok ? await r.json() : null;
+    if (j && j[0] && PINMAP && PINMAP.map === map && S.loc.lat == null){ const c = [+j[0].lon, +j[0].lat]; map.jumpTo({ center: c, zoom: 14 }); mk.setLngLat(c); const g = mxGeoCache(); g[place] = { lat: c[1], lng: c[0] }; try { localStorage.setItem("lk-geo", JSON.stringify(g)); } catch(e) {} }
+  } catch(e) {}
+}
+
 function edInsights(){
   const items = bulletinItems(), seen = bulSeen();
   setTimeout(() => { try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {} }, 0);
@@ -2486,6 +2539,7 @@ let AUTOSAVE_T = 0, EDITV = 0, SAVING = null;
 function saveProblem(){
   if (S.loc.on && !S.loc.state) return "Choose your state under Browse listing.";
   if (S.loc.on && !S.loc.city && !affOnly(S)) return "Choose your city or town under Browse listing.";
+  if (S.loc.on && S.loc.pub && S.loc.lat == null && !affOnly(S)) return "Drag the pin onto your shop under Browse listing.";
   if (!S.name.trim()) return "Add your shop name.";
   if (!S.wa || S.wa.length < 9) return "Add your WhatsApp number, so orders can reach you.";
   return "";
@@ -2718,7 +2772,7 @@ function legacyEditor(msg){
     </div>
   </section>
 
-  ${edListingCard()}
+  ${edListingCard()}${(setTimeout(initPinMap, 0), "")}
 
   <section class="card">
     <h2>${W(S).list}</h2>
@@ -2764,6 +2818,8 @@ function onField(e){
     if (t.dataset.floc === "city"){ if (t.value === "__other"){ EDOTHER = true; S.loc.city = ""; } else { EDOTHER = false; S.loc.city = t.value; } touch(); if (e.type === "change") renderEditor(); return; }
     if (t.dataset.floc === "cityOther"){ const sel = document.querySelector('[data-floc="city"]'); if (!t.isConnected || (sel && sel.value !== "__other")) return; S.loc.city = t.value.trim().slice(0, 40); touch(); return; }
     if (t.dataset.floc === "area"){ S.loc.area = t.value; touch(); return; }
+    if (t.dataset.floc === "addr"){ S.loc.addr = t.value.replace(/[<>"`]/g, "").slice(0, 120); touch(); return; }
+    if (t.dataset.floc === "pub"){ if (e.type !== "change") return; S.loc.pub = t.checked; if (!t.checked) S.loc.addr = ""; touch(); renderEditor(); return; }
   }
   if (t.dataset.lf !== undefined){
     const l = S.links[+t.dataset.j]; if (!l) return;
@@ -2853,6 +2909,12 @@ $("builder").addEventListener("click", async e => {
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("insights"); }
   else if (a === "setcat"){ S.cat = b.dataset.v; touch(); renderEditor(); }
   else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed."); }
+  else if (a === "pinme"){
+    if (!navigator.geolocation) return notify("Your phone's browser can't share location. Drag the pin onto your shop instead.");
+    b.disabled = true; b.textContent = "Finding you...";
+    navigator.geolocation.getCurrentPosition(pos => { b.disabled = false; b.innerHTML = ico("pin", 16) + "Use my current location"; pinSet(pos.coords.latitude, pos.coords.longitude, true); },
+      () => { b.disabled = false; b.innerHTML = ico("pin", 16) + "Use my current location"; notify("Couldn't get your location. Drag the pin onto your shop instead."); }, { enableHighAccuracy: true, timeout: 12000 });
+  }
   else if (a === "myloc"){
     if (!navigator.geolocation) return notify("Your phone's browser can't share location. You can still be listed by state and area.");
     b.disabled = true; b.textContent = "Finding you...";
@@ -3043,9 +3105,12 @@ async function showStore(data, isPreview, refresh){
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
   // town + state (the seller's own preview uses what they've set in the editor)
-  const pl = isPreview ? (S && S.loc && S.loc.state ? { city: S.loc.city, state: S.loc.state } : null) : STORE_PLACE;
+  const pl = isPreview ? (S && S.loc && S.loc.state ? { city: S.loc.city, state: S.loc.state, pub: S.loc.on && S.loc.pub && S.loc.lat != null, lat: S.loc.lat, lng: S.loc.lng, addr: S.loc.addr } : null) : STORE_PLACE;
   const plTxt = pl ? [pl.city, pl.state].filter(Boolean).join(", ") : "";
   $("stPlace").hidden = !plTxt; $("stPlace").innerHTML = plTxt ? ico("pin", 14, 2) + `<span>${esc(plTxt)}</span>` : "";
+  const visit = pl && pl.pub && isFinite(+pl.lat) && isFinite(+pl.lng);
+  $("stVisit").hidden = !visit;
+  $("stVisit").innerHTML = visit ? `<span class="addr">${ico("store", 16, 2)}<span>Visit the shop${pl.addr ? ": " + esc(pl.addr) : ""}</span></span>${dirButtons(pl.lat, pl.lng, "mxdir")}` : "";
   $("brandLink").href = home();
   $("stReportWrap").hidden = !!isPreview;
   $("stTerms").href = home() + "terms"; $("stPrivacy").href = home() + "privacy";
@@ -3749,7 +3814,7 @@ function legalDoc(which){
       <li><b>Email (optional):</b> if you add one, we use it only to let you log in and to send you codes, for example to reset your PIN. It is never shown on your store.</li>
       <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
       <li><b>Payment receipts:</b> the receipt screenshot you upload when you publish. Receipts are private and only seen by us.</li>
-      <li><b>Store listing (optional):</b> if you list your store in Browse stores, customers see your state, the area name you write and your category. If you also add your location for "Nearest first", it stays private: customers only see roughly how far away you are, never where.</li>
+      <li><b>Store listing (optional):</b> if you list your store in Browse stores, customers see your state, the area name you write and your category. If you also add your location for "Nearest first", it stays private: customers only see roughly how far away you are, never where. If you turn on "I have a shop customers can visit", customers see your exact shop location and the address you write, so they can get directions. You can turn it off any time.</li>
     </ul>
     <h2>2. Information from customers</h2>
     <ul>
@@ -3865,6 +3930,7 @@ const mxPlace = st => [st.city || st.area, st.state].filter(Boolean).join(", ");
 const mxCol = st => /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
 function mxArea(st){
   if (st.aff) return null;   // Affiliate Shops sell online through Shopee, TikTok Shop and others: never a pin
+  if (st.pub && mxHasCoords(st)) return { lat: +st.lat, lng: +st.lng, r: 0, exact: true };   // a shop that chose to show its door
   if (mxHasCoords(st)){
     // snap to a ~440 m grid, then nudge inside the cell: the true spot is always inside the 650 m circle
     const g = 0.004, snap = v => (Math.floor(v / g) + 0.5) * g;
@@ -3967,8 +4033,8 @@ function mxDraw(force){
       }
       const st = c.items[0], col = mxCol(st), sel = st.id === MX.sel;
       const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
-      feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
-      const el = document.createElement("div"); el.className = "mxmk" + (st.closed ? " closed" : "") + (sel ? " sel" : "");
+      if (!st._a.exact) feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
+      const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
       el.innerHTML = `<span class="mxpin" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
       el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
       if (sel) el.style.zIndex = 5;
@@ -4029,23 +4095,30 @@ function mxRenderSheet(){
     (MX.noarea && MX.noarea.length ? `<h3 class="mxh3">Not on the map yet</h3><p class="mxnote">These sellers haven't set a location.</p>${MX.noarea.map(s => mxRow(s, false)).join("")}` : "") +
     (affs.length ? `<h3 class="mxh3">Affiliate Shops</h3>${affNote}${affs.map(s => mxRow(s, false)).join("")}` : "");
 }
+// Google Maps and Waze open with the shop as the destination
+function dirButtons(lat, lng, cls){
+  if (!isFinite(+lat) || !isFinite(+lng)) return "";
+  const ll = (+lat).toFixed(6) + "," + (+lng).toFixed(6);
+  return `<div class="${cls}"><a class="btn small" href="https://www.google.com/maps/dir/?api=1&destination=${ll}" target="_blank" rel="noopener">${ico("pin", 16)}Google Maps</a><a class="btn small" href="https://waze.com/ul?ll=${ll}&navigate=yes" target="_blank" rel="noopener">${ico("ext", 16)}Waze</a></div>`;
+}
 function mxShowCard(st){
   const c = $("mxCard"), logo = safeImg(st.logo), blurb = st.tag || st.items || "";
   c.dataset.store = st.id;
   c.innerHTML = `<div class="mxcrow">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : initial(st.name))}
-    <div class="mxci"><b><span>${esc(st.name)}</span></b>${st.v ? `<span class="vlabel">Verified by ${esc(APP_NAME)}</span>` : ""}<span class="mxmeta">${esc(mxMeta(st))}</span>
+    <div class="mxci"><b><span>${esc(st.name)}</span>${st._a && st._a.exact ? `<span class="shoptag">Shop</span>` : ""}</b>${st.v ? `<span class="vlabel">Verified by ${esc(APP_NAME)}</span>` : ""}<span class="mxmeta">${esc(mxMeta(st))}</span>
     <span class="mxmeta">${st.closed ? `<span class="exshut">Closed now</span>` : `<span class="exopen">Open now</span>`} · ${esc(CATS[st.cat] || "Other")}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></div>
     <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></div>
     ${blurb ? `<p class="mxitems">${esc(blurb)}</p>` : ""}
     <div class="mxgo"><a class="btn solid full" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" id="mxVisit">Visit store ${ico("chevron", 18, 2.2)}</a></div>
-    <p class="mxhint">${ico("pin", 14, 2)}<span>${st._a && st._a.r > 1000 ? "Shown at town level, not the exact address." : "Approximate selling area, not the exact address."}</span></p>`;
+    ${st._a && st._a.exact ? `${st.addr ? `<p class="mxhint">${ico("pin", 14, 2)}<span>${esc(st.addr)}</span></p>` : ""}${dirButtons(st.lat, st.lng, "mxdir")}`
+      : `<p class="mxhint">${ico("pin", 14, 2)}<span>${st._a && st._a.r > 1000 ? "Shown at town level, not the exact address." : "Approximate selling area, not the exact address."}</span></p>`}`;
   c.classList.add("show");
 }
 function mxSelect(id, fly = true){
   const st = EX.stores.find(x => x.id === id); if (!st || !MX) return;
   st._a = st._a || mxArea(st); if (!st._a) return;
   MX.sel = id; MX.sig = ""; mxShowCard(st); mxCloseSheet();
-  if (fly) MX.map.flyTo({ center: [st._a.lng, st._a.lat], zoom: Math.max(MX.map.getZoom(), st._a.r > 1000 ? 12 : 13), duration: 600, offset: [0, -100] });
+  if (fly) MX.map.flyTo({ center: [st._a.lng, st._a.lat], zoom: Math.max(MX.map.getZoom(), st._a.exact ? 15 : st._a.r > 1000 ? 12 : 13), duration: 600, offset: [0, -100] });
   mxDraw();
 }
 function mxDeselect(){ if (!MX || !MX.sel) return; MX.sel = null; MX.sig = ""; $("mxCard").classList.remove("show"); mxDraw(); }
