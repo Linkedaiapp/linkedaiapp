@@ -12,7 +12,6 @@
 <title>Link Kedai App</title>
 <meta name="copyright" content="© 2026 Link Kedai App. All rights reserved.">
 <meta name="color-scheme" content="light only">
-<link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#18395C">
 <meta name="description" content="Find home sellers near you and order on WhatsApp.">
 <meta property="og:type" content="website">
@@ -20,6 +19,10 @@
 <meta property="og:title" content="Link Kedai App">
 <meta property="og:description" content="Find home sellers near you and order on WhatsApp.">
 <meta property="og:url" content="https://linkedaiapp.github.io/linkedaiapp/">
+<!-- yoursite/shop-name/ or yoursite/explore/: drop the slash before any file below loads, so they come from the right folder -->
+<script>(function(){ try { var base = new URL(document.querySelector('meta[property="og:url"]').content).pathname, p = location.pathname;
+  if (p.length > base.length && p.indexOf(base) === 0 && /\/$/.test(p)) history.replaceState(null, "", p.replace(/\/+$/, "") + location.search + location.hash); } catch(e){} })();</script>
+<link rel="manifest" href="manifest.webmanifest">
 <meta property="og:image" content="https://linkedaiapp.github.io/linkedaiapp/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -379,7 +382,7 @@ textarea{min-height:72px;resize:vertical}
   color:#fff;display:grid;place-items:center;font-weight:800;overflow:hidden;
   box-shadow:0 0 0 5px var(--surface),0 8px 22px rgba(20,10,15,.16);position:relative}
 .st-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.stname{font-weight:800;letter-spacing:-.03em;line-height:1.08;}
+.stname{font-weight:800;letter-spacing:-.03em;line-height:1.08;overflow-wrap:anywhere}
 .tag{color:var(--muted);margin:0}
 .info{margin:10px 0 0;font-size:14px;font-weight:500}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
@@ -402,7 +405,7 @@ textarea{min-height:72px;resize:vertical}
 .prow{display:flex;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
 .prow:last-child{border-bottom:0}
 .ptext{flex:1;min-width:0}
-.ptext h3{font-weight:700;margin:0 0 3px;line-height:1.25}
+.ptext h3{font-weight:700;margin:0 0 3px;line-height:1.25;overflow-wrap:anywhere}
 .pdesc{color:var(--muted);margin:0;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
 .pmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .pprice{font-weight:700;font-size:15px}
@@ -426,14 +429,15 @@ textarea{min-height:72px;resize:vertical}
 .plist.minimal .ptext h3{font-size:18px;font-weight:600;letter-spacing:-.01em}
 .plist.minimal .pmeta{margin-top:4px}
 .plist.minimal .prow::after{content:"+";flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:18px;font-weight:600;color:var(--ink)}
-.plist.minimal .prow.out::after{content:none}
+.plist.minimal .prow.out::after,.plist.minimal .plink::after{content:none}
 .empty{color:var(--muted);text-align:center;padding:40px 16px}
 .foot{text-align:center;color:var(--muted);font-size:13px;margin:32px 16px 0}
 .foot a{color:inherit}
 
 .bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));z-index:5;
   transform:translateY(120%);transition:transform .25s ease;pointer-events:none}
-.bar.show{transform:none;pointer-events:auto}
+.bar.show{transform:none;pointer-events:auto;visibility:visible}
+.bar:not(.show){visibility:hidden;transition:transform .25s ease,visibility 0s .25s}
 .cartbtn{width:100%;max-width:692px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--accent);color:#fff;border:0;
   border-radius:var(--r-md);padding:15px 18px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:var(--sh-2)}
 .cartbtn .cnt{background:rgba(255,255,255,.22);border-radius:var(--r-xs);padding:2px 9px;min-width:30px;text-align:center}
@@ -515,13 +519,13 @@ html,body{overflow-x:hidden}
 .pbig img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-lg) var(--r-lg) 0 0}
 .pbig .ph{border-radius:var(--r-lg) var(--r-lg) 0 0;font-size:32px}
 .pbody{padding:18px 16px 0}
-.pbody h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px;line-height:1.15}
+.pbody h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px;line-height:1.15;overflow-wrap:anywhere}
 .pbody .pdesc{display:block;-webkit-line-clamp:unset}
 .opts{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:0 14px}
 .optrow{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer;margin:0;font-weight:500}
 .optrow:last-child{border-bottom:0}
 .optrow input{width:20px;height:20px;accent-color:var(--accent);margin:0}
-.optrow .ol{flex:1}
+.optrow .ol{flex:1;overflow-wrap:anywhere}
 .qtyrow{display:flex;justify-content:space-between;align-items:center;margin:18px 0}
 .step{display:flex;align-items:center;gap:6px}
 .step button{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:20px;line-height:1;cursor:pointer}
@@ -1226,6 +1230,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <p class="hint" style="margin:0 0 4px">Now: <b id="waNow"></b>. After the change, orders go to the new number and you log in with it.</p>
     <label>New WhatsApp number<input type="tel" id="waNew" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
     <label>Type it again<input type="tel" id="waNew2" autocomplete="off" placeholder="e.g. 012-345 6789"></label>
+    <label id="waPinWrap" hidden>Your 6-digit PIN<span class="pinwrap"><input type="password" id="waPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="waPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
     <p class="err" id="waErr" role="alert"></p>
     <div class="row2" style="margin-top:6px">
       <div><button class="btn full" type="button" data-close="waOverlay">Cancel</button></div>
@@ -1414,10 +1419,14 @@ function linkInfo(u){
     return { host, brand: b ? b[1] : host };
   } catch(e){ return { host: "", brand: "" }; }
 }
-function looksJunk(t){
+// Search: every word typed must appear somewhere; spacing, capitals and accents don't matter ("chocoluxe hub", "creampuff klang")
+const foldText = t => String(t || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+const matchWords = (hay, q) => { const h = foldText(hay); return foldText(q).split(" ").every(w => !w || h.includes(w)); };
+// typed: a name the seller wrote (only address-like text is junk); otherwise a fetched title (short ones are junk too)
+function looksJunk(t, typed){
   t = String(t || "").trim(); if (!t) return false;
   const letters = (t.match(/\p{L}/gu) || []).length;
-  return letters < 4 || /[?&]\w+=/.test(t) || /^https?:/i.test(t) || /^[\w.-]+\.[a-z]{2,}\//i.test(t) || /^[\d._-]+$/.test(t);
+  return (!typed && letters < 4) || /[?&]\w+=/.test(t) || /^https?:/i.test(t) || /^[\w.-]+\.[a-z]{2,}\//i.test(t) || /^[\d._-]+$/.test(t);
 }
 function slugName(u){   // Shopee product pages carry the name in the address: /Product-Name-i.123.456
   try { const seg = decodeURIComponent(new URL(u).pathname.split("/").filter(Boolean).pop() || ""), m = seg.match(/^(.+)-i\.\d+\.\d+$/); return m ? m[1].replace(/-+/g, " ").trim().slice(0, 120) : ""; } catch(e){ return ""; }
@@ -1565,7 +1574,7 @@ async function apiPost(body, extra){
   if (SESSION && SESSION.tok && body.id === SESSION.id && !body.pin && !body.key) body.tok = SESSION.tok;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the server link to site.json.");
   const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
-  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 40000 : 0);
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) && !(body.action === "admin" && /^(delete|rename|resetpin)$/.test(body.op || "")) ? 2 : 1, body.action === "upload" ? 40000 : 0);
   if (!(extra && extra.again) && serverMoved(j)) return apiPost(body, Object.assign({}, extra, { again: true }));
   if (j.error) throw new Error(j.error);
   return j;
@@ -1611,7 +1620,7 @@ function normalize(d){
     o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String((o && o.l) || ""), p: Math.min(Math.max(0, Number(o && o.p) || 0), 1e9) })) : [{ l: "", p: 0 }]
   }));
   x.links = (Array.isArray(x.links) ? x.links : []).slice(0, 80).map(l => ({
-    u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: looksJunk((l && l.n) || "") ? "" : String((l && l.n) || "").slice(0, 120),
+    u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: looksJunk((l && l.n) || "", true) ? "" : String((l && l.n) || "").slice(0, 120),
     img: safeImg(String((l && l.img) || "").trim()), p: Math.max(0, Number(l && l.p) || 0), pu: safeUrl(String((l && l.pu) || "")).slice(0, 600)
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
@@ -1717,6 +1726,7 @@ function openSheet(id){
   clearTimeout(o._closeT);
   o.classList.remove("closing");
   o.classList.add("open");
+  const x = o.querySelector(".xmini, [data-close]"); if (x) try { x.focus({ preventScroll: true }); } catch(e) {}
 }
 function show(id){
   ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
@@ -1821,7 +1831,15 @@ function saveSession(){
   try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {}
   if (SESSION && SESSION.tok && !SESSION.admin) keep.set("lk-keep", { id: SESSION.id, tok: SESSION.tok });
 }
-function clearSession(){ SESSION = null; ME_EMAIL = ""; BUL = null; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); localStorage.removeItem("lk-keep"); } catch(e) {} }
+// The phone's kept login (lk-keep) is removed only when it belongs to this login, or when the seller logs out on purpose.
+// An admin editing a store, or an old tab with an outdated key, never logs the phone's own seller out.
+function clearSession(leaving){
+  const k = keep.get("lk-keep"), s = SESSION;
+  const mine = s && !s.admin && k && k.id === s.id && (leaving || !s.tok || k.tok === s.tok);
+  SESSION = null; ME_EMAIL = ""; BUL = null;
+  try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); } catch(e) {}
+  if (mine) keep.del("lk-keep");
+}
 const authErr = e => /PIN|WhatsApp number|logged out on this phone/i.test((e && e.message) || "");
 
 function loginCardHtml(msg){
@@ -1911,7 +1929,14 @@ $("fpSave").onclick = async () => {
   btn.disabled = false; btn.textContent = "Save and log in";
 };
 
-function normWa(v){ let d = String(v || "").replace(/\D/g, ""); if (d.startsWith("0")) d = "6" + d; return d; }
+function normWa(v){
+  let d = String(v || "").replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);                // 0060 12...
+  if (d.startsWith("600")) d = "60" + d.slice(3);         // +60 012...
+  else if (d.startsWith("0")) d = "6" + d;               // 012...
+  else if (/^1\d{8,9}$/.test(d)) d = "60" + d;           // 12... (no 0)
+  return d;
+}
 
 function renderStart(msg, mode){
   const signup = mode === "signup";
@@ -1960,7 +1985,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
@@ -1984,6 +2009,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-fixes", at: "2026-10-17", title: "Smoother editing and ordering", body: "The phone's Back button now steps back through your editor properly. Links pasted without https:// and short link names are saved. If your PIN was changed on another phone, we ask for it instead of failing to save. Customers can clear an optional date, and Browse search finds every word you type." },
   { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
   { id: "u-20261016-daysoff", at: "2026-10-16", title: "New: mark your days off", body: "Under Store status, tap the dates you aren't taking orders, or pick a day of the week that's always off. Customers can't choose those dates when they order." },
   { id: "u-20261016-faster", at: "2026-10-16", title: "Your store now opens faster", body: "Link Kedai App moved to a faster server. Your store page and your editor now load in a second or two, even when nobody has visited for a while." },
@@ -2092,8 +2118,10 @@ function updateBell(){
 }
 async function loadBulletin(){
   if (!SESSION) return;
-  try { BUL = await apiPost({ action: "bulletin", id: SESSION.id, pin: SESSION.pin }); } catch(e){ BUL = null; }
-  updateBell();
+  const id = SESSION.id;
+  let b = null; try { b = await apiPost({ action: "bulletin", id, pin: SESSION.pin }); } catch(e) {}
+  if (!SESSION || SESSION.id !== id) return;
+  BUL = b; updateBell();
 }
 function openBulletin(){
   const items = bulletinItems(), seen = bulSeen();
@@ -2136,7 +2164,7 @@ function shoutHtml(){
     <button class="xmini" data-act="shoutx" data-v="${esc(x.id)}" aria-label="Close">×</button></section>`;
 }
 function edTop(title, back, right){
-  return `<div class="lk-bar">${back ? `<button class="iconbtn" data-act="go" data-v="${back}" aria-label="Back">${ico("back",20)}</button>` : ""}<h1>${esc(title)}</h1>${right || ""}</div>`;
+  return `<div class="lk-bar">${back ? `<button class="iconbtn" data-act="back" data-v="${back}" aria-label="Back">${ico("back",20)}</button>` : ""}<h1>${esc(title)}</h1>${right || ""}</div>`;
 }
 function edTabs(){
   const unread = EDV === "insights" ? 0 : unreadOf(insItems());
@@ -2569,7 +2597,8 @@ function fmtWa(wa){
   const l = "0" + wa.slice(2); return l.slice(0, 3) + "-" + l.slice(3, 6) + " " + l.slice(6);
 }
 function openWaChange(){
-  $("waNew").value = ""; $("waNew2").value = ""; $("waErr").textContent = ""; $("waNow").textContent = fmtWa(S.wa) || "none yet";
+  $("waNew").value = ""; $("waNew2").value = ""; $("waPin").value = ""; $("waPin").type = "password"; $("waErr").textContent = ""; $("waNow").textContent = fmtWa(S.wa) || "none yet";
+  $("waPinWrap").hidden = !(SESSION && SESSION.tok);   // a phone that stays logged in proves it's the owner with the PIN
   openSheet("waOverlay"); setTimeout(() => $("waNew").focus(), 300);
 }
 $("waSave").onclick = async () => {
@@ -2577,10 +2606,13 @@ $("waSave").onclick = async () => {
   if (a.length < 9 || a.length > 15) return err("Type your full WhatsApp number, like 012-345 6789.");
   if (a !== b) return err("The two numbers don't match. Please check and type them again.");
   if (a === S.wa) return err("That's already your number.");
+  const pin = SESSION.tok ? $("waPin").value.trim() : "";
+  if (SESSION.tok && !/^\d{6}$/.test(pin)) return err("Type your 6-digit PIN to change your number.");
   const btn = $("waSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
-  const old = S.wa; S.wa = a;
+  const old = S.wa, had = SESSION.pin; S.wa = a;
   try {
-    await saveNow();
+    if (pin) SESSION.pin = pin;   // this one save checks the PIN instead of the phone's login key
+    try { await saveNow(); } finally { if (pin && SESSION){ if (had === undefined) delete SESSION.pin; else SESSION.pin = had; } }
     dismissSheet("waOverlay"); renderEditor();
     notify(`Done. From now on, orders go to ${fmtWa(a)}, and you log in with this number.`);
   } catch(e){ S.wa = old; err(friendly(e, "Couldn't change your number right now. Check your internet and try again.")); }
@@ -2664,8 +2696,23 @@ $("bwrap").addEventListener("click", e => {
   if (nav && !nav.disabled){ const d = new Date(OFFCAL.y, OFFCAL.m + +nav.dataset.calnav, 1); OFFCAL = { y: d.getFullYear(), m: d.getMonth() }; cal.innerHTML = calHtml(OFFCAL.y, OFFCAL.m, S.off, "mark"); return; }
   if (day && !day.disabled){ const s = day.dataset.day; S.off.dates = S.off.dates.includes(s) ? S.off.dates.filter(x => x !== s) : [...S.off.dates, s].sort(); redrawOff(); }
 });
+// an item worth keeping: anything typed or picked (a photo still uploading counts)
+const keepItem = it => !!(it.n.trim() || it.d.trim() || it.img || UP_ITEMS.has(it) || it.o.some(o => +o.p || o.l.trim()));
+// leaving an item or link page: an untouched new one doesn't stay behind
+function leaveEdPage(to){
+  if (EDV === "product" && to !== "product"){ const it = S.items[EDI]; if (it && !keepItem(it)){ S.items.splice(EDI, 1); EDI = -1; } }
+  if (EDV === "link" && to !== "link"){ const l = S.links[EDI]; if (l && !l.u.trim()){ S.links.splice(EDI, 1); EDI = -1; } }
+}
+// The ‹ arrow steps back through the phone's history (so its Back button never bounces between two pages),
+// then opens the arrow's page if the step below was a different one
+let ED_BACK_TO = null;
+function edBack(v, i){
+  const top = INPAGE_N.get(HIST_CUR);
+  if (top && top.ed && !$("builder").hidden){ ED_BACK_TO = { v, i: i == null ? null : i }; return history.back(); }
+  edGo(v, i);
+}
 function edTidy(){
-  if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || UP_ITEMS.has(it) || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
+  if (!window.LK_ALLVIEW) S.items = S.items.filter(keepItem);   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
 }
 function openEditor(msg){
@@ -2698,9 +2745,29 @@ function savePill(state, text){
   if (state === "saved") el._t = setTimeout(() => el.classList.remove("show"), 2200);
 }
 function scheduleAutosave(ms){ clearTimeout(AUTOSAVE_T); if (SESSION) AUTOSAVE_T = setTimeout(() => autoSave(), ms == null ? 2500 : ms); }
+// The PIN was changed or reset elsewhere, or this phone was logged out: stop saving (every try would count as a wrong PIN
+// and lock the store), keep the changes on screen, and ask for the PIN once.
+let RELOGIN = null, ED_SYNC = false;
+function relogin(e){
+  if (RELOGIN) return RELOGIN;
+  RELOGIN = (async () => {
+    const m = friendly(e, "");
+    if (!SESSION || SESSION.admin || /too many/i.test(m)){ notify(m + " Your changes are still here."); return false; }
+    const pin = await askText("Type your PIN to keep saving", "", (/logged out/i.test(m) ? m : "Your PIN may have been changed on another phone.") + " Your changes are still here.", "Continue", true);
+    if (!pin || !SESSION) return false;
+    try {
+      await apiPost({ action: "login", id: SESSION.id, pin });
+      if (SESSION.tok){ delete SESSION.tok; keep.del("lk-keep"); }   // the old key is gone; this tab continues with the PIN
+      SESSION.pin = pin; saveSession(); savePill("");
+      return true;
+    } catch(err){ notify(friendly(err, "Couldn't check your PIN. Check your internet and try again.")); return false; }
+  })();
+  return RELOGIN.finally(() => { RELOGIN = null; });
+}
 async function autoSave(retry, keepalive){
   clearTimeout(AUTOSAVE_T);
-  if (!SESSION || !S || !DIRTY) return;
+  if (!SESSION || !S || !DIRTY || RELOGIN) return;
+  if (ED_SYNC) return scheduleAutosave(1000);   // still fetching the newest version of this store
   if (UPN) return scheduleAutosave(2000);   // a photo is still uploading: save once it's in
   const bad = saveProblem(); if (bad){ setStatus(bad); return savePill("bad", bad); }   // tells the seller exactly what's missing
   if (SAVING){ try { await SAVING; } catch(e) {} if (DIRTY) scheduleAutosave(300); return; }
@@ -2713,6 +2780,7 @@ async function autoSave(retry, keepalive){
     savePill("saved", r.flagged && STATUS !== "live" ? "Saved. Some words need a quick check by " + APP_NAME + "." : "Saved");
   } catch(e){
     const m = friendly(e, "No internet right now. Your changes are still here.");
+    if (authErr(e)){ savePill("bad", "Log in again to save. Your changes are still here."); relogin(e).then(ok => { if (ok && DIRTY) scheduleAutosave(300); }); return; }
     savePill("bad", /can't reach/i.test(m) ? "No internet right now. Your changes are still here." : /slow right now/i.test(m) ? "The server is busy. Your changes are still here." : m);
     scheduleAutosave(15000);
   }
@@ -2963,14 +3031,20 @@ function onField(e){
     if (t.dataset.floc === "cityOther"){ const sel = document.querySelector('[data-floc="city"]'); if (!t.isConnected || (sel && sel.value !== "__other")) return; S.loc.city = t.value.trim().slice(0, 40); touch(); return; }
     if (t.dataset.floc === "area"){ S.loc.area = t.value; touch(); return; }
     if (t.dataset.floc === "addr"){ S.loc.addr = t.value.replace(/[<>"`]/g, "").slice(0, 120); touch(); return; }
-    if (t.dataset.floc === "pub"){ if (e.type !== "change") return; S.loc.pub = t.checked; if (!t.checked) S.loc.addr = ""; touch(); renderEditor(); return; }
+    if (t.dataset.floc === "pub"){
+      if (e.type !== "change") return;
+      S.loc.pub = t.checked;
+      // the private "Nearest first" spot (often home) must never become the public pin: the seller drags it onto the shop
+      if (t.checked){ S.loc.lat = null; S.loc.lng = null; } else S.loc.addr = "";
+      touch(); renderEditor(); return;
+    }
   }
   if (t.dataset.lf !== undefined){
     const l = S.links[+t.dataset.j]; if (!l) return;
     const lf = t.dataset.lf;
     if (lf === "p") l.p = Math.max(0, parseFloat(t.value) || 0); else l[lf] = t.value;
     if (lf === "u"){
-      const st0 = safeUrl(l.u) ? 1 : 0; const startFetch = () => { const fx = fixUrl(l.u); if (safeUrl(fx) && l.pu !== fx){ l.u = fx; l.n = ""; l.img = ""; l.p = 0; l.pu = ""; LKST.delete(l); const inp = t.isConnected ? t : null; if (inp && e.type === "change") inp.value = fx; fetchLinkMeta(l); } else if (!safeUrl(fx) || (st0 !== (safeUrl(l.u) ? 1 : 0))) updateLinkPreview(l); };
+      const st0 = safeUrl(l.u) ? 1 : 0; const startFetch = () => { const fx = fixUrl(l.u); if (safeUrl(fx) && l.u !== fx){ l.u = fx; if (t.isConnected && e.type === "change") t.value = fx; } if (safeUrl(fx) && l.pu !== fx){ l.u = fx; l.n = ""; l.img = ""; l.p = 0; l.pu = ""; LKST.delete(l); const inp = t.isConnected ? t : null; if (inp && e.type === "change") inp.value = fx; fetchLinkMeta(l); } else if (!safeUrl(fx) || (st0 !== (safeUrl(l.u) ? 1 : 0))) updateLinkPreview(l); };
       clearTimeout(onField.lt);
       if (e.type === "change") startFetch(); else onField.lt = setTimeout(startFetch, 900);
     }
@@ -3010,20 +3084,20 @@ $("builder").addEventListener("click", async e => {
     if (a === "frpublish") openPublishCheck();
     return;
   }
-  if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); }
-    if (EDV === "link" && b.dataset.v !== "link"){ const l = S.links[EDI]; if (l && !l.u.trim()) S.links.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
+  if (a === "go" || a === "back"){ const to = b.dataset.v, ti = b.dataset.i != null ? +b.dataset.i : null; leaveEdPage(to); EDOTHER = false; return a === "back" ? edBack(to, ti) : edGo(to, ti); }
   if (a === "secpick"){ S.items[i].sec = b.dataset.v; redraw(); return; }
-  if (a === "lkadd"){ S.links.push({ u: "", sec: "", n: "", img: "", p: 0, pu: "" }); EDV = "link"; EDI = S.links.length - 1; window.scrollTo(0, 0); renderEditor(); setTimeout(() => { const el = document.querySelector('[data-lf="u"]'); if (el) el.focus(); }, 30); return; }
-  if (a === "lkdel"){ const l = S.links[j]; if (l && (!l.u.trim() || await ask(`Delete ${l.n.trim() ? '"' + tidyName(l.n) + '"' : "this link"}?`, "Delete", true))){ S.links.splice(j, 1); if (EDV === "link") EDV = "links"; redraw(); } return; }
+  if (a === "lkadd"){ if (S.links.length >= 80) return notify("You can add up to 80 links. Delete one to add another."); S.links.push({ u: "", sec: "", n: "", img: "", p: 0, pu: "" }); edGo("link", S.links.length - 1); setTimeout(() => { const el = document.querySelector('[data-lf="u"]'); if (el) el.focus(); }, 30); return; }
+  if (a === "lkdel"){ const l = S.links[j]; if (l && (!l.u.trim() || await ask(`Delete ${l.n.trim() ? '"' + tidyName(l.n) + '"' : "this link"}?`, "Delete", true))){ S.links.splice(j, 1); if (EDV === "link"){ EDI = -1; touch(); return edBack("links"); } redraw(); } return; }
   if (a === "lkfetch"){ const l = S.links[j]; if (l){ l.pu = ""; fetchLinkMeta(l); } return; }
   if (a === "lkedit"){ const l = S.links[j]; if (l){ const st = lkState(l); st.edit = !st.edit; updateLinkPreview(l); } return; }
   if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = b.dataset.v; redraw(); } return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
-  else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem()); if (EDV === "product") EDV = "products"; redraw(); } }
+  else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem());
+    if (EDV === "product"){ EDI = -1; touch(); return edBack("products"); } redraw(); } }
   else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); setTimeout(() => { const el = document.querySelector(`.opt input[data-i="${i}"][data-f="l"]`); if (el && !el.value) el.focus(); }, 30); }
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
-  else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ EDV = "product"; EDI = S.items.length - 1; window.scrollTo(0, 0); } redraw(); }
+  else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ touch(); edGo("product", S.items.length - 1); } else redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
   else if (a === "kind"){ S.kind = b.dataset.v; redraw(); }
@@ -3033,8 +3107,10 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-logo"){ S.logo = ""; redraw(); }
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
+  else if (a === "rm-link"){ if (S.links[i]) S.links[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
   else if (a === "backadmin"){
+    if (UPN && !(await ask("A photo is still uploading. Leave anyway? It won't be added.", "Leave", true))) return;
     if (DIRTY) await autoSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Leave anyway?", "Leave", true))) return;
     DIRTY = false; clearSession(); history.pushState(null, "", home() + "admin"); renderAdmin();
@@ -3046,7 +3122,7 @@ $("builder").addEventListener("click", async e => {
     b.disabled = true; b.textContent = "Deleting...";
     try {
       await apiPost({ action: "delete", id: SESSION.id, pin });
-      DIRTY = false; clearSession();
+      DIRTY = false; clearSession(true);
       history.replaceState(null, "", home());
       renderHome();
       notify("Your store and account have been deleted.");
@@ -3055,7 +3131,7 @@ $("builder").addEventListener("click", async e => {
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
   else if (a === "bulx"){ const y = window.scrollY; bulRemove([b.dataset.v]); renderEditor(); window.scrollTo(0, y); }
   else if (a === "bulclear"){ if (!(await ask("Remove all these posts? Status posts you still need to act on stay.", "Clear all"))) return; bulRemove(newsItems().filter(x => !x.keep).map(x => x.id)); renderEditor(); }
-  else if (a === "shoutx"){ const y = window.scrollY; markSeen([{ id: b.dataset.v }]); renderEditor(); window.scrollTo(0, y); }
+  else if (a === "shoutx"){ const y = window.scrollY; markSeen(newsItems().filter(x => /^u-/.test(x.id))); renderEditor(); window.scrollTo(0, y); }
   else if (a === "setcat"){ S.cat = b.dataset.v; touch(); renderEditor(); }
   else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed."); }
   else if (a === "pinme"){
@@ -3082,10 +3158,11 @@ $("builder").addEventListener("click", async e => {
     catch(err){ notify(friendly(err, "Couldn't check right now. Check your internet and try again.")); }
   }
   else if (a === "logout"){
+    if (UPN && !(await ask("A photo is still uploading. Log out anyway? It won't be added.", "Log out", true))) return;
     if (DIRTY) await autoSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Log out anyway?", "Log out", true))) return;
     if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
-    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); setIconBadge(0); renderStart();
+    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(true); setIconBadge(0); renderStart();
   }
 });
 
@@ -3128,7 +3205,8 @@ async function saveNow(){
     if (EDITV === v){ DIRTY = false; rememberEdNow(); const bl = $("builder"); if (bl) bl.classList.remove("dirty"); }
     else scheduleAutosave();
     return r;
-  } finally { SAVING = null; }
+  } catch(e){ if (!authErr(e)) scheduleAutosave(15000); throw e; }
+  finally { SAVING = null; }
 }
 async function saveStore(){
   if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse listing, so customers can find you.");
@@ -3141,7 +3219,11 @@ async function saveStore(){
     const r = await saveNow(); savePill("");
     renderEditor(r.flagged && STATUS !== "live" ? `Saved. Some words in your store need a quick check by ${APP_NAME} before it can go live.`
       : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
-  } catch(e){ notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment.")); }
+  } catch(e){
+    btn.disabled = false; btn.textContent = "Save";
+    if (authErr(e)){ if (await relogin(e)) return saveStore(); return; }
+    notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment."));
+  }
   btn.disabled = false; btn.textContent = "Save";
 }
 
@@ -3279,8 +3361,7 @@ async function showStore(data, isPreview, refresh){
   $("closedMore").href = home() + "explore"; $("closedMore").hidden = !!isPreview;
   $("closedShop").textContent = D.name;
   $("closedMsg").textContent = D.closedMsg.trim() || "We're not taking orders right now. Please check back later.";
-  const t = new Date();
-  $("date").min = new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  setDateMin();
   if (!refresh || dayOff(D.off, $("date").value)) setDate("");   // a day the shop has since marked off can't stay picked
   $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false");
   $("dateLabel").textContent = W(D).date;
@@ -3290,7 +3371,7 @@ async function showStore(data, isPreview, refresh){
   loadCart();
   // C2: a product sheet from another store, or for an item that changed, never stays open
   if (!refresh){ closeSheet("pOverlay"); closeSheet("overlay"); ORDER_SENT = false; }
-  else if ($("pOverlay").classList.contains("open") && (!D.items[pSel.i] || D.items[pSel.i].n !== $("pTitle").textContent || !D.items[pSel.i].o[pSel.j])) closeSheet("pOverlay");
+  else if ($("pOverlay").classList.contains("open") && (!D.items[pSel.i] || D.items[pSel.i].out || D.closed || pSig(D.items[pSel.i]) !== pSel.sig)) dismissSheet("pOverlay");
   if (!refresh){ $("note").value = ""; MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
   renderMenu(); renderBar();
   if (!refresh) showAd();
@@ -3323,7 +3404,7 @@ function showAd(){
 }
 function startAds(){
   clearInterval(adTimer);
-  if (ADS.length > 1) adTimer = setInterval(() => { if (!document.hidden) goAd(adI + 1); }, AD_EVERY);
+  if (ADS.length > 1) adTimer = setInterval(() => { if (!document.hidden && !$("store").hidden) goAd(adI + 1); }, AD_EVERY);
 }
 function paintAd(){
   const a = ADS[adI], img = $("adImg"), ban = $("adBan");
@@ -3336,7 +3417,7 @@ function paintAd(){
     paintAd(); startAds();
   };
   const url = safeUrl(a.img);
-  if ($("backBtn").hidden) track("adview", url);
+  if ($("backBtn").hidden && !$("store").hidden) track("adview", url);
   if (img.getAttribute("src") === url && img.complete && img.naturalWidth){ img.classList.add("loaded"); ban.classList.remove("swapping"); }
   else img.src = url;
   const link = safeUrl(a.link || "");
@@ -3376,12 +3457,12 @@ $("repGo").onclick = async () => {
 };
 
 function productRow(i){
-  const p = D.items[i], img = safeImg(p.img), n = inCart(i), bare = !img && D.layout !== "grid";
+  const p = D.items[i], img = safeImg(p.img), n = inCart(i), bare = !img && D.layout === "list";   // Minimal draws its own "+"
   return `<button class="prow${p.out ? " out" : ""}${bare ? " nophoto" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
     <div class="ptext">
       <h3>${esc(p.n)}</h3>
       ${p.d ? `<p class="pdesc">${esc(p.d)}</p>` : ""}
-      <div class="pmeta"><span class="pprice">${priceLabel(p)}</span>
+      <div class="pmeta"><span class="pprice">${priceLabel(p)}${p.o.length === 1 && p.o[0].l ? ` · ${esc(p.o[0].l)}` : ""}</span>
         ${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
     </div>
     ${bare ? (p.out ? "" : `<span class="addb solo" aria-hidden="true">+</span>`) : `<div class="pimg">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<div class="ph">${initial(p.n)}</div>`}
@@ -3425,9 +3506,8 @@ function renderMenu(){
   const q = MQ.trim().toLowerCase();
   if (q){
     // searching looks through everything, menu and links together
-    const has = t => String(t || "").toLowerCase().includes(q);
-    const hitI = list.filter(i => { const p = D.items[i]; return has(p.n) || has(p.d) || has(p.sec) || p.o.some(o => has(o.l)); });
-    const hitL = linkList.filter(j => { const l = D.links[j]; return has(tidyName(l.n)) || has(l.sec) || has(linkInfo(l.u).brand); });
+    const hitI = list.filter(i => { const p = D.items[i]; return matchWords([p.n, p.d, p.sec, ...p.o.map(o => o.l)].join(" "), q); });
+    const hitL = linkList.filter(j => { const l = D.links[j]; return matchWords([tidyName(l.n), l.sec, linkInfo(l.u).brand].join(" "), q); });
     tabs.hidden = true; tabs.innerHTML = "";
     $("menu").innerHTML = hitI.length || hitL.length
       ? (hitI.length ? block(both ? W(D).list : "", hitI.map(productRow).join(""), false) : "") + (hitL.length ? block(both ? "Shop links" : "", hitL.map(linkRow).join(""), true) : "")
@@ -3462,14 +3542,15 @@ $("viewTabs").addEventListener("click", e => {
 });
 $("stQ").addEventListener("input", () => { MQ = $("stQ").value; renderMenu(); });
 $("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur(); });
+const pSig = p => JSON.stringify([p.n, p.o]);
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
-  pSel = { i, j: 0, q: 1 };
+  pSel = { i, j: 0, q: 1, sig: pSig(p) };
   const img = safeImg(p.img);
   $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : ""; $("pImg").hidden = !img;
   $("pTitle").textContent = p.n;
   $("pDesc").textContent = p.d; $("pDesc").hidden = !p.d;
-  $("pOpts").hidden = p.o.length < 2;
+  $("pOpts").hidden = p.o.length < 2 && !p.o[0].l;
   $("pOpts").innerHTML = p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
   updateProduct();
   openSheet("pOverlay");
@@ -3479,7 +3560,11 @@ $("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"
 $("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
 $("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
 $("pPlus").onclick = () => { pSel.q = Math.min(99, pSel.q + 1); updateProduct(); };
-$("pAdd").onclick = () => { const k = pSel.i + "|" + pSel.j; cart[k] = (cart[k] || 0) + pSel.q; saveCart(); dismissSheet("pOverlay"); renderMenu(); renderBar(); };
+$("pAdd").onclick = () => {
+  const p = D.items[pSel.i];
+  if (!p || p.out || D.closed || pSig(p) !== pSel.sig || !p.o[pSel.j]) return dismissSheet("pOverlay");
+  const k = pSel.i + "|" + pSel.j; cart[k] = Math.min(99, (cart[k] || 0) + pSel.q); saveCart(); dismissSheet("pOverlay"); renderMenu(); renderBar();
+};
 
 function items(){
   const out = [];
@@ -3516,32 +3601,39 @@ function renderBar(){
 }
 $("lines").addEventListener("click", e => {
   const b = e.target.closest("button[data-k]"); if (!b) return;
-  const k = b.dataset.k; cart[k] = Math.max(0, (cart[k] || 0) + Number(b.dataset.d)); if (!cart[k]) delete cart[k];
+  const k = b.dataset.k; cart[k] = Math.min(99, Math.max(0, (cart[k] || 0) + Number(b.dataset.d))); if (!cart[k]) delete cart[k];
   saveCart(); renderBar(); renderMenu();
 });
 // Customer date picker: the seller's days off are crossed out and can't be picked
 let DATECAL = null;
+function setDateMin(){ const t = new Date(); $("date").min = new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function setDate(s){
   $("date").value = s || "";
   $("dateTxt").textContent = s ? new Date(s + "T00:00").toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Pick a date";
   $("dateBtn").classList.toggle("empty", !s);
   $("date").dispatchEvent(new Event("input"));
 }
-function drawDateCal(){ $("dateCal").innerHTML = calHtml(DATECAL.y, DATECAL.m, D.off, "pick", $("date").value, $("date").min); }
+function drawDateCal(){
+  $("dateCal").innerHTML = calHtml(DATECAL.y, DATECAL.m, D.off, "pick", $("date").value, $("date").min)
+    + (!W(D).dateNeeded && $("date").value ? `<button type="button" class="btn small" data-nodate style="margin-top:10px">No date</button>` : "");
+}
 $("dateBtn").onclick = () => {
   const open = $("dateCal").hidden;
-  if (open){ const base = $("date").value ? new Date($("date").value + "T00:00") : new Date(); DATECAL = { y: base.getFullYear(), m: base.getMonth() }; drawDateCal(); }
+  if (open){ setDateMin(); const base = $("date").value ? new Date($("date").value + "T00:00") : new Date(); DATECAL = { y: base.getFullYear(), m: base.getMonth() }; drawDateCal(); }
   $("dateCal").hidden = !open; $("dateBtn").setAttribute("aria-expanded", String(open));
 };
 $("dateCal").addEventListener("click", e => {
   const nav = e.target.closest("[data-calnav]"), day = e.target.closest("[data-day]");
   if (nav && !nav.disabled){ const d = new Date(DATECAL.y, DATECAL.m + +nav.dataset.calnav, 1); DATECAL = { y: d.getFullYear(), m: d.getMonth() }; return drawDateCal(); }
+  if (e.target.closest("[data-nodate]")){ setDate(""); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); return; }
   if (day && !day.disabled){ setDate(day.dataset.day); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); $("err").textContent = ""; }
 });
 ["note","cName","date"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
   let msg = "";
+  setDateMin();
   if (D.closed) msg = "This store is closed right now.";
+  else if (!items().length) msg = "Add something to your cart first.";
   else if (!$("cName").value.trim()) msg = "Add your name so the shop knows who the order is for.";
   else if (W(D).dateNeeded && !$("date").value) msg = "Pick a date first.";
   else if ($("date").value && $("date").value < $("date").min) msg = "Pick today or a later date.";
@@ -3578,7 +3670,7 @@ $("backBtn").onclick = () => { const top = INPAGE_N.get(HIST_CUR); if (top && to
    ============================================================ */
 let ADMIN = "", ADMTAB = "stores", ADMQ = "";
 try { ADMIN = sessionStorage.getItem("lk-admin") || ""; } catch(e) {}
-function adminLock(){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} if (SESSION && SESSION.admin) clearSession(); }
+function adminLock(){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} const s = SESSION || loadSession(); if (s && s.admin){ SESSION = s; clearSession(); } }
 // Only a wrong or blocked key locks the dashboard; a slow connection just shows the error
 const adminKeyErr = e => /admin key|ADMIN_KEY|Too many wrong tries/i.test((e && e.message) || "");
 
@@ -3669,7 +3761,8 @@ async function adminStores(g, head, wire){
   wire();
   const filter = () => {
     ADMQ = $("admFind").value.trim().toLowerCase();
-    g.querySelectorAll(".admrow").forEach(r => r.hidden = !!ADMQ && !r.dataset.find.includes(ADMQ));
+    const num = /^[\d\s+()-]{3,}$/.test(ADMQ) ? normWa(ADMQ) : "";
+    g.querySelectorAll(".admrow").forEach(r => r.hidden = !!ADMQ && !r.dataset.find.includes(ADMQ) && !(num && r.dataset.find.includes(num)));
   };
   $("admFind").oninput = filter; filter();
   if ($("goReview")) $("goReview").onclick = () => { ADMTAB = "review"; renderAdmin(); };
@@ -4115,7 +4208,7 @@ function exList(){
   const q = EX.q.trim().toLowerCase();
   const list = EX.stores.filter(st =>
     (EX.cat === "all" || st.cat === EX.cat) &&
-    (!q || (st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag).toLowerCase().includes(q)) &&
+    (!q || matchWords(st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag, q)) &&
     (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)) &&
     (EX.aff ? !!st.aff : (!st.aff || !!q || EX.fav)));   // Affiliate Shops show under their own pill, in search and in Saved
   list.forEach(st => { st._a = mxArea(st); st._km = EX.me && st._a ? kmBetween(EX.me.lat, EX.me.lng, st._a.lat, st._a.lng) : null; });
@@ -4198,7 +4291,8 @@ function mxDraw(force){
       if (c.items.length > 1){
         const el = document.createElement("div"); el.className = "mxcl"; el.innerHTML = `<span>${c.items.length}</span>`;
         el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", c.items.length + " stores, tap to zoom in");
-        const go = () => map.fitBounds(mxBounds(c.items.map(i => [i._a.lng, i._a.lat])), { padding: { top: 150, bottom: 140, left: 50, right: 50 }, maxZoom: 16, duration: 600 });
+        // shops in the same mall or row can't be split by zooming: once zoomed right in, show them as a list
+        const go = () => map.getZoom() >= 15.5 ? mxOpenSheet() : map.fitBounds(mxBounds(c.items.map(i => [i._a.lng, i._a.lat])), { padding: { top: 150, bottom: 140, left: 50, right: 50 }, maxZoom: 16, duration: 600 });
         el.addEventListener("click", go); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } });
         MX.mk.push(mxMarker(el, c.ll)); return;
       }
@@ -4288,13 +4382,22 @@ function mxShowCard(st){
 function mxSelect(id, fly = true){
   const st = EX.stores.find(x => x.id === id); if (!st || !MX) return;
   st._a = st._a || mxArea(st); if (!st._a) return;
-  MX.sel = id; MX.sig = ""; mxShowCard(st); mxCloseSheet();
+  MX.sel = id; MX.sig = ""; mxShowCard(st); mxCloseSheet(); mxSyncStep();
   if (fly) MX.map.flyTo({ center: [st._a.lng, st._a.lat], zoom: Math.max(MX.map.getZoom(), st._a.exact ? 15 : st._a.r > 1000 ? 12 : 13), duration: 600, offset: [0, -100] });
   mxDraw();
 }
-function mxDeselect(){ if (!MX || !MX.sel) return; MX.sel = null; MX.sig = ""; $("mxCard").classList.remove("show"); mxDraw(); }
-function mxOpenSheet(){ mxRenderSheet(); $("mxSheet").classList.add("open"); $("mxSheet").setAttribute("aria-hidden", "false"); $("mxScrim").classList.add("show"); }
-function mxCloseSheet(){ const s = $("mxSheet"); if (!s) return; s.classList.remove("open"); s.setAttribute("aria-hidden", "true"); $("mxScrim").classList.remove("show"); }
+function mxDeselect(){ if (!MX || !MX.sel) return; MX.sel = null; MX.sig = ""; $("mxCard").classList.remove("show"); mxDraw(); mxSyncStep(); }
+function mxOpenSheet(){ mxRenderSheet(); $("mxSheet").classList.add("open"); $("mxSheet").setAttribute("aria-hidden", "false"); $("mxScrim").classList.add("show"); mxSyncStep(); }
+function mxCloseSheet(){ const s = $("mxSheet"); if (!s) return; s.classList.remove("open"); s.setAttribute("aria-hidden", "true"); $("mxScrim").classList.remove("show"); mxSyncStep(); }
+// Phone Back closes the store list or the store card first (one history step while either is open), like the app's pop-ups
+function mxSyncStep(){
+  const sh = $("mxSheet"), open = !!(sh && sh.classList.contains("open")) || !!(MX && MX.sel), t = INPAGE_N.get(HIST_CUR);
+  if (open && !(t && t.mx)) inpagePush({ mx: 1 });
+  else if (!open && t && t.mx && !t.self){ t.self = true; history.back(); }
+}
+// Back from a store to Browse brings back the same search, filters and map view
+let EX_BACK = false;
+function exRemember(){ try { if (MX) { const c = MX.map.getCenter(); sessionStorage.setItem("lk-ex", JSON.stringify({ q: EX.q, cat: EX.cat, open: EX.open, ver: EX.ver, aff: EX.aff, fav: EX.fav, c: [c.lng, c.lat], z: MX.map.getZoom() })); } } catch(e) {} }
 function mxToggleFav(id){
   EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs();
   document.querySelectorAll(`[data-fav="${CSS.escape(id)}"]`).forEach(b => b.setAttribute("aria-pressed", String(EX.favs.has(id))));
@@ -4308,8 +4411,8 @@ function mxChips(){
 }
 function exRender(fit){   // re-apply filters; optionally move the map to the results
   if (!MX) return;
-  mxChips();
-  if (MX.sel && !exList().some(s => s.id === MX.sel)){ MX.sel = null; $("mxCard").classList.remove("show"); }
+  mxChips(); exRemember();
+  if (MX.sel && !exList().some(s => s.id === MX.sel)){ MX.sel = null; $("mxCard").classList.remove("show"); mxSyncStep(); }
   mxDraw(true);
   if (fit) mxFit(exList());
 }
@@ -4317,7 +4420,7 @@ async function enterShop(card){
   const id = card.dataset.store, st = (EX && EX.stores.find(x => x.id === id)) || {};
   const url = new URL(storeLink(id), location.href);
   const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const go = async () => { history.pushState(null, "", url.pathname + url.search); document.body.classList.remove("exploring"); await route(); };
+  const go = async () => { const t = INPAGE_N.get(HIST_CUR); if (t && t.mx){ INPAGE_N.delete(HIST_CUR); history.replaceState(null, "", url.pathname + url.search); } else history.pushState(null, "", url.pathname + url.search); document.body.classList.remove("exploring"); await route(); };
   if (reduce || !card.animate){ return go(); }
   const r = card.getBoundingClientRect(), lg = card.querySelector(".exslogo"), lr = lg ? lg.getBoundingClientRect() : null;
   const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
@@ -4334,7 +4437,8 @@ async function enterShop(card){
   if (lr) fl.animate([{ transform: `translate(${lr.left - tr.left}px,${lr.top - tr.top}px) scale(${lr.width / tr.width})` }, { transform: "none" }], { duration: 620, easing: "cubic-bezier(.2,.9,.3,1.18)", fill: "both" });
   const page = $("mxMap") || $("gwrap"), sink = page.animate([{ transform: "none", filter: "none" }, { transform: "scale(.94)", filter: "brightness(.8)" }], { duration: 520, easing: ease, fill: "forwards" });
   const loaded = go();
-  await Promise.all([grow.finished.catch(() => {}), loaded.catch(() => {})]);
+  // the store (or its grey outline) is drawn underneath at once; never hold the cover for a slow network
+  await Promise.all([grow.finished.catch(() => {}), Promise.race([loaded.catch(() => {}), new Promise(r => setTimeout(r, 700))])]);
   sink.cancel();
   const fade = ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 280, easing: "ease-out", fill: "forwards" });
   fade.onfinish = () => ov.remove(); setTimeout(() => ov.remove(), 900);
@@ -4347,21 +4451,31 @@ function mxShowMe(){
 }
 function exLocate(silent, fly){
   if (!navigator.geolocation){ if (!silent) mxToast("Your browser can't share location."); return; }
+  const was = EX.me;
   navigator.geolocation.getCurrentPosition(pos => {
-    EX.me = { lat: pos.coords.latitude, lng: pos.coords.longitude }; EX.near = true;
+    EX.me = { lat: pos.coords.latitude, lng: pos.coords.longitude, at: Date.now() }; EX.near = true;
     try { localStorage.setItem("lk-me", JSON.stringify(EX.me)); } catch(e) {}
     if (!MX) return;
     mxShowMe();
-    if (fly){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); }
+    // fly when asked, or when the phone has moved since the saved spot (another town)
+    if (fly || (was && kmBetween(was.lat, was.lng, EX.me.lat, EX.me.lng) > 2)){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); if (fly) mxToast("Showing stores around you"); }
     mxDraw(true);
-  }, () => { if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings."); }, { timeout: 12000 });
+  }, err => {
+    if (err && err.code === 1){ EX.me = null; EX.near = false; try { localStorage.removeItem("lk-me"); } catch(e) {} if (MX) mxDraw(true); }   // location turned off: forget the old spot
+    if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings.");
+  }, { timeout: 12000 });
 }
 async function renderExplore(){
   mxDestroy();
   const rtok = ROUTE_TOK;
   setAccent(COLORS[0]); document.title = APP_NAME + " · Browse stores";
   let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
+  if (me && !(me.at > Date.now() - 864e5)) me = null;   // a day old: the phone may be somewhere else now
   EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, aff: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
+  let prev = null; if (EX_BACK) try { prev = JSON.parse(sessionStorage.getItem("lk-ex") || "null"); } catch(e) {}
+  EX_BACK = false;
+  if (prev) Object.assign(EX, { q: String(prev.q || ""), cat: prev.cat || "all", open: !!prev.open, ver: !!prev.ver, aff: !!prev.aff, fav: !!prev.fav });
+  const view = prev && Array.isArray(prev.c) && isFinite(prev.z) ? { center: prev.c, zoom: prev.z } : null;
   $("gwrap").innerHTML = `
     <div id="mxMap" role="application" aria-label="Map showing the areas where sellers sell"></div>
     <div class="mxtop">
@@ -4387,7 +4501,7 @@ async function renderExplore(){
     <div class="mxtoast" id="mxToast" role="status"></div>`;
   document.body.classList.add("exploring");
   show("page"); SPLASH.ready();
-  mxChips();
+  mxChips(); if (EX.q){ $("exQ").value = EX.q; $("mxClr").hidden = false; }
 
   // stores load in the background while the map opens
   let loadErr = null;
@@ -4400,11 +4514,11 @@ async function renderExplore(){
   catch(e){ if (rtok === ROUTE_TOK && $("mxMap")){ $("mxMap").innerHTML = `<div class="mxerr"><p class="err">${esc(e.message)}</p><button type="button" class="btn solid" id="mxLibRetry">Try again</button></div>`; $("mxLibRetry").onclick = () => renderExplore(); } return; }
   if (!$("mxMap") || rtok !== ROUTE_TOK || MX) return;   // the person already left this page, or it opened again meanwhile
 
-  const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: me ? [me.lng, me.lat] : [108.3, 4.2], zoom: me ? 11 : 5, minZoom: 4, maxZoom: 17,
+  const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: view ? view.center : me ? [me.lng, me.lat] : [108.3, 4.2], zoom: view ? view.zoom : me ? 11 : 5, minZoom: 4, maxZoom: 17,
     attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false });
   map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
-  MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0, err: null, moved: false };
+  MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0, err: null, moved: !!view };   // a restored view counts as moved: don't jump away from it
   map.on("movestart", e => { if (e.originalEvent && MX && MX.map === map) MX.moved = true; });   // the person moved the map themselves
   MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
   document.addEventListener("keydown", MX.key);
@@ -4417,7 +4531,7 @@ async function renderExplore(){
       MX.ready = true; mxDraw(true);
     }
   });
-  map.on("moveend", () => mxDraw());
+  map.on("moveend", () => { mxDraw(); exRemember(); });
   map.on("click", e => {
     const t = e.originalEvent && e.originalEvent.target;
     if (t && t.closest && t.closest(".mxmk,.mxcl")) return;   // a pin was tapped, not the map
@@ -4439,7 +4553,7 @@ async function renderExplore(){
   $("exQ").onkeydown = e => { if (e.key === "Enter") $("exQ").blur(); };
   $("mxClr").onclick = () => { $("exQ").value = ""; EX.q = ""; $("mxClr").hidden = true; exRender(true); };
   $("mxEmpty").onclick = e => { if (e.target.id === "mxRetry") return renderExplore(); if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.aff = false; EX.fav = false; mxCloseSheet(); $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
-  $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(true); } else exLocate(false, true); };
+  $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(false, false); } else exLocate(false, true); };
   $("exBrowse").onclick = () => { EX.fav = false; exRender(true); };
   $("exFav").onclick = () => { EX.fav = true; exRender(true); if (!EX.favs.size) mxToast("Tap the heart on a store to save it"); };
   $("mxPill").onclick = mxOpenSheet; $("mxShClose").onclick = mxCloseSheet; $("mxScrim").onclick = mxCloseSheet;
@@ -4463,8 +4577,9 @@ async function renderExplore(){
   EX.stores = stores; MX.loaded = true; MX.err = loadErr;
   if (loadErr) return mxDraw(true);
   const list = exList();
-  if (!me) mxFit(list, 12);
+  if (!me && !view) mxFit(list, 12);
   mxDraw(true);
+  if (prev && EX.aff && MX.affs && MX.affs.length) mxOpenSheet();   // back from an Affiliate shop: its list again
   if (urlFlag("affiliate") && !EX.aff){ $("exAff").click(); history.replaceState(null, "", home() + "explore"); }
   if (Array.isArray(savedNear)) freshNear.then(st => { if (MX && MX.map === map && JSON.stringify(st) !== JSON.stringify(savedNear)){ EX.stores = st; mxDraw(true); } }).catch(() => {});
   mxGeocode().then(found => { if (found && MX && MX.map === map && !me && !MX.moved && !MX.sel) mxFit(exList(), 12); });
@@ -4562,13 +4677,13 @@ let INSTALL_EVT = null;
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault(); INSTALL_EVT = e;
   const b = $("exInstall"); if (b) b.hidden = false;
-  showPwaBar("sellerPwaBar"); showPwaBar("stPwaBar");
+  showPwaBar("sellerPwaBar"); if ($("backBtn").hidden) showPwaBar("stPwaBar");   // never on the seller's own preview
 });
 window.addEventListener("appinstalled", () => { INSTALL_EVT = null; hidePwaBar("sellerPwaBar"); hidePwaBar("stPwaBar"); });
 
 // --- Custom "Add to home screen" banners (seller dashboard + storefront) ---
 function isStandalone(){ return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true; }
-function isIos(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+function isIos(){ return (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }   // iPads say "Macintosh"
 function pwaDismissed(key){ try { const t = +localStorage.getItem("pwaDismiss:" + key); return t && Date.now() - t < 14 * 864e5; } catch(e){ return false; } }
 function pwaDismiss(key){ try { localStorage.setItem("pwaDismiss:" + key, String(Date.now())); } catch(e){} hidePwaBar(key === "seller" ? "sellerPwaBar" : "stPwaBar"); }
 function hidePwaBar(id){ const b = $(id); if (b) b.hidden = true; }
@@ -4618,6 +4733,8 @@ async function route(){
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
   if (q === "admin") return renderAdmin();
+  // a seller who stays logged in on this phone: the home page ("For sellers") opens their store, not the login form
+  if (!q){ const k = keep.get("lk-keep"); if (k && k.id && k.tok){ history.replaceState(null, "", home() + "build"); return route(); } }
   if (q === "terms" || q === "privacy" || q === "refund") return renderLegal(q);
   if (q === "safe") return renderSafe();
   if (q === "explore" || q === "near") return renderExplore();
@@ -4629,14 +4746,19 @@ async function route(){
       const req = SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }, saved = edCopy();
       if (saved){
         // open at once from this tab's copy, then take the server's newer version if nothing was changed meanwhile
-        S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; ME_EMAIL = saved.email || ""; openEditor(); SPLASH.ready();
-        apiPost(req).then(r => {
+        S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; ME_EMAIL = saved.email || ""; ED_SYNC = true; openEditor(); SPLASH.ready();
+        apiPost(req).then(async r => {
+          ED_SYNC = false;
           if (!SESSION || SESSION.id !== saved.id) return;
           const same = JSON.stringify(normalize(Object.assign({}, r.data, { loc: r.loc }))) === JSON.stringify(normalize(Object.assign({}, saved.data, { loc: saved.loc }))) && r.status === saved.status;
           rememberEd(r);
-          if (same || DIRTY || $("builder").hidden) return;
-          S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); renderEditor();
-        }).catch(e => { if (authErr(e)){ clearSession(); renderStart(friendly(e, "")); } });
+          if (same) return;
+          // changed somewhere else, and also here before it arrived: let the seller choose instead of overwriting either
+          if ((DIRTY || UPN) && !(await ask("This store was changed on another phone or tab. Open the newer version? What you just changed here will be lost.", "Open newer version"))) return scheduleAutosave(300);
+          DIRTY = false;
+          // newer changes from another phone: use them even while the preview is open, so an edit afterwards never saves the old copy
+          S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); if (!$("builder").hidden) renderEditor();
+        }).catch(e => { ED_SYNC = false; if (authErr(e)){ clearSession(); renderStart(friendly(e, "")); } });
         return;
       }
       $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page"); SPLASH.ready();
@@ -4673,19 +4795,24 @@ async function route(){
   renderHome();
 }
 window.addEventListener("popstate", async e => {
-  const left = HIST_CUR, st = e.state || {};
+  const left = HIST_CUR, st = e.state || {}, backTo = ED_BACK_TO; ED_BACK_TO = null;
   HIST_CUR = st._n || 0;
   if (INPAGE_N.has(left) && HIST_CUR < left){   // Back from one of our in-page steps: stay on this page
     const step = INPAGE_N.get(left); INPAGE_N.delete(left);
     if (step.self){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }   // our own close: a message shown meanwhile stays
-    if ($("askOverlay").classList.contains("open")) return closeAsk(false);
+    if ($("askOverlay").classList.contains("open") && !$("askOverlay").classList.contains("closing")) return closeAsk(false);   // one already closing doesn't swallow this step
     if (step.sheet){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }
+    if (step.mx){ mxCloseSheet(); mxDeselect(); return; }
     if (step.preview){ if (!$("store").hidden && !$("backBtn").hidden) leavePreview(); return; }
-    if (!$("builder").hidden && SESSION){ const v = st.ed || "home"; if (v !== EDV){ EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); } }
+    if (!$("builder").hidden && SESSION){
+      const v = st.ed || "home"; if (v !== EDV){ leaveEdPage(v); EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); }
+      if (backTo && backTo.v !== EDV) edGo(backTo.v, backTo.i);   // the ‹ arrow's page wasn't the one below
+    }
     return;
   }
   document.querySelectorAll(".overlay.open").forEach(o => closeSheet(o));   // a real page change never keeps a pop-up open
   if (DIRTY) await autoSave();
+  EX_BACK = true;
   if (!DIRTY) return route();
   const here = location.href;
   history.pushState(null, "", home() + "build");   // stay in the editor while we ask
