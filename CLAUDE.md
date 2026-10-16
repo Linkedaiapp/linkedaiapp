@@ -6,7 +6,4 @@
   `{ id: "u-YYYYMMDD-short-name", at: "YYYY-MM-DD", title: "...", body: "..." }`.
   The bot shows the newest unread post on the seller's store home and lists every post in News.
   Write it for sellers: say what's new and where to find it, in plain English. Keep the id unique and never reuse one.
-  The server also sends each new post as a phone notification at 9am the next morning. It reads the posts straight from
-  `index.html`, so keep each one on a single line with the fields in this order: `id`, `at`, `title`, `body`.
-- Notifications that open a page use `?build&news` or `?build&insights`. `sw.js` shows them and only opens pages of this app.
 - Never put secrets (admin key, relay secret) in this repo. It is public.

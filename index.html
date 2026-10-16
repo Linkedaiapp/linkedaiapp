@@ -1808,8 +1808,7 @@ document.addEventListener("click", e => {
    SELLER: log in or create (yoursite/?build)
    ============================================================ */
 let SESSION = null, S = null, STATUS = "pending", DIRTY = false, ME_EMAIL = "";
-// The home-screen shortcut "Open or close shop" (?build&status) opens the editor straight on Store status;
-// notifications open ?build&news or ?build&insights the same way
+// The home-screen shortcut "Open or close shop" (?build&status) opens the editor straight on Store status
 let PENDING_VIEW = "";
 const urlFlag = w => location.search.slice(1).split("&").includes(w);
 // "Keep me logged in on this phone" keeps a login key from the server (never the PIN) on this phone.
@@ -1985,7 +1984,6 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261016-push", at: "2026-10-16", title: "New: notifications", body: "Under Account, turn on Notifications. We'll tell you when your store goes live or is Verified, send your numbers every Monday, and let you know what's new. On iPhone, add the app to your Home Screen first." },
   { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
   { id: "u-20261016-daysoff", at: "2026-10-16", title: "New: mark your days off", body: "Under Store status, tap the dates you aren't taking orders, or pick a day of the week that's always off. Customers can't choose those dates when they order." },
   { id: "u-20261016-faster", at: "2026-10-16", title: "Your store now opens faster", body: "Link Kedai App moved to a faster server. Your store page and your editor now load in a second or two, even when nobody has visited for a while." },
@@ -2070,66 +2068,6 @@ function bulletinItems(){
   const gone = bulGone();   // posts the seller removed; insights and must-act status posts always stay
   return out.filter(x => x.ins || x.keep || !gone.has(x.id));
 }
-// ---------- Notifications on this phone (Web Push): the server sends, sw.js shows them ----------
-const PUSH_OK = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
-function b64uBytes(s){ s = s.replace(/-/g, "+").replace(/_/g, "/"); const bin = atob(s + "===".slice((s.length + 3) % 4)); return Uint8Array.from(bin, c => c.charCodeAt(0)); }
-async function pushSub(){ try { const reg = await navigator.serviceWorker.getRegistration(); return reg ? await reg.pushManager.getSubscription() : null; } catch(e){ return null; } }
-let PUSH_KEY;   // the server's public key; null until the server has notifications set up
-// on | off | ios (iPhone: only from the home screen) | denied | no (this browser can't) | unset (server not ready yet)
-async function pushState(){
-  if ((isIos() || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) && !isStandalone() && !PUSH_OK) return "ios";   // isIos, isStandalone: install bar below
-  if (!PUSH_OK) return "no";
-  if (PUSH_KEY === undefined) PUSH_KEY = await apiPost({ action: "pushkey" }).then(r => r.key || null, () => null);
-  if (!PUSH_KEY) return "unset";
-  if (Notification.permission === "denied") return "denied";
-  const sub = await pushSub();
-  return sub && SESSION && keep.get("lk-push") === SESSION.id + "|" + sub.endpoint ? "on" : "off";
-}
-async function pushOn(){
-  if (await Notification.requestPermission() !== "granted") throw new Error("Notifications weren't allowed. Tap Allow when your phone asks.");
-  const key = b64uBytes(PUSH_KEY || (PUSH_KEY = (await apiPost({ action: "pushkey" })).key)), reg = await navigator.serviceWorker.ready;
-  let sub = await reg.pushManager.getSubscription();
-  const old = sub && sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
-  if (sub && old && old.join() !== key.join()){ await sub.unsubscribe(); sub = null; }
-  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
-  const r = await apiPost({ action: "pushon", id: SESSION.id, pin: SESSION.pin, sub: sub.toJSON() });
-  keep.set("lk-push", SESSION.id + "|" + sub.endpoint);
-  return r;
-}
-async function pushOff(){
-  const sub = await pushSub();
-  if (sub){ apiPost({ action: "pushoff", ep: sub.endpoint }).catch(() => {}); try { await sub.unsubscribe(); } catch(e) {} }
-  keep.del("lk-push");
-}
-const PUSH_TEXT = { on: "Store news, your weekly numbers and what's new", off: "Hear when your store goes live, your weekly numbers and what's new",
-  ios: "On iPhone, add the app to your Home Screen first", denied: "Blocked. Allow notifications in your phone's settings", no: "This browser can't show notifications" };
-async function fillPush(){
-  const st = await pushState(), row = $("pushRow"), nudge = $("pushNudge");
-  if (row) row.hidden = st === "unset";
-  if (row && st !== "unset"){ row.querySelector(".tt span").textContent = PUSH_TEXT[st]; const tg = row.querySelector(".tag2"); tg.hidden = !(st === "on" || st === "off"); tg.className = "tag2 " + (st === "on" ? "paid" : ""); tg.textContent = st === "on" ? "On" : "Off"; row.dataset.st = st; }
-  if (nudge){
-    const show = (st === "off" || st === "ios") && !keep.get("lk-pushnudge");
-    nudge.hidden = !show;
-    if (show) nudge.innerHTML = `<div class="bulic">${ico("bell",19)}</div><div class="bulbody"><h3 style="margin:0">Get news as a notification</h3>
-      <p class="hint" style="margin:4px 0 10px">${st === "ios" ? "On iPhone: tap Share, then Add to Home Screen. Open Link Kedai App from your home screen, then turn on notifications under Account." : "We'll tell you when your store goes live, send your numbers every Monday, and share what's new."}</p>
-      <div style="display:flex;gap:8px">${st === "off" ? `<button class="btn small solid" data-act="pushtoggle">Turn on</button>` : ""}<button class="btn small" data-act="pushnudgex">Not now</button></div></div>`;
-  }
-}
-async function pushToggle(){
-  const st = await pushState();
-  if (st === "unset") return;
-  if (st === "ios") return notify("On iPhone, tap Share, then Add to Home Screen. Open Link Kedai App from your home screen, then turn on notifications here.");
-  if (st === "no") return notify("This browser can't show notifications. Try Chrome on Android, or Safari on iPhone from your home screen.");
-  if (st === "denied") return notify("Notifications are blocked for Link Kedai App. Allow them in your phone's settings, then try again.");
-  if (st === "on"){
-    if (!(await ask("Turn off notifications on this phone?", "Turn off"))) return;
-    await pushOff(); notify("Notifications are off on this phone."); return fillPush();
-  }
-  try { const r = await pushOn(); notify(r.sent ? "Notifications are on. You should see a test notification now." : "Notifications are on."); keep.set("lk-pushnudge", 1); }
-  catch(e){ notify(friendly(e, "Couldn't turn on notifications. Check your internet and try again.")); }
-  fillPush();
-}
-
 // News (bell) and Insights (tab) are separate: each has its own unread count
 function newsItems(){ return bulletinItems().filter(x => !x.ins); }
 function insItems(){ return bulletinItems().filter(x => x.ins); }
@@ -2551,16 +2489,14 @@ function edInsights(){
 }
 function edNews(){
   const items = newsItems(), seen = bulSeen();
-  setTimeout(() => { markSeen(items); updateBell(); fillPush(); }, 0);
+  setTimeout(() => { markSeen(items); updateBell(); }, 0);
   const canClear = items.some(x => !x.keep);
   return `${edTop("News", NEWSBACK, canClear ? `<button class="btn small" data-act="bulclear">Clear all</button>` : "")}
   <p class="hint" style="margin:-4px 2px 14px">From the Link Kedai App bot: your store status, tips and what's new. Tap × to remove a post you've read.</p>
-  ${SESSION.admin ? "" : `<section class="card bulshout" id="pushNudge" hidden></section>`}
   ${items.length ? bulCards(items, seen, true) : `<section class="card"><p class="hint" style="margin:0">You're all caught up. New tips and updates will show here.</p></section>`}`;
 }
 function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
-  setTimeout(fillPush, 0);
   return `${edTop("Account", "")}
   <section class="card lk-group">
     <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(fmtWa(S.wa) || "your WhatsApp number")}${ME_EMAIL ? " or " + esc(ME_EMAIL) : ""} and your PIN</span></span></div>
@@ -2568,8 +2504,7 @@ function edAccount(){
     ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chemail"><span class="tile">${ico("mail")}</span><span class="tt"><b>${ME_EMAIL ? "Change email" : "Add email"}</b><span>${ME_EMAIL ? esc(ME_EMAIL) : "So you can reset your PIN yourself if you forget it"}</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chpin"><span class="tile">${ico("lock")}</span><span class="tt"><b>Change PIN</b><span>The 6-digit PIN you log in with</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
-    ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("megaphone")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new from ${esc(APP_NAME)}</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
-    ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="pushtoggle" id="pushRow"><span class="tile">${ico("bell")}</span><span class="tt"><b>Notifications</b><span>Checking this phone...</span></span><span class="tag2" hidden></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
+    ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new from ${esc(APP_NAME)}</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in until you log out" : "You can log in again anytime"}</span></span></button>
   </section>
@@ -3112,12 +3047,9 @@ $("builder").addEventListener("click", async e => {
       history.replaceState(null, "", home());
       renderHome();
       notify("Your store and account have been deleted.");
-      pushOff();
     } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
   }
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
-  else if (a === "pushtoggle") pushToggle();
-  else if (a === "pushnudgex"){ keep.set("lk-pushnudge", 1); fillPush(); }
   else if (a === "bulx"){ const y = window.scrollY; bulRemove([b.dataset.v]); renderEditor(); window.scrollTo(0, y); }
   else if (a === "bulclear"){ if (!(await ask("Remove all these posts? Status posts you still need to act on stay.", "Clear all"))) return; bulRemove(newsItems().filter(x => !x.keep).map(x => x.id)); renderEditor(); }
   else if (a === "shoutx"){ const y = window.scrollY; markSeen([{ id: b.dataset.v }]); renderEditor(); window.scrollTo(0, y); }
@@ -3150,7 +3082,6 @@ $("builder").addEventListener("click", async e => {
     if (DIRTY) await autoSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Log out anyway?", "Log out", true))) return;
     if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
-    if (SESSION && String(keep.get("lk-push") || "").startsWith(SESSION.id + "|")) pushOff();   // no notifications for a store this phone left
     DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); renderStart();
   }
 });
@@ -3916,30 +3847,6 @@ function adminAds(g, head, wire, cfg){
   if ($("adStop")) $("adStop").onclick = async () => { if (await ask("Stop all ads on every store?", "Stop all", true)) adminSaveConfig(cfg, { ad: [] }, "All ads stopped."); };
 }
 
-// ---------- Notifications to sellers' phones ----------
-async function loadPushCard(){
-  const box = $("pushCard"); if (!box) return;
-  let st;
-  try { st = await apiPost({ action: "admin", key: ADMIN, op: "pushstats" }); }
-  catch(e){ box.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
-  box.innerHTML = `<h2>Notifications to sellers</h2>
-    ${st.ready ? `<p class="hint" style="margin:4px 0 12px">${st.phones} phone${st.phones === 1 ? "" : "s"} from ${st.stores} store${st.stores === 1 ? "" : "s"} have notifications on${st.waiting ? `. ${st.waiting} waiting to go out` : ""}.
-      Sellers also get these by themselves: store live, Verified or offline, their week every Monday at 9am, and each new What's new post the morning after it goes up.</p>
-      <label>Title<input type="text" id="pnTitle" maxlength="80" placeholder="e.g. Hari Raya tips for your store"></label>
-      <label>Message<textarea id="pnBody" maxlength="240" rows="3" placeholder="e.g. Post your Raya menu early. Customers start ordering 2 weeks before."></textarea></label>
-      <p class="err" id="pnErr"></p>
-      <button class="btn solid full" id="pnSend" style="margin-top:8px">Send to all sellers</button>`
-    : `<p class="hint">Not set up yet. Add the <b>VAPID_KEY</b> secret to the Cloudflare Worker, then reload this page.</p>`}`;
-  if (!$("pnSend")) return;
-  $("pnSend").onclick = async () => {
-    const title = $("pnTitle").value.trim(), body = $("pnBody").value.trim(); $("pnErr").textContent = "";
-    if (!title) return $("pnErr").textContent = "Add a title.";
-    if (!(await ask(`Send "${title}" to ${st.phones} phone${st.phones === 1 ? "" : "s"}?`, "Send"))) return;
-    try { const r = await apiPost({ action: "admin", key: ADMIN, op: "pushall", title, body }); notify(`Sending to ${r.queued} phone${r.queued === 1 ? "" : "s"}. Big lists go out over a few minutes.`); loadPushCard(); }
-    catch(e){ $("pnErr").textContent = e.message; }
-  };
-}
-
 // ---------- Alerts from Link Kedai App Guard (Telegram + email) ----------
 async function loadAlertsCard(){
   const box = $("alertsCard"); if (!box) return;
@@ -4037,11 +3944,9 @@ function adminSettings(g, head, wire, cfg){
       <p class="hint">Turn off to invite sellers privately with ${esc(home())}signup</p>
     </section>
     <button class="btn solid full" style="padding:15px" id="stSave">Save settings</button>
-    <section class="card guard" id="alertsCard" style="margin-top:22px">${loaderHtml("Loading alerts...")}</section>
-    <section class="card" id="pushCard">${loaderHtml("Loading notifications...")}</section>`;
+    <section class="card guard" id="alertsCard" style="margin-top:22px">${loaderHtml("Loading alerts...")}</section>`;
   wire();
   loadAlertsCard();
-  loadPushCard();
   const prev = (inp, box) => $(inp).oninput = () => { const u = safeUrl($(inp).value.trim()); $(box).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
   prev("stQr", "qrPrev"); prev("stPpQr", "ppPrev");
   $("stSave").onclick = () => {
@@ -4058,7 +3963,7 @@ function adminSettings(g, head, wire, cfg){
    HOME + ROUTER
    ============================================================ */
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
-const LEGAL_UPDATED = "16 October 2026";
+const LEGAL_UPDATED = "15 October 2026";
 const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
 const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
 function legalContact(){
@@ -4086,7 +3991,6 @@ function legalDoc(which){
       <li><b>Reports</b> you send about a store are anonymous: we only receive the reason and any note you write.</li>
       <li><b>Your location</b> in Browse stores is used only on your own phone to sort stores by distance. It is never sent to ${A} or to sellers.</li>
       <li><b>Visit counts:</b> we count store visits, order taps and ad views without any names or numbers, to show sellers simple insights.</li>
-      <li><b>Notifications:</b> if a seller turns them on, we keep that phone's notification address so we can send store updates. Messages are encrypted for that phone. Turn them off anytime under Account, or by logging out.</li>
     </ul>
     <h2>3. How we use it</h2>
     <ul>
@@ -4716,7 +4620,7 @@ async function route(){
   if (q === "explore" || q === "near") return renderExplore();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
-    PENDING_VIEW = urlFlag("status") ? "status" : urlFlag("news") ? "news" : urlFlag("insights") ? "insights" : "";
+    PENDING_VIEW = urlFlag("status") ? "status" : "";
     SESSION = loadSession();
     if (SESSION){
       const req = SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }, saved = edCopy();
