@@ -411,6 +411,10 @@ textarea{min-height:72px;resize:vertical}
 .tab{flex:none;padding:8px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
 .tab[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .sechips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.seccard{padding:12px 14px}.seccard > b{font-size:14px}
+.sechips.row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:8px -14px 0;padding:0 14px 2px}.sechips.row::-webkit-scrollbar{display:none}
+.seccard .sechip{height:30px;font-size:13px}.sechip.add{color:var(--muted);border-style:dashed}
+.seccard .secnew{margin-top:8px;height:40px;font-size:15px}
 .sechip{padding:6px 12px;border-radius:999px;border:1.3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px;cursor:pointer}
 .sechip:active{background:var(--soft)}
 .sechip.on{background:var(--plum);border-color:var(--plum-ink);color:#fff}
@@ -2441,10 +2445,14 @@ function edLink(j){
     <label style="margin-top:0">Link<input type="url" inputmode="url" data-lf="u" data-j="${j}" value="${esc(l.u)}" placeholder="https://s.shopee.com.my/..." maxlength="600" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
     <div id="lpv-${j}">${linkPreviewHtml(l)}</div>
   </section>
-  <section class="card">
-    <label style="margin-top:0">Section name (optional)<input type="text" data-lf="sec" data-j="${j}" value="${esc(l.sec)}" placeholder="e.g. Gadgets, Beauty" maxlength="30"></label>
-    <div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === cur ? " on" : ""}" aria-pressed="${x === cur}" data-act="lksecpick" data-j="${j}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
-    <p class="hint">Links with the same section name show together on your store.</p>
+  ${secCard(secs, cur, `data-act="lksecpick" data-j="${j}"`, `data-lf="sec" data-j="${j}"`, "e.g. Gadgets")}`;
+}
+// Section: a small card with one row of chips. Tap one to use it (tap again to clear), or + New to type a name.
+function secCard(secs, cur, pick, field, ph){
+  const list = cur && !secs.includes(cur) ? [cur, ...secs] : secs;
+  return `<section class="card seccard"><b>Section</b>
+    <div class="sechips row">${list.map(x => `<button type="button" class="sechip${x === cur ? " on" : ""}" aria-pressed="${x === cur}" ${pick} data-v="${esc(x)}">${esc(x)}</button>`).join("")}<button type="button" class="sechip add" data-act="secnew">${ico("plus", 14, 2.4)}New</button></div>
+    <input type="text" class="secnew" ${field} value="" placeholder="${esc(ph)}" maxlength="30" hidden aria-label="New section name">
   </section>`;
 }
 function edProducts(){
@@ -2487,11 +2495,7 @@ function edProduct(i){
       </div>`).join("")}
     <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add another</button>
   </section>`}
-  <section class="card">
-    <label style="margin-top:0">Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
-    ${secs.length ? `<div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === curSec ? " on" : ""}" aria-pressed="${x === curSec}" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
-    <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
-  </section>
+  ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, "e.g. Drinks")}
   <section class="card">
     <label class="check" style="margin-top:0"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>Sold out for now</span></label>
     <div class="between" style="margin-top:12px"><span class="hint" style="margin:0">Position in your list</span>
@@ -3148,12 +3152,13 @@ $("builder").addEventListener("click", async e => {
     return;
   }
   if (a === "go" || a === "back"){ const to = b.dataset.v, ti = b.dataset.i != null ? +b.dataset.i : null; leaveEdPage(to); EDOTHER = false; return a === "back" ? edBack(to, ti) : edGo(to, ti); }
-  if (a === "secpick"){ S.items[i].sec = b.dataset.v; redraw(); return; }
+  if (a === "secpick"){ S.items[i].sec = S.items[i].sec === b.dataset.v ? "" : b.dataset.v; redraw(); return; }
+  if (a === "secnew"){ const inp = b.closest(".seccard").querySelector(".secnew"); inp.hidden = false; inp.focus(); return; }
   if (a === "lkadd"){ if (S.links.length >= 80) return notify("You can add up to 80 links. Delete one to add another."); S.links.push({ u: "", sec: "", n: "", img: "", p: 0, pu: "" }); edGo("link", S.links.length - 1); setTimeout(() => { const el = document.querySelector('[data-lf="u"]'); if (el) el.focus(); }, 30); return; }
   if (a === "lkdel"){ const l = S.links[j]; if (l && (!l.u.trim() || await ask(`Delete ${l.n.trim() ? '"' + tidyName(l.n) + '"' : "this link"}?`, "Delete", true))){ S.links.splice(j, 1); if (EDV === "link"){ EDI = -1; touch(); return edBack("links"); } redraw(); } return; }
   if (a === "lkfetch"){ const l = S.links[j]; if (l){ l.pu = ""; fetchLinkMeta(l); } return; }
   if (a === "lkedit"){ const l = S.links[j]; if (l){ const st = lkState(l); st.edit = !st.edit; updateLinkPreview(l); } return; }
-  if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = b.dataset.v; redraw(); } return; }
+  if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = S.links[j].sec === b.dataset.v ? "" : b.dataset.v; redraw(); } return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
   else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem());
