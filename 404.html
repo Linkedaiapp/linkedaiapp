@@ -252,7 +252,7 @@ textarea{min-height:72px;resize:vertical}
 .bulnums{display:flex;gap:16px;margin:10px 0 4px}
 .bulnums div b{display:block;font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
 .bulnums div span{font-size:12px;color:var(--muted)}
-.bulnums .up{color:var(--ok);font-weight:700}.bulnums .down{color:var(--warn);font-weight:700}
+.bulbody .up,.lk-group .up{color:var(--ok);font-weight:700}.bulbody .down,.lk-group .down{color:var(--warn);font-weight:700}
 .bulbars{display:flex;align-items:flex-end;gap:6px;height:56px;margin:10px 0 2px}
 .bulbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
 .bulbars i{display:block;width:100%;border-radius:var(--r-xs) var(--r-xs) var(--r-xs) var(--r-xs);background:var(--plum);min-height:3px}
@@ -1980,6 +1980,7 @@ function renderStart(msg, mode){
 // ---------- Bulletin board: everything here is written by the Link Kedai App bot ----------
 // New Link Kedai App features are announced to sellers automatically from this list.
 const APP_UPDATES = [
+  { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are here in News. Tap the bell to open News." },
   { id: "u-20260925-browse", at: "2026-09-25", title: "New: get found in Browse stores", body: "Turn on List my store in Browse stores, then pick your state, area and category, so customers can find you in the Link Kedai App. You can also add your location for Nearest first. It stays private." },
   { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Link Kedai App news now appear here. Look for the red number on the bell." },
   { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Link Kedai App Guard now show a blue Verified tick on their logo, so customers can trust your link." },
@@ -2000,7 +2001,7 @@ function weekKey(){ const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDa
 function shortHash(t){ let h = 0; for (const c of String(t)) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); }
 function bulletinItems(){
   const out = [], b = BUL || {}, wk = weekKey(), to = String(b.ownerWa || SITE.ownerWa || "").replace(/\D/g, "");
-  const push = (id, kind, label, title, body, cta) => out.push({ id, kind, label, title, body, cta });
+  const push = (id, kind, label, title, body, cta) => out.push({ id, kind, label, title, body, cta, ins: /^(ins|adins)-/.test(id) });
   const sum = (arr, f) => arr.reduce((a, x) => a + (x[f] || 0), 0);
   // store status
   if (b.status === "review") push("st-review-" + b.paidAt, "shield", "Store status", "Link Kedai App Guard is checking your store", "Thanks for your payment. Your store goes live as soon as it's approved, usually within 24 hours.");
@@ -2046,13 +2047,27 @@ function bulletinItems(){
   // Link Kedai App updates
   const since = b.created ? new Date(b.created - 14 * 864e5).toISOString().slice(0, 10) : "";
   APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
-  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm the Link Kedai App bot. I'll post your shop insights, tips and news here every week.</p>");
+  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm the Link Kedai App bot. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights.</p>");
   return out;
+}
+// News (bell) and Insights (tab) are separate: each has its own unread count
+function newsItems(){ return bulletinItems().filter(x => !x.ins); }
+function insItems(){ return bulletinItems().filter(x => x.ins); }
+function unreadOf(items){ try { const seen = bulSeen(); return items.filter(x => !seen.has(x.id)).length; } catch(e){ return 0; } }
+function markSeen(items){ const seen = bulSeen(); try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {} }
+function bulCards(items, seen){
+  return items.map(x => `
+    <article class="bulcard ${seen.has(x.id) ? "" : "unread"}">
+      <div class="bulic">${IC[x.kind] || IC.news}</div>
+      <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
+    </article>`).join("");
 }
 function updateBell(){
   const el = $("bellCount"); if (!el) return;
-  const seen = bulSeen(), n = bulletinItems().filter(x => !seen.has(x.id)).length;
+  const n = unreadOf(window.LK_ALLVIEW ? bulletinItems() : newsItems());
   el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n);
+  const tab = document.querySelector('.lk-tabs [data-v="insights"]');
+  if (tab && EDV !== "insights"){ const n = unreadOf(insItems()), d = tab.querySelector(".dotn"); if (d) d.remove(); if (n) tab.insertAdjacentHTML("beforeend", `<span class="dotn">${n > 9 ? "9+" : n}</span>`); }
 }
 async function loadBulletin(){
   if (!SESSION) return;
@@ -2061,11 +2076,7 @@ async function loadBulletin(){
 }
 function openBulletin(){
   const items = bulletinItems(), seen = bulSeen();
-  $("bulList").innerHTML = items.length ? items.map(x => `
-    <article class="bulcard ${seen.has(x.id) ? "" : "unread"}">
-      <div class="bulic">${IC[x.kind] || IC.news}</div>
-      <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
-    </article>`).join("") : `<p class="hint">Nothing here yet. Check back soon.</p>`;
+  $("bulList").innerHTML = items.length ? bulCards(items, seen) : `<p class="hint">Nothing here yet. Check back soon.</p>`;
   openSheet("bulOverlay");
   $("bulOverlay").querySelector(".sheet").scrollTop = 0;
   try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {}
@@ -2096,7 +2107,7 @@ function edTop(title, back, right){
   return `<div class="lk-bar">${back ? `<button class="iconbtn" data-act="go" data-v="${back}" aria-label="Back">${ico("back",20)}</button>` : ""}<h1>${esc(title)}</h1>${right || ""}</div>`;
 }
 function edTabs(){
-  const unread = (() => { try { const seen = bulSeen(); return bulletinItems().filter(x => !seen.has(x.id)).length; } catch(e){ return 0; } })();
+  const unread = EDV === "insights" ? 0 : unreadOf(insItems());
   const t = (v, icon, label, n) => `<button data-act="go" data-v="${v}" ${EDV === v ? 'aria-current="page"' : ""}>${ico(icon,22)}<span>${label}</span>${n ? `<span class="dotn">${n > 9 ? "9+" : n}</span>` : ""}</button>`;
   return `<nav class="lk-tabs" aria-label="Seller menu">${t("home","store","Store")}${t("products","box","Products")}${t("links","link","Links")}${t("insights","chart","Insights", unread)}${t("account","user","Account")}</nav>`;
 }
@@ -2116,7 +2127,7 @@ function edHome(msg){
   const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
-  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="insights" aria-label="Bulletin board">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
+  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
   <section class="card linkcard">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${status}</div>
@@ -2429,15 +2440,29 @@ async function initPinMap(){
 }
 
 function edInsights(){
-  const items = bulletinItems(), seen = bulSeen();
-  setTimeout(() => { try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {} }, 0);
-  return `${edTop("Insights & news", "")}
-  <p class="hint" style="margin:-4px 2px 14px">Written for you by the Link Kedai App bot: your shop numbers, tips and updates.</p>
-  ${items.length ? items.map(x => `
-    <article class="bulcard ${seen.has(x.id) ? "" : "unread"}">
-      <div class="bulic">${IC[x.kind] || IC.news}</div>
-      <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
-    </article>`).join("") : `<p class="hint">Nothing here yet. Check back soon.</p>`}`;
+  const items = insItems(), seen = bulSeen(), b = BUL || {};
+  setTimeout(() => markSeen(items), 0);
+  const st = Array.isArray(b.stats) ? b.stats : [], sum = (arr, f) => arr.reduce((a, x) => a + (x[f] || 0), 0);
+  // this week next to last week, from the 14 days the server keeps
+  const wk = st.length >= 14 ? (() => {
+    const a = st.slice(-7), p = st.slice(-14, -7), row = (label, f) => {
+      const n = sum(a, f), m = sum(p, f), d = m ? Math.round((n - m) / m * 100) : null;
+      return `<div class="lk-row" style="cursor:default"><span class="tt"><b>${label}</b><span>Last week ${m}</span></span><b style="font-size:18px">${n}</b>${d === null ? "" : `<span class="${d >= 0 ? "up" : "down"}" style="min-width:52px;text-align:right;font-weight:700">${d >= 0 ? "+" : ""}${d}%</span>`}</div>`;
+    };
+    return `<section class="card lk-group"><h2 style="margin:0;padding:16px 16px 4px">This week vs last week</h2>${row("Store visits", "v")}${row("Order taps", "o")}</section>`;
+  })() : "";
+  const empty = STATUS === "live" ? "Your numbers show here after your store's first week. Share your store link so customers can find you."
+    : "Your shop numbers show here once your store is live.";
+  return `${edTop("Insights", "")}
+  <p class="hint" style="margin:-4px 2px 14px">Your shop numbers, updated every day. We count visits without any names or numbers.</p>
+  ${items.length ? bulCards(items, seen) + wk : `<section class="card"><p class="hint" style="margin:0">${empty}</p></section>`}`;
+}
+function edNews(){
+  const items = newsItems(), seen = bulSeen();
+  setTimeout(() => { markSeen(items); updateBell(); }, 0);
+  return `${edTop("News", "home")}
+  <p class="hint" style="margin:-4px 2px 14px">From the Link Kedai App bot: your store status, tips and what's new.</p>
+  ${items.length ? bulCards(items, seen) : `<p class="hint">Nothing here yet. Check back soon.</p>`}`;
 }
 function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -2463,7 +2488,7 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
@@ -2992,7 +3017,7 @@ $("builder").addEventListener("click", async e => {
       notify("Your store and account have been deleted.");
     } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
   }
-  else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("insights"); }
+  else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
   else if (a === "setcat"){ S.cat = b.dataset.v; touch(); renderEditor(); }
   else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed."); }
   else if (a === "pinme"){
