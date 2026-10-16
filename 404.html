@@ -354,6 +354,16 @@ textarea{min-height:72px;resize:vertical}
   color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .pineye:active{background:var(--soft)}
 .pineye svg{width:22px;height:22px}
+/* A 6-digit PIN shows as six dots that fill as you type, like a phone's lock screen. The real box stays underneath
+   (its text hidden), so typing, pasting and password autofill all keep working. */
+.pinwrap.dots input{color:transparent;caret-color:transparent;-webkit-text-fill-color:transparent;letter-spacing:0}
+.pinwrap.dots input::selection{background:transparent}
+.pdots{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:18px;padding-right:44px;pointer-events:none}
+.pdots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);opacity:.28;transition:transform .15s,opacity .15s,background-color .15s;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:19px;line-height:1}
+.pdots i.next{opacity:.7}
+.pdots i.on{background:var(--ink);opacity:1;transform:scale(1.08)}
+.pdots i.txt{width:14px;height:auto;border:0;background:transparent;transform:none;color:var(--ink)}
+.pinwrap.dots .pineye{z-index:1}
 .filebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .sw{width:40px;height:40px;border-radius:50%;border:3px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
@@ -863,6 +873,9 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxmk:focus-visible .mxpin,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
 .mxpin{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 .mxpin svg{width:17px;height:17px}
+.mxpin.haslogo{overflow:hidden;background:#fff}
+.mxpin .mxlg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.mxmk.exact .mxpin .mxlg{transform:rotate(45deg) scale(1.42)}
 .mxvb{position:absolute;left:24px;top:22px;width:17px;height:17px;border-radius:50%;background:var(--verify);border:2px solid #fff;display:grid;place-items:center;color:#fff}
 .mxvb svg{width:9px;height:9px}
 .mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05);opacity:.8}
@@ -1044,7 +1057,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 .x{width:40px;height:40px}
 .sechip{height:36px}
 /* ---- first run: three short steps for a brand-new store ---- */
-#builder.starting .actions{display:none}
+#builder.starting .actions,#builder.noactions .actions{display:none}
 .fr-head{display:flex;align-items:center;gap:10px;min-height:48px}
 .fr-dots{display:flex;gap:6px;flex:1}
 .fr-dots i{width:28px;height:6px;border-radius:999px;background:var(--line2)}
@@ -1771,17 +1784,27 @@ function resizeImage(file, max, square, type, quality){
 
 /* ---------- Own confirm and message box (browser popups get blocked in some apps) ---------- */
 let askResolve = null;
-function ask(text, yesLabel, danger){
+// wait: seconds before the yes button works (for things that can't be undone), counted down on the button
+let ASK_T = null;
+function askTimer(stop){ clearInterval(ASK_T); ASK_T = null; if (stop) $("askYes").disabled = false; }
+function ask(text, yesLabel, danger, wait){
+  askTimer(true);
   $("askText").textContent = text;
   $("askYes").textContent = yesLabel || "OK";
+  if (wait){
+    let n = wait; const label = yesLabel || "OK", b = $("askYes");
+    b.disabled = true; b.textContent = `${label} (${n})`;
+    ASK_T = setInterval(() => { n--; if (n > 0) b.textContent = `${label} (${n})`; else { askTimer(true); b.textContent = label; } }, 1000);
+  }
   $("askYes").style.background = danger ? "var(--err)" : "";
   $("askYes").style.borderColor = danger ? "var(--err)" : "";
   $("askNoWrap").hidden = false;
   openSheet("askOverlay");
-  $("askYes").focus();
+  (wait ? $("askNo") : $("askYes")).focus();   // while Delete is counting down, Cancel is the safe default
   return new Promise(res => { askResolve = res; });
 }
 function notify(text){
+  askTimer(true);
   $("askText").textContent = text;
   $("askYes").textContent = "OK";
   $("askYes").style.background = ""; $("askYes").style.borderColor = "";
@@ -1789,7 +1812,7 @@ function notify(text){
   openSheet("askOverlay");
   return new Promise(res => { askResolve = res; });
 }
-function closeAsk(v){ closeSheet("askOverlay"); if (askResolve){ const r = askResolve; askResolve = null; r(v); } }
+function closeAsk(v){ askTimer(true); closeSheet("askOverlay"); if (askResolve){ const r = askResolve; askResolve = null; r(v); } }
 $("askYes").onclick = () => closeAsk(true);
 $("askNo").onclick = () => closeAsk(false);
 $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay")) closeAsk(false); });
@@ -1800,6 +1823,26 @@ $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay"
 
 
 
+// 6-digit PINs as six dots, filled as the seller types (every PIN box, whenever it's drawn)
+const INPUT_VALUE = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+function dotPin(inp){
+  if (inp.dataset.dots) return; inp.dataset.dots = "1";
+  const wrap = inp.parentNode; wrap.classList.add("dots");
+  const d = document.createElement("span"); d.className = "pdots"; d.setAttribute("aria-hidden", "true"); d.innerHTML = "<i></i>".repeat(6);
+  wrap.insertBefore(d, inp.nextSibling);
+  const sync = () => {
+    const v = INPUT_VALUE.get.call(inp), show = inp.type === "text", f = document.activeElement === inp;
+    [...d.children].forEach((el, k) => { const on = k < v.length; el.className = on ? (show ? "txt" : "on") : f && k === v.length ? "next" : ""; el.textContent = show && on ? v[k] : ""; });
+  };
+  // the dots follow the box even when the app clears or fills it
+  Object.defineProperty(inp, "value", { configurable: true, get(){ return INPUT_VALUE.get.call(inp); }, set(x){ INPUT_VALUE.set.call(inp, x); sync(); } });
+  inp.addEventListener("input", () => { const raw = INPUT_VALUE.get.call(inp), c = raw.replace(/\D/g, "").slice(0, 6); if (c !== raw) INPUT_VALUE.set.call(inp, c); sync(); });
+  ["focus", "blur"].forEach(t => inp.addEventListener(t, sync));
+  new MutationObserver(sync).observe(inp, { attributes: true, attributeFilter: ["type"] });   // Show PIN: the digits appear in place of the dots
+  sync();
+}
+const dotPins = () => document.querySelectorAll('.pinwrap > input[maxlength="6"][inputmode="numeric"]:not([data-dots])').forEach(dotPin);
+dotPins(); new MutationObserver(dotPins).observe(document.body, { childList: true, subtree: true });
 // Show / hide PIN buttons (work on every page)
 const EYE_OPEN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>`;
 const EYE_SHUT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.5 4.5-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
@@ -1841,6 +1884,8 @@ function clearSession(leaving){
   if (mine) keep.del("lk-keep");
 }
 const authErr = e => /PIN|WhatsApp number|logged out on this phone/i.test((e && e.message) || "");
+// only the server's own "who are you" answers (not "that number is already used" or "add your WhatsApp number")
+const pinErr = e => /wrong (whatsapp number|email) or pin|too many wrong pins|logged out on this phone|type your pin/i.test((e && e.message) || "");
 
 function loginCardHtml(msg){
   return `<section class="card" id="loginCard">
@@ -2009,6 +2054,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-look", at: "2026-10-17", title: "Your logo on the map, and PIN dots", body: "Browse stores now shows each shop's own logo on its map pin. Your 6-digit PIN shows as six dots as you type, like a phone lock screen. Deleting your account now waits 5 seconds before the Delete button works, so it can't happen by accident." },
   { id: "u-20261017-fixes", at: "2026-10-17", title: "Smoother editing and ordering", body: "The phone's Back button now steps back through your editor properly. Links pasted without https:// and short link names are saved. If your PIN was changed on another phone, we ask for it instead of failing to save. Customers can clear an optional date, and Browse search finds every word you type." },
   { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
   { id: "u-20261016-daysoff", at: "2026-10-16", title: "New: mark your days off", body: "Under Store status, tap the dates you aren't taking orders, or pick a day of the week that's always off. Customers can't choose those dates when they order." },
@@ -2145,8 +2191,7 @@ function edSteps(){
     products: named.some(it => it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
     look: !!(safeImg(S.logo) || safeImg(S.cover)),
     listing: !!(S.loc.on && S.loc.state && (S.loc.city || affOnly(S))),
-    status: true,
-    plan: STATUS === "live"
+    status: true
   };
 }
 function edRow(v, icon, title, sub, done, i){
@@ -2182,8 +2227,7 @@ function edHome(msg){
   const done = Object.values(st).filter(Boolean).length, total = Object.keys(st).length;
   const allDone = done === total, mark = v => allDone ? null : v;   // all set up: no progress bar or Done tags, just a clean menu
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
-  const b = BUL || {}, last = (b.stats || []).slice(-7), sum = f => last.reduce((a, x) => a + (x[f] || 0), 0);
-  const v = sum("v"), o = sum("o");
+  const b = BUL || {};
   const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
@@ -2211,12 +2255,8 @@ function edHome(msg){
     ${edRow("look","palette","Appearance","Logo, cover, colour and layout", mark(st.look))}
     ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
-    ${edRow("plan","card","Plan & payment", live ? "Paid · one-time" : STATUS === "review" ? "Paid · being checked" : "Not published yet", mark(st.plan))}
   </section>
-  ${live ? `<section class="card">
-    <div class="between"><h2 style="margin:0">This week</h2><button class="btn small" data-act="go" data-v="insights">See insights</button></div>
-    <div class="lk-kpis"><div><b>${v}</b><span>Visits</span></div><div><b>${o}</b><span>Order taps</span></div><div><b>${v ? Math.round(o / v * 100) : 0}%</b><span>Ordered</span></div></div>
-  </section>` : ""}`;
+`;
 }
 function edDetails(){
   return `${edTop("Shop details", "home")}
@@ -2554,6 +2594,7 @@ function renderEditor(msg){
   const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
+  bld.classList.toggle("noactions", EDV === "news");   // nothing to save or preview on News
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
@@ -2780,7 +2821,7 @@ async function autoSave(retry, keepalive){
     savePill("saved", r.flagged && STATUS !== "live" ? "Saved. Some words need a quick check by " + APP_NAME + "." : "Saved");
   } catch(e){
     const m = friendly(e, "No internet right now. Your changes are still here.");
-    if (authErr(e)){ savePill("bad", "Log in again to save. Your changes are still here."); relogin(e).then(ok => { if (ok && DIRTY) scheduleAutosave(300); }); return; }
+    if (pinErr(e)){ savePill("bad", "Log in again to save. Your changes are still here."); relogin(e).then(ok => { if (ok && DIRTY) scheduleAutosave(300); }); return; }
     savePill("bad", /can't reach/i.test(m) ? "No internet right now. Your changes are still here." : /slow right now/i.test(m) ? "The server is busy. Your changes are still here." : m);
     scheduleAutosave(15000);
   }
@@ -3116,7 +3157,7 @@ $("builder").addEventListener("click", async e => {
     DIRTY = false; clearSession(); history.pushState(null, "", home() + "admin"); renderAdmin();
   }
   else if (a === "deleteacct"){
-    if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
+    if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true, 5))) return;
     let pin = SESSION.pin;
     if (!pin && !SESSION.admin){ pin = await askText("Type your 6-digit PIN to delete your account.", "", "", "Delete", true); if (!pin) return; }
     b.disabled = true; b.textContent = "Deleting...";
@@ -3205,7 +3246,7 @@ async function saveNow(){
     if (EDITV === v){ DIRTY = false; rememberEdNow(); const bl = $("builder"); if (bl) bl.classList.remove("dirty"); }
     else scheduleAutosave();
     return r;
-  } catch(e){ if (!authErr(e)) scheduleAutosave(15000); throw e; }
+  } catch(e){ if (!pinErr(e)) scheduleAutosave(15000); throw e; }
   finally { SAVING = null; }
 }
 async function saveStore(){
@@ -3221,7 +3262,7 @@ async function saveStore(){
       : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
   } catch(e){
     btn.disabled = false; btn.textContent = "Save";
-    if (authErr(e)){ if (await relogin(e)) return saveStore(); return; }
+    if (pinErr(e)){ if (await relogin(e)) return saveStore(); return; }
     notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment."));
   }
   btn.disabled = false; btn.textContent = "Save";
@@ -3783,7 +3824,7 @@ async function adminStores(g, head, wire){
       if (v === null || v === id) return;
       extra.newId = v.toLowerCase();
     }
-    if (op === "delete" && !(await ask(`Delete "${b.dataset.name}" for good? Their link stops working and this can't be undone.`, "Delete", true))) return;
+    if (op === "delete" && !(await ask(`Delete "${b.dataset.name}" for good? Their link stops working and this can't be undone.`, "Delete", true, 5))) return;
     if (op === "resetpin" && !(await ask(`Reset the PIN for ${id}? Their old PIN stops working.`, "Reset", true))) return;
     if (op === "unpublish" && !(await ask(`Take ${id} offline? They won't be able to publish it again themselves.`, "Take offline", true))) return;
     if (op === "approve"){ const x = (ADMLIST || []).find(s => s.id === id) || {};
@@ -3862,7 +3903,9 @@ async function adminReview(g, head, wire){
     .then(r => renderAdmin(`Link Kedai App Guard updated: ${r.words.block.length} blocked words, ${r.words.check.length} check words. Tap Check all stores now to apply them to existing stores.`)).catch(e => notify(e.message));
   $("scanNow").onclick = async () => {
     $("scanNow").disabled = true; $("scanNow").innerHTML = `<span class="spin"></span> Link Kedai App Guard is checking...`;
-    try { const r = (await apiPost({ action: "admin", key: ADMIN, op: "scanall" })).result;
+    try {
+      // the server checks a few stores at a time; keep asking until it has been through them all
+      let r = { more: true }; for (let k = 0; r && r.more && k < 200; k++){ r = (await apiPost({ action: "admin", key: ADMIN, op: "scanall" })).result; if (r && r.more) $("scanNow").innerHTML = `<span class="spin"></span> Checked ${r.stores} stores...`; }
       renderAdmin(`Link Kedai App Guard checked ${r.stores} store${r.stores === 1 ? "" : "s"}. ${r.flagged} flagged${r.hidden ? `, ${r.hidden} hidden until you approve` : ""}.`); }
     catch(e){ notify(e.message); $("scanNow").disabled = false; $("scanNow").innerHTML = "Check all stores now"; }
   };
@@ -4300,7 +4343,9 @@ function mxDraw(force){
       const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
       if (!st._a.exact) feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
       const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
-      el.innerHTML = `<span class="mxpin" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
+      // the shop's own logo on its pin (the category icon shows if there's no logo, or it doesn't load)
+      const lg = safeImg(st.logo);
+      el.innerHTML = `<span class="mxpin${lg ? " haslogo" : ""}" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
       el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
       if (sel) el.style.zIndex = 5;
       el.addEventListener("click", () => mxSelect(st.id)); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); mxSelect(st.id); } });
