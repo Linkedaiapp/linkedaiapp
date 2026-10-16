@@ -4,9 +4,13 @@
   "description": "Find Link Kedai App home sellers near you and order on WhatsApp.",
   "start_url": "./?explore",
   "scope": "./",
-  "display": "standalone",
-  "background_color": "#18395C",
-  "theme_color": "#18395C",
+  "display": "fullscreen",
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
+  "background_color": "#F7F5F3",
+  "theme_color": "#F7F5F3",
   "icons": [
     {
       "src": "icon-192.png",

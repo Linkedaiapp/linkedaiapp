@@ -5,21 +5,27 @@
   This software, its design and its code are the property of Link Kedai App.
   Copying, modifying, reusing or redistributing any part of it without written permission is not allowed.
 -->
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Link Kedai App</title>
 <meta name="copyright" content="© 2026 Link Kedai App. All rights reserved.">
-<meta name="color-scheme" content="light only">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#18395C">
+<meta name="color-scheme" content="light dark">
+<!-- Light or dark: always the same as the phone -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F5F3" class="lktc">
 <meta name="description" content="Find home sellers near you and order on WhatsApp.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Link Kedai App">
 <meta property="og:title" content="Link Kedai App">
 <meta property="og:description" content="Find home sellers near you and order on WhatsApp.">
 <meta property="og:url" content="https://linkedaiapp.github.io/linkedaiapp/">
+<!-- yoursite/shop-name/ or yoursite/explore/: drop the slash before any file below loads, so they come from the right folder -->
+<script>(function(){ try { var base = new URL(document.querySelector('meta[property="og:url"]').content).pathname, p = location.pathname;
+  if (p.length > base.length && p.indexOf(base) === 0 && /\/$/.test(p)) history.replaceState(null, "", p.replace(/\/+$/, "") + location.search + location.hash); } catch(e){} })();</script>
+<link rel="manifest" href="manifest.webmanifest">
 <meta property="og:image" content="https://linkedaiapp.github.io/linkedaiapp/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -27,7 +33,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#18395C">
+<meta name="theme-color" content="#F7F5F3" class="lktc">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sora:wght@700;800&family=Sacramento&display=swap" rel="stylesheet">
@@ -51,7 +57,7 @@
   --wa:#3DBE72; --err:#F2887F; --ok:#6FD39A; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{height:100%;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+html{height:100%;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px));touch-action:pan-x pan-y}   /* pages scroll but never zoom; the map zooms itself */
 body{margin:0;min-height:100%;
   font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;
   }
@@ -77,6 +83,7 @@ textarea{min-height:72px;resize:vertical}
 .seg{display:flex;margin-top:6px}
 .seg button{flex:1;padding:11px;cursor:pointer;}
 .seg button[aria-pressed="true"]{border-color:var(--ink);}
+
 .check{margin-top:12px}
 .err{color:var(--err);font-size:14px;min-height:20px;margin:14px 0 8px}
 .status{color:var(--ok);font-size:14px;min-height:20px;margin:8px 0 0}
@@ -151,7 +158,7 @@ textarea{min-height:72px;resize:vertical}
 .codein{letter-spacing:.35em;font-size:22px;font-weight:800;text-align:center}
 .signupbox{display:block;margin-top:26px;padding:16px;text-align:center;
   font-size:15px;color:var(--muted);text-decoration:none}
-.signupbox b{color:var(--accent)}
+.signupbox b{color:var(--accent-ink)}
 .chatfab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;
   background:#25D366;color:#fff;display:grid;place-items:center;z-index:20;
   animation:riseIn .5s .3s cubic-bezier(.16,1,.3,1) both;transition:transform .15s ease}
@@ -172,7 +179,7 @@ textarea{min-height:72px;resize:vertical}
 .admprev img{display:block;width:100%;height:auto}
 .stplace{position:absolute;top:14px;right:16px;max-width:calc(100% - 140px);display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;
   background:var(--soft);color:var(--ink);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stplace svg{width:14px;height:14px;flex:none;color:var(--plum)}
+.stplace svg{width:14px;height:14px;flex:none;color:var(--plum-ink)}
 .stmore{position:absolute;top:12px;left:12px;z-index:5;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);
   background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.08);box-shadow:var(--sh-2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   -webkit-tap-highlight-color:transparent;transition:transform .15s ease}
@@ -189,7 +196,7 @@ textarea{min-height:72px;resize:vertical}
 .stcta-btn{display:inline-block;padding:7px 14px;border-radius:999px;background:var(--plum);color:#fff;font-weight:700;font-size:13px;text-decoration:none;transition:transform .15s ease}
 .stcta-btn:active{transform:scale(.96)}
 /* Link Kedai App Guard */
-.guard{border-color:var(--plum);background:linear-gradient(160deg,var(--surface) 55%,rgba(141,182,232,.12))}
+.guard{border-color:var(--plum-ink);background:linear-gradient(160deg,var(--surface) 55%,rgba(141,182,232,.12))}
 .guardhead{display:flex;align-items:center;gap:12px}
 .guardhead svg{width:46px;height:46px;flex:none;filter:drop-shadow(0 4px 10px rgba(24,57,92,.25))}
 .guardhead b{display:block;font-size:18px;font-weight:800;letter-spacing:-.01em}
@@ -215,12 +222,12 @@ textarea{min-height:72px;resize:vertical}
 .legal .note{background:var(--soft);border-radius:var(--r-sm);padding:12px 14px;margin:14px 0;font-size:14px}
 .legalnav{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
 .legalnav a{padding:8px 14px;border-radius:999px;border:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:700;font-size:14px;background:var(--surface)}
-.legalnav a[aria-current="page"]{background:var(--plum);border-color:var(--plum);color:#fff}
+.legalnav a[aria-current="page"]{background:var(--plum);border-color:var(--plum-ink);color:#fff}
 .copyright{display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--muted)}
 .legallinks{display:block;text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
 .legallinks a{color:var(--muted);text-decoration:underline;margin:0 6px}
 /* ---------- Verified badge + safety note ---------- */
-.vbadge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px 4px 6px;border-radius:999px;background:rgba(141,182,232,.18);color:var(--plum);font-size:12px;font-weight:800}
+.vbadge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px 4px 6px;border-radius:999px;background:rgba(141,182,232,.18);color:var(--plum-ink);font-size:12px;font-weight:800}
 .vbadge svg{width:16px;height:16px}
 .safenote{display:flex;gap:10px;align-items:flex-start;margin:16px 14px 0;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);font-size:13px;line-height:1.45;color:var(--muted)}
 .safenote svg{width:22px;height:22px;flex:none;margin-top:1px}
@@ -245,8 +252,8 @@ textarea{min-height:72px;resize:vertical}
 .bulcard.unread::after{content:"";position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--alert)}
 .bulcard.canx .bulbody{padding-right:30px}.bulcard.canx.unread::after{right:52px;top:26px}
 .bulcard .xmini{top:10px;right:10px}
-.bulshout{display:flex;gap:12px;position:relative;border-color:var(--plum)}.bulshout .bulbody{padding-right:34px}.bulshout p{margin:4px 0 10px}
-.bulic{width:36px;height:36px;border-radius:var(--r-sm);flex:none;display:grid;place-items:center;background:var(--soft);color:var(--plum)}
+.bulshout{display:flex;gap:12px;position:relative;border-color:var(--plum-ink)}.bulshout .bulbody{padding-right:34px}.bulshout p{margin:4px 0 10px}
+.bulic{width:36px;height:36px;border-radius:var(--r-sm);flex:none;display:grid;place-items:center;background:var(--soft);color:var(--plum-ink)}
 .bulic svg{width:19px;height:19px}
 .bulbody{flex:1;min-width:0}
 .bulmeta{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
@@ -351,6 +358,17 @@ textarea{min-height:72px;resize:vertical}
   color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .pineye:active{background:var(--soft)}
 .pineye svg{width:22px;height:22px}
+/* A 6-digit PIN shows as six dots that fill as you type, like a phone's lock screen. The real box stays underneath
+   (its text hidden), so typing, pasting and password autofill all keep working. */
+.pinwrap.dots input{color:transparent;caret-color:transparent;-webkit-text-fill-color:transparent;letter-spacing:0;
+  border-color:transparent !important;background:transparent !important;box-shadow:none !important;outline:none}   /* just the dots, no box */
+.pinwrap.dots input::selection{background:transparent}
+.pdots{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:18px;padding-right:44px;pointer-events:none}
+.pdots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);opacity:.28;transition:transform .15s,opacity .15s,background-color .15s;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:19px;line-height:1}
+.pdots i.next{opacity:.7}
+.pdots i.on{background:var(--ink);opacity:1;transform:scale(1.08)}
+.pdots i.txt{width:14px;height:auto;border:0;background:transparent;transform:none;color:var(--ink)}
+.pinwrap.dots .pineye{z-index:1}
 .filebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .sw{width:40px;height:40px;border-radius:50%;border:3px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
@@ -379,7 +397,7 @@ textarea{min-height:72px;resize:vertical}
   color:#fff;display:grid;place-items:center;font-weight:800;overflow:hidden;
   box-shadow:0 0 0 5px var(--surface),0 8px 22px rgba(20,10,15,.16);position:relative}
 .st-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.stname{font-weight:800;letter-spacing:-.03em;line-height:1.08;}
+.stname{font-weight:800;letter-spacing:-.03em;line-height:1.08;overflow-wrap:anywhere}
 .tag{color:var(--muted);margin:0}
 .info{margin:10px 0 0;font-size:14px;font-weight:500}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
@@ -393,16 +411,20 @@ textarea{min-height:72px;resize:vertical}
 .tab{flex:none;padding:8px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
 .tab[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .sechips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.seccard{padding:12px 14px}.seccard > b{font-size:14px}
+.sechips.row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:8px -14px 0;padding:0 14px 2px}.sechips.row::-webkit-scrollbar{display:none}
+.seccard .sechip{height:30px;font-size:13px}.sechip.add{color:var(--muted);border-style:dashed}
+.seccard .secnew{margin-top:8px;height:40px;font-size:15px}
 .sechip{padding:6px 12px;border-radius:999px;border:1.3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px;cursor:pointer}
 .sechip:active{background:var(--soft)}
-.sechip.on{background:var(--plum);border-color:var(--plum);color:#fff}
+.sechip.on{background:var(--plum);border-color:var(--plum-ink);color:#fff}
 .group{scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
 .group h2{font-weight:800;letter-spacing:-.02em;}
 .plist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
 .prow{display:flex;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
 .prow:last-child{border-bottom:0}
 .ptext{flex:1;min-width:0}
-.ptext h3{font-weight:700;margin:0 0 3px;line-height:1.25}
+.ptext h3{font-weight:700;margin:0 0 3px;line-height:1.25;overflow-wrap:anywhere}
 .pdesc{color:var(--muted);margin:0;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
 .pmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .pprice{font-weight:700;font-size:15px}
@@ -426,14 +448,15 @@ textarea{min-height:72px;resize:vertical}
 .plist.minimal .ptext h3{font-size:18px;font-weight:600;letter-spacing:-.01em}
 .plist.minimal .pmeta{margin-top:4px}
 .plist.minimal .prow::after{content:"+";flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:18px;font-weight:600;color:var(--ink)}
-.plist.minimal .prow.out::after{content:none}
+.plist.minimal .prow.out::after,.plist.minimal .plink::after{content:none}
 .empty{color:var(--muted);text-align:center;padding:40px 16px}
 .foot{text-align:center;color:var(--muted);font-size:13px;margin:32px 16px 0}
 .foot a{color:inherit}
 
 .bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));z-index:5;
   transform:translateY(120%);transition:transform .25s ease;pointer-events:none}
-.bar.show{transform:none;pointer-events:auto}
+.bar.show{transform:none;pointer-events:auto;visibility:visible}
+.bar:not(.show){visibility:hidden;transition:transform .25s ease,visibility 0s .25s}
 .cartbtn{width:100%;max-width:692px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--accent);color:#fff;border:0;
   border-radius:var(--r-md);padding:15px 18px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:var(--sh-2)}
 .cartbtn .cnt{background:rgba(255,255,255,.22);border-radius:var(--r-xs);padding:2px 9px;min-width:30px;text-align:center}
@@ -515,13 +538,13 @@ html,body{overflow-x:hidden}
 .pbig img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-lg) var(--r-lg) 0 0}
 .pbig .ph{border-radius:var(--r-lg) var(--r-lg) 0 0;font-size:32px}
 .pbody{padding:18px 16px 0}
-.pbody h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px;line-height:1.15}
+.pbody h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px;line-height:1.15;overflow-wrap:anywhere}
 .pbody .pdesc{display:block;-webkit-line-clamp:unset}
 .opts{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:0 14px}
 .optrow{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer;margin:0;font-weight:500}
 .optrow:last-child{border-bottom:0}
 .optrow input{width:20px;height:20px;accent-color:var(--accent);margin:0}
-.optrow .ol{flex:1}
+.optrow .ol{flex:1;overflow-wrap:anywhere}
 .qtyrow{display:flex;justify-content:space-between;align-items:center;margin:18px 0}
 .step{display:flex;align-items:center;gap:6px}
 .step button{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:20px;line-height:1;cursor:pointer}
@@ -604,10 +627,10 @@ html,body{overflow-x:hidden}
 /* =====================================================================
    Link Kedai App design system v2: warm neutrals, navy + sky, liquid glass
    ===================================================================== */
-:root{--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#18395C;--gold:#8DB6E8;
+:root{--plum-ink:#18395C;--accent-ink:var(--accent);--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#18395C;--gold:#8DB6E8;
   --glass:rgba(255,255,255,.62);--glass-edge:rgba(255,255,255,.85);--r-card:18px;--r-btn:14px;--r-field:12px}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}}
-:root[data-theme="dark"]{--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 45%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}}
+:root[data-theme="dark"]{--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 45%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}
 body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 .card{border-radius:var(--r-card);border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh-1)}
 .card h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
@@ -656,9 +679,9 @@ label{font-weight:600;font-size:14px}
 .chips button,.chip{border-radius:999px;border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(20,10,15,.06);font-weight:600}
 .chips button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);border-color:rgba(255,255,255,.24);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 12px rgba(24,57,92,.25)}
 /* ---- category tiles (line icons, no stalls) ---- */
-.stalls button .stall{width:58px;height:58px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);color:var(--plum);box-shadow:var(--sh-1)}
+.stalls button .stall{width:58px;height:58px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);color:var(--plum-ink);box-shadow:var(--sh-1)}
 .stalls button .stall svg{width:27px;height:27px}
-.stalls button[aria-pressed="true"] .stall{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);color:#fff;border-color:var(--plum);box-shadow:0 6px 16px rgba(24,57,92,.25)}
+.stalls button[aria-pressed="true"] .stall{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);color:#fff;border-color:var(--plum-ink);box-shadow:0 6px 16px rgba(24,57,92,.25)}
 /* ---- home page ---- */
 .brandmark img{border-radius:0;box-shadow:none}
 .signupbox{border-radius:var(--r-btn);background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.07)}
@@ -672,7 +695,7 @@ label{font-weight:600;font-size:14px}
   background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 12px 32px rgba(20,10,15,.16);display:flex;justify-content:space-around;align-items:center}
 .lk-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;font:inherit;font-size:12px;font-weight:600;color:var(--muted);padding:6px 8px;border-radius:var(--r-md);cursor:pointer;position:relative}
-.lk-tabs button[aria-current="page"]{color:var(--plum);background:color-mix(in srgb,var(--plum) 9%,transparent)}
+.lk-tabs button[aria-current="page"]{color:var(--plum-ink);background:color-mix(in srgb,var(--plum) 9%,transparent)}
 .lk-tabs button[aria-current="page"] .fillme path{fill:currentColor}
 .lk-tabs .dotn{position:absolute;top:0;right:8px;min-width:16px;height:16px;border-radius:999px;background:var(--alert);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 4px}
 #builder.tabbed .wrap{padding-bottom:110px}
@@ -681,10 +704,11 @@ label{font-weight:600;font-size:14px}
 #builder.tabbed:not(.dirty) .actions{display:none}
 .lk-bar{display:flex;align-items:center;gap:10px;min-height:56px;margin:0 0 6px}
 .lk-bar h1{flex:1;font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0}
+.edsub{font-size:15px;font-weight:700;color:var(--muted);margin:18px 4px 8px}
 .lk-group{padding:0;overflow:hidden}
 .lk-row{display:flex;align-items:center;gap:14px;padding:14px 16px;width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .lk-row + .lk-row{border-top:1px solid var(--line)}
-.lk-row .tile{width:40px;height:40px;border-radius:var(--r-sm);background:var(--soft);color:var(--plum);display:grid;place-items:center;flex:none}
+.lk-row .tile{width:40px;height:40px;border-radius:var(--r-sm);background:var(--soft);color:var(--plum-ink);display:grid;place-items:center;flex:none}
 .lk-row .tt{flex:1;min-width:0}
 .lk-row .tt b{font-size:15px;font-weight:600}
 .lk-row .tt span{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -707,7 +731,7 @@ label{font-weight:600;font-size:14px}
 .excities{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 2px;scrollbar-width:none}
 .excities::-webkit-scrollbar{display:none}
 .excities button{flex:none;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line2);background:var(--surface);font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
-.excities button[aria-pressed="true"]{border-color:var(--plum);color:var(--plum);background:color-mix(in srgb,var(--plum) 8%,var(--surface))}
+.excities button[aria-pressed="true"]{border-color:var(--plum-ink);color:var(--plum-ink);background:color-mix(in srgb,var(--plum) 8%,var(--surface))}
 .exshop{border-radius:var(--r-lg);}
 .exsfav{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--muted);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(20,10,15,.12)}
 .exsfav svg{width:18px;height:18px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
@@ -790,9 +814,9 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 .exbar2 select{flex:none;width:38%;max-width:150px;margin:0;height:44px;padding-top:0;padding-bottom:0;font-size:14px;font-weight:600}
 #exCats{gap:8px;}
 #exCats button{width:auto;flex-direction:row;gap:5px;height:38px;padding:0 14px 0 8px;border-radius:999px;background:var(--surface);border:1px solid var(--line2);font-size:13px;font-weight:700;white-space:nowrap}
-#exCats button .stall{width:24px;height:24px;border:0;border-radius:0;background:none;box-shadow:none;color:var(--plum)}
+#exCats button .stall{width:24px;height:24px;border:0;border-radius:0;background:none;box-shadow:none;color:var(--plum-ink)}
 #exCats button .stall svg{width:20px;height:20px}
-#exCats button[aria-pressed="true"]{background:var(--plum);border-color:var(--plum);color:#fff}
+#exCats button[aria-pressed="true"]{background:var(--plum);border-color:var(--plum-ink);color:#fff}
 #exCats button[aria-pressed="true"] .stall{background:none;border:0;box-shadow:none;color:#fff}
 .stalls+.chips button{padding:6px 12px;font-size:13px}
 .exgrid{margin-top:4px}
@@ -811,6 +835,8 @@ body.exploring #gwrap{padding:0;max-width:none}
 #mxMap{position:fixed;inset:0;z-index:1;background:var(--bg);touch-action:none}
 #mxMap{font-family:inherit;-webkit-tap-highlight-color:transparent}
 #mxMap .maplibregl-canvas{outline:none}
+.mxinfo{position:fixed;z-index:10;left:12px;bottom:calc(104px + env(safe-area-inset-bottom,0px));width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  background:var(--glass);border:1px solid var(--glass-edge);color:var(--muted);font:italic 700 12px/1 Georgia,serif;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #mxMap .maplibregl-ctrl-attrib{font-size:11px;background:var(--glass);color:var(--muted);border-radius:var(--r-xs) 0 0 0}
 #mxMap .maplibregl-ctrl-attrib a{color:inherit}
 #mxMap .maplibregl-ctrl-attrib-button{background-color:transparent}
@@ -835,7 +861,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxchips::-webkit-scrollbar{display:none}
 .mxchip{flex:none;height:38px;display:flex;align-items:center;gap:6px;padding:0 14px 0 10px;border-radius:999px;font:inherit;font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;cursor:pointer;transition:transform .15s ease}
 .mxchip.mxg{-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;background:color-mix(in srgb,var(--surface) 94%,transparent)}
-.mxchip svg{width:19px;height:19px;color:var(--plum)}
+.mxchip svg{width:19px;height:19px;color:var(--plum-ink)}
 .mxchip.t{padding:0 14px}
 .mxchip[aria-pressed="true"]{background:var(--plum);border-color:transparent;color:#fff;box-shadow:none}
 .mxchip[aria-pressed="true"] svg{color:#fff}
@@ -843,7 +869,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxfabs{position:fixed;z-index:10;right:12px;bottom:calc(98px + env(safe-area-inset-bottom,0px))}
 .mxpill{position:fixed;z-index:10;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);height:42px;padding:0 16px 0 12px;border-radius:999px;display:flex;align-items:center;gap:8px;
   font:inherit;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;cursor:pointer;transition:opacity .2s ease,transform .25s ease}
-.mxpill svg{width:18px;height:18px;color:var(--plum)}
+.mxpill svg{width:18px;height:18px;color:var(--plum-ink)}
 .mxpill.off{opacity:0;pointer-events:none;transform:translate(-50%,12px)}
 .mxempty{position:fixed;z-index:9;left:50%;top:42%;transform:translate(-50%,-50%);width:min(300px,calc(100% - 48px));padding:18px;border-radius:var(--r-lg);text-align:center}
 .mxempty[hidden]{display:none}
@@ -859,6 +885,9 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxmk:focus-visible .mxpin,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
 .mxpin{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 .mxpin svg{width:17px;height:17px}
+.mxpin.haslogo{overflow:hidden;background:#fff}
+.mxpin .mxlg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.mxmk.exact .mxpin .mxlg{transform:rotate(45deg) scale(1.42)}
 .mxvb{position:absolute;left:24px;top:22px;width:17px;height:17px;border-radius:50%;background:var(--verify);border:2px solid #fff;display:grid;place-items:center;color:#fff}
 .mxvb svg{width:9px;height:9px}
 .mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05);opacity:.8}
@@ -896,7 +925,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxgo{margin-top:12px}
 .mxgo .btn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
 .mxhint{display:flex;align-items:center;gap:6px;margin:10px 2px 0;font-size:12px;color:var(--muted)}
-.mxhint svg{width:14px;height:14px;flex:none;color:var(--plum)}
+.mxhint svg{width:14px;height:14px;flex:none;color:var(--plum-ink)}
 .mxscrim{position:fixed;inset:0;z-index:25;background:rgba(10,10,12,.35);opacity:0;pointer-events:none;transition:opacity .25s ease}
 .mxscrim.show{opacity:1;pointer-events:auto}
 .mxsheet{position:fixed;z-index:30;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;height:min(68%,620px);background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:0 -12px 40px rgba(20,10,15,.25);
@@ -928,14 +957,17 @@ a.prow{text-decoration:none;color:inherit}
 .plink h3{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
 .plink .pimg img{position:absolute;left:0;top:0}
 .affbar{display:flex;gap:8px;align-items:flex-start;margin:4px 12px 14px;padding:10px 12px;border-radius:var(--r-md);background:var(--soft);font-size:13px;line-height:1.5;color:var(--muted)}
-.affbar svg{flex:none;margin-top:2px;color:var(--plum)}
+.affbar svg{flex:none;margin-top:2px;color:var(--plum-ink)}
 .lnkcard .lprev{display:flex;gap:12px;align-items:center;margin:12px 0 4px}
 .lnkcard .lprev .thumb{flex:none;width:64px;height:64px;border-radius:var(--r-md);overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
 .lnkcard .lprev .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .lnkcard .lprev .tt{min-width:0;display:flex;flex-direction:column}
 .lnkcard .lprev .tt b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lnkcard .lprev .tt span{font-size:13px;color:var(--muted)}
-.lnkcard .lst{font-size:12px}
+.lnkcard .lst{font-size:12px;display:flex;align-items:center;gap:4px;min-height:18px;margin-top:2px}
+.lnkcard .lprev .tt .lst.ok{color:var(--ok);font-weight:600}
+.lnkcard .lst .spin{display:block;width:16px;height:16px;border-width:2px}
+.lnkcard .lprev .tt > span{display:block;line-height:1.35}
 .lnkcard .lbtns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 2px}
 /* ---------- UI polish: store page + seller editor ---------- */
 /* a shorter top, so the first items show on the first screen */
@@ -991,7 +1023,7 @@ a.prow{text-decoration:none;color:inherit}
 /* affiliate links: a short note under the section title, and lighter shop tags */
 .affnote{display:flex;gap:6px;align-items:center;margin:-4px 2px 10px;font-size:12px;line-height:1.4;color:var(--muted)}
 .affnote svg{flex:none;color:var(--muted)}
-.plink .pill{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.plink .pill{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink)}
 /* footer: one calm block instead of five stacked lines */
 .stfoot{margin:22px 14px 0;text-align:center}
 .stfoot .safenote{margin:0 0 14px;text-align:left}
@@ -1040,7 +1072,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 .x{width:40px;height:40px}
 .sechip{height:36px}
 /* ---- first run: three short steps for a brand-new store ---- */
-#builder.starting .actions{display:none}
+#builder.starting .actions,#builder.noactions .actions{display:none}
 .fr-head{display:flex;align-items:center;gap:10px;min-height:48px}
 .fr-dots{display:flex;gap:6px;flex:1}
 .fr-dots i{width:28px;height:6px;border-radius:999px;background:var(--line2)}
@@ -1050,11 +1082,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 .fr-sub{color:var(--muted);margin:0 0 20px}
 .fr-kinds{display:grid;gap:12px}
 .fr-kind{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border-radius:var(--r-card);border:1.5px solid var(--line);background:var(--surface);font:inherit;color:var(--ink);text-align:left;cursor:pointer;box-shadow:var(--sh-1)}
-.fr-kind .tile{width:52px;height:52px;border-radius:var(--r-md);background:var(--soft);color:var(--plum);display:grid;place-items:center;flex:none}
+.fr-kind .tile{width:52px;height:52px;border-radius:var(--r-md);background:var(--soft);color:var(--plum-ink);display:grid;place-items:center;flex:none}
 .fr-kind .tt{flex:1;min-width:0}
 .fr-kind b{display:block;font-size:18px}
 .fr-kind .tt span{color:var(--muted);font-size:14px}
-.fr-kind[aria-pressed="true"]{border-color:var(--plum)}
+.fr-kind[aria-pressed="true"]{border-color:var(--plum-ink)}
 .fr-kind > svg{color:var(--faint);flex:none}
 .fr-done{display:grid;justify-items:center;gap:6px;padding:26px 16px;text-align:center}
 .fr-done > svg{color:var(--ok);background:var(--ok-bg);border-radius:50%;padding:10px;box-sizing:content-box}
@@ -1226,6 +1258,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <p class="hint" style="margin:0 0 4px">Now: <b id="waNow"></b>. After the change, orders go to the new number and you log in with it.</p>
     <label>New WhatsApp number<input type="tel" id="waNew" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
     <label>Type it again<input type="tel" id="waNew2" autocomplete="off" placeholder="e.g. 012-345 6789"></label>
+    <label id="waPinWrap" hidden>Your 6-digit PIN<span class="pinwrap"><input type="password" id="waPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="waPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
     <p class="err" id="waErr" role="alert"></p>
     <div class="row2" style="margin-top:6px">
       <div><button class="btn full" type="button" data-close="waOverlay">Cancel</button></div>
@@ -1414,10 +1447,14 @@ function linkInfo(u){
     return { host, brand: b ? b[1] : host };
   } catch(e){ return { host: "", brand: "" }; }
 }
-function looksJunk(t){
+// Search: every word typed must appear somewhere; spacing, capitals and accents don't matter ("chocoluxe hub", "creampuff klang")
+const foldText = t => String(t || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+const matchWords = (hay, q) => { const h = foldText(hay); return foldText(q).split(" ").every(w => !w || h.includes(w)); };
+// typed: a name the seller wrote (only address-like text is junk); otherwise a fetched title (short ones are junk too)
+function looksJunk(t, typed){
   t = String(t || "").trim(); if (!t) return false;
   const letters = (t.match(/\p{L}/gu) || []).length;
-  return letters < 4 || /[?&]\w+=/.test(t) || /^https?:/i.test(t) || /^[\w.-]+\.[a-z]{2,}\//i.test(t) || /^[\d._-]+$/.test(t);
+  return (!typed && letters < 4) || /[?&]\w+=/.test(t) || /^https?:/i.test(t) || /^[\w.-]+\.[a-z]{2,}\//i.test(t) || /^[\d._-]+$/.test(t);
 }
 function slugName(u){   // Shopee product pages carry the name in the address: /Product-Name-i.123.456
   try { const seg = decodeURIComponent(new URL(u).pathname.split("/").filter(Boolean).pop() || ""), m = seg.match(/^(.+)-i\.\d+\.\d+$/); return m ? m[1].replace(/-+/g, " ").trim().slice(0, 120) : ""; } catch(e){ return ""; }
@@ -1463,7 +1500,7 @@ function paypalLink(){
 }
 const signupOpen = () => SITE.signup !== false;
 // Works for yoursite/?shop (old links) and yoursite/shop (new links, served by 404.html on GitHub Pages)
-(function(){ const m = location.pathname.match(/^(.*\/)(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)\/$/i);
+(function(){ const m = location.pathname.match(/^(.*\/)(admin|build|edit|signup|terms|privacy|refund|safe|about|explore|near)\/$/i);
   if (m) try { history.replaceState(null, "", m[1] + m[2] + location.search + location.hash); } catch(e){} })();
 const siteUrl = path => new URL(path, location.href.split("#")[0].split("?")[0]).href;
 const home = () => siteUrl("./");
@@ -1565,7 +1602,7 @@ async function apiPost(body, extra){
   if (SESSION && SESSION.tok && body.id === SESSION.id && !body.pin && !body.key) body.tok = SESSION.tok;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the server link to site.json.");
   const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
-  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) ? 2 : 1, body.action === "upload" ? 40000 : 0);
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) && !(body.action === "admin" && /^(delete|rename|resetpin)$/.test(body.op || "")) ? 2 : 1, body.action === "upload" ? 40000 : 0);
   if (!(extra && extra.again) && serverMoved(j)) return apiPost(body, Object.assign({}, extra, { again: true }));
   if (j.error) throw new Error(j.error);
   return j;
@@ -1611,7 +1648,7 @@ function normalize(d){
     o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String((o && o.l) || ""), p: Math.min(Math.max(0, Number(o && o.p) || 0), 1e9) })) : [{ l: "", p: 0 }]
   }));
   x.links = (Array.isArray(x.links) ? x.links : []).slice(0, 80).map(l => ({
-    u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: looksJunk((l && l.n) || "") ? "" : String((l && l.n) || "").slice(0, 120),
+    u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: looksJunk((l && l.n) || "", true) ? "" : String((l && l.n) || "").slice(0, 120),
     img: safeImg(String((l && l.img) || "").trim()), p: Math.max(0, Number(l && l.p) || 0), pu: safeUrl(String((l && l.pu) || "")).slice(0, 600)
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
@@ -1637,9 +1674,13 @@ function setAccent(c){ document.documentElement.style.setProperty("--accent", c)
 // Every picture fades in once it has loaded; broken ones stop shimmering too
 // ---------- Counting for shop and ad insights (anonymous, no personal data) ----------
 let STORE_ID = "", STORE_VERIFIED = false, STORE_PLACE = null;
+// Stores this phone has edited: opening them here (the storefront button, the Open link, or the link itself) isn't a customer visit
+function ownStores(){ try { return JSON.parse(localStorage.getItem("lk-own") || "[]"); } catch(e){ return []; } }
+function markOwn(id){ try { const a = ownStores().filter(x => x !== id); a.unshift(id); localStorage.setItem("lk-own", JSON.stringify(a.slice(0, 10))); } catch(e) {} }
 function track(t, img){
   try {
     if (!safeUrl(SITE.api) || (!STORE_ID && !img)) return;
+    if (STORE_ID && (ownStores().includes(STORE_ID) || (SESSION && SESSION.id === STORE_ID))) return;   // the seller's own phone: only customers count
     const day = new Date().toISOString().slice(0, 10), once = t === "view" ? `lk-v:${STORE_ID}:${day}` : t === "adview" ? `lk-av:${img}:${day}:${STORE_ID}` : "";
     if (once){ if (sessionStorage.getItem(once)) return; sessionStorage.setItem(once, "1"); }
     const q = new URLSearchParams({ action: "hit", t, id: STORE_ID || "", img: img || "" });
@@ -1717,6 +1758,7 @@ function openSheet(id){
   clearTimeout(o._closeT);
   o.classList.remove("closing");
   o.classList.add("open");
+  const x = o.querySelector(".xmini, [data-close]"); if (x) try { x.focus({ preventScroll: true }); } catch(e) {}
 }
 function show(id){
   ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
@@ -1761,17 +1803,27 @@ function resizeImage(file, max, square, type, quality){
 
 /* ---------- Own confirm and message box (browser popups get blocked in some apps) ---------- */
 let askResolve = null;
-function ask(text, yesLabel, danger){
+// wait: seconds before the yes button works (for things that can't be undone), counted down on the button
+let ASK_T = null;
+function askTimer(stop){ clearInterval(ASK_T); ASK_T = null; if (stop) $("askYes").disabled = false; }
+function ask(text, yesLabel, danger, wait){
+  askTimer(true);
   $("askText").textContent = text;
   $("askYes").textContent = yesLabel || "OK";
+  if (wait){
+    let n = wait; const label = yesLabel || "OK", b = $("askYes");
+    b.disabled = true; b.textContent = `${label} (${n})`;
+    ASK_T = setInterval(() => { n--; if (n > 0) b.textContent = `${label} (${n})`; else { askTimer(true); b.textContent = label; } }, 1000);
+  }
   $("askYes").style.background = danger ? "var(--err)" : "";
   $("askYes").style.borderColor = danger ? "var(--err)" : "";
   $("askNoWrap").hidden = false;
   openSheet("askOverlay");
-  $("askYes").focus();
+  (wait ? $("askNo") : $("askYes")).focus();   // while Delete is counting down, Cancel is the safe default
   return new Promise(res => { askResolve = res; });
 }
 function notify(text){
+  askTimer(true);
   $("askText").textContent = text;
   $("askYes").textContent = "OK";
   $("askYes").style.background = ""; $("askYes").style.borderColor = "";
@@ -1779,7 +1831,7 @@ function notify(text){
   openSheet("askOverlay");
   return new Promise(res => { askResolve = res; });
 }
-function closeAsk(v){ closeSheet("askOverlay"); if (askResolve){ const r = askResolve; askResolve = null; r(v); } }
+function closeAsk(v){ askTimer(true); closeSheet("askOverlay"); if (askResolve){ const r = askResolve; askResolve = null; r(v); } }
 $("askYes").onclick = () => closeAsk(true);
 $("askNo").onclick = () => closeAsk(false);
 $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay")) closeAsk(false); });
@@ -1790,6 +1842,34 @@ $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay"
 
 
 
+// ---------- Light or dark: always the same as the phone (no setting) ----------
+const isDark = () => matchMedia("(prefers-color-scheme: dark)").matches;
+function paintBars(){ document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.content = isDark() ? "#141112" : "#F7F5F3"); }   // the phone's bars match the page
+try { localStorage.removeItem("lk-theme"); } catch(e) {}   // a choice saved by an earlier version
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paintBars(); if (MX && $("mxMap")){ exRemember(); EX_BACK = true; renderExplore(); } });   // the map has its own light and dark style
+paintBars();
+// iPhones ignore "no zoom" in the page settings: stop the pinch gesture too, except on a map (it zooms itself)
+["gesturestart", "gesturechange"].forEach(t => document.addEventListener(t, e => { if (!(e.target.closest && e.target.closest(".maplibregl-map"))) e.preventDefault(); }, { passive: false }));
+// 6-digit PINs as six dots, filled as the seller types (every PIN box, whenever it's drawn)
+const INPUT_VALUE = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+function dotPin(inp){
+  if (inp.dataset.dots) return; inp.dataset.dots = "1";
+  const wrap = inp.parentNode; wrap.classList.add("dots");
+  const d = document.createElement("span"); d.className = "pdots"; d.setAttribute("aria-hidden", "true"); d.innerHTML = "<i></i>".repeat(6);
+  wrap.insertBefore(d, inp.nextSibling);
+  const sync = () => {
+    const v = INPUT_VALUE.get.call(inp), show = inp.type === "text", f = document.activeElement === inp;
+    [...d.children].forEach((el, k) => { const on = k < v.length; el.className = on ? (show ? "txt" : "on") : f && k === v.length ? "next" : ""; el.textContent = show && on ? v[k] : ""; });
+  };
+  // the dots follow the box even when the app clears or fills it
+  Object.defineProperty(inp, "value", { configurable: true, get(){ return INPUT_VALUE.get.call(inp); }, set(x){ INPUT_VALUE.set.call(inp, x); sync(); } });
+  inp.addEventListener("input", () => { const raw = INPUT_VALUE.get.call(inp), c = raw.replace(/\D/g, "").slice(0, 6); if (c !== raw) INPUT_VALUE.set.call(inp, c); sync(); });
+  ["focus", "blur"].forEach(t => inp.addEventListener(t, sync));
+  new MutationObserver(sync).observe(inp, { attributes: true, attributeFilter: ["type"] });   // Show PIN: the digits appear in place of the dots
+  sync();
+}
+const dotPins = () => document.querySelectorAll('.pinwrap > input[maxlength="6"][inputmode="numeric"]:not([data-dots])').forEach(dotPin);
+dotPins(); new MutationObserver(dotPins).observe(document.body, { childList: true, subtree: true });
 // Show / hide PIN buttons (work on every page)
 const EYE_OPEN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>`;
 const EYE_SHUT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.5 4.5-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
@@ -1821,8 +1901,18 @@ function saveSession(){
   try { sessionStorage.setItem("lk-session", JSON.stringify(SESSION)); } catch(e) {}
   if (SESSION && SESSION.tok && !SESSION.admin) keep.set("lk-keep", { id: SESSION.id, tok: SESSION.tok });
 }
-function clearSession(){ SESSION = null; ME_EMAIL = ""; BUL = null; try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); localStorage.removeItem("lk-keep"); } catch(e) {} }
+// The phone's kept login (lk-keep) is removed only when it belongs to this login, or when the seller logs out on purpose.
+// An admin editing a store, or an old tab with an outdated key, never logs the phone's own seller out.
+function clearSession(leaving){
+  const k = keep.get("lk-keep"), s = SESSION;
+  const mine = s && !s.admin && k && k.id === s.id && (leaving || !s.tok || k.tok === s.tok);
+  SESSION = null; ME_EMAIL = ""; BUL = null;
+  try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); } catch(e) {}
+  if (mine) keep.del("lk-keep");
+}
 const authErr = e => /PIN|WhatsApp number|logged out on this phone/i.test((e && e.message) || "");
+// only the server's own "who are you" answers (not "that number is already used" or "add your WhatsApp number")
+const pinErr = e => /wrong (whatsapp number|email) or pin|too many wrong pins|logged out on this phone|type your pin/i.test((e && e.message) || "");
 
 function loginCardHtml(msg){
   return `<section class="card" id="loginCard">
@@ -1911,7 +2001,14 @@ $("fpSave").onclick = async () => {
   btn.disabled = false; btn.textContent = "Save and log in";
 };
 
-function normWa(v){ let d = String(v || "").replace(/\D/g, ""); if (d.startsWith("0")) d = "6" + d; return d; }
+function normWa(v){
+  let d = String(v || "").replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);                // 0060 12...
+  if (d.startsWith("600")) d = "60" + d.slice(3);         // +60 012...
+  else if (d.startsWith("0")) d = "6" + d;               // 012...
+  else if (/^1\d{8,9}$/.test(d)) d = "60" + d;           // 12... (no 0)
+  return d;
+}
 
 function renderStart(msg, mode){
   const signup = mode === "signup";
@@ -1960,7 +2057,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
@@ -1984,6 +2081,11 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-front", at: "2026-10-17", title: "See your store as customers do", body: "Tap the shop icon next to the bell to open your store front, exactly as customers see it. Your own visits never count in Insights, only customers' do. Your logo, colour and store style are now under Shop details." },
+  { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Link Kedai App now goes dark when your phone is in dark mode, and light when it isn't. Your store does the same for your customers." },
+  { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Browse stores has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
+  { id: "u-20261017-look", at: "2026-10-17", title: "Your logo on the map, and PIN dots", body: "Browse stores now shows each shop's own logo on its map pin. Your 6-digit PIN shows as six dots as you type, like a phone lock screen. Deleting your account now waits 5 seconds before the Delete button works, so it can't happen by accident." },
+  { id: "u-20261017-fixes", at: "2026-10-17", title: "Smoother editing and ordering", body: "The phone's Back button now steps back through your editor properly. Links pasted without https:// and short link names are saved. If your PIN was changed on another phone, we ask for it instead of failing to save. Customers can clear an optional date, and Browse search finds every word you type." },
   { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
   { id: "u-20261016-daysoff", at: "2026-10-16", title: "New: mark your days off", body: "Under Store status, tap the dates you aren't taking orders, or pick a day of the week that's always off. Customers can't choose those dates when they order." },
   { id: "u-20261016-faster", at: "2026-10-16", title: "Your store now opens faster", body: "Link Kedai App moved to a faster server. Your store page and your editor now load in a second or two, even when nobody has visited for a while." },
@@ -2092,8 +2194,10 @@ function updateBell(){
 }
 async function loadBulletin(){
   if (!SESSION) return;
-  try { BUL = await apiPost({ action: "bulletin", id: SESSION.id, pin: SESSION.pin }); } catch(e){ BUL = null; }
-  updateBell();
+  const id = SESSION.id;
+  let b = null; try { b = await apiPost({ action: "bulletin", id, pin: SESSION.pin }); } catch(e) {}
+  if (!SESSION || SESSION.id !== id) return;
+  BUL = b; updateBell();
 }
 function openBulletin(){
   const items = bulletinItems(), seen = bulSeen();
@@ -2115,10 +2219,8 @@ function edSteps(){
   return {
     details: !!(S.name.trim() && S.wa),
     products: named.some(it => it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
-    look: !!(safeImg(S.logo) || safeImg(S.cover)),
     listing: !!(S.loc.on && S.loc.state && (S.loc.city || affOnly(S))),
-    status: true,
-    plan: STATUS === "live"
+    status: true
   };
 }
 function edRow(v, icon, title, sub, done, i){
@@ -2136,7 +2238,7 @@ function shoutHtml(){
     <button class="xmini" data-act="shoutx" data-v="${esc(x.id)}" aria-label="Close">×</button></section>`;
 }
 function edTop(title, back, right){
-  return `<div class="lk-bar">${back ? `<button class="iconbtn" data-act="go" data-v="${back}" aria-label="Back">${ico("back",20)}</button>` : ""}<h1>${esc(title)}</h1>${right || ""}</div>`;
+  return `<div class="lk-bar">${back ? `<button class="iconbtn" data-act="back" data-v="${back}" aria-label="Back">${ico("back",20)}</button>` : ""}<h1>${esc(title)}</h1>${right || ""}</div>`;
 }
 function edTabs(){
   const unread = EDV === "insights" ? 0 : unreadOf(insItems());
@@ -2154,12 +2256,11 @@ function edHome(msg){
   const done = Object.values(st).filter(Boolean).length, total = Object.keys(st).length;
   const allDone = done === total, mark = v => allDone ? null : v;   // all set up: no progress bar or Done tags, just a clean menu
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
-  const b = BUL || {}, last = (b.stats || []).slice(-7), sum = f => last.reduce((a, x) => a + (x[f] || 0), 0);
-  const v = sum("v"), o = sum("o");
+  const b = BUL || {};
   const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
-  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
+  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
   ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
@@ -2178,17 +2279,12 @@ function edHome(msg){
     <div class="lk-prog"><i style="width:${Math.round(done / total * 100)}%"></i></div>
   </section>`}
   <section class="card lk-group">
-    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet"].join(" · "), mark(st.details))}
+    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet", safeImg(S.logo) ? "Logo added" : "Logo, colour and style"].join(" · "), mark(st.details))}
     ${edRow("products","box", W(S).list, named.length ? `${named.length} ${named.length === 1 ? W(S).item : W(S).item + "s"}${out ? ` · ${out} sold out` : ""}` : "Nothing added yet", mark(st.products))}
-    ${edRow("look","palette","Appearance","Logo, cover, colour and layout", mark(st.look))}
     ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
-    ${edRow("plan","card","Plan & payment", live ? "Paid · one-time" : STATUS === "review" ? "Paid · being checked" : "Not published yet", mark(st.plan))}
   </section>
-  ${live ? `<section class="card">
-    <div class="between"><h2 style="margin:0">This week</h2><button class="btn small" data-act="go" data-v="insights">See insights</button></div>
-    <div class="lk-kpis"><div><b>${v}</b><span>Visits</span></div><div><b>${o}</b><span>Order taps</span></div><div><b>${v ? Math.round(o / v * 100) : 0}%</b><span>Ordered</span></div></div>
-  </section>` : ""}`;
+`;
 }
 function edDetails(){
   return `${edTop("Shop details", "home")}
@@ -2201,10 +2297,11 @@ function edDetails(){
     <label>What do you sell?</label>
     <div class="seg">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
     <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
-  </section>`;
+  </section>
+  ${edLook()}`;
 }
-function edLook(){
-  return `${edTop("Appearance", "home")}
+function edLook(){   // the logo, cover, colour and style cards, shown on Shop details
+  return `<h2 class="edsub" id="lookSec">Look</h2>
   <section class="card">
     <label>Logo</label>
     <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
@@ -2273,10 +2370,12 @@ function linkPreviewHtml(l){
   if (!l.u.trim()) return `<p class="hint">Paste an https link from Shopee, TikTok Shop, Lazada or any shop. We'll fetch the photo and name for you.</p>`;
   if (!safeUrl(l.u)) return `<p class="hint" style="color:var(--err)">The link must start with https://</p>`;
   const info = linkInfo(l.u), img = safeImg(l.img);
-  const msg = st.s === "loading" ? "Fetching photo and name…" : st.s === "fail" ? (st.m || "Couldn't read this page.") : st.s === "none" ? (/shopee|tiktok/i.test(info.brand) ? info.brand + " hides product details from preview tools. Add the photo, name and price below." : "Couldn't read this page. Add the photo, name and price below.") : st.s === "partial" ? "Found the name only. Add a photo below." : st.s === "ok" ? "Fetched from the link" : "";
+  const msg = st.s === "loading" ? "" : st.s === "fail" ? (st.m || "Couldn't read this page.") : st.s === "none" ? (/shopee|tiktok/i.test(info.brand) ? info.brand + " hides product details from preview tools. Add the photo, name and price below." : "Couldn't read this page. Add the photo, name and price below.") : st.s === "partial" ? "Found the name only. Add a photo below." : st.s === "ok" ? "Done" : "";
+  // fetching: just a spinner; done: a tick
+  const stat = st.s === "loading" ? `<i class="spin" role="status" aria-label="Loading"></i>` : st.s === "ok" ? `${ico("check", 14, 2.6)}${esc(msg)}` : esc(msg);
   return `<div class="lprev"><span class="thumb">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ico("image", 20)}</span>
-      <span class="tt"><b>${esc(tidyName(l.n) || "No name yet")}</b><span>${esc(info.brand)}${l.p > 0 ? " · " + esc(fmtMoney(S.cur || curSymbol(S.curCode), l.p)) : ""}</span><span class="lst">${esc(msg)}</span></span></div>
-    <div class="lbtns"><button type="button" class="btn small" data-act="lkfetch" data-j="${j}" ${st.s === "loading" ? "disabled" : ""}>Fetch again</button><button type="button" class="btn small" data-act="lkedit" data-j="${j}">${st.edit ? "Hide details" : "Edit photo, name & price"}</button></div>
+      <span class="tt"><b>${esc(tidyName(l.n) || "No name yet")}</b><span>${esc(info.brand)}${l.p > 0 ? " · " + esc(fmtMoney(S.cur || curSymbol(S.curCode), l.p)) : ""}</span><span class="lst${st.s === "ok" ? " ok" : ""}">${stat}</span></span></div>
+    <div class="lbtns"><button type="button" class="btn small" data-act="lkfetch" data-j="${j}" ${st.s === "loading" ? "disabled" : ""}>Refresh</button><button type="button" class="btn small" data-act="lkedit" data-j="${j}">${st.edit ? "Hide details" : "Edit photo, name & price"}</button></div>
     ${st.edit ? `<label>Photo</label><div class="media-row">${photoBox("lkPrev" + j, l.img, "No photo", "sq")}${photoControls("link", l.img, `data-i="${j}"`)}</div><label>Name<input type="text" data-lf="n" data-j="${j}" value="${esc(l.n)}" maxlength="120" placeholder="e.g. Mini Handheld Fan"></label><label>Price (optional)<input type="number" inputmode="decimal" data-lf="p" data-j="${j}" value="${l.p || ""}" placeholder="e.g. 25"></label>` : ""}`;
 }
 function updateLinkPreview(l){ const j = S.links.indexOf(l), el = $("lpv-" + j); if (el) el.innerHTML = linkPreviewHtml(l); }
@@ -2351,10 +2450,14 @@ function edLink(j){
     <label style="margin-top:0">Link<input type="url" inputmode="url" data-lf="u" data-j="${j}" value="${esc(l.u)}" placeholder="https://s.shopee.com.my/..." maxlength="600" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
     <div id="lpv-${j}">${linkPreviewHtml(l)}</div>
   </section>
-  <section class="card">
-    <label style="margin-top:0">Section name (optional)<input type="text" data-lf="sec" data-j="${j}" value="${esc(l.sec)}" placeholder="e.g. Gadgets, Beauty" maxlength="30"></label>
-    <div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === cur ? " on" : ""}" aria-pressed="${x === cur}" data-act="lksecpick" data-j="${j}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
-    <p class="hint">Links with the same section name show together on your store.</p>
+  ${secCard(secs, cur, `data-act="lksecpick" data-j="${j}"`, `data-lf="sec" data-j="${j}"`, "e.g. Gadgets")}`;
+}
+// Section: a small card with one row of chips. Tap one to use it (tap again to clear), or + New to type a name.
+function secCard(secs, cur, pick, field, ph){
+  const list = cur && !secs.includes(cur) ? [cur, ...secs] : secs;
+  return `<section class="card seccard"><b>Section</b>
+    <div class="sechips row">${list.map(x => `<button type="button" class="sechip${x === cur ? " on" : ""}" aria-pressed="${x === cur}" ${pick} data-v="${esc(x)}">${esc(x)}</button>`).join("")}<button type="button" class="sechip add" data-act="secnew">${ico("plus", 14, 2.4)}New</button></div>
+    <input type="text" class="secnew" ${field} value="" placeholder="${esc(ph)}" maxlength="30" hidden aria-label="New section name">
   </section>`;
 }
 function edProducts(){
@@ -2397,11 +2500,7 @@ function edProduct(i){
       </div>`).join("")}
     <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add another</button>
   </section>`}
-  <section class="card">
-    <label style="margin-top:0">Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains, Add-ons" maxlength="30"></label>
-    ${secs.length ? `<div class="sechips">${secs.map(x => `<button type="button" class="sechip${x === curSec ? " on" : ""}" aria-pressed="${x === curSec}" data-act="secpick" data-i="${i}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
-    <p class="hint">Tap an existing section to reuse it, or type a new one. Give items the same name to group them, like "Drinks" or "Mains".</p>
-  </section>
+  ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, "e.g. Drinks")}
   <section class="card">
     <label class="check" style="margin-top:0"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>Sold out for now</span></label>
     <div class="between" style="margin-top:12px"><span class="hint" style="margin:0">Position in your list</span>
@@ -2523,9 +2622,10 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edLook, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
+  bld.classList.toggle("noactions", EDV === "news");   // nothing to save or preview on News
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
@@ -2569,7 +2669,8 @@ function fmtWa(wa){
   const l = "0" + wa.slice(2); return l.slice(0, 3) + "-" + l.slice(3, 6) + " " + l.slice(6);
 }
 function openWaChange(){
-  $("waNew").value = ""; $("waNew2").value = ""; $("waErr").textContent = ""; $("waNow").textContent = fmtWa(S.wa) || "none yet";
+  $("waNew").value = ""; $("waNew2").value = ""; $("waPin").value = ""; $("waPin").type = "password"; $("waErr").textContent = ""; $("waNow").textContent = fmtWa(S.wa) || "none yet";
+  $("waPinWrap").hidden = !(SESSION && SESSION.tok);   // a phone that stays logged in proves it's the owner with the PIN
   openSheet("waOverlay"); setTimeout(() => $("waNew").focus(), 300);
 }
 $("waSave").onclick = async () => {
@@ -2577,10 +2678,13 @@ $("waSave").onclick = async () => {
   if (a.length < 9 || a.length > 15) return err("Type your full WhatsApp number, like 012-345 6789.");
   if (a !== b) return err("The two numbers don't match. Please check and type them again.");
   if (a === S.wa) return err("That's already your number.");
+  const pin = SESSION.tok ? $("waPin").value.trim() : "";
+  if (SESSION.tok && !/^\d{6}$/.test(pin)) return err("Type your 6-digit PIN to change your number.");
   const btn = $("waSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
-  const old = S.wa; S.wa = a;
+  const old = S.wa, had = SESSION.pin; S.wa = a;
   try {
-    await saveNow();
+    if (pin) SESSION.pin = pin;   // this one save checks the PIN instead of the phone's login key
+    try { await saveNow(); } finally { if (pin && SESSION){ if (had === undefined) delete SESSION.pin; else SESSION.pin = had; } }
     dismissSheet("waOverlay"); renderEditor();
     notify(`Done. From now on, orders go to ${fmtWa(a)}, and you log in with this number.`);
   } catch(e){ S.wa = old; err(friendly(e, "Couldn't change your number right now. Check your internet and try again.")); }
@@ -2664,12 +2768,28 @@ $("bwrap").addEventListener("click", e => {
   if (nav && !nav.disabled){ const d = new Date(OFFCAL.y, OFFCAL.m + +nav.dataset.calnav, 1); OFFCAL = { y: d.getFullYear(), m: d.getMonth() }; cal.innerHTML = calHtml(OFFCAL.y, OFFCAL.m, S.off, "mark"); return; }
   if (day && !day.disabled){ const s = day.dataset.day; S.off.dates = S.off.dates.includes(s) ? S.off.dates.filter(x => x !== s) : [...S.off.dates, s].sort(); redrawOff(); }
 });
+// an item worth keeping: anything typed or picked (a photo still uploading counts)
+const keepItem = it => !!(it.n.trim() || it.d.trim() || it.img || UP_ITEMS.has(it) || it.o.some(o => +o.p || o.l.trim()));
+// leaving an item or link page: an untouched new one doesn't stay behind
+function leaveEdPage(to){
+  if (EDV === "product" && to !== "product"){ const it = S.items[EDI]; if (it && !keepItem(it)){ S.items.splice(EDI, 1); EDI = -1; } }
+  if (EDV === "link" && to !== "link"){ const l = S.links[EDI]; if (l && !l.u.trim()){ S.links.splice(EDI, 1); EDI = -1; } }
+}
+// The ‹ arrow steps back through the phone's history (so its Back button never bounces between two pages),
+// then opens the arrow's page if the step below was a different one
+let ED_BACK_TO = null;
+function edBack(v, i){
+  const top = INPAGE_N.get(HIST_CUR);
+  if (top && top.ed && !$("builder").hidden){ ED_BACK_TO = { v, i: i == null ? null : i }; return history.back(); }
+  edGo(v, i);
+}
 function edTidy(){
-  if (!window.LK_ALLVIEW) S.items = S.items.filter(it => it.n.trim() || it.d.trim() || it.img || UP_ITEMS.has(it) || it.o.some(o => +o.p || o.l.trim()));   // no empty starter rows in the new Products page
+  if (!window.LK_ALLVIEW) S.items = S.items.filter(keepItem);   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
 }
 function openEditor(msg){
   edTidy();
+  if (SESSION && SESSION.id && !SESSION.admin) markOwn(SESSION.id);
   if (!window.LK_KEEPVIEW) EDV = "home";
   if (EDV === "home" && needsStart()){ EDV = "start"; EDSTEP = 1; }
   else if (PENDING_VIEW && EDV === "home"){ EDV = PENDING_VIEW; history.replaceState(null, "", home() + "build"); }
@@ -2698,9 +2818,29 @@ function savePill(state, text){
   if (state === "saved") el._t = setTimeout(() => el.classList.remove("show"), 2200);
 }
 function scheduleAutosave(ms){ clearTimeout(AUTOSAVE_T); if (SESSION) AUTOSAVE_T = setTimeout(() => autoSave(), ms == null ? 2500 : ms); }
+// The PIN was changed or reset elsewhere, or this phone was logged out: stop saving (every try would count as a wrong PIN
+// and lock the store), keep the changes on screen, and ask for the PIN once.
+let RELOGIN = null, ED_SYNC = false;
+function relogin(e){
+  if (RELOGIN) return RELOGIN;
+  RELOGIN = (async () => {
+    const m = friendly(e, "");
+    if (!SESSION || SESSION.admin || /too many/i.test(m)){ notify(m + " Your changes are still here."); return false; }
+    const pin = await askText("Type your PIN to keep saving", "", (/logged out/i.test(m) ? m : "Your PIN may have been changed on another phone.") + " Your changes are still here.", "Continue", true);
+    if (!pin || !SESSION) return false;
+    try {
+      await apiPost({ action: "login", id: SESSION.id, pin });
+      if (SESSION.tok){ delete SESSION.tok; keep.del("lk-keep"); }   // the old key is gone; this tab continues with the PIN
+      SESSION.pin = pin; saveSession(); savePill("");
+      return true;
+    } catch(err){ notify(friendly(err, "Couldn't check your PIN. Check your internet and try again.")); return false; }
+  })();
+  return RELOGIN.finally(() => { RELOGIN = null; });
+}
 async function autoSave(retry, keepalive){
   clearTimeout(AUTOSAVE_T);
-  if (!SESSION || !S || !DIRTY) return;
+  if (!SESSION || !S || !DIRTY || RELOGIN) return;
+  if (ED_SYNC) return scheduleAutosave(1000);   // still fetching the newest version of this store
   if (UPN) return scheduleAutosave(2000);   // a photo is still uploading: save once it's in
   const bad = saveProblem(); if (bad){ setStatus(bad); return savePill("bad", bad); }   // tells the seller exactly what's missing
   if (SAVING){ try { await SAVING; } catch(e) {} if (DIRTY) scheduleAutosave(300); return; }
@@ -2713,6 +2853,7 @@ async function autoSave(retry, keepalive){
     savePill("saved", r.flagged && STATUS !== "live" ? "Saved. Some words need a quick check by " + APP_NAME + "." : "Saved");
   } catch(e){
     const m = friendly(e, "No internet right now. Your changes are still here.");
+    if (pinErr(e)){ savePill("bad", "Log in again to save. Your changes are still here."); relogin(e).then(ok => { if (ok && DIRTY) scheduleAutosave(300); }); return; }
     savePill("bad", /can't reach/i.test(m) ? "No internet right now. Your changes are still here." : /slow right now/i.test(m) ? "The server is busy. Your changes are still here." : m);
     scheduleAutosave(15000);
   }
@@ -2963,14 +3104,20 @@ function onField(e){
     if (t.dataset.floc === "cityOther"){ const sel = document.querySelector('[data-floc="city"]'); if (!t.isConnected || (sel && sel.value !== "__other")) return; S.loc.city = t.value.trim().slice(0, 40); touch(); return; }
     if (t.dataset.floc === "area"){ S.loc.area = t.value; touch(); return; }
     if (t.dataset.floc === "addr"){ S.loc.addr = t.value.replace(/[<>"`]/g, "").slice(0, 120); touch(); return; }
-    if (t.dataset.floc === "pub"){ if (e.type !== "change") return; S.loc.pub = t.checked; if (!t.checked) S.loc.addr = ""; touch(); renderEditor(); return; }
+    if (t.dataset.floc === "pub"){
+      if (e.type !== "change") return;
+      S.loc.pub = t.checked;
+      // the private "Nearest first" spot (often home) must never become the public pin: the seller drags it onto the shop
+      if (t.checked){ S.loc.lat = null; S.loc.lng = null; } else S.loc.addr = "";
+      touch(); renderEditor(); return;
+    }
   }
   if (t.dataset.lf !== undefined){
     const l = S.links[+t.dataset.j]; if (!l) return;
     const lf = t.dataset.lf;
     if (lf === "p") l.p = Math.max(0, parseFloat(t.value) || 0); else l[lf] = t.value;
     if (lf === "u"){
-      const st0 = safeUrl(l.u) ? 1 : 0; const startFetch = () => { const fx = fixUrl(l.u); if (safeUrl(fx) && l.pu !== fx){ l.u = fx; l.n = ""; l.img = ""; l.p = 0; l.pu = ""; LKST.delete(l); const inp = t.isConnected ? t : null; if (inp && e.type === "change") inp.value = fx; fetchLinkMeta(l); } else if (!safeUrl(fx) || (st0 !== (safeUrl(l.u) ? 1 : 0))) updateLinkPreview(l); };
+      const st0 = safeUrl(l.u) ? 1 : 0; const startFetch = () => { const fx = fixUrl(l.u); if (safeUrl(fx) && l.u !== fx){ l.u = fx; if (t.isConnected && e.type === "change") t.value = fx; } if (safeUrl(fx) && l.pu !== fx){ l.u = fx; l.n = ""; l.img = ""; l.p = 0; l.pu = ""; LKST.delete(l); const inp = t.isConnected ? t : null; if (inp && e.type === "change") inp.value = fx; fetchLinkMeta(l); } else if (!safeUrl(fx) || (st0 !== (safeUrl(l.u) ? 1 : 0))) updateLinkPreview(l); };
       clearTimeout(onField.lt);
       if (e.type === "change") startFetch(); else onField.lt = setTimeout(startFetch, 900);
     }
@@ -3010,20 +3157,21 @@ $("builder").addEventListener("click", async e => {
     if (a === "frpublish") openPublishCheck();
     return;
   }
-  if (a === "go"){ if (DIRTY && EDV === "product" && b.dataset.v === "products") { const it = S.items[EDI]; if (it && !it.n.trim() && !it.o.some(o => +o.p) && !it.img) S.items.splice(EDI, 1); }
-    if (EDV === "link" && b.dataset.v !== "link"){ const l = S.links[EDI]; if (l && !l.u.trim()) S.links.splice(EDI, 1); } EDOTHER = false; return edGo(b.dataset.v, b.dataset.i != null ? +b.dataset.i : null); }
-  if (a === "secpick"){ S.items[i].sec = b.dataset.v; redraw(); return; }
-  if (a === "lkadd"){ S.links.push({ u: "", sec: "", n: "", img: "", p: 0, pu: "" }); EDV = "link"; EDI = S.links.length - 1; window.scrollTo(0, 0); renderEditor(); setTimeout(() => { const el = document.querySelector('[data-lf="u"]'); if (el) el.focus(); }, 30); return; }
-  if (a === "lkdel"){ const l = S.links[j]; if (l && (!l.u.trim() || await ask(`Delete ${l.n.trim() ? '"' + tidyName(l.n) + '"' : "this link"}?`, "Delete", true))){ S.links.splice(j, 1); if (EDV === "link") EDV = "links"; redraw(); } return; }
+  if (a === "go" || a === "back"){ const to = b.dataset.v, ti = b.dataset.i != null ? +b.dataset.i : null; leaveEdPage(to); EDOTHER = false; return a === "back" ? edBack(to, ti) : edGo(to, ti); }
+  if (a === "secpick"){ S.items[i].sec = S.items[i].sec === b.dataset.v ? "" : b.dataset.v; redraw(); return; }
+  if (a === "secnew"){ const inp = b.closest(".seccard").querySelector(".secnew"); inp.hidden = false; inp.focus(); return; }
+  if (a === "lkadd"){ if (S.links.length >= 80) return notify("You can add up to 80 links. Delete one to add another."); S.links.push({ u: "", sec: "", n: "", img: "", p: 0, pu: "" }); edGo("link", S.links.length - 1); setTimeout(() => { const el = document.querySelector('[data-lf="u"]'); if (el) el.focus(); }, 30); return; }
+  if (a === "lkdel"){ const l = S.links[j]; if (l && (!l.u.trim() || await ask(`Delete ${l.n.trim() ? '"' + tidyName(l.n) + '"' : "this link"}?`, "Delete", true))){ S.links.splice(j, 1); if (EDV === "link"){ EDI = -1; touch(); return edBack("links"); } redraw(); } return; }
   if (a === "lkfetch"){ const l = S.links[j]; if (l){ l.pu = ""; fetchLinkMeta(l); } return; }
   if (a === "lkedit"){ const l = S.links[j]; if (l){ const st = lkState(l); st.edit = !st.edit; updateLinkPreview(l); } return; }
-  if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = b.dataset.v; redraw(); } return; }
+  if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = S.links[j].sec === b.dataset.v ? "" : b.dataset.v; redraw(); } return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
-  else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem()); if (EDV === "product") EDV = "products"; redraw(); } }
+  else if (a === "del"){ if (await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem());
+    if (EDV === "product"){ EDI = -1; touch(); return edBack("products"); } redraw(); } }
   else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); setTimeout(() => { const el = document.querySelector(`.opt input[data-i="${i}"][data-f="l"]`); if (el && !el.value) el.focus(); }, 30); }
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
-  else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ EDV = "product"; EDI = S.items.length - 1; window.scrollTo(0, 0); } redraw(); }
+  else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ touch(); edGo("product", S.items.length - 1); } else redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
   else if (a === "kind"){ S.kind = b.dataset.v; redraw(); }
@@ -3033,20 +3181,22 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-logo"){ S.logo = ""; redraw(); }
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
+  else if (a === "rm-link"){ if (S.links[i]) S.links[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
   else if (a === "backadmin"){
+    if (UPN && !(await ask("A photo is still uploading. Leave anyway? It won't be added.", "Leave", true))) return;
     if (DIRTY) await autoSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Leave anyway?", "Leave", true))) return;
     DIRTY = false; clearSession(); history.pushState(null, "", home() + "admin"); renderAdmin();
   }
   else if (a === "deleteacct"){
-    if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true))) return;
+    if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true, 5))) return;
     let pin = SESSION.pin;
     if (!pin && !SESSION.admin){ pin = await askText("Type your 6-digit PIN to delete your account.", "", "", "Delete", true); if (!pin) return; }
     b.disabled = true; b.textContent = "Deleting...";
     try {
       await apiPost({ action: "delete", id: SESSION.id, pin });
-      DIRTY = false; clearSession();
+      DIRTY = false; clearSession(true);
       history.replaceState(null, "", home());
       renderHome();
       notify("Your store and account have been deleted.");
@@ -3055,7 +3205,7 @@ $("builder").addEventListener("click", async e => {
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
   else if (a === "bulx"){ const y = window.scrollY; bulRemove([b.dataset.v]); renderEditor(); window.scrollTo(0, y); }
   else if (a === "bulclear"){ if (!(await ask("Remove all these posts? Status posts you still need to act on stay.", "Clear all"))) return; bulRemove(newsItems().filter(x => !x.keep).map(x => x.id)); renderEditor(); }
-  else if (a === "shoutx"){ const y = window.scrollY; markSeen([{ id: b.dataset.v }]); renderEditor(); window.scrollTo(0, y); }
+  else if (a === "shoutx"){ const y = window.scrollY; markSeen(newsItems().filter(x => /^u-/.test(x.id))); renderEditor(); window.scrollTo(0, y); }
   else if (a === "setcat"){ S.cat = b.dataset.v; touch(); renderEditor(); }
   else if (a === "noloc"){ S.loc.lat = null; S.loc.lng = null; touch(); renderEditor("Location removed."); }
   else if (a === "pinme"){
@@ -3082,10 +3232,11 @@ $("builder").addEventListener("click", async e => {
     catch(err){ notify(friendly(err, "Couldn't check right now. Check your internet and try again.")); }
   }
   else if (a === "logout"){
+    if (UPN && !(await ask("A photo is still uploading. Log out anyway? It won't be added.", "Log out", true))) return;
     if (DIRTY) await autoSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Log out anyway?", "Log out", true))) return;
     if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
-    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); setIconBadge(0); renderStart();
+    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(true); setIconBadge(0); renderStart();
   }
 });
 
@@ -3128,7 +3279,8 @@ async function saveNow(){
     if (EDITV === v){ DIRTY = false; rememberEdNow(); const bl = $("builder"); if (bl) bl.classList.remove("dirty"); }
     else scheduleAutosave();
     return r;
-  } finally { SAVING = null; }
+  } catch(e){ if (!pinErr(e)) scheduleAutosave(15000); throw e; }
+  finally { SAVING = null; }
 }
 async function saveStore(){
   if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse listing, so customers can find you.");
@@ -3141,7 +3293,11 @@ async function saveStore(){
     const r = await saveNow(); savePill("");
     renderEditor(r.flagged && STATUS !== "live" ? `Saved. Some words in your store need a quick check by ${APP_NAME} before it can go live.`
       : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
-  } catch(e){ notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment.")); }
+  } catch(e){
+    btn.disabled = false; btn.textContent = "Save";
+    if (pinErr(e)){ if (await relogin(e)) return saveStore(); return; }
+    notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment."));
+  }
   btn.disabled = false; btn.textContent = "Save";
 }
 
@@ -3279,8 +3435,7 @@ async function showStore(data, isPreview, refresh){
   $("closedMore").href = home() + "explore"; $("closedMore").hidden = !!isPreview;
   $("closedShop").textContent = D.name;
   $("closedMsg").textContent = D.closedMsg.trim() || "We're not taking orders right now. Please check back later.";
-  const t = new Date();
-  $("date").min = new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  setDateMin();
   if (!refresh || dayOff(D.off, $("date").value)) setDate("");   // a day the shop has since marked off can't stay picked
   $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false");
   $("dateLabel").textContent = W(D).date;
@@ -3290,7 +3445,7 @@ async function showStore(data, isPreview, refresh){
   loadCart();
   // C2: a product sheet from another store, or for an item that changed, never stays open
   if (!refresh){ closeSheet("pOverlay"); closeSheet("overlay"); ORDER_SENT = false; }
-  else if ($("pOverlay").classList.contains("open") && (!D.items[pSel.i] || D.items[pSel.i].n !== $("pTitle").textContent || !D.items[pSel.i].o[pSel.j])) closeSheet("pOverlay");
+  else if ($("pOverlay").classList.contains("open") && (!D.items[pSel.i] || D.items[pSel.i].out || D.closed || pSig(D.items[pSel.i]) !== pSel.sig)) dismissSheet("pOverlay");
   if (!refresh){ $("note").value = ""; MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
   renderMenu(); renderBar();
   if (!refresh) showAd();
@@ -3323,7 +3478,7 @@ function showAd(){
 }
 function startAds(){
   clearInterval(adTimer);
-  if (ADS.length > 1) adTimer = setInterval(() => { if (!document.hidden) goAd(adI + 1); }, AD_EVERY);
+  if (ADS.length > 1) adTimer = setInterval(() => { if (!document.hidden && !$("store").hidden) goAd(adI + 1); }, AD_EVERY);
 }
 function paintAd(){
   const a = ADS[adI], img = $("adImg"), ban = $("adBan");
@@ -3336,7 +3491,7 @@ function paintAd(){
     paintAd(); startAds();
   };
   const url = safeUrl(a.img);
-  if ($("backBtn").hidden) track("adview", url);
+  if ($("backBtn").hidden && !$("store").hidden) track("adview", url);
   if (img.getAttribute("src") === url && img.complete && img.naturalWidth){ img.classList.add("loaded"); ban.classList.remove("swapping"); }
   else img.src = url;
   const link = safeUrl(a.link || "");
@@ -3376,12 +3531,12 @@ $("repGo").onclick = async () => {
 };
 
 function productRow(i){
-  const p = D.items[i], img = safeImg(p.img), n = inCart(i), bare = !img && D.layout !== "grid";
+  const p = D.items[i], img = safeImg(p.img), n = inCart(i), bare = !img && D.layout === "list";   // Minimal draws its own "+"
   return `<button class="prow${p.out ? " out" : ""}${bare ? " nophoto" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
     <div class="ptext">
       <h3>${esc(p.n)}</h3>
       ${p.d ? `<p class="pdesc">${esc(p.d)}</p>` : ""}
-      <div class="pmeta"><span class="pprice">${priceLabel(p)}</span>
+      <div class="pmeta"><span class="pprice">${priceLabel(p)}${p.o.length === 1 && p.o[0].l ? ` · ${esc(p.o[0].l)}` : ""}</span>
         ${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
     </div>
     ${bare ? (p.out ? "" : `<span class="addb solo" aria-hidden="true">+</span>`) : `<div class="pimg">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<div class="ph">${initial(p.n)}</div>`}
@@ -3425,9 +3580,8 @@ function renderMenu(){
   const q = MQ.trim().toLowerCase();
   if (q){
     // searching looks through everything, menu and links together
-    const has = t => String(t || "").toLowerCase().includes(q);
-    const hitI = list.filter(i => { const p = D.items[i]; return has(p.n) || has(p.d) || has(p.sec) || p.o.some(o => has(o.l)); });
-    const hitL = linkList.filter(j => { const l = D.links[j]; return has(tidyName(l.n)) || has(l.sec) || has(linkInfo(l.u).brand); });
+    const hitI = list.filter(i => { const p = D.items[i]; return matchWords([p.n, p.d, p.sec, ...p.o.map(o => o.l)].join(" "), q); });
+    const hitL = linkList.filter(j => { const l = D.links[j]; return matchWords([tidyName(l.n), l.sec, linkInfo(l.u).brand].join(" "), q); });
     tabs.hidden = true; tabs.innerHTML = "";
     $("menu").innerHTML = hitI.length || hitL.length
       ? (hitI.length ? block(both ? W(D).list : "", hitI.map(productRow).join(""), false) : "") + (hitL.length ? block(both ? "Shop links" : "", hitL.map(linkRow).join(""), true) : "")
@@ -3462,14 +3616,15 @@ $("viewTabs").addEventListener("click", e => {
 });
 $("stQ").addEventListener("input", () => { MQ = $("stQ").value; renderMenu(); });
 $("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur(); });
+const pSig = p => JSON.stringify([p.n, p.o]);
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
-  pSel = { i, j: 0, q: 1 };
+  pSel = { i, j: 0, q: 1, sig: pSig(p) };
   const img = safeImg(p.img);
   $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : ""; $("pImg").hidden = !img;
   $("pTitle").textContent = p.n;
   $("pDesc").textContent = p.d; $("pDesc").hidden = !p.d;
-  $("pOpts").hidden = p.o.length < 2;
+  $("pOpts").hidden = p.o.length < 2 && !p.o[0].l;
   $("pOpts").innerHTML = p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
   updateProduct();
   openSheet("pOverlay");
@@ -3479,7 +3634,11 @@ $("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"
 $("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
 $("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
 $("pPlus").onclick = () => { pSel.q = Math.min(99, pSel.q + 1); updateProduct(); };
-$("pAdd").onclick = () => { const k = pSel.i + "|" + pSel.j; cart[k] = (cart[k] || 0) + pSel.q; saveCart(); dismissSheet("pOverlay"); renderMenu(); renderBar(); };
+$("pAdd").onclick = () => {
+  const p = D.items[pSel.i];
+  if (!p || p.out || D.closed || pSig(p) !== pSel.sig || !p.o[pSel.j]) return dismissSheet("pOverlay");
+  const k = pSel.i + "|" + pSel.j; cart[k] = Math.min(99, (cart[k] || 0) + pSel.q); saveCart(); dismissSheet("pOverlay"); renderMenu(); renderBar();
+};
 
 function items(){
   const out = [];
@@ -3516,32 +3675,39 @@ function renderBar(){
 }
 $("lines").addEventListener("click", e => {
   const b = e.target.closest("button[data-k]"); if (!b) return;
-  const k = b.dataset.k; cart[k] = Math.max(0, (cart[k] || 0) + Number(b.dataset.d)); if (!cart[k]) delete cart[k];
+  const k = b.dataset.k; cart[k] = Math.min(99, Math.max(0, (cart[k] || 0) + Number(b.dataset.d))); if (!cart[k]) delete cart[k];
   saveCart(); renderBar(); renderMenu();
 });
 // Customer date picker: the seller's days off are crossed out and can't be picked
 let DATECAL = null;
+function setDateMin(){ const t = new Date(); $("date").min = new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function setDate(s){
   $("date").value = s || "";
   $("dateTxt").textContent = s ? new Date(s + "T00:00").toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Pick a date";
   $("dateBtn").classList.toggle("empty", !s);
   $("date").dispatchEvent(new Event("input"));
 }
-function drawDateCal(){ $("dateCal").innerHTML = calHtml(DATECAL.y, DATECAL.m, D.off, "pick", $("date").value, $("date").min); }
+function drawDateCal(){
+  $("dateCal").innerHTML = calHtml(DATECAL.y, DATECAL.m, D.off, "pick", $("date").value, $("date").min)
+    + (!W(D).dateNeeded && $("date").value ? `<button type="button" class="btn small" data-nodate style="margin-top:10px">No date</button>` : "");
+}
 $("dateBtn").onclick = () => {
   const open = $("dateCal").hidden;
-  if (open){ const base = $("date").value ? new Date($("date").value + "T00:00") : new Date(); DATECAL = { y: base.getFullYear(), m: base.getMonth() }; drawDateCal(); }
+  if (open){ setDateMin(); const base = $("date").value ? new Date($("date").value + "T00:00") : new Date(); DATECAL = { y: base.getFullYear(), m: base.getMonth() }; drawDateCal(); }
   $("dateCal").hidden = !open; $("dateBtn").setAttribute("aria-expanded", String(open));
 };
 $("dateCal").addEventListener("click", e => {
   const nav = e.target.closest("[data-calnav]"), day = e.target.closest("[data-day]");
   if (nav && !nav.disabled){ const d = new Date(DATECAL.y, DATECAL.m + +nav.dataset.calnav, 1); DATECAL = { y: d.getFullYear(), m: d.getMonth() }; return drawDateCal(); }
+  if (e.target.closest("[data-nodate]")){ setDate(""); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); return; }
   if (day && !day.disabled){ setDate(day.dataset.day); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); $("err").textContent = ""; }
 });
 ["note","cName","date"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
   let msg = "";
+  setDateMin();
   if (D.closed) msg = "This store is closed right now.";
+  else if (!items().length) msg = "Add something to your cart first.";
   else if (!$("cName").value.trim()) msg = "Add your name so the shop knows who the order is for.";
   else if (W(D).dateNeeded && !$("date").value) msg = "Pick a date first.";
   else if ($("date").value && $("date").value < $("date").min) msg = "Pick today or a later date.";
@@ -3578,7 +3744,7 @@ $("backBtn").onclick = () => { const top = INPAGE_N.get(HIST_CUR); if (top && to
    ============================================================ */
 let ADMIN = "", ADMTAB = "stores", ADMQ = "";
 try { ADMIN = sessionStorage.getItem("lk-admin") || ""; } catch(e) {}
-function adminLock(){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} if (SESSION && SESSION.admin) clearSession(); }
+function adminLock(){ ADMIN = ""; try { sessionStorage.removeItem("lk-admin"); } catch(e) {} const s = SESSION || loadSession(); if (s && s.admin){ SESSION = s; clearSession(); } }
 // Only a wrong or blocked key locks the dashboard; a slow connection just shows the error
 const adminKeyErr = e => /admin key|ADMIN_KEY|Too many wrong tries/i.test((e && e.message) || "");
 
@@ -3669,7 +3835,8 @@ async function adminStores(g, head, wire){
   wire();
   const filter = () => {
     ADMQ = $("admFind").value.trim().toLowerCase();
-    g.querySelectorAll(".admrow").forEach(r => r.hidden = !!ADMQ && !r.dataset.find.includes(ADMQ));
+    const num = /^[\d\s+()-]{3,}$/.test(ADMQ) ? normWa(ADMQ) : "";
+    g.querySelectorAll(".admrow").forEach(r => r.hidden = !!ADMQ && !r.dataset.find.includes(ADMQ) && !(num && r.dataset.find.includes(num)));
   };
   $("admFind").oninput = filter; filter();
   if ($("goReview")) $("goReview").onclick = () => { ADMTAB = "review"; renderAdmin(); };
@@ -3690,7 +3857,7 @@ async function adminStores(g, head, wire){
       if (v === null || v === id) return;
       extra.newId = v.toLowerCase();
     }
-    if (op === "delete" && !(await ask(`Delete "${b.dataset.name}" for good? Their link stops working and this can't be undone.`, "Delete", true))) return;
+    if (op === "delete" && !(await ask(`Delete "${b.dataset.name}" for good? Their link stops working and this can't be undone.`, "Delete", true, 5))) return;
     if (op === "resetpin" && !(await ask(`Reset the PIN for ${id}? Their old PIN stops working.`, "Reset", true))) return;
     if (op === "unpublish" && !(await ask(`Take ${id} offline? They won't be able to publish it again themselves.`, "Take offline", true))) return;
     if (op === "approve"){ const x = (ADMLIST || []).find(s => s.id === id) || {};
@@ -3769,7 +3936,9 @@ async function adminReview(g, head, wire){
     .then(r => renderAdmin(`Link Kedai App Guard updated: ${r.words.block.length} blocked words, ${r.words.check.length} check words. Tap Check all stores now to apply them to existing stores.`)).catch(e => notify(e.message));
   $("scanNow").onclick = async () => {
     $("scanNow").disabled = true; $("scanNow").innerHTML = `<span class="spin"></span> Link Kedai App Guard is checking...`;
-    try { const r = (await apiPost({ action: "admin", key: ADMIN, op: "scanall" })).result;
+    try {
+      // the server checks a few stores at a time; keep asking until it has been through them all
+      let r = { more: true }; for (let k = 0; r && r.more && k < 200; k++){ r = (await apiPost({ action: "admin", key: ADMIN, op: "scanall" })).result; if (r && r.more) $("scanNow").innerHTML = `<span class="spin"></span> Checked ${r.stores} stores...`; }
       renderAdmin(`Link Kedai App Guard checked ${r.stores} store${r.stores === 1 ? "" : "s"}. ${r.flagged} flagged${r.hidden ? `, ${r.hidden} hidden until you approve` : ""}.`); }
     catch(e){ notify(e.message); $("scanNow").disabled = false; $("scanNow").innerHTML = "Check all stores now"; }
   };
@@ -3968,7 +4137,7 @@ function adminSettings(g, head, wire, cfg){
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
 const LEGAL_UPDATED = "15 October 2026";
 const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
-const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
+const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}about">About us</a>·<a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
 function legalContact(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return to ? `WhatsApp <a href="https://wa.me/${to}" target="_blank" rel="noopener">+${esc(to)}</a>` : "the contact details on our home page";
@@ -4115,7 +4284,7 @@ function exList(){
   const q = EX.q.trim().toLowerCase();
   const list = EX.stores.filter(st =>
     (EX.cat === "all" || st.cat === EX.cat) &&
-    (!q || (st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag).toLowerCase().includes(q)) &&
+    (!q || matchWords(st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag, q)) &&
     (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)) &&
     (EX.aff ? !!st.aff : (!st.aff || !!q || EX.fav)));   // Affiliate Shops show under their own pill, in search and in Saved
   list.forEach(st => { st._a = mxArea(st); st._km = EX.me && st._a ? kmBetween(EX.me.lat, EX.me.lng, st._a.lat, st._a.lng) : null; });
@@ -4198,7 +4367,8 @@ function mxDraw(force){
       if (c.items.length > 1){
         const el = document.createElement("div"); el.className = "mxcl"; el.innerHTML = `<span>${c.items.length}</span>`;
         el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", c.items.length + " stores, tap to zoom in");
-        const go = () => map.fitBounds(mxBounds(c.items.map(i => [i._a.lng, i._a.lat])), { padding: { top: 150, bottom: 140, left: 50, right: 50 }, maxZoom: 16, duration: 600 });
+        // shops in the same mall or row can't be split by zooming: once zoomed right in, show them as a list
+        const go = () => map.getZoom() >= 15.5 ? mxOpenSheet() : map.fitBounds(mxBounds(c.items.map(i => [i._a.lng, i._a.lat])), { padding: { top: 150, bottom: 140, left: 50, right: 50 }, maxZoom: 16, duration: 600 });
         el.addEventListener("click", go); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } });
         MX.mk.push(mxMarker(el, c.ll)); return;
       }
@@ -4206,7 +4376,9 @@ function mxDraw(force){
       const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
       if (!st._a.exact) feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
       const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
-      el.innerHTML = `<span class="mxpin" style="--c:${col}">${ico(CAT_ICON[st.cat] || "box", 17, 2)}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
+      // the shop's own logo on its pin (the shop icon shows if there's no logo, or it doesn't load)
+      const lg = safeImg(st.logo);
+      el.innerHTML = `<span class="mxpin${lg ? " haslogo" : ""}" style="--c:${col}">${ico("store", 17, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
       el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
       if (sel) el.style.zIndex = 5;
       el.addEventListener("click", () => mxSelect(st.id)); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); mxSelect(st.id); } });
@@ -4288,13 +4460,22 @@ function mxShowCard(st){
 function mxSelect(id, fly = true){
   const st = EX.stores.find(x => x.id === id); if (!st || !MX) return;
   st._a = st._a || mxArea(st); if (!st._a) return;
-  MX.sel = id; MX.sig = ""; mxShowCard(st); mxCloseSheet();
+  MX.sel = id; MX.sig = ""; mxShowCard(st); mxCloseSheet(); mxSyncStep();
   if (fly) MX.map.flyTo({ center: [st._a.lng, st._a.lat], zoom: Math.max(MX.map.getZoom(), st._a.exact ? 15 : st._a.r > 1000 ? 12 : 13), duration: 600, offset: [0, -100] });
   mxDraw();
 }
-function mxDeselect(){ if (!MX || !MX.sel) return; MX.sel = null; MX.sig = ""; $("mxCard").classList.remove("show"); mxDraw(); }
-function mxOpenSheet(){ mxRenderSheet(); $("mxSheet").classList.add("open"); $("mxSheet").setAttribute("aria-hidden", "false"); $("mxScrim").classList.add("show"); }
-function mxCloseSheet(){ const s = $("mxSheet"); if (!s) return; s.classList.remove("open"); s.setAttribute("aria-hidden", "true"); $("mxScrim").classList.remove("show"); }
+function mxDeselect(){ if (!MX || !MX.sel) return; MX.sel = null; MX.sig = ""; $("mxCard").classList.remove("show"); mxDraw(); mxSyncStep(); }
+function mxOpenSheet(){ mxRenderSheet(); $("mxSheet").classList.add("open"); $("mxSheet").setAttribute("aria-hidden", "false"); $("mxScrim").classList.add("show"); mxSyncStep(); }
+function mxCloseSheet(){ const s = $("mxSheet"); if (!s) return; s.classList.remove("open"); s.setAttribute("aria-hidden", "true"); $("mxScrim").classList.remove("show"); mxSyncStep(); }
+// Phone Back closes the store list or the store card first (one history step while either is open), like the app's pop-ups
+function mxSyncStep(){
+  const sh = $("mxSheet"), open = !!(sh && sh.classList.contains("open")) || !!(MX && MX.sel), t = INPAGE_N.get(HIST_CUR);
+  if (open && !(t && t.mx)) inpagePush({ mx: 1 });
+  else if (!open && t && t.mx && !t.self){ t.self = true; history.back(); }
+}
+// Back from a store to Browse brings back the same search, filters and map view
+let EX_BACK = false;
+function exRemember(){ try { if (MX) { const c = MX.map.getCenter(); sessionStorage.setItem("lk-ex", JSON.stringify({ q: EX.q, cat: EX.cat, open: EX.open, ver: EX.ver, aff: EX.aff, fav: EX.fav, c: [c.lng, c.lat], z: MX.map.getZoom() })); } } catch(e) {} }
 function mxToggleFav(id){
   EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs();
   document.querySelectorAll(`[data-fav="${CSS.escape(id)}"]`).forEach(b => b.setAttribute("aria-pressed", String(EX.favs.has(id))));
@@ -4308,8 +4489,8 @@ function mxChips(){
 }
 function exRender(fit){   // re-apply filters; optionally move the map to the results
   if (!MX) return;
-  mxChips();
-  if (MX.sel && !exList().some(s => s.id === MX.sel)){ MX.sel = null; $("mxCard").classList.remove("show"); }
+  mxChips(); exRemember();
+  if (MX.sel && !exList().some(s => s.id === MX.sel)){ MX.sel = null; $("mxCard").classList.remove("show"); mxSyncStep(); }
   mxDraw(true);
   if (fit) mxFit(exList());
 }
@@ -4317,7 +4498,7 @@ async function enterShop(card){
   const id = card.dataset.store, st = (EX && EX.stores.find(x => x.id === id)) || {};
   const url = new URL(storeLink(id), location.href);
   const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const go = async () => { history.pushState(null, "", url.pathname + url.search); document.body.classList.remove("exploring"); await route(); };
+  const go = async () => { const t = INPAGE_N.get(HIST_CUR); if (t && t.mx){ INPAGE_N.delete(HIST_CUR); history.replaceState(null, "", url.pathname + url.search); } else history.pushState(null, "", url.pathname + url.search); document.body.classList.remove("exploring"); await route(); };
   if (reduce || !card.animate){ return go(); }
   const r = card.getBoundingClientRect(), lg = card.querySelector(".exslogo"), lr = lg ? lg.getBoundingClientRect() : null;
   const col = /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
@@ -4334,7 +4515,8 @@ async function enterShop(card){
   if (lr) fl.animate([{ transform: `translate(${lr.left - tr.left}px,${lr.top - tr.top}px) scale(${lr.width / tr.width})` }, { transform: "none" }], { duration: 620, easing: "cubic-bezier(.2,.9,.3,1.18)", fill: "both" });
   const page = $("mxMap") || $("gwrap"), sink = page.animate([{ transform: "none", filter: "none" }, { transform: "scale(.94)", filter: "brightness(.8)" }], { duration: 520, easing: ease, fill: "forwards" });
   const loaded = go();
-  await Promise.all([grow.finished.catch(() => {}), loaded.catch(() => {})]);
+  // the store (or its grey outline) is drawn underneath at once; never hold the cover for a slow network
+  await Promise.all([grow.finished.catch(() => {}), Promise.race([loaded.catch(() => {}), new Promise(r => setTimeout(r, 700))])]);
   sink.cancel();
   const fade = ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 280, easing: "ease-out", fill: "forwards" });
   fade.onfinish = () => ov.remove(); setTimeout(() => ov.remove(), 900);
@@ -4347,21 +4529,31 @@ function mxShowMe(){
 }
 function exLocate(silent, fly){
   if (!navigator.geolocation){ if (!silent) mxToast("Your browser can't share location."); return; }
+  const was = EX.me;
   navigator.geolocation.getCurrentPosition(pos => {
-    EX.me = { lat: pos.coords.latitude, lng: pos.coords.longitude }; EX.near = true;
+    EX.me = { lat: pos.coords.latitude, lng: pos.coords.longitude, at: Date.now() }; EX.near = true;
     try { localStorage.setItem("lk-me", JSON.stringify(EX.me)); } catch(e) {}
     if (!MX) return;
     mxShowMe();
-    if (fly){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); }
+    // fly when asked, or when the phone has moved since the saved spot (another town)
+    if (fly || (was && kmBetween(was.lat, was.lng, EX.me.lat, EX.me.lng) > 2)){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); if (fly) mxToast("Showing stores around you"); }
     mxDraw(true);
-  }, () => { if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings."); }, { timeout: 12000 });
+  }, err => {
+    if (err && err.code === 1){ EX.me = null; EX.near = false; try { localStorage.removeItem("lk-me"); } catch(e) {} if (MX) mxDraw(true); }   // location turned off: forget the old spot
+    if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings.");
+  }, { timeout: 12000 });
 }
 async function renderExplore(){
   mxDestroy();
   const rtok = ROUTE_TOK;
   setAccent(COLORS[0]); document.title = APP_NAME + " · Browse stores";
   let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
+  if (me && !(me.at > Date.now() - 864e5)) me = null;   // a day old: the phone may be somewhere else now
   EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, aff: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
+  let prev = null; if (EX_BACK) try { prev = JSON.parse(sessionStorage.getItem("lk-ex") || "null"); } catch(e) {}
+  EX_BACK = false;
+  if (prev) Object.assign(EX, { q: String(prev.q || ""), cat: prev.cat || "all", open: !!prev.open, ver: !!prev.ver, aff: !!prev.aff, fav: !!prev.fav });
+  const view = prev && Array.isArray(prev.c) && isFinite(prev.z) ? { center: prev.c, zoom: prev.z } : null;
   $("gwrap").innerHTML = `
     <div id="mxMap" role="application" aria-label="Map showing the areas where sellers sell"></div>
     <div class="mxtop">
@@ -4374,6 +4566,7 @@ async function renderExplore(){
     </div>
     <div class="mxempty mxg" id="mxEmpty" hidden></div>
     <div class="mxfabs"><button type="button" class="mxib mxg" id="exNear" aria-label="Show stores near me" title="Near me">${ico("locate", 22)}</button></div>
+    <a class="mxinfo" href="${esc(home())}about#map" aria-label="Map credits and about us">i</a>
     <button type="button" class="mxpill mxg off" id="mxPill"><span>${esc("Finding stores...")}</span></button>
     <section class="mxcard" id="mxCard" aria-live="polite"></section>
     <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("pin", 22)}<span>Browse</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart", 22)}</span><span>Saved</span></button></nav>
@@ -4387,7 +4580,7 @@ async function renderExplore(){
     <div class="mxtoast" id="mxToast" role="status"></div>`;
   document.body.classList.add("exploring");
   show("page"); SPLASH.ready();
-  mxChips();
+  mxChips(); if (EX.q){ $("exQ").value = EX.q; $("mxClr").hidden = false; }
 
   // stores load in the background while the map opens
   let loadErr = null;
@@ -4400,11 +4593,10 @@ async function renderExplore(){
   catch(e){ if (rtok === ROUTE_TOK && $("mxMap")){ $("mxMap").innerHTML = `<div class="mxerr"><p class="err">${esc(e.message)}</p><button type="button" class="btn solid" id="mxLibRetry">Try again</button></div>`; $("mxLibRetry").onclick = () => renderExplore(); } return; }
   if (!$("mxMap") || rtok !== ROUTE_TOK || MX) return;   // the person already left this page, or it opened again meanwhile
 
-  const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: me ? [me.lng, me.lat] : [108.3, 4.2], zoom: me ? 11 : 5, minZoom: 4, maxZoom: 17,
+  const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: view ? view.center : me ? [me.lng, me.lat] : [108.3, 4.2], zoom: view ? view.zoom : me ? 11 : 5, minZoom: 4, maxZoom: 17,
     attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false });
   map.touchZoomRotate.disableRotation();
-  map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
-  MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0, err: null, moved: false };
+  MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0, err: null, moved: !!view };   // a restored view counts as moved: don't jump away from it
   map.on("movestart", e => { if (e.originalEvent && MX && MX.map === map) MX.moved = true; });   // the person moved the map themselves
   MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
   document.addEventListener("keydown", MX.key);
@@ -4417,7 +4609,7 @@ async function renderExplore(){
       MX.ready = true; mxDraw(true);
     }
   });
-  map.on("moveend", () => mxDraw());
+  map.on("moveend", () => { mxDraw(); exRemember(); });
   map.on("click", e => {
     const t = e.originalEvent && e.originalEvent.target;
     if (t && t.closest && t.closest(".mxmk,.mxcl")) return;   // a pin was tapped, not the map
@@ -4439,7 +4631,7 @@ async function renderExplore(){
   $("exQ").onkeydown = e => { if (e.key === "Enter") $("exQ").blur(); };
   $("mxClr").onclick = () => { $("exQ").value = ""; EX.q = ""; $("mxClr").hidden = true; exRender(true); };
   $("mxEmpty").onclick = e => { if (e.target.id === "mxRetry") return renderExplore(); if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.aff = false; EX.fav = false; mxCloseSheet(); $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
-  $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(true); } else exLocate(false, true); };
+  $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(false, false); } else exLocate(false, true); };
   $("exBrowse").onclick = () => { EX.fav = false; exRender(true); };
   $("exFav").onclick = () => { EX.fav = true; exRender(true); if (!EX.favs.size) mxToast("Tap the heart on a store to save it"); };
   $("mxPill").onclick = mxOpenSheet; $("mxShClose").onclick = mxCloseSheet; $("mxScrim").onclick = mxCloseSheet;
@@ -4463,8 +4655,9 @@ async function renderExplore(){
   EX.stores = stores; MX.loaded = true; MX.err = loadErr;
   if (loadErr) return mxDraw(true);
   const list = exList();
-  if (!me) mxFit(list, 12);
+  if (!me && !view) mxFit(list, 12);
   mxDraw(true);
+  if (prev && EX.aff && MX.affs && MX.affs.length) mxOpenSheet();   // back from an Affiliate shop: its list again
   if (urlFlag("affiliate") && !EX.aff){ $("exAff").click(); history.replaceState(null, "", home() + "explore"); }
   if (Array.isArray(savedNear)) freshNear.then(st => { if (MX && MX.map === map && JSON.stringify(st) !== JSON.stringify(savedNear)){ EX.stores = st; mxDraw(true); } }).catch(() => {});
   mxGeocode().then(found => { if (found && MX && MX.map === map && !me && !MX.moved && !MX.sel) mxFit(exList(), 12); });
@@ -4508,6 +4701,43 @@ function renderSafe(){
     </article>
     ${legalLinks()}${copyrightLine()}`;
   show("page");
+}
+// About us: who made Link Kedai App, and the free and open tools it's built on (including the map credits)
+function renderAbout(){
+  setAccent(COLORS[0]); document.title = "About us · " + APP_NAME;
+  const A = esc(APP_NAME), ext = (u, t) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+  $("gwrap").innerHTML = `
+    <div class="top"><span class="brand">${A}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <article class="legal about">
+      <h1>About us</h1><p class="updated">The people and tools behind ${A}</p>
+      <p>${A} helps home sellers in Malaysia take orders on WhatsApp with one simple store link. No app to download, no commission. Customers find sellers near them in Browse stores.</p>
+      <h2>The people who made it</h2>
+      <ul>
+        <li><b>The ${A} founder</b>: had the idea, runs the app, checks every new store and helps sellers on WhatsApp.</li>
+        <li><b>Claude, an AI by Anthropic</b>: worked with the founder as a developer, designing, building and testing the app, from the store pages to the map and the server.</li>
+        <li><b>Our sellers</b>: every home baker, cook, crafter and small shop who built a store, shared their link and told us what to make better.</li>
+        <li><b>Our customers</b>: everyone who orders, saves a favourite store and reports anything that looks wrong.</li>
+      </ul>
+      <h2 id="map">Map credits</h2>
+      <p>The map in Browse stores is made possible by free and open projects:</p>
+      <ul>
+        <li>Map data © ${ext("https://www.openstreetmap.org/copyright", "OpenStreetMap contributors")}, available under the Open Database License.</li>
+        <li>Map style and tiles by ${ext("https://openfreemap.org", "OpenFreeMap")} and ${ext("https://openmaptiles.org", "OpenMapTiles")}.</li>
+        <li>The map itself is drawn with ${ext("https://maplibre.org", "MapLibre GL JS")}, open source.</li>
+        <li>Town and area search by ${ext("https://nominatim.org", "Nominatim")}, using OpenStreetMap data.</li>
+      </ul>
+      <h2>Built with</h2>
+      <ul>
+        <li>Hosting by ${ext("https://pages.github.com", "GitHub Pages")}, and our server on ${ext("https://workers.cloudflare.com", "Cloudflare Workers")}.</li>
+        <li>Store photos kept in Google Drive, and code emails sent with Google Apps Script.</li>
+        <li>The fonts Figtree, Sora and Sacramento, from ${ext("https://fonts.google.com", "Google Fonts")} under the SIL Open Font License.</li>
+        <li>Orders open in WhatsApp. WhatsApp, Shopee, TikTok Shop and other brands named in stores belong to their owners. ${A} isn't part of them.</li>
+      </ul>
+      <p>Thank you to everyone who helped make ${A} what it is.</p>
+    </article>
+    ${legalLinks()}${copyrightLine()}`;
+  show("page");
+  if (location.hash === "#map") setTimeout(() => { const h = $("map"); if (h) h.scrollIntoView(); }, 50);
 }
 function renderLegal(which){
   const titles = { terms: "Terms of Service", privacy: "Privacy Policy", refund: "Refund Policy" };
@@ -4562,13 +4792,13 @@ let INSTALL_EVT = null;
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault(); INSTALL_EVT = e;
   const b = $("exInstall"); if (b) b.hidden = false;
-  showPwaBar("sellerPwaBar"); showPwaBar("stPwaBar");
+  showPwaBar("sellerPwaBar"); if ($("backBtn").hidden) showPwaBar("stPwaBar");   // never on the seller's own preview
 });
 window.addEventListener("appinstalled", () => { INSTALL_EVT = null; hidePwaBar("sellerPwaBar"); hidePwaBar("stPwaBar"); });
 
 // --- Custom "Add to home screen" banners (seller dashboard + storefront) ---
 function isStandalone(){ return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true; }
-function isIos(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+function isIos(){ return (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }   // iPads say "Macintosh"
 function pwaDismissed(key){ try { const t = +localStorage.getItem("pwaDismiss:" + key); return t && Date.now() - t < 14 * 864e5; } catch(e){ return false; } }
 function pwaDismiss(key){ try { localStorage.setItem("pwaDismiss:" + key, String(Date.now())); } catch(e){} hidePwaBar(key === "seller" ? "sellerPwaBar" : "stPwaBar"); }
 function hidePwaBar(id){ const b = $(id); if (b) b.hidden = true; }
@@ -4613,13 +4843,16 @@ async function route(){
   document.body.classList.remove("exploring"); mxDestroy(); ROUTE_TOK++;
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop();
-  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ)) await CONFIG_P;
+  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|about|explore|near)?$/i.test(bareQ)) await CONFIG_P;
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
   if (q === "admin") return renderAdmin();
+  // a seller who stays logged in on this phone: the home page ("For sellers") opens their store, not the login form
+  if (!q){ const k = keep.get("lk-keep"); if (k && k.id && k.tok){ history.replaceState(null, "", home() + "build"); return route(); } }
   if (q === "terms" || q === "privacy" || q === "refund") return renderLegal(q);
   if (q === "safe") return renderSafe();
+  if (q === "about") return renderAbout();
   if (q === "explore" || q === "near") return renderExplore();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
@@ -4629,14 +4862,19 @@ async function route(){
       const req = SESSION.admin ? { action: "login", id: SESSION.id } : { action: "login", id: SESSION.id, pin: SESSION.pin }, saved = edCopy();
       if (saved){
         // open at once from this tab's copy, then take the server's newer version if nothing was changed meanwhile
-        S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; ME_EMAIL = saved.email || ""; openEditor(); SPLASH.ready();
-        apiPost(req).then(r => {
+        S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; ME_EMAIL = saved.email || ""; ED_SYNC = true; openEditor(); SPLASH.ready();
+        apiPost(req).then(async r => {
+          ED_SYNC = false;
           if (!SESSION || SESSION.id !== saved.id) return;
           const same = JSON.stringify(normalize(Object.assign({}, r.data, { loc: r.loc }))) === JSON.stringify(normalize(Object.assign({}, saved.data, { loc: saved.loc }))) && r.status === saved.status;
           rememberEd(r);
-          if (same || DIRTY || $("builder").hidden) return;
-          S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); renderEditor();
-        }).catch(e => { if (authErr(e)){ clearSession(); renderStart(friendly(e, "")); } });
+          if (same) return;
+          // changed somewhere else, and also here before it arrived: let the seller choose instead of overwriting either
+          if ((DIRTY || UPN) && !(await ask("This store was changed on another phone or tab. Open the newer version? What you just changed here will be lost.", "Open newer version"))) return scheduleAutosave(300);
+          DIRTY = false;
+          // newer changes from another phone: use them even while the preview is open, so an edit afterwards never saves the old copy
+          S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); if (!$("builder").hidden) renderEditor();
+        }).catch(e => { ED_SYNC = false; if (authErr(e)){ clearSession(); renderStart(friendly(e, "")); } });
         return;
       }
       $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page"); SPLASH.ready();
@@ -4673,19 +4911,24 @@ async function route(){
   renderHome();
 }
 window.addEventListener("popstate", async e => {
-  const left = HIST_CUR, st = e.state || {};
+  const left = HIST_CUR, st = e.state || {}, backTo = ED_BACK_TO; ED_BACK_TO = null;
   HIST_CUR = st._n || 0;
   if (INPAGE_N.has(left) && HIST_CUR < left){   // Back from one of our in-page steps: stay on this page
     const step = INPAGE_N.get(left); INPAGE_N.delete(left);
     if (step.self){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }   // our own close: a message shown meanwhile stays
-    if ($("askOverlay").classList.contains("open")) return closeAsk(false);
+    if ($("askOverlay").classList.contains("open") && !$("askOverlay").classList.contains("closing")) return closeAsk(false);   // one already closing doesn't swallow this step
     if (step.sheet){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }
+    if (step.mx){ mxCloseSheet(); mxDeselect(); return; }
     if (step.preview){ if (!$("store").hidden && !$("backBtn").hidden) leavePreview(); return; }
-    if (!$("builder").hidden && SESSION){ const v = st.ed || "home"; if (v !== EDV){ EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); } }
+    if (!$("builder").hidden && SESSION){
+      const v = st.ed || "home"; if (v !== EDV){ leaveEdPage(v); EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); }
+      if (backTo && backTo.v !== EDV) edGo(backTo.v, backTo.i);   // the ‹ arrow's page wasn't the one below
+    }
     return;
   }
   document.querySelectorAll(".overlay.open").forEach(o => closeSheet(o));   // a real page change never keeps a pop-up open
   if (DIRTY) await autoSave();
+  EX_BACK = true;
   if (!DIRTY) return route();
   const here = location.href;
   history.pushState(null, "", home() + "build");   // stay in the editor while we ask
