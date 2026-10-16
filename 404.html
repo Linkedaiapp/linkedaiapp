@@ -8,11 +8,13 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Link Kedai App</title>
 <meta name="copyright" content="© 2026 Link Kedai App. All rights reserved.">
 <meta name="color-scheme" content="light only">
-<meta name="theme-color" content="#18395C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F5F3">
 <meta name="description" content="Find home sellers near you and order on WhatsApp.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Link Kedai App">
@@ -30,7 +32,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#18395C">
+<meta name="theme-color" content="#F7F5F3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sora:wght@700;800&family=Sacramento&display=swap" rel="stylesheet">
@@ -54,7 +56,7 @@
   --wa:#3DBE72; --err:#F2887F; --ok:#6FD39A; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{height:100%;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+html{height:100%;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px));touch-action:pan-x pan-y}   /* pages scroll but never zoom; the map zooms itself */
 body{margin:0;min-height:100%;
   font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;
   }
@@ -826,6 +828,8 @@ body.exploring #gwrap{padding:0;max-width:none}
 #mxMap{position:fixed;inset:0;z-index:1;background:var(--bg);touch-action:none}
 #mxMap{font-family:inherit;-webkit-tap-highlight-color:transparent}
 #mxMap .maplibregl-canvas{outline:none}
+.mxinfo{position:fixed;z-index:10;left:12px;bottom:calc(104px + env(safe-area-inset-bottom,0px));width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  background:var(--glass);border:1px solid var(--glass-edge);color:var(--muted);font:italic 700 12px/1 Georgia,serif;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #mxMap .maplibregl-ctrl-attrib{font-size:11px;background:var(--glass);color:var(--muted);border-radius:var(--r-xs) 0 0 0}
 #mxMap .maplibregl-ctrl-attrib a{color:inherit}
 #mxMap .maplibregl-ctrl-attrib-button{background-color:transparent}
@@ -1486,7 +1490,7 @@ function paypalLink(){
 }
 const signupOpen = () => SITE.signup !== false;
 // Works for yoursite/?shop (old links) and yoursite/shop (new links, served by 404.html on GitHub Pages)
-(function(){ const m = location.pathname.match(/^(.*\/)(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)\/$/i);
+(function(){ const m = location.pathname.match(/^(.*\/)(admin|build|edit|signup|terms|privacy|refund|safe|about|explore|near)\/$/i);
   if (m) try { history.replaceState(null, "", m[1] + m[2] + location.search + location.hash); } catch(e){} })();
 const siteUrl = path => new URL(path, location.href.split("#")[0].split("?")[0]).href;
 const home = () => siteUrl("./");
@@ -1824,6 +1828,8 @@ $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay"
 
 
 
+// iPhones ignore "no zoom" in the page settings: stop the pinch gesture too, except on a map (it zooms itself)
+["gesturestart", "gesturechange"].forEach(t => document.addEventListener(t, e => { if (!(e.target.closest && e.target.closest(".maplibregl-map"))) e.preventDefault(); }, { passive: false }));
 // 6-digit PINs as six dots, filled as the seller types (every PIN box, whenever it's drawn)
 const INPUT_VALUE = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
 function dotPin(inp){
@@ -2031,7 +2037,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
@@ -2055,6 +2061,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Browse stores has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
   { id: "u-20261017-look", at: "2026-10-17", title: "Your logo on the map, and PIN dots", body: "Browse stores now shows each shop's own logo on its map pin. Your 6-digit PIN shows as six dots as you type, like a phone lock screen. Deleting your account now waits 5 seconds before the Delete button works, so it can't happen by accident." },
   { id: "u-20261017-fixes", at: "2026-10-17", title: "Smoother editing and ordering", body: "The phone's Back button now steps back through your editor properly. Links pasted without https:// and short link names are saved. If your PIN was changed on another phone, we ask for it instead of failing to save. Customers can clear an optional date, and Browse search finds every word you type." },
   { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
@@ -4105,7 +4112,7 @@ function adminSettings(g, head, wire, cfg){
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
 const LEGAL_UPDATED = "15 October 2026";
 const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
-const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
+const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}about">About us</a>·<a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
 function legalContact(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return to ? `WhatsApp <a href="https://wa.me/${to}" target="_blank" rel="noopener">+${esc(to)}</a>` : "the contact details on our home page";
@@ -4534,6 +4541,7 @@ async function renderExplore(){
     </div>
     <div class="mxempty mxg" id="mxEmpty" hidden></div>
     <div class="mxfabs"><button type="button" class="mxib mxg" id="exNear" aria-label="Show stores near me" title="Near me">${ico("locate", 22)}</button></div>
+    <a class="mxinfo" href="${esc(home())}about#map" aria-label="Map credits and about us">i</a>
     <button type="button" class="mxpill mxg off" id="mxPill"><span>${esc("Finding stores...")}</span></button>
     <section class="mxcard" id="mxCard" aria-live="polite"></section>
     <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("pin", 22)}<span>Browse</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart", 22)}</span><span>Saved</span></button></nav>
@@ -4563,7 +4571,6 @@ async function renderExplore(){
   const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: view ? view.center : me ? [me.lng, me.lat] : [108.3, 4.2], zoom: view ? view.zoom : me ? 11 : 5, minZoom: 4, maxZoom: 17,
     attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false });
   map.touchZoomRotate.disableRotation();
-  map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
   MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0, err: null, moved: !!view };   // a restored view counts as moved: don't jump away from it
   map.on("movestart", e => { if (e.originalEvent && MX && MX.map === map) MX.moved = true; });   // the person moved the map themselves
   MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
@@ -4670,6 +4677,43 @@ function renderSafe(){
     ${legalLinks()}${copyrightLine()}`;
   show("page");
 }
+// About us: who made Link Kedai App, and the free and open tools it's built on (including the map credits)
+function renderAbout(){
+  setAccent(COLORS[0]); document.title = "About us · " + APP_NAME;
+  const A = esc(APP_NAME), ext = (u, t) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+  $("gwrap").innerHTML = `
+    <div class="top"><span class="brand">${A}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <article class="legal about">
+      <h1>About us</h1><p class="updated">The people and tools behind ${A}</p>
+      <p>${A} helps home sellers in Malaysia take orders on WhatsApp with one simple store link. No app to download, no commission. Customers find sellers near them in Browse stores.</p>
+      <h2>The people who made it</h2>
+      <ul>
+        <li><b>The ${A} founder</b>: had the idea, runs the app, checks every new store and helps sellers on WhatsApp.</li>
+        <li><b>Claude, an AI by Anthropic</b>: worked with the founder as a developer, designing, building and testing the app, from the store pages to the map and the server.</li>
+        <li><b>Our sellers</b>: every home baker, cook, crafter and small shop who built a store, shared their link and told us what to make better.</li>
+        <li><b>Our customers</b>: everyone who orders, saves a favourite store and reports anything that looks wrong.</li>
+      </ul>
+      <h2 id="map">Map credits</h2>
+      <p>The map in Browse stores is made possible by free and open projects:</p>
+      <ul>
+        <li>Map data © ${ext("https://www.openstreetmap.org/copyright", "OpenStreetMap contributors")}, available under the Open Database License.</li>
+        <li>Map style and tiles by ${ext("https://openfreemap.org", "OpenFreeMap")} and ${ext("https://openmaptiles.org", "OpenMapTiles")}.</li>
+        <li>The map itself is drawn with ${ext("https://maplibre.org", "MapLibre GL JS")}, open source.</li>
+        <li>Town and area search by ${ext("https://nominatim.org", "Nominatim")}, using OpenStreetMap data.</li>
+      </ul>
+      <h2>Built with</h2>
+      <ul>
+        <li>Hosting by ${ext("https://pages.github.com", "GitHub Pages")}, and our server on ${ext("https://workers.cloudflare.com", "Cloudflare Workers")}.</li>
+        <li>Store photos kept in Google Drive, and code emails sent with Google Apps Script.</li>
+        <li>The fonts Figtree, Sora and Sacramento, from ${ext("https://fonts.google.com", "Google Fonts")} under the SIL Open Font License.</li>
+        <li>Orders open in WhatsApp. WhatsApp, Shopee, TikTok Shop and other brands named in stores belong to their owners. ${A} isn't part of them.</li>
+      </ul>
+      <p>Thank you to everyone who helped make ${A} what it is.</p>
+    </article>
+    ${legalLinks()}${copyrightLine()}`;
+  show("page");
+  if (location.hash === "#map") setTimeout(() => { const h = $("map"); if (h) h.scrollIntoView(); }, 50);
+}
 function renderLegal(which){
   const titles = { terms: "Terms of Service", privacy: "Privacy Policy", refund: "Refund Policy" };
   setAccent(COLORS[0]); document.title = titles[which] + " · " + APP_NAME;
@@ -4774,7 +4818,7 @@ async function route(){
   document.body.classList.remove("exploring"); mxDestroy(); ROUTE_TOK++;
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop();
-  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|explore|near)?$/i.test(bareQ)) await CONFIG_P;
+  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|about|explore|near)?$/i.test(bareQ)) await CONFIG_P;
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
@@ -4783,6 +4827,7 @@ async function route(){
   if (!q){ const k = keep.get("lk-keep"); if (k && k.id && k.tok){ history.replaceState(null, "", home() + "build"); return route(); } }
   if (q === "terms" || q === "privacy" || q === "refund") return renderLegal(q);
   if (q === "safe") return renderSafe();
+  if (q === "about") return renderAbout();
   if (q === "explore" || q === "near") return renderExplore();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
