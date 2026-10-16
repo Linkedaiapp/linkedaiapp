@@ -1985,7 +1985,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261016-push", at: "2026-10-16", title: "New: notifications", body: "Under Account, turn on Notifications to get important messages from Link Kedai App on your phone. Tips, store news and your numbers stay in the app, with red dots. On iPhone, add the app to your Home Screen first." },
+  { id: "u-20261016-push", at: "2026-10-16", title: "New: notifications", body: "Under Account, turn on Notifications. We'll tell you when your store goes live or is Verified, send your numbers every Monday, and let you know what's new. On iPhone, add the app to your Home Screen first." },
   { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
   { id: "u-20261016-daysoff", at: "2026-10-16", title: "New: mark your days off", body: "Under Store status, tap the dates you aren't taking orders, or pick a day of the week that's always off. Customers can't choose those dates when they order." },
   { id: "u-20261016-faster", at: "2026-10-16", title: "Your store now opens faster", body: "Link Kedai App moved to a faster server. Your store page and your editor now load in a second or two, even when nobody has visited for a while." },
@@ -2101,7 +2101,7 @@ async function pushOff(){
   if (sub){ apiPost({ action: "pushoff", ep: sub.endpoint }).catch(() => {}); try { await sub.unsubscribe(); } catch(e) {} }
   keep.del("lk-push");
 }
-const PUSH_TEXT = { on: "Important messages from Link Kedai App", off: "Get important messages from Link Kedai App on this phone",
+const PUSH_TEXT = { on: "Store news, your weekly numbers and what's new", off: "Hear when your store goes live, your weekly numbers and what's new",
   ios: "On iPhone, add the app to your Home Screen first", denied: "Blocked. Allow notifications in your phone's settings", no: "This browser can't show notifications" };
 async function fillPush(){
   const st = await pushState(), row = $("pushRow"), nudge = $("pushNudge");
@@ -2110,8 +2110,8 @@ async function fillPush(){
   if (nudge){
     const show = (st === "off" || st === "ios") && !keep.get("lk-pushnudge");
     nudge.hidden = !show;
-    if (show) nudge.innerHTML = `<div class="bulic">${ico("bell",19)}</div><div class="bulbody"><h3 style="margin:0">Get important messages on your phone</h3>
-      <p class="hint" style="margin:4px 0 10px">${st === "ios" ? "On iPhone: tap Share, then Add to Home Screen. Open Link Kedai App from your home screen, then turn on notifications under Account." : "We'll only send one when Link Kedai App has an important message. Tips and your numbers stay here, with red dots."}</p>
+    if (show) nudge.innerHTML = `<div class="bulic">${ico("bell",19)}</div><div class="bulbody"><h3 style="margin:0">Get news as a notification</h3>
+      <p class="hint" style="margin:4px 0 10px">${st === "ios" ? "On iPhone: tap Share, then Add to Home Screen. Open Link Kedai App from your home screen, then turn on notifications under Account." : "We'll tell you when your store goes live, send your numbers every Monday, and share what's new."}</p>
       <div style="display:flex;gap:8px">${st === "off" ? `<button class="btn small solid" data-act="pushtoggle">Turn on</button>` : ""}<button class="btn small" data-act="pushnudgex">Not now</button></div></div>`;
   }
 }
@@ -2142,10 +2142,7 @@ function bulCards(items, seen, canx){
       <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
     </article>`).join("");
 }
-// The app icon on the home screen shows the same red number (Android, and iPhone with notifications on)
-function setIconBadge(n){ try { if (!("setAppBadge" in navigator)) return; (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {}); } catch(e) {} }
 function updateBell(){
-  if (SESSION && !SESSION.admin) setIconBadge(unreadOf(bulletinItems()));
   const el = $("bellCount"); if (!el) return;
   const n = unreadOf(window.LK_ALLVIEW ? bulletinItems() : newsItems());
   el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n);
@@ -3154,7 +3151,7 @@ $("builder").addEventListener("click", async e => {
     if (DIRTY && !(await ask("Your changes couldn't be saved. Log out anyway?", "Log out", true))) return;
     if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
     if (SESSION && String(keep.get("lk-push") || "").startsWith(SESSION.id + "|")) pushOff();   // no notifications for a store this phone left
-    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); setIconBadge(0); renderStart();
+    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); renderStart();
   }
 });
 
@@ -3927,7 +3924,7 @@ async function loadPushCard(){
   catch(e){ box.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
   box.innerHTML = `<h2>Notifications to sellers</h2>
     ${st.ready ? `<p class="hint" style="margin:4px 0 12px">${st.phones} phone${st.phones === 1 ? "" : "s"} from ${st.stores} store${st.stores === 1 ? "" : "s"} have notifications on${st.waiting ? `. ${st.waiting} waiting to go out` : ""}.
-      Phones only buzz when you send something here. Store news, tips and numbers show as red dots inside the app.</p>
+      Sellers also get these by themselves: store live, Verified or offline, their week every Monday at 9am, and each new What's new post the morning after it goes up.</p>
       <label>Title<input type="text" id="pnTitle" maxlength="80" placeholder="e.g. Hari Raya tips for your store"></label>
       <label>Message<textarea id="pnBody" maxlength="240" rows="3" placeholder="e.g. Post your Raya menu early. Customers start ordering 2 weeks before."></textarea></label>
       <p class="err" id="pnErr"></p>
@@ -4089,7 +4086,7 @@ function legalDoc(which){
       <li><b>Reports</b> you send about a store are anonymous: we only receive the reason and any note you write.</li>
       <li><b>Your location</b> in Browse stores is used only on your own phone to sort stores by distance. It is never sent to ${A} or to sellers.</li>
       <li><b>Visit counts:</b> we count store visits, order taps and ad views without any names or numbers, to show sellers simple insights.</li>
-      <li><b>Notifications:</b> if a seller turns them on, we keep that phone's notification address so we can send important messages. Messages are encrypted for that phone. Turn them off anytime under Account, or by logging out.</li>
+      <li><b>Notifications:</b> if a seller turns them on, we keep that phone's notification address so we can send store updates. Messages are encrypted for that phone. Turn them off anytime under Account, or by logging out.</li>
     </ul>
     <h2>3. How we use it</h2>
     <ul>
