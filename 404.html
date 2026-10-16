@@ -959,7 +959,10 @@ a.prow{text-decoration:none;color:inherit}
 .lnkcard .lprev .tt{min-width:0;display:flex;flex-direction:column}
 .lnkcard .lprev .tt b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lnkcard .lprev .tt span{font-size:13px;color:var(--muted)}
-.lnkcard .lst{font-size:12px}
+.lnkcard .lst{font-size:12px;display:flex;align-items:center;gap:4px;min-height:18px;margin-top:2px}
+.lnkcard .lprev .tt .lst.ok{color:var(--ok);font-weight:600}
+.lnkcard .lst .spin{display:block;width:16px;height:16px;border-width:2px}
+.lnkcard .lprev .tt > span{display:block;line-height:1.35}
 .lnkcard .lbtns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 2px}
 /* ---------- UI polish: store page + seller editor ---------- */
 /* a shorter top, so the first items show on the first screen */
@@ -2358,10 +2361,12 @@ function linkPreviewHtml(l){
   if (!l.u.trim()) return `<p class="hint">Paste an https link from Shopee, TikTok Shop, Lazada or any shop. We'll fetch the photo and name for you.</p>`;
   if (!safeUrl(l.u)) return `<p class="hint" style="color:var(--err)">The link must start with https://</p>`;
   const info = linkInfo(l.u), img = safeImg(l.img);
-  const msg = st.s === "loading" ? "Fetching photo and name…" : st.s === "fail" ? (st.m || "Couldn't read this page.") : st.s === "none" ? (/shopee|tiktok/i.test(info.brand) ? info.brand + " hides product details from preview tools. Add the photo, name and price below." : "Couldn't read this page. Add the photo, name and price below.") : st.s === "partial" ? "Found the name only. Add a photo below." : st.s === "ok" ? "Fetched from the link" : "";
+  const msg = st.s === "loading" ? "" : st.s === "fail" ? (st.m || "Couldn't read this page.") : st.s === "none" ? (/shopee|tiktok/i.test(info.brand) ? info.brand + " hides product details from preview tools. Add the photo, name and price below." : "Couldn't read this page. Add the photo, name and price below.") : st.s === "partial" ? "Found the name only. Add a photo below." : st.s === "ok" ? "Done" : "";
+  // fetching: just a spinner; done: a tick
+  const stat = st.s === "loading" ? `<i class="spin" role="status" aria-label="Loading"></i>` : st.s === "ok" ? `${ico("check", 14, 2.6)}${esc(msg)}` : esc(msg);
   return `<div class="lprev"><span class="thumb">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ico("image", 20)}</span>
-      <span class="tt"><b>${esc(tidyName(l.n) || "No name yet")}</b><span>${esc(info.brand)}${l.p > 0 ? " · " + esc(fmtMoney(S.cur || curSymbol(S.curCode), l.p)) : ""}</span><span class="lst">${esc(msg)}</span></span></div>
-    <div class="lbtns"><button type="button" class="btn small" data-act="lkfetch" data-j="${j}" ${st.s === "loading" ? "disabled" : ""}>Fetch again</button><button type="button" class="btn small" data-act="lkedit" data-j="${j}">${st.edit ? "Hide details" : "Edit photo, name & price"}</button></div>
+      <span class="tt"><b>${esc(tidyName(l.n) || "No name yet")}</b><span>${esc(info.brand)}${l.p > 0 ? " · " + esc(fmtMoney(S.cur || curSymbol(S.curCode), l.p)) : ""}</span><span class="lst${st.s === "ok" ? " ok" : ""}">${stat}</span></span></div>
+    <div class="lbtns"><button type="button" class="btn small" data-act="lkfetch" data-j="${j}" ${st.s === "loading" ? "disabled" : ""}>Refresh</button><button type="button" class="btn small" data-act="lkedit" data-j="${j}">${st.edit ? "Hide details" : "Edit photo, name & price"}</button></div>
     ${st.edit ? `<label>Photo</label><div class="media-row">${photoBox("lkPrev" + j, l.img, "No photo", "sq")}${photoControls("link", l.img, `data-i="${j}"`)}</div><label>Name<input type="text" data-lf="n" data-j="${j}" value="${esc(l.n)}" maxlength="120" placeholder="e.g. Mini Handheld Fan"></label><label>Price (optional)<input type="number" inputmode="decimal" data-lf="p" data-j="${j}" value="${l.p || ""}" placeholder="e.g. 25"></label>` : ""}`;
 }
 function updateLinkPreview(l){ const j = S.links.indexOf(l), el = $("lpv-" + j); if (el) el.innerHTML = linkPreviewHtml(l); }
