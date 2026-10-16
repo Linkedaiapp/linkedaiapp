@@ -2080,7 +2080,10 @@ function bulCards(items, seen, canx){
       <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
     </article>`).join("");
 }
+// The app icon on the home screen shows the same red number while the app is open (Android)
+function setIconBadge(n){ try { if (!("setAppBadge" in navigator)) return; (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {}); } catch(e) {} }
 function updateBell(){
+  if (SESSION && !SESSION.admin) setIconBadge(unreadOf(bulletinItems()));
   const el = $("bellCount"); if (!el) return;
   const n = unreadOf(window.LK_ALLVIEW ? bulletinItems() : newsItems());
   el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n);
@@ -3082,7 +3085,7 @@ $("builder").addEventListener("click", async e => {
     if (DIRTY) await autoSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Log out anyway?", "Log out", true))) return;
     if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
-    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); renderStart();
+    DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(); setIconBadge(0); renderStart();
   }
 });
 
