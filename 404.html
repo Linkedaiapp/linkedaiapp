@@ -1035,6 +1035,9 @@ a.prow{text-decoration:none;color:inherit}
 .stfoot .copyright{margin-top:2px}
 /* seller editor */
 .linkcard .url{font-size:15px;font-weight:600}
+.linkhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.linkhead h2{margin:0;font-size:17px}
+.linktags{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 #saveStatus:empty{min-height:0;margin:0}
 .opt input:nth-child(2){flex:0 0 92px;width:92px;min-width:0}
 .bulcard.unread{border-color:var(--line);box-shadow:0 4px 14px rgba(24,57,92,.06)}
@@ -2082,6 +2085,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-linkcard", at: "2026-10-17", title: "Your store link, clearly marked", body: "The top card on your store home is now titled \"Your store link\": the link to share with customers. The blue Verified tag also shows straight away when you open the app." },
   { id: "u-20261017-profile", at: "2026-10-17", title: "Your Profile", body: "Tap your store name at the top of Account to see your Profile: your store link and how you log in. Delete account is now a small button at the bottom of Profile, so it can't be tapped by mistake." },
   { id: "u-20261017-front", at: "2026-10-17", title: "See your store as customers do", body: "Tap the shop icon next to the bell to open your store front, exactly as customers see it. Your own visits never count in Insights, only customers' do. Your logo, colour and store style are now under Shop details." },
   { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Link Kedai App now goes dark when your phone is in dark mode, and light when it isn't. Your store does the same for your customers." },
@@ -2200,6 +2204,8 @@ async function loadBulletin(){
   let b = null; try { b = await apiPost({ action: "bulletin", id, pin: SESSION.pin }); } catch(e) {}
   if (!SESSION || SESSION.id !== id) return;
   BUL = b; updateBell();
+  if (b && !SESSION.admin) try { if (b.verified) localStorage.setItem("lk-ver:" + id, "1"); else localStorage.removeItem("lk-ver:" + id); } catch(e) {}
+  const tags = $("linkTags"); if (tags) tags.innerHTML = linkTags();
 }
 function openBulletin(){
   const items = bulletinItems(), seen = bulSeen();
@@ -2253,20 +2259,25 @@ function priceText(it){
   const lo = Math.min(...ps);
   return (ps.length > 1 ? "From " : "") + fmtMoney(S.cur || curSymbol(S.curCode), lo);
 }
+// Live / Verified chips on the store link card. Verified comes with the store's status, a moment after the page opens,
+// so the last answer is remembered on this phone and the chips are redrawn when the new one arrives.
+function wasVerified(){ try { return localStorage.getItem("lk-ver:" + SESSION.id) === "1"; } catch(e){ return false; } }
+function linkTags(){
+  const v = BUL ? !!BUL.verified : wasVerified();
+  return STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${v ? `<span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
+    : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
+}
 function edHome(msg){
   const link = storeLink(SESSION.id), live = STATUS === "live", st = edSteps();
   const done = Object.values(st).filter(Boolean).length, total = Object.keys(st).length;
   const allDone = done === total, mark = v => allDone ? null : v;   // all set up: no progress bar or Done tags, just a clean menu
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
-  const b = BUL || {};
-  const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
-    : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
   ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
   ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${status}</div>
+    <div class="linkhead"><h2>${live ? "Your store link" : "Your store"}</h2><div class="linktags" id="linkTags">${linkTags()}</div></div>
     ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link)}</span></p>
       <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
     : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
@@ -3208,6 +3219,7 @@ $("builder").addEventListener("click", async e => {
     b.disabled = true; b.textContent = "Deleting...";
     try {
       await apiPost({ action: "delete", id: SESSION.id, pin });
+      try { localStorage.removeItem("lk-ver:" + SESSION.id); } catch(e) {}
       DIRTY = false; clearSession(true);
       history.replaceState(null, "", home());
       renderHome();
