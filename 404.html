@@ -349,7 +349,8 @@ textarea{min-height:72px;resize:vertical}
 .mxmk.exact .mxpin{border-radius:50% 50% 50% 4px;transform:rotate(-45deg)}.mxmk.exact .mxpin>svg{transform:rotate(45deg)}
 .mxdir{display:flex;gap:8px;margin-top:8px}.mxdir .btn{flex:1;white-space:nowrap}.stvisit .mxdir{flex:1 1 100%;margin-top:0}
 .shoptag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--ink);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:1px}
-.exinstall{margin-top:12px}
+.exinstall{margin-top:12px}.dangercard{border-color:var(--err)}
+.dangercard h2{color:var(--err)}
 .btn.danger{background:var(--err);}
 .pinwrap{position:relative;display:block;margin-top:6px}
 .pinwrap input{margin-top:0;padding-right:54px}
@@ -2080,7 +2081,6 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261017-close", at: "2026-10-17", title: "Closing your store is now done by us", body: "To keep stores safe from a wrong tap, there's no delete button in the app any more. If you ever want to close your store for good, message us from Account and we'll do it for you." },
   { id: "u-20261017-front", at: "2026-10-17", title: "See your store as customers do", body: "Tap the shop icon next to the bell to open your store front, exactly as customers see it. Your own visits never count in Insights, only customers' do. Your logo, colour and store style are now under Shop details." },
   { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Link Kedai App now goes dark when your phone is in dark mode, and light when it isn't. Your store does the same for your customers." },
   { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Browse stores has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
@@ -2610,7 +2610,11 @@ function edAccount(){
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in until you log out" : "You can log in again anytime"}</span></span></button>
   </section>
-  <p class="hint" style="text-align:center;margin:20px 12px 8px">Want to close your store for good? ${to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", please delete my store " + (SESSION ? SESSION.id : "") + " and my account.")}" target="_blank" rel="noopener" style="color:var(--plum-ink);font-weight:600">Message us</a>` : "Message us"} and we'll delete it for you.</p>`;
+  <section class="card dangercard">
+    <h2>Danger zone</h2>
+    <p class="hint">Delete your store and account. Your store link stops working, and your items and photos are removed. This can't be undone.</p>
+    <button class="btn danger full" style="margin-top:12px" data-act="deleteacct">${ico("trash",18)}Delete my account</button>
+  </section>`;
 }
 let EDOTHER = false;
 function renderEditor(msg){
@@ -3083,7 +3087,12 @@ function legacyEditor(msg){
       </div>`).join("")}
     <button class="btn full" style="margin-top:14px" data-act="additem">Add ${W(S).item}</button>
   </section>
-`;
+
+  <section class="card dangercard">
+    <h2>Danger zone</h2>
+    <p class="hint">Delete your store and account. Your store link stops working, and your items and photos are removed. This can't be undone.</p>
+    <button class="btn danger full" style="margin-top:12px" data-act="deleteacct">Delete my account</button>
+  </section>`;
 }
 
 function onField(e){
@@ -3179,6 +3188,19 @@ $("builder").addEventListener("click", async e => {
     if (DIRTY) await autoSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Leave anyway?", "Leave", true))) return;
     DIRTY = false; clearSession(); history.pushState(null, "", home() + "admin"); renderAdmin();
+  }
+  else if (a === "deleteacct"){
+    if (!(await ask(`Delete "${S.name || SESSION.id}" and your account for good? Your store link stops working and this can't be undone.`, "Delete", true, 5))) return;
+    let pin = SESSION.pin;
+    if (!pin && !SESSION.admin){ pin = await askText("Type your 6-digit PIN to delete your account.", "", "", "Delete", true); if (!pin) return; }
+    b.disabled = true; b.textContent = "Deleting...";
+    try {
+      await apiPost({ action: "delete", id: SESSION.id, pin });
+      DIRTY = false; clearSession(true);
+      history.replaceState(null, "", home());
+      renderHome();
+      notify("Your store and account have been deleted.");
+    } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
   }
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
   else if (a === "bulx"){ const y = window.scrollY; bulRemove([b.dataset.v]); renderEditor(); window.scrollTo(0, y); }
@@ -4113,7 +4135,7 @@ function adminSettings(g, head, wire, cfg){
    HOME + ROUTER
    ============================================================ */
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
-const LEGAL_UPDATED = "17 October 2026";
+const LEGAL_UPDATED = "15 October 2026";
 const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
 const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}about">About us</a>·<a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
 function legalContact(){
@@ -4153,11 +4175,11 @@ function legalDoc(which){
     <p>Your information is stored using trusted providers: Google (store data, photos and receipts), GitHub (the website), WhatsApp/Meta (orders you send), and link preview services (Microlink and Jina Reader), which read the public shop pages of affiliate links you paste to fetch their photo and name. Payments are handled by your bank, DuitNow or PayPal. Each of these follows its own privacy policy.</p>
     <h2>5. How long we keep it</h2>
     <ul>
-      <li>Store information is kept while your store exists. When you ask us to close your store, we delete your store and photos.</li>
+      <li>Store information is kept while your store exists. When you delete your account in the Danger zone, your store and photos are removed.</li>
       <li>Payment receipts may be kept for our records, as required for accounting.</li>
     </ul>
     <h2>6. Your rights</h2>
-    <p>You can view and correct your store information anytime in your editor, and ask us on WhatsApp to delete your store and account. You can also ask us what information we hold about you, or ask us to correct or delete it.</p>
+    <p>You can view and correct your store information anytime in your editor, and delete your account yourself. You can also ask us what information we hold about you, or ask us to correct or delete it.</p>
     <h2>7. Contact</h2>
     <p>For privacy questions, contact us on ${legalContact()}.</p>`;
   if (which === "refund") return `
