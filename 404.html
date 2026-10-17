@@ -193,7 +193,7 @@ textarea{min-height:72px;resize:vertical}
 .rules p{margin:4px 0 0;color:var(--muted);line-height:1.45}
 /* short invitation under every store */
 .stcta{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 14px 0;font-size:14px;color:var(--muted)}
-.stcta-btn{display:inline-block;padding:7px 14px;border-radius:999px;background:var(--plum);color:#fff;font-weight:700;font-size:13px;text-decoration:none;transition:transform .15s ease}
+.stcta-btn{display:inline-block;padding:7px 14px;border-radius:999px;background:var(--surface);color:var(--plum-ink);border:1px solid color-mix(in srgb,var(--plum-ink) 30%,transparent);font-weight:700;font-size:13px;text-decoration:none;transition:transform .15s ease}
 .stcta-btn:active{transform:scale(.96)}
 /* Link Kedai App Guard */
 .guard{border-color:var(--plum-ink);background:linear-gradient(160deg,var(--surface) 55%,rgba(141,182,232,.12))}
@@ -458,9 +458,9 @@ textarea{min-height:72px;resize:vertical}
   transform:translateY(120%);transition:transform .25s ease;pointer-events:none}
 .bar.show{transform:none;pointer-events:auto;visibility:visible}
 .bar:not(.show){visibility:hidden;transition:transform .25s ease,visibility 0s .25s}
-.cartbtn{width:100%;max-width:692px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--accent);color:#fff;border:0;
+.cartbtn{width:100%;max-width:692px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--surface);color:var(--accent-ink);border:1px solid color-mix(in srgb,var(--accent-ink) 30%,transparent);
   border-radius:var(--r-md);padding:15px 18px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:var(--sh-2)}
-.cartbtn .cnt{background:rgba(255,255,255,.22);border-radius:var(--r-xs);padding:2px 9px;min-width:30px;text-align:center}
+.cartbtn .cnt{background:color-mix(in srgb,var(--accent-ink) 12%,transparent);border-radius:var(--r-xs);padding:2px 9px;min-width:30px;text-align:center}
 .cartbtn .lbl{flex:1;text-align:left}
 
 .overlay{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;align-items:flex-end;justify-content:center;z-index:30}
@@ -481,7 +481,7 @@ img.broken{visibility:hidden}
 @keyframes shimmer{from{background-position:100% 0}to{background-position:0 0}}
 /* spinner for uploads */
 .spin{width:24px;height:24px;border:2.5px solid rgba(0,0,0,.12);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:none}
-.btn .spin{width:18px;height:18px;border-color:rgba(255,255,255,.35);border-top-color:#fff}
+.btn .spin{width:18px;height:18px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .upov{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;background:rgba(255,255,255,.78);
   font-size:11px;font-weight:700;color:var(--ink);border-radius:inherit;animation:pageIn .2s ease both}
@@ -630,8 +630,8 @@ html,body{overflow-x:hidden}
    ===================================================================== */
 :root{--plum-ink:#18395C;--accent-ink:var(--accent);--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#18395C;--gold:#8DB6E8;
   --glass:rgba(255,255,255,.62);--glass-edge:rgba(255,255,255,.85);--r-card:18px;--r-btn:14px;--r-field:12px}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 45%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}}
-:root[data-theme="dark"]{--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 45%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}}
+:root[data-theme="dark"]{--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}
 body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 .card{border-radius:var(--r-card);border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh-1)}
 .card h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
@@ -642,16 +642,15 @@ body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
   -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 1px rgba(20,10,15,.05),0 4px 14px rgba(20,10,15,.08)}
 .btn::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 52%);pointer-events:none;z-index:-1}
-.btn.solid{color:#fff;border-color:rgba(255,255,255,.24);background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--accent) 92%,transparent);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -1px 1px rgba(0,0,0,.25),0 8px 22px color-mix(in srgb,var(--accent) 30%,transparent)}
-.btn.wa{color:#fff;border-color:rgba(255,255,255,.24);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--wa) 92%,transparent);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -1px 1px rgba(0,0,0,.2),0 8px 22px color-mix(in srgb,var(--wa) 28%,transparent)}
-.btn.dangerline,.btn.small.dangerline{color:var(--err);border-color:color-mix(in srgb,var(--err) 30%,transparent)}
-.btn.danger{color:#fff;border-color:rgba(255,255,255,.24);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--err) 94%,transparent);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 1px rgba(0,0,0,.2),0 8px 22px color-mix(in srgb,var(--err) 28%,transparent)}
+/* every coloured button is an outline, like Delete account: the glass fill, with the colour on the edge, the words and the icon */
+.btn.solid{color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent-ink) 30%,transparent)}
+.btn.wa{color:var(--wa);border-color:color-mix(in srgb,var(--wa) 30%,transparent)}
+.btn.danger,.btn.dangerline,.btn.small.dangerline{color:var(--err);border-color:color-mix(in srgb,var(--err) 30%,transparent)}
+.btn.solid,.btn.wa,.btn.danger{background:var(--glass)}
+.btn .spin{border-color:color-mix(in srgb,currentColor 30%,transparent);border-top-color:currentColor}
 .btn.small{height:38px;border-radius:var(--r-sm);font-size:14px;padding:0 13px}
 .btn:disabled{opacity:.5}
-@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.btn{background:var(--surface)}}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.btn,.btn.solid,.btn.wa,.btn.danger{background:var(--surface)}}
 /* ---- fields ---- */
 input[type=text],input[type=tel],input[type=url],input[type=email],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input:not([type]),textarea,select{
   border-radius:var(--r-field);border:1px solid var(--line2);background:var(--surface);min-height:48px;font-size:15px}
@@ -686,7 +685,7 @@ label{font-weight:600;font-size:14px}
 /* ---- home page ---- */
 .brandmark img{border-radius:0;box-shadow:none}
 .signupbox{border-radius:var(--r-btn);background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.07)}
-.chatfab{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--wa) 92%,transparent);border:1px solid rgba(255,255,255,.3);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 24px rgba(31,157,85,.35)}
+.chatfab{background:var(--glass);color:var(--wa);border:1px solid color-mix(in srgb,var(--wa) 30%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 20px rgba(20,10,15,.14)}
 /* ---- sheets ---- */
 .overlay .sheet{border-radius:var(--r-xl) var(--r-xl) 0 0}
 .xmini{border-radius:var(--r-sm)}
@@ -1819,8 +1818,8 @@ function ask(text, yesLabel, danger, wait){
     b.disabled = true; b.textContent = `${label} (${n})`;
     ASK_T = setInterval(() => { n--; if (n > 0) b.textContent = `${label} (${n})`; else { askTimer(true); b.textContent = label; } }, 1000);
   }
-  $("askYes").style.background = danger ? "var(--err)" : "";
-  $("askYes").style.borderColor = danger ? "var(--err)" : "";
+  $("askYes").classList.toggle("danger", !!danger); $("askYes").style.background = "";
+  $("askYes").style.borderColor = "";
   $("askNoWrap").hidden = false;
   openSheet("askOverlay");
   (wait ? $("askNo") : $("askYes")).focus();   // while Delete is counting down, Cancel is the safe default
@@ -1830,7 +1829,7 @@ function notify(text){
   askTimer(true);
   $("askText").textContent = text;
   $("askYes").textContent = "OK";
-  $("askYes").style.background = ""; $("askYes").style.borderColor = "";
+  $("askYes").classList.remove("danger"); $("askYes").style.background = ""; $("askYes").style.borderColor = "";
   $("askNoWrap").hidden = true;
   openSheet("askOverlay");
   return new Promise(res => { askResolve = res; });
@@ -2085,6 +2084,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-buttons", at: "2026-10-17", title: "A lighter look for buttons", body: "Every button in the app now has the same clean look: a light button with a coloured outline, coloured words and icon. Save, Share, Add to cart, Log in and the rest all work the same as before." },
   { id: "u-20261017-linkcard", at: "2026-10-17", title: "Your store link, clearly marked", body: "The top card on your store home is now titled \"Your store link\": the link to share with customers. The blue Verified tag also shows straight away when you open the app." },
   { id: "u-20261017-profile", at: "2026-10-17", title: "Your Profile", body: "Tap your store name at the top of Account to see your Profile: your store link and how you log in. Delete account is now a small button at the bottom of Profile, so it can't be tapped by mistake." },
   { id: "u-20261017-front", at: "2026-10-17", title: "See your store as customers do", body: "Tap the shop icon next to the bell to open your store front, exactly as customers see it. Your own visits never count in Insights, only customers' do. Your logo, colour and store style are now under Shop details." },
