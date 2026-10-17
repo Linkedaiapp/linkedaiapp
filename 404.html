@@ -351,6 +351,7 @@ textarea{min-height:72px;resize:vertical}
 .shoptag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--ink);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:1px}
 .exinstall{margin-top:12px}.dangercard{border-color:var(--err)}
 .dangercard h2{color:var(--err)}
+.card.dangersmall{padding:14px 16px}.card.dangersmall h2{font-size:15px;margin:0 0 2px}.card.dangersmall .hint{margin:0 0 10px;font-size:13px}
 .btn.danger{background:var(--err);}
 .pinwrap{position:relative;display:block;margin-top:6px}
 .pinwrap input{margin-top:0;padding-right:54px}
@@ -1034,6 +1035,9 @@ a.prow{text-decoration:none;color:inherit}
 .stfoot .copyright{margin-top:2px}
 /* seller editor */
 .linkcard .url{font-size:15px;font-weight:600}
+.linkhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.linkhead h2{margin:0;font-size:17px}
+.linktags{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 #saveStatus:empty{min-height:0;margin:0}
 .opt input:nth-child(2){flex:0 0 92px;width:92px;min-width:0}
 .bulcard.unread{border-color:var(--line);box-shadow:0 4px 14px rgba(24,57,92,.06)}
@@ -2081,6 +2085,8 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-linkcard", at: "2026-10-17", title: "Your store link, clearly marked", body: "The top card on your store home is now titled \"Your store link\": the link to share with customers. The blue Verified tag also shows straight away when you open the app." },
+  { id: "u-20261017-profile", at: "2026-10-17", title: "Your Profile", body: "Tap your store name at the top of Account to see your Profile: your store link and how you log in. Delete account is now a small button at the bottom of Profile, so it can't be tapped by mistake." },
   { id: "u-20261017-front", at: "2026-10-17", title: "See your store as customers do", body: "Tap the shop icon next to the bell to open your store front, exactly as customers see it. Your own visits never count in Insights, only customers' do. Your logo, colour and store style are now under Shop details." },
   { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Link Kedai App now goes dark when your phone is in dark mode, and light when it isn't. Your store does the same for your customers." },
   { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Browse stores has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
@@ -2198,6 +2204,8 @@ async function loadBulletin(){
   let b = null; try { b = await apiPost({ action: "bulletin", id, pin: SESSION.pin }); } catch(e) {}
   if (!SESSION || SESSION.id !== id) return;
   BUL = b; updateBell();
+  if (b && !SESSION.admin) try { if (b.verified) localStorage.setItem("lk-ver:" + id, "1"); else localStorage.removeItem("lk-ver:" + id); } catch(e) {}
+  const tags = $("linkTags"); if (tags) tags.innerHTML = linkTags();
 }
 function openBulletin(){
   const items = bulletinItems(), seen = bulSeen();
@@ -2251,20 +2259,25 @@ function priceText(it){
   const lo = Math.min(...ps);
   return (ps.length > 1 ? "From " : "") + fmtMoney(S.cur || curSymbol(S.curCode), lo);
 }
+// Live / Verified chips on the store link card. Verified comes with the store's status, a moment after the page opens,
+// so the last answer is remembered on this phone and the chips are redrawn when the new one arrives.
+function wasVerified(){ try { return localStorage.getItem("lk-ver:" + SESSION.id) === "1"; } catch(e){ return false; } }
+function linkTags(){
+  const v = BUL ? !!BUL.verified : wasVerified();
+  return STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${v ? `<span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
+    : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
+}
 function edHome(msg){
   const link = storeLink(SESSION.id), live = STATUS === "live", st = edSteps();
   const done = Object.values(st).filter(Boolean).length, total = Object.keys(st).length;
   const allDone = done === total, mark = v => allDone ? null : v;   // all set up: no progress bar or Done tags, just a clean menu
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
-  const b = BUL || {};
-  const status = STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${b.verified ? ` <span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
-    : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
   return `
   ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
   ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${status}</div>
+    <div class="linkhead"><h2>${live ? "Your store link" : "Your store"}</h2><div class="linktags" id="linkTags">${linkTags()}</div></div>
     ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link)}</span></p>
       <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
     : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
@@ -2601,7 +2614,7 @@ function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
-    <div class="lk-row" style="cursor:default"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(fmtWa(S.wa) || "your WhatsApp number")}${ME_EMAIL ? " or " + esc(ME_EMAIL) : ""} and your PIN</span></span></div>
+    <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(fmtWa(S.wa) || "your WhatsApp number")}${ME_EMAIL ? " or " + esc(ME_EMAIL) : ""} and your PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
     <button class="lk-row" data-act="chwa"><span class="tile">${ico("chat")}</span><span class="tt"><b>Change WhatsApp number</b><span>Orders go to this number, and you log in with it</span></span><span class="chev">${ico("chevron",18)}</span></button>
     ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chemail"><span class="tile">${ico("mail")}</span><span class="tt"><b>${ME_EMAIL ? "Change email" : "Add email"}</b><span>${ME_EMAIL ? esc(ME_EMAIL) : "So you can reset your PIN yourself if you forget it"}</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
     ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chpin"><span class="tile">${ico("lock")}</span><span class="tt"><b>Change PIN</b><span>The 6-digit PIN you log in with</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
@@ -2609,12 +2622,22 @@ function edAccount(){
     ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new from ${esc(APP_NAME)}</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in until you log out" : "You can log in again anytime"}</span></span></button>
-  </section>
-  <section class="card dangercard">
-    <h2>Danger zone</h2>
-    <p class="hint">Delete your store and account. Your store link stops working, and your items and photos are removed. This can't be undone.</p>
-    <button class="btn danger full" style="margin-top:12px" data-act="deleteacct">${ico("trash",18)}Delete my account</button>
   </section>`;
+}
+// Profile: the store's account details, with a small Danger zone at the bottom (one step away from Account, so it isn't tapped by chance)
+function edProfile(){
+  const link = storeLink(SESSION.id);
+  return `${edTop("Profile", "account")}
+  <section class="card">
+    <label style="margin-top:0">Store name</label><p style="margin:2px 0 0;font-weight:600">${esc(S.name || "Not set yet")}</p>
+    <label>Store link</label><p class="lk-link" style="margin:2px 0 0">${ico("link",16)}<span class="url">${esc(link)}</span></p>
+    <label>Log in with</label><p style="margin:2px 0 0">${esc(fmtWa(S.wa) || "Your WhatsApp number")}${ME_EMAIL ? " or " + esc(ME_EMAIL) : ""}, and your 6-digit PIN</p>
+  </section>
+  ${SESSION && !SESSION.admin ? `<section class="card dangercard dangersmall">
+    <h2>Danger zone</h2>
+    <p class="hint">Removes your store, items and photos for good. Your store link stops working.</p>
+    <button class="btn small dangerline" data-act="deleteacct">${ico("trash",16)}Delete account</button>
+  </section>` : ""}`;
 }
 let EDOTHER = false;
 function renderEditor(msg){
@@ -2622,10 +2645,10 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
-  bld.classList.toggle("noactions", EDV === "news");   // nothing to save or preview on News
+  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
@@ -3196,11 +3219,12 @@ $("builder").addEventListener("click", async e => {
     b.disabled = true; b.textContent = "Deleting...";
     try {
       await apiPost({ action: "delete", id: SESSION.id, pin });
+      try { localStorage.removeItem("lk-ver:" + SESSION.id); } catch(e) {}
       DIRTY = false; clearSession(true);
       history.replaceState(null, "", home());
       renderHome();
       notify("Your store and account have been deleted.");
-    } catch(err){ b.disabled = false; b.textContent = "Delete my account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
+    } catch(err){ b.disabled = false; b.innerHTML = ico("trash",16) + "Delete account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
   }
   else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
   else if (a === "bulx"){ const y = window.scrollY; bulRemove([b.dataset.v]); renderEditor(); window.scrollTo(0, y); }
@@ -4175,7 +4199,7 @@ function legalDoc(which){
     <p>Your information is stored using trusted providers: Google (store data, photos and receipts), GitHub (the website), WhatsApp/Meta (orders you send), and link preview services (Microlink and Jina Reader), which read the public shop pages of affiliate links you paste to fetch their photo and name. Payments are handled by your bank, DuitNow or PayPal. Each of these follows its own privacy policy.</p>
     <h2>5. How long we keep it</h2>
     <ul>
-      <li>Store information is kept while your store exists. When you delete your account in the Danger zone, your store and photos are removed.</li>
+      <li>Store information is kept while your store exists. When you delete your account (Account, then your store name, then Danger zone), your store and photos are removed.</li>
       <li>Payment receipts may be kept for our records, as required for accounting.</li>
     </ul>
     <h2>6. Your rights</h2>
