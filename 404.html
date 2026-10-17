@@ -713,6 +713,7 @@ label{font-weight:600;font-size:14px}
 .lk-row .tt b{font-size:15px;font-weight:600}
 .lk-row .tt span{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lk-row .chev{color:var(--faint);flex:none}
+.lk-row .pen{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--accent-ink);border:1px solid color-mix(in srgb,var(--accent-ink) 30%,transparent)}
 .lk-row .thumb{width:48px;height:48px;border-radius:var(--r-sm);background:var(--soft);overflow:hidden;flex:none;display:grid;place-items:center;color:var(--faint)}
 .lk-row .thumb img{width:100%;height:100%;object-fit:cover}
 .lk-prog{height:8px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:10px}
@@ -1138,7 +1139,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <div class="sheet-h"><h2 id="pubTitle">Check before you publish</h2><button class="x" data-close="pubOverlay" aria-label="Close">×</button></div>
     <p class="hint" style="margin:0 0 12px">Please check your details. After you pay, your store goes live with these.</p>
     <div class="lines" id="pubSummary"></div>
-    <label class="check"><input type="checkbox" id="pubOk1"> My shop name, WhatsApp number and items are correct</label>
+    <label class="check"><input type="checkbox" id="pubOk1"> My shop name, phone number and items are correct</label>
     <label class="check"><input type="checkbox" id="pubOk2"> I understand my store link can't be changed later</label>
     <label class="check"><input type="checkbox" id="pubOk3"> <span id="pubPayText">I understand this is a one-time payment</span></label>
     <p class="err" id="pubErr"></p>
@@ -1253,13 +1254,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
   </div>
 </div>
 
-<!-- ============ CHANGE WHATSAPP NUMBER ============ -->
+<!-- ============ CHANGE PHONE NUMBER ============ -->
 <div class="overlay" id="waOverlay" role="dialog" aria-modal="true" aria-labelledby="waTitle">
   <div class="sheet">
     <button class="xmini" data-close="waOverlay" aria-label="Close">×</button>
-    <h2 id="waTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Change WhatsApp number</h2>
+    <h2 id="waTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Change phone number</h2>
     <p class="hint" style="margin:0 0 4px">Now: <b id="waNow"></b>. After the change, orders go to the new number and you log in with it.</p>
-    <label>New WhatsApp number<input type="tel" id="waNew" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
+    <label>New phone number<input type="tel" id="waNew" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
     <label>Type it again<input type="tel" id="waNew2" autocomplete="off" placeholder="e.g. 012-345 6789"></label>
     <label id="waPinWrap" hidden>Your 6-digit PIN<span class="pinwrap"><input type="password" id="waPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="waPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
     <p class="err" id="waErr" role="alert"></p>
@@ -1607,7 +1608,7 @@ async function apiPost(body, extra){
   const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
   const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) && !(body.action === "admin" && /^(delete|rename|resetpin)$/.test(body.op || "")) ? 2 : 1, body.action === "upload" ? 40000 : 0);
   if (!(extra && extra.again) && serverMoved(j)) return apiPost(body, Object.assign({}, extra, { again: true }));
-  if (j.error) throw new Error(j.error);
+  if (j.error) throw new Error(String(j.error).replace(/\bWhatsApp number/g, "phone number").replace(/^phone number/, "Phone number"));
   return j;
 }
 
@@ -1697,7 +1698,7 @@ const CITIES = {"Johor": ["Johor Bahru", "Iskandar Puteri", "Pasir Gudang", "Sku
 const CATS = { food: "Food", cakes: "Dessert", drinks: "Drinks", fashion: "Fashion", beauty: "Beauty", crafts: "Crafts", homestay: "Homestay", services: "Services", other: "Other" };
 function kmBetween(a, b, c, d){ const t = x => x * Math.PI / 180, h = Math.sin(t(c - a) / 2) ** 2 + Math.cos(t(a)) * Math.cos(t(c)) * Math.sin(t(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
 // ---------- Link Kedai App icon set: one line style everywhere (24px grid, 1.8 stroke, rounded) ----------
-const ICONS = {"chevron": "<path d=\"m9 6 6 6-6 6\"/>", "back": "<path d=\"m15 6-6 6 6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/>", "heart": "<path d=\"M12 20s-7-4.4-9-9a4.6 4.6 0 0 1 9-3 4.6 4.6 0 0 1 9 3c-2 4.6-9 9-9 9z\"/>", "bell": "<path d=\"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.9 1.9 0 0 0 3.4 0\"/>", "chart": "<path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/>", "shield": "<path d=\"M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z\"/><path d=\"m9 12 2 2 4-4\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "chat": "<path d=\"M21 12a8.5 8.5 0 0 1-12.5 7.5L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z\"/>", "sliders": "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><circle cx=\"9\" cy=\"10\" r=\"2\"/><path d=\"m21 16-5-5-9 9\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-1-.9-1.4-.9-2.4 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4.1-4-7.2-9-7.2z\"/><circle cx=\"7.5\" cy=\"11.5\" r=\"1\"/><circle cx=\"10\" cy=\"7.5\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "card": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"2.5\"/><path d=\"M2.5 10h19M6 15h4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "share": "<circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "mail": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2.5\"/><path d=\"m3.5 7 8.5 6 8.5-6\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "logout": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3\"/><path d=\"m10 17-5-5 5-5M5 12h11\"/>", "check": "<path d=\"m5 12 5 5 9-10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "box": "<path d=\"M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z\"/><path d=\"m3 7.5 9 4.5 9-4.5M12 12v9\"/>", "grid": "<rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "store": "<path d=\"M4 9.5V20h16V9.5\"/><path d=\"M3 9.5 4.5 4h15L21 9.5c0 1.6-1.3 2.5-2.9 2.5S15.3 11 15.3 9.5c0 1.6-1.4 2.5-3.3 2.5S8.7 11 8.7 9.5C8.7 11 7.5 12 5.9 12S3 11.1 3 9.5z\"/><path d=\"M9.5 20v-5h5v5\"/>", "food": "<path d=\"M3.5 11h17a8.5 8.5 0 0 1-17 0z\"/><path d=\"M9 7.5c0-1.4 1.4-1.4 1.4-3M13.6 7.5c0-1.4 1.4-1.4 1.4-3\"/>", "cake": "<path d=\"M4 21h16M5 21v-8.5h14V21\"/><path d=\"M5 16.5c2.3 1.2 4.7 1.2 7 0s4.7-1.2 7 0\"/><path d=\"M12 12.5V9\"/><path d=\"M12 6.5c.8-.8.8-1.7 0-2.5-.8.8-.8 1.7 0 2.5z\"/>", "cup": "<path d=\"M6 8h12l-1.5 12.5h-9z\"/><path d=\"M5 8h14M12 8V4h4\"/>", "shirt": "<path d=\"M8.5 3.5 3.5 6.5l2 4.5 2.5-1v10.5h8V10l2.5 1 2-4.5-5-3c0 1.6-1.6 2.8-3.5 2.8S8.5 5.1 8.5 3.5z\"/>", "sparkle": "<path d=\"M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z\"/><path d=\"M19 17v4M17 19h4\"/>", "scissors": "<circle cx=\"6\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"6\" cy=\"17.5\" r=\"2.5\"/><path d=\"M8.2 7.8 20 18M8.2 16.2 20 6\"/>", "home": "<path d=\"M3.5 11 12 4l8.5 7\"/><path d=\"M5.5 9.5V20h13V9.5\"/><path d=\"M10 20v-6h4v6\"/>", "wrench": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5v3h3l5.8-5.8a4 4 0 0 0 5.4-5.4L15 12l-2.4-.6L12 9z\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "flag": "<path d=\"M5 21V4M5 4h11l-2 4 2 4H5\"/>", "star": "<path d=\"m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z\"/>", "trend": "<path d=\"m3 17 6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "upload": "<path d=\"M12 16V4M7 9l5-5 5 5\"/><path d=\"M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/>", "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17\"/>", "up": "<path d=\"m6 15 6-6 6 6\"/>", "down": "<path d=\"m6 9 6 6 6-6\"/>", "x": "<path d=\"M6 6l12 12M18 6 6 18\"/>", "ext": "<path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/>"};
+const ICONS = {"chevron": "<path d=\"m9 6 6 6-6 6\"/>", "back": "<path d=\"m15 6-6 6 6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/>", "heart": "<path d=\"M12 20s-7-4.4-9-9a4.6 4.6 0 0 1 9-3 4.6 4.6 0 0 1 9 3c-2 4.6-9 9-9 9z\"/>", "bell": "<path d=\"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.9 1.9 0 0 0 3.4 0\"/>", "chart": "<path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/>", "shield": "<path d=\"M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z\"/><path d=\"m9 12 2 2 4-4\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "chat": "<path d=\"M21 12a8.5 8.5 0 0 1-12.5 7.5L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z\"/>", "sliders": "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><circle cx=\"9\" cy=\"10\" r=\"2\"/><path d=\"m21 16-5-5-9 9\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-1-.9-1.4-.9-2.4 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4.1-4-7.2-9-7.2z\"/><circle cx=\"7.5\" cy=\"11.5\" r=\"1\"/><circle cx=\"10\" cy=\"7.5\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "card": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"2.5\"/><path d=\"M2.5 10h19M6 15h4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "share": "<circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "mail": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2.5\"/><path d=\"m3.5 7 8.5 6 8.5-6\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "logout": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3\"/><path d=\"m10 17-5-5 5-5M5 12h11\"/>", "check": "<path d=\"m5 12 5 5 9-10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "box": "<path d=\"M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z\"/><path d=\"m3 7.5 9 4.5 9-4.5M12 12v9\"/>", "grid": "<rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "store": "<path d=\"M4 9.5V20h16V9.5\"/><path d=\"M3 9.5 4.5 4h15L21 9.5c0 1.6-1.3 2.5-2.9 2.5S15.3 11 15.3 9.5c0 1.6-1.4 2.5-3.3 2.5S8.7 11 8.7 9.5C8.7 11 7.5 12 5.9 12S3 11.1 3 9.5z\"/><path d=\"M9.5 20v-5h5v5\"/>", "food": "<path d=\"M3.5 11h17a8.5 8.5 0 0 1-17 0z\"/><path d=\"M9 7.5c0-1.4 1.4-1.4 1.4-3M13.6 7.5c0-1.4 1.4-1.4 1.4-3\"/>", "cake": "<path d=\"M4 21h16M5 21v-8.5h14V21\"/><path d=\"M5 16.5c2.3 1.2 4.7 1.2 7 0s4.7-1.2 7 0\"/><path d=\"M12 12.5V9\"/><path d=\"M12 6.5c.8-.8.8-1.7 0-2.5-.8.8-.8 1.7 0 2.5z\"/>", "cup": "<path d=\"M6 8h12l-1.5 12.5h-9z\"/><path d=\"M5 8h14M12 8V4h4\"/>", "shirt": "<path d=\"M8.5 3.5 3.5 6.5l2 4.5 2.5-1v10.5h8V10l2.5 1 2-4.5-5-3c0 1.6-1.6 2.8-3.5 2.8S8.5 5.1 8.5 3.5z\"/>", "sparkle": "<path d=\"M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z\"/><path d=\"M19 17v4M17 19h4\"/>", "scissors": "<circle cx=\"6\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"6\" cy=\"17.5\" r=\"2.5\"/><path d=\"M8.2 7.8 20 18M8.2 16.2 20 6\"/>", "home": "<path d=\"M3.5 11 12 4l8.5 7\"/><path d=\"M5.5 9.5V20h13V9.5\"/><path d=\"M10 20v-6h4v6\"/>", "wrench": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5v3h3l5.8-5.8a4 4 0 0 0 5.4-5.4L15 12l-2.4-.6L12 9z\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "flag": "<path d=\"M5 21V4M5 4h11l-2 4 2 4H5\"/>", "star": "<path d=\"m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z\"/>", "trend": "<path d=\"m3 17 6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "upload": "<path d=\"M12 16V4M7 9l5-5 5 5\"/><path d=\"M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/>", "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17\"/>", "up": "<path d=\"m6 15 6-6 6 6\"/>", "down": "<path d=\"m6 9 6 6 6-6\"/>", "x": "<path d=\"M6 6l12 12M18 6 6 18\"/>", "pencil": "<path d=\"M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z\"/><path d=\"m13.5 6.5 4 4\"/>", "phone": "<rect x=\"6.5\" y=\"2.5\" width=\"11\" height=\"19\" rx=\"2.5\"/><path d=\"M10.5 18h3\"/>", "ext": "<path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/>"};
 function ico(name, size, sw){ return `<svg width="${size || 22}" height="${size || 22}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw || 1.8}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.box}</svg>`; }
 const CAT_ICON = { all: "grid", food: "food", cakes: "cake", drinks: "cup", fashion: "shirt", beauty: "sparkle", crafts: "scissors", homestay: "home", services: "wrench", other: "box" };
 function stallIcon(cat){ return ico(CAT_ICON[cat] || "box", 27); }
@@ -1913,15 +1914,15 @@ function clearSession(leaving){
   try { sessionStorage.removeItem("lk-session"); sessionStorage.removeItem("lk-ed"); } catch(e) {}
   if (mine) keep.del("lk-keep");
 }
-const authErr = e => /PIN|WhatsApp number|logged out on this phone/i.test((e && e.message) || "");
-// only the server's own "who are you" answers (not "that number is already used" or "add your WhatsApp number")
-const pinErr = e => /wrong (whatsapp number|email) or pin|too many wrong pins|logged out on this phone|type your pin/i.test((e && e.message) || "");
+const authErr = e => /PIN|phone number|logged out on this phone/i.test((e && e.message) || "");
+// only the server's own "who are you" answers (not "that number is already used" or "add your phone number")
+const pinErr = e => /wrong (phone number|email) or pin|too many wrong pins|logged out on this phone|type your pin/i.test((e && e.message) || "");
 
 function loginCardHtml(msg){
   return `<section class="card" id="loginCard">
       <h2>Seller login</h2>
       <p class="hint">Edit your store: items, prices, photos, open or closed.</p>
-      <label>WhatsApp number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
+      <label>Phone number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
       <p class="hint">The number your store gets orders on, or the email you added.</p>
       <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <label class="check keepme"><input type="checkbox" id="lKeep"><span>Keep me logged in on this phone</span></label>
@@ -1935,7 +1936,7 @@ function wireLogin(){
     if ($("lGo").disabled) return;
     const who = $("lWa").value.trim(), pin = $("lPin").value, byEmail = who.includes("@"), wa = byEmail ? "" : normWa(who), email = byEmail ? who.toLowerCase() : "";
     $("lErr").textContent = "";
-    if ((byEmail ? !EMAIL_RE.test(email) : wa.length < 9) || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your WhatsApp number or email, and your 6-digit PIN.";
+    if ((byEmail ? !EMAIL_RE.test(email) : wa.length < 9) || !/^\d{6}$/.test(pin)) return $("lErr").textContent = "Enter your phone number or email, and your 6-digit PIN.";
     $("lGo").dataset.label = $("lGo").dataset.label || $("lGo").textContent;
     $("lGo").disabled = true; $("lGo").textContent = "Logging in...";
     const slow = setTimeout(() => { if ($("lGo") && $("lGo").disabled) $("lGo").textContent = "Still working, please wait..."; }, 6000);
@@ -1946,7 +1947,7 @@ function wireLogin(){
     } catch(e){
       clearTimeout(slow);
       // an older server script doesn't know email login yet and asks for a link name instead
-      $("lErr").textContent = byEmail && /link name/i.test(e.message || "") ? "Logging in with email isn't ready yet. Use your WhatsApp number for now." : friendly(e, "Couldn't log in right now. Check your internet and try again.");
+      $("lErr").textContent = byEmail && /link name/i.test(e.message || "") ? "Logging in with email isn't ready yet. Use your phone number for now." : friendly(e, "Couldn't log in right now. Check your internet and try again.");
       $("lGo").disabled = false; $("lGo").textContent = $("lGo").dataset.label || "Log in and edit my store";
     }
   };
@@ -2025,13 +2026,13 @@ function renderStart(msg, mode){
     <section class="card" ${signup ? "" : "hidden"}>
       <h2>Your store details</h2>
       <label>Shop name<input type="text" id="cShop" placeholder="e.g. Aurora Boutique"></label>
-      <label>Your WhatsApp number<input type="tel" id="cWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
+      <label>Your phone number<input type="tel" id="cWa" autocomplete="tel" placeholder="e.g. 012-345 6789"></label>
       <p class="hint">Orders come to this number, and you log in with it.</p>
       <label>Your store link name<input type="text" id="cId" autocapitalize="off" spellcheck="false" placeholder="e.g. aurora-boutique"></label>
       <p class="hint" id="cHint">Your link will be ${esc(home())}your-shop</p>
       <label>Choose a 6-digit PIN<span class="pinwrap"><input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
-      <p class="hint">You'll log in with your WhatsApp number and this PIN.</p>
+      <p class="hint">You'll log in with your phone number and this PIN.</p>
       <div class="rules">
         <b>Not allowed on ${esc(APP_NAME)}</b>
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
@@ -2058,7 +2059,7 @@ function renderStart(msg, mode){
     const name = $("cShop").value.trim(), rawId = $("cId").value.trim(), id = rawId ? slug(rawId) : "", pin = $("cPin").value, wa = normWa($("cWa").value);
     $("cErr").textContent = "";
     if (!name) return $("cErr").textContent = "Add your shop name.";
-    if (wa.length < 9) return $("cErr").textContent = "Add your WhatsApp number.";
+    if (wa.length < 9) return $("cErr").textContent = "Add your phone number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
     if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
@@ -2084,6 +2085,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-profile2", at: "2026-10-17", title: "Phone number, email and PIN in one place", body: "Tap your store name at the top of Account to open Profile. Your phone number, email and PIN are all there: tap the pencil next to one to change it. We now say \"phone number\" everywhere instead of \"WhatsApp number\". Orders still come to that number on WhatsApp." },
   { id: "u-20261017-buttons", at: "2026-10-17", title: "A lighter look for buttons", body: "Every button in the app now has the same clean look: a light button with a coloured outline, coloured words and icon. Save, Share, Add to cart, Log in and the rest all work the same as before." },
   { id: "u-20261017-linkcard", at: "2026-10-17", title: "Your store link, clearly marked", body: "The top card on your store home is now titled \"Your store link\": the link to share with customers. The blue Verified tag also shows straight away when you open the app." },
   { id: "u-20261017-profile", at: "2026-10-17", title: "Your Profile", body: "Tap your store name at the top of Account to see your Profile: your store link and how you log in. Delete account is now a small button at the bottom of Profile, so it can't be tapped by mistake." },
@@ -2099,7 +2101,7 @@ const APP_UPDATES = [
   { id: "u-20261015-keepme", at: "2026-10-15", title: "Stay logged in on your phone", body: "Tick Keep me logged in on this phone when you log in, and you won't need your PIN on that phone for 90 days. Log out anytime under Account." },
   { id: "u-20261015-shortcuts", at: "2026-10-15", title: "New: open or close your shop in one tap", body: "Add Link Kedai App to your home screen. On Android, press and hold the icon to open or close your shop, or jump to My store, Browse or Affiliate Shops." },
   { id: "u-20261015-email", at: "2026-10-15", title: "New: add your email", body: "Under Account, add your email. You can then log in with it, and if you forget your PIN you can reset it yourself with a code we email you." },
-  { id: "u-20261015-account", at: "2026-10-15", title: "Change your WhatsApp number or PIN", body: "Under Account, you can now change the WhatsApp number your orders go to, and the PIN you log in with. Your store link stays the same." },
+  { id: "u-20261015-account", at: "2026-10-15", title: "Change your phone number or PIN", body: "Under Account, you can now change the phone number your orders go to, and the PIN you log in with. Your store link stays the same." },
   { id: "u-20261015-verified", at: "2026-10-15", title: "A new Verified look", body: "Verified stores now show a blue ring and tick around their logo, everywhere in Link Kedai App." },
   { id: "u-20261014-affiliate", at: "2026-10-14", title: "New: Affiliate Shops", body: "Sell with Shopee or other shop links? Paste your affiliate link and we fill in the photo and name for you. Stores with only shop links are listed under Affiliate Shops in Browse stores." },
   { id: "u-20261014-bigstores", at: "2026-10-14", title: "Big stores are easier to shop", body: "Stores with lots of items now show filters and a search box, so customers find what they want faster. Pages also open instantly from a saved copy." },
@@ -2292,7 +2294,7 @@ function edHome(msg){
     <div class="lk-prog"><i style="width:${Math.round(done / total * 100)}%"></i></div>
   </section>`}
   <section class="card lk-group">
-    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "WhatsApp added" : "No WhatsApp yet", safeImg(S.logo) ? "Logo added" : "Logo, colour and style"].join(" · "), mark(st.details))}
+    ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "Phone added" : "No phone number yet", safeImg(S.logo) ? "Logo added" : "Logo, colour and style"].join(" · "), mark(st.details))}
     ${edRow("products","box", W(S).list, named.length ? `${named.length} ${named.length === 1 ? W(S).item : W(S).item + "s"}${out ? ` · ${out} sold out` : ""}` : "Nothing added yet", mark(st.products))}
     ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
@@ -2304,7 +2306,7 @@ function edDetails(){
   <section class="card">
     <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}" placeholder="${esc(W(S).ex.shop)}"></label>
     <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="${esc(W(S).ex.tag)}"></label>
-    <label>WhatsApp number</label>
+    <label>Phone number</label>
     <div class="warow"><b>${esc(fmtWa(S.wa) || "Not added yet")}</b><button type="button" class="btn small" data-act="chwa">Change number</button></div>
     <p class="hint">Orders are sent here, and you log in with this number.</p>
     <label>What do you sell?</label>
@@ -2614,10 +2616,7 @@ function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
-    <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Log in with ${esc(fmtWa(S.wa) || "your WhatsApp number")}${ME_EMAIL ? " or " + esc(ME_EMAIL) : ""} and your PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
-    <button class="lk-row" data-act="chwa"><span class="tile">${ico("chat")}</span><span class="tt"><b>Change WhatsApp number</b><span>Orders go to this number, and you log in with it</span></span><span class="chev">${ico("chevron",18)}</span></button>
-    ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chemail"><span class="tile">${ico("mail")}</span><span class="tt"><b>${ME_EMAIL ? "Change email" : "Add email"}</b><span>${ME_EMAIL ? esc(ME_EMAIL) : "So you can reset your PIN yourself if you forget it"}</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
-    ${SESSION && !SESSION.admin ? `<button class="lk-row" data-act="chpin"><span class="tile">${ico("lock")}</span><span class="tt"><b>Change PIN</b><span>The 6-digit PIN you log in with</span></span><span class="chev">${ico("chevron",18)}</span></button>` : ""}
+    <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Profile: phone number, email and PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
     ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new from ${esc(APP_NAME)}</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
@@ -2626,14 +2625,20 @@ function edAccount(){
 }
 // Profile: the store's account details, with a small Danger zone at the bottom (one step away from Account, so it isn't tapped by chance)
 function edProfile(){
-  const link = storeLink(SESSION.id);
+  const link = storeLink(SESSION.id), me = SESSION && !SESSION.admin;
+  const row = (act, icon, title, value) => `<button class="lk-row" data-act="${act}" aria-label="Change ${esc(title.toLowerCase())}"><span class="tile">${ico(icon)}</span><span class="tt"><b>${esc(title)}</b><span>${esc(value)}</span></span><span class="pen">${ico("pencil",16)}</span></button>`;
   return `${edTop("Profile", "account")}
   <section class="card">
     <label style="margin-top:0">Store name</label><p style="margin:2px 0 0;font-weight:600">${esc(S.name || "Not set yet")}</p>
     <label>Store link</label><p class="lk-link" style="margin:2px 0 0">${ico("link",16)}<span class="url">${esc(link)}</span></p>
-    <label>Log in with</label><p style="margin:2px 0 0">${esc(fmtWa(S.wa) || "Your WhatsApp number")}${ME_EMAIL ? " or " + esc(ME_EMAIL) : ""}, and your 6-digit PIN</p>
   </section>
-  ${SESSION && !SESSION.admin ? `<section class="card dangercard dangersmall">
+  <section class="card lk-group">
+    ${row("chwa", "phone", "Phone number", fmtWa(S.wa) || "Not added yet")}
+    ${me ? row("chemail", "mail", "Email", ME_EMAIL || "Add one, so you can reset your PIN yourself") : ""}
+    ${me ? row("chpin", "lock", "PIN", "••••••") : ""}
+  </section>
+  <p class="hint" style="margin:-4px 4px 14px">Orders come to your phone number on WhatsApp. You log in with your phone number${me && ME_EMAIL ? " or email" : ""} and your PIN.</p>
+  ${me ? `<section class="card dangercard dangersmall">
     <h2>Danger zone</h2>
     <p class="hint">Removes your store, items and photos for good. Your store link stops working.</p>
     <button class="btn small dangerline" data-act="deleteacct">${ico("trash",16)}Delete account</button>
@@ -2698,7 +2703,7 @@ function openWaChange(){
 }
 $("waSave").onclick = async () => {
   const a = normWa($("waNew").value), b = normWa($("waNew2").value), err = t => { $("waErr").textContent = t; };
-  if (a.length < 9 || a.length > 15) return err("Type your full WhatsApp number, like 012-345 6789.");
+  if (a.length < 9 || a.length > 15) return err("Type your full phone number, like 012-345 6789.");
   if (a !== b) return err("The two numbers don't match. Please check and type them again.");
   if (a === S.wa) return err("That's already your number.");
   const pin = SESSION.tok ? $("waPin").value.trim() : "";
@@ -2733,7 +2738,7 @@ $("pinSave").onclick = async () => {
     notify("Done. Use your new PIN next time you log in. Any other phone that stayed logged in has been logged out.");
   } catch(e){
     const m = String(e.message || "");
-    err(/Wrong WhatsApp number or PIN/i.test(m) ? "Your current PIN isn't right. Please check it and try again."
+    err(/Wrong phone number or PIN/i.test(m) ? "Your current PIN isn't right. Please check it and try again."
       : /Unknown action/i.test(m) ? "Changing your PIN isn't ready yet. Please message us and we'll change it for you."
       : friendly(e, "Couldn't change your PIN right now. Check your internet and try again."));
   }
@@ -2759,7 +2764,7 @@ async function emSendCode(btn, errId){
     $("emTo").textContent = email; $("emStep1").hidden = true; $("emStep2").hidden = false; $("emCode").value = "";
     if (errId === "emErr2") notify("We sent a new code.");
     setTimeout(() => $("emCode").focus(), 50);
-  } catch(e){ sayErr(errId, /Wrong WhatsApp number or PIN/.test(e.message || "") ? "That PIN isn't right. Please check it and try again." : notReady(e.message) ? "Adding an email isn't ready yet. Please try again in a few days." : friendly(e, "Couldn't send the code right now. Check your internet and try again.")); }
+  } catch(e){ sayErr(errId, /Wrong phone number or PIN/.test(e.message || "") ? "That PIN isn't right. Please check it and try again." : notReady(e.message) ? "Adding an email isn't ready yet. Please try again in a few days." : friendly(e, "Couldn't send the code right now. Check your internet and try again.")); }
   btn.disabled = false; btn.textContent = label;
 }
 $("emSend").onclick = () => emSendCode($("emSend"), "emErr1");
@@ -2827,7 +2832,7 @@ function saveProblem(){
   if (S.loc.on && !S.loc.city && !affOnly(S)) return "Choose your city or town under Browse listing.";
   if (S.loc.on && S.loc.pub && S.loc.lat == null && !affOnly(S)) return "Drag the pin onto your shop under Browse listing.";
   if (!S.name.trim()) return "Add your shop name.";
-  if (!S.wa || S.wa.length < 9) return "Add your WhatsApp number, so orders can reach you.";
+  if (!S.wa || S.wa.length < 9) return "Add your phone number, so orders can reach you.";
   return "";
 }
 function savePill(state, text){
@@ -2990,14 +2995,14 @@ $("payOverlay").addEventListener("click", e => {
 $("payOverlay").addEventListener("change", e => { if (e.target.dataset.media === "receipt") publishWithReceipt(e.target); });
 
 function openPublishCheck(){
-  const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your WhatsApp number first." : (!S.items.some(it => it.n.trim()) && !(S.links || []).some(l => safeUrl(l.u))) ? `Add at least one ${W(S).item} or link first.` : (S.links || []).some(l => l.u.trim() && !safeUrl(l.u.trim())) ? "One of your links must start with https://." : "";
+  const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your phone number first." : (!S.items.some(it => it.n.trim()) && !(S.links || []).some(l => safeUrl(l.u))) ? `Add at least one ${W(S).item} or link first.` : (S.links || []).some(l => l.u.trim() && !safeUrl(l.u.trim())) ? "One of your links must start with https://." : "";
   if (bad) return notify(bad);
   const named = S.items.filter(it => it.n.trim());
   const row = (k, v) => `<div class="cline"><div class="cn"><span>${esc(k)}</span><b>${esc(v)}</b></div></div>`;
   $("pubSummary").innerHTML =
     row("Shop name", S.name) +
     row("Store link", storeLink(SESSION.id)) +
-    row("WhatsApp number (orders + login)", S.wa) +
+    row("Phone number (orders + login)", S.wa) +
     row("What you sell", W(S).label + ", " + named.length + " " + (named.length === 1 ? W(S).item : W(S).item + "s")) +
     (shownPrice() ? row("Payment", shownPrice() + ", one time") : "");
   $("pubPayText").textContent = shownPrice() ? `I understand this is a one-time payment of ${shownPrice()}` : "I understand this is a one-time payment";
@@ -3037,7 +3042,7 @@ function legacyEditor(msg){
     <p class="hint">This link never changes. Your changes save by themselves and show on your store straight away.</p>` : `
     <div class="between"><h2>Your store</h2>${STATUS === "review" ? `<span class="tag2 claim">In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
     <p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Build your store and tap Preview to see it. Your store link appears here once you publish."}</p>`}
-    <p class="hint">You log in with <b>${esc(S.wa || "your WhatsApp number")}</b> and your PIN.</p>
+    <p class="hint">You log in with <b>${esc(S.wa || "your phone number")}</b> and your PIN.</p>
     <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Saving your changes..." : ""))}</p>
   </section>
 
@@ -3063,7 +3068,7 @@ function legacyEditor(msg){
     <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
     <label>Cover photo (optional)</label>
     <div class="media-row">${photoBox("coverPrev", S.cover, "No cover", "wide")}${photoControls("cover", S.cover)}</div>
-    <label>WhatsApp number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="e.g. 012-345 6789"></label>
+    <label>Phone number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="e.g. 012-345 6789"></label>
     <p class="hint">Orders are sent here, and you log in with this number.</p>
     <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
     <label>Brand colour</label>
@@ -3310,7 +3315,7 @@ async function saveStore(){
   if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse listing, so customers can find you.");
   if (S.loc.on && !S.loc.city && !affOnly(S)) return notify("Choose your city or town under Browse listing, so customers can find you.");
   if (!S.name.trim()) return notify("Add your shop name first.");
-  if (!S.wa || S.wa.length < 9) return notify("Add your WhatsApp number first, so orders can reach you.");
+  if (!S.wa || S.wa.length < 9) return notify("Add your phone number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
   btn.disabled = true; btn.textContent = "Saving...";
   try {
@@ -3852,7 +3857,7 @@ async function adminStores(g, head, wire){
       <div class="stat"><b>${groups[4][1].length}</b><span>Offline</span></div>
     </div>
     ${needsReview(list).length ? `<button class="btn full" style="margin-bottom:10px;border-color:#B45309;color:#B45309" id="goReview"><span class="guardbtn" style="justify-content:center">${GUARD_SVG}Link Kedai App Guard: ${needsReview(list).length} store${needsReview(list).length > 1 ? "s" : ""} need${needsReview(list).length > 1 ? "" : "s"} review</span></button>` : ""}
-    <input type="search" id="admFind" placeholder="Search name, link or WhatsApp number" value="${esc(ADMQ)}" style="margin-bottom:6px">
+    <input type="search" id="admFind" placeholder="Search name, link or phone number" value="${esc(ADMQ)}" style="margin-bottom:6px">
     <p class="hint" style="margin:0 2px 8px">Open each receipt, check the money reached your account, then tap Payment OK. If it didn't, tap Take offline.</p>
     ${groups.filter(([t, arr, empty]) => arr.length || empty).map(([t, arr, empty]) =>
       `<h2 class="admhead" style="font-size:19px;margin:16px 2px 10px">${t} (${arr.length})</h2>${arr.map(row).join("") || `<p class="hint">${empty}</p>`}`).join("")}`;
@@ -4116,7 +4121,7 @@ function adminSettings(g, head, wire, cfg){
   g.innerHTML = head + `
     <section class="card">
       <h2>Your WhatsApp</h2>
-      <label>Your WhatsApp number<input type="tel" id="stWaOwner" value="${esc(v("ownerWa"))}" placeholder="e.g. 012-345 6789"></label>
+      <label>Your phone number<input type="tel" id="stWaOwner" value="${esc(v("ownerWa"))}" placeholder="e.g. 012-345 6789"></label>
       <p class="hint">Used for the chat button, "Forgot PIN" and payment help.</p>
     </section>
     <section class="card">
@@ -4173,7 +4178,7 @@ function legalDoc(which){
     <p>This policy explains what information ${A} collects, why, and how it's protected. We follow Malaysia's Personal Data Protection Act 2010 (PDPA).</p>
     <h2>1. Information from sellers</h2>
     <ul>
-      <li><b>Account:</b> your shop name, store link name, WhatsApp number and PIN. Your PIN is stored scrambled, so no one can read it, including us.</li>
+      <li><b>Account:</b> your shop name, store link name, phone number and PIN. Your PIN is stored scrambled, so no one can read it, including us.</li>
       <li><b>Keep me logged in (optional):</b> your phone keeps a login key, never your PIN. Logging out, changing your PIN or resetting it ends it, and it expires after 90 days without use.</li>
       <li><b>Email (optional):</b> if you add one, we use it only to let you log in and to send you codes, for example to reset your PIN. It is never shown on your store.</li>
       <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
@@ -4233,7 +4238,7 @@ function legalDoc(which){
     <h2>2. Your account</h2>
     <ul>
       <li>You must be at least 18 years old, or have a parent or guardian's permission.</li>
-      <li>The information you give must be true and yours, including your WhatsApp number.</li>
+      <li>The information you give must be true and yours, including your phone number.</li>
       <li>Keep your PIN private. You're responsible for everything done with your account.</li>
     </ul>
     <h2>3. Fees</h2>
@@ -4789,7 +4794,7 @@ function renderHome(){
       <p class="tagline">Your shop, one link.</p>
       <p class="subhead">Take orders on WhatsApp through one simple store link. No app. No commission.${shownPrice() ? ` One-time fee of ${esc(shownPrice())}.` : ""}</p>
       <div class="authform" id="loginCard">
-        <label>WhatsApp number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
+        <label>Phone number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
         <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
         <label class="check keepme"><input type="checkbox" id="lKeep"><span>Keep me logged in on this phone</span></label>
         <p class="err" id="lErr"></p>
