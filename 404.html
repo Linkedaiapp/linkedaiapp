@@ -557,6 +557,9 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .svbook .svb1{font-size:18px;font-weight:800;letter-spacing:.01em}
 .svbook .svb2{font-size:12.5px;font-weight:600;opacity:.88}
 .svbook[hidden],.cartbtn[hidden]{display:none}
+.bkprev{padding:14px;border-radius:var(--r-md);background:var(--soft);margin-bottom:10px}
+.bkprev .svbook{box-shadow:none;cursor:default}
+.bkpicks{display:flex;flex-wrap:wrap;gap:6px}
 .svpickhint{margin:0 0 6px;font-size:13px;font-weight:700;color:var(--muted)}
 .svline{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:8px}
 .svline.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
@@ -1852,6 +1855,14 @@ const isDigital = d => !!d && d.kind === "digital";
 const isService = d => !!d && d.kind === "services";
 const isAgent = d => isService(d) && d.svStyle === "agent";
 const hasBrochure = p => !!p && ((p.br && p.br.length) || safeUrl(p.pdf) || String(p.cov || "").trim());
+// The big booking button: the seller's own words, or ready words that fit their category
+const BK_PICKS = [["Book now", "Set your appointment"], ["Book a consultation", "Set your appointment"], ["Check availability", "Pick your dates"], ["Book a class", "Choose a day and time"],
+  ["Book a shoot", "Pick your date"], ["Rent now", "Choose your dates"], ["Get a free quote", "Tell us what you need"], ["Book a site visit", "We come to you"], ["Book a test drive", "Pick a day"]];
+function svBtn(d){
+  const own = (d && d.bk) || {}, cat = d && (d.cat || catOf(d));
+  const def = isAgent(d) ? BK_PICKS[1] : cat === "homestay" ? BK_PICKS[2] : BK_PICKS[0];
+  return { t: String(own.t || "").trim() || def[0], s: String(own.s || "").trim() || def[1] };
+}
 const svAreas = d => String((d && d.areas) || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean).slice(0, 12);
 // Sold online, so never a pin on the map: link-only shops (Affiliate Shops) and digital stores
 const noPin = d => affOnly(d) || isDigital(d);
@@ -1923,7 +1934,10 @@ function normalize(d){
   // Services: a short bio and the areas the seller travels to (shown on the store with a pin)
   x.bio = String(x.bio || "").replace(/[<>]/g, "").slice(0, 300);
   x.areas = String(x.areas || "").replace(/[<>]/g, "").slice(0, 200);
-  if (x.svStyle !== "agent") delete x.svStyle;   // Services page style: "agent" (brochures, consultations) or the normal booking page
+  if (x.svStyle !== "agent") delete x.svStyle;
+  // Services: the seller's own words on the big button (empty = the ready wording for their category)
+  const bk = x.bk && typeof x.bk === "object" ? x.bk : {}, bt = String(bk.t || "").replace(/[<>]/g, "").trim().slice(0, 24), bs = String(bk.s || "").replace(/[<>]/g, "").trim().slice(0, 40);
+  if (bt || bs) x.bk = { t: bt, s: bs }; else delete x.bk;   // Services page style: "agent" (brochures, consultations) or the normal booking page
   if (!KINDS[x.kind]) x.kind = "products";
   const l = d && d.loc && typeof d.loc === "object" ? d.loc : {};
   x.loc = { on: !!l.on, state: STATES.includes(l.state) ? l.state : "", city: String(l.city || "").slice(0, 40), lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60),
@@ -2390,7 +2404,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261018-service-booking", at: "2026-10-18", title: "A booking page for services", body: "Selling services, like aircond service, Coway or insurance? Your store is now a booking page: a list of your services and one big Book now button where customers pick a date, a time and their address. In Shop details, add About you and Areas you cover: customers see them at the top with a pin. No fixed price? Leave it empty and customers see Get a quote. Agents with brochures (insurance, takaful, property): pick Page style Agent, add your brochure pages and a PDF to each plan, and customers book a consultation." },
+  { id: "u-20261018-service-booking", at: "2026-10-18", title: "A booking page for services", body: "Selling services, like aircond service, Coway or insurance? Your store is now a booking page: a list of your services and one big Book now button where customers pick a date, a time and their address. In Shop details, add About you and Areas you cover: customers see them at the top with a pin. No fixed price? Leave it empty and customers see Get a quote. Make the big button your own, like Book a shoot, Check availability or Rent now, in Shop details under Book button. Agents with brochures (insurance, takaful, property): pick Page style Agent, add your brochure pages and a PDF to each plan, and customers book a consultation." },
   { id: "u-20261018-digital-stores", at: "2026-10-18", title: "Sell digital products", body: "You can now sell e-books, templates, presets and online classes. In Shop details, under What do you sell?, pick Digital. Each product gets a book-shaped cover, sample pages, a What you get list and a Best value badge for bundles. Choose how buyers get it: on WhatsApp, a private download link you send after payment, or your own checkout page. Customers find you under Digital on Spot It!." },
   { id: "u-20261018-bridges", at: "2026-10-18", title: "Bridges on Spot It!", body: "The Penang Bridge now crosses the channel on the Spot It! map at its real length, with its cable-stayed towers in the middle, and the Kuala Terengganu Drawbridge stands with its deck split open. Zoom in on Penang or Kuala Terengganu to see them." },
   { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the real shape of the Sepang International Circuit, raised like a model and lying right on the track, and KLIA with its control tower. Zoom in near Sepang to see them." },
@@ -2653,6 +2667,14 @@ function edDetails(){
     <h2 style="margin:0">Page style</h2>
     <div class="seg" style="margin-top:10px"><button type="button" data-act="svstyle" data-v="book" aria-pressed="${!isAgent(S)}">Services</button><button type="button" data-act="svstyle" data-v="agent" aria-pressed="${isAgent(S)}">Agent</button></div>
     <p class="hint">${isAgent(S) ? "<b>Agent</b>: for insurance, takaful, property and Coway agents. Customers see your plans with brochures and book a consultation." : "<b>Services</b>: for aircond, cleaning, beauty and repairs. Customers see your prices and book a service."}</p>
+  </section>
+  <section class="card">
+    <h2 style="margin:0">Book button</h2>
+    <p class="hint" style="margin:6px 0 10px">The big button at the bottom of your store. Pick ready words or write your own.</p>
+    <div class="bkprev" style="--accent:${esc(S.color || "#18395C")}"><span class="svbook" aria-hidden="true"><span class="svb1" id="bkPrevT">${esc(svBtn(S).t)}</span><span class="svb2" id="bkPrevS">${esc(svBtn(S).s)}</span></span></div>
+    <div class="bkpicks">${BK_PICKS.map(([t, sub]) => `<button type="button" class="sechip${svBtn(S).t === t ? " on" : ""}" data-act="bkpick" data-t="${esc(t)}" data-s="${esc(sub)}" aria-pressed="${svBtn(S).t === t}">${esc(t)}</button>`).join("")}</div>
+    <label>Button words<input type="text" data-fbk="t" maxlength="24" value="${esc((S.bk && S.bk.t) || "")}" placeholder="${esc(svBtn(Object.assign({}, S, { bk: null })).t)}"></label>
+    <label>Small line under it<input type="text" data-fbk="s" maxlength="40" value="${esc((S.bk && S.bk.s) || "")}" placeholder="${esc(svBtn(Object.assign({}, S, { bk: null })).s)}"></label>
   </section>
   <section class="card">
     <h2 style="margin:0">About you and where you go</h2>
@@ -3768,6 +3790,12 @@ function legacyEditor(msg){
 
 function onField(e){
   const t = e.target, f = t.dataset.f;
+  if (t.dataset.fbk){   // the Book button's words, with a live preview
+    S.bk = Object.assign({ t: "", s: "" }, S.bk, { [t.dataset.fbk]: t.value.replace(/[<>]/g, "").slice(0, t.dataset.fbk === "t" ? 24 : 40) });
+    const b = svBtn(S), pt = $("bkPrevT"), ps = $("bkPrevS"); if (pt) pt.textContent = b.t; if (ps) ps.textContent = b.s;
+    document.querySelectorAll('[data-act="bkpick"]').forEach(c => { const on = c.dataset.t === b.t; c.classList.toggle("on", on); c.setAttribute("aria-pressed", String(on)); });
+    touch(); return;
+  }
   if (t.dataset.floc){
     if (t.dataset.floc === "on"){ if (e.type !== "change") return; S.loc.on = t.checked; touch(); renderEditor(); return; }
     if (t.dataset.floc === "state"){ S.loc.state = t.value; S.loc.city = ""; EDOTHER = false; touch(); if (!window.LK_ALLVIEW && e.type === "change") renderEditor(); return; }
@@ -3872,6 +3900,7 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-logo"){ S.logo = ""; redraw(); }
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
+  else if (a === "bkpick"){ S.bk = { t: b.dataset.t, s: b.dataset.s }; redraw(); }
   else if (a === "svstyle"){ if (b.dataset.v === "agent") S.svStyle = "agent"; else delete S.svStyle; redraw(); }
   else if (a === "rm-br"){ const it = S.items[i]; if (it && Array.isArray(it.br)){ it.br.splice(+b.dataset.k, 1); if (!it.br.length) delete it.br; } redraw(); }
   else if (a === "rm-smp"){ const it = S.items[i]; if (it && Array.isArray(it.smp)){ it.smp.splice(+b.dataset.k, 1); if (!it.smp.length) delete it.smp; } redraw(); }
@@ -4171,8 +4200,11 @@ async function showStore(data, isPreview, refresh){
   $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false");
   $("dateLabel").textContent = W(D).date;
   $("dateWrap").hidden = isDigital(D); $("cEmailWrap").hidden = !isDigital(D); $("svExtra").hidden = !isService(D);
-  $("sheetTitle").textContent = isDigital(D) ? "Your order" : isAgent(D) ? "Book a consultation" : isService(D) ? "Book an appointment" : "Your cart";
-  $("svBook").querySelector(".svb1").textContent = isAgent(D) ? "Book a consultation" : "Book now";
+  const stay = isService(D) && (D.cat || catOf(D)) === "homestay";
+  $("sheetTitle").textContent = isDigital(D) ? "Your order" : isService(D) ? (D.bk && D.bk.t ? svBtn(D).t : isAgent(D) ? "Book a consultation" : stay ? "Check availability" : "Book an appointment") : "Your cart";
+  if (stay) $("dateLabel").textContent = "Check-in date";   // a homestay: dates matter, not the time of day
+  $("svTimeLabel").hidden = $("svTime").hidden = stay;
+  $("svBook").querySelector(".svb1").textContent = svBtn(D).t;
   $("noteLabel").textContent = `Note to the ${isAgent(D) ? "agent" : "shop"} (optional)`;
   $("sendHint").textContent = `Opens a chat with the ${isAgent(D) ? "agent" : "shop"}, with your ${isService(D) ? "booking" : "order"} written in. Just tap send.`;
   // Services: who the seller is and where they go, with a pin
@@ -4510,7 +4542,7 @@ function renderBooking(it, n, total){
   $("viewCart").hidden = true; $("svBook").hidden = false;
   $("bar").classList.toggle("show", named.length > 0 && !D.closed);
   const word = isAgent(D) ? ["plan", "plans"] : ["service", "services"];
-  $("svBookSub").textContent = n ? `${n} ${n === 1 ? word[0] : word[1]} chosen${total > 0 ? " · " + money(total) : ""}` : "Set your appointment";
+  $("svBookSub").textContent = n ? `${n} ${n === 1 ? word[0] : word[1]} chosen${total > 0 ? " · " + money(total) : ""}` : svBtn(D).s;
   $("lines").innerHTML = `<p class="svpickhint">${isAgent(D) ? "Which plans would you like to know about?" : "Choose what you need"}</p>` + named.map(i => {
     const p = D.items[i], j = Object.keys(cart).filter(k => k.startsWith(i + "|")).map(k => +k.split("|")[1])[0], on = j != null;
     return `<div class="svline${on ? " on" : ""}${p.out ? " out" : ""}"><label class="svcheck"><input type="checkbox" data-sv="${i}" ${on ? "checked" : ""} ${p.out ? "disabled" : ""}>
