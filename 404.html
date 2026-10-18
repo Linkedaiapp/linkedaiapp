@@ -264,6 +264,7 @@ textarea{min-height:72px;resize:vertical}
 .bulhead .botav{width:56px;height:56px}
 .askbot .bulbody p{color:var(--ink)}.askbot .bulcta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .askme{margin:0 0 10px auto;max-width:85%;width:fit-content;padding:10px 14px;border-radius:18px 18px 4px 18px;background:var(--soft);border:1px solid var(--line);color:var(--ink);font-size:14px;line-height:1.4;overflow-wrap:anywhere;scroll-margin-top:72px}
+.askshot{margin:12px 0 0}.askshot a{display:block}.askshot img{display:block;width:100%;max-width:300px;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}.askshot figcaption{font-size:12px;font-weight:600;color:var(--muted);margin-top:6px}
 .askmore{margin-top:12px}.askmore .sechips{margin-top:6px}
 .askrow{display:flex;gap:8px;align-items:stretch}.askrow input{flex:1;min-width:0;margin:0}.askrow .btn{flex:none}
 .askall summary{padding:14px 16px;font-weight:700;cursor:pointer}
@@ -2162,6 +2163,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-ask-pictures", at: "2026-10-18", title: "Answers now come with pictures", body: "When you ask your assistant a question, most answers now show a picture of the screen with a red circle and arrow on exactly where to tap. Tap the picture to see it bigger." },
   { id: "u-20261018-share", at: "2026-10-18", title: "Customers can share your store", body: "Your store page now has a Share button at the top right. Customers tap it to send your store to friends on WhatsApp, Telegram, Facebook and more, so word about your shop spreads further." },
   { id: "u-20261018-link-list", at: "2026-10-18", title: "Shop links are now a tidy list", body: "On your store, shop links now always show as a simple list: a small photo, the name, the price and the shop. Customers can scroll through lots of links quickly. Your store style (List, Photo grid or Minimal) still applies to your own items." },
   { id: "u-20261018-ask", at: "2026-10-18", title: "Ask your assistant anything", body: "Got a question about the app? Tap Got a question? on your Store page (or Ask your assistant under Account) and type it in English or Malay, like \"how do I add a photo?\" or \"macam mana nak tutup kedai?\". Your assistant answers right away, with a button that takes you straight there." },
@@ -2765,7 +2767,7 @@ const ASK_KB = [
   { id: "news", q: "Where do I see news and updates?", k: "news update new bell red tip", a: () => `Tap the bell at the top of your Store page. A red number means something new. You can also find News under Account.`, go: () => askGo("news", "Open News") },
   { id: "phone", q: "How do I change my phone number?", k: "change phone number whatsapp", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>Phone number</b>. Orders go to the new number, and your store link stays the same.`, go: () => askGo("profile", "Open Profile") },
   { id: "chpin", q: "How do I change my PIN?", k: "change pin new", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>PIN</b>.`, go: () => askGo("profile", "Open Profile") },
-  { id: "forgot", q: "I forgot my PIN", k: "forgot pin reset login", a: () => `On the log-in page, tap <b>Forgot PIN</b>. If you've added an email, we send you a code to set a new PIN. No email added? WhatsApp us and we'll help.${ME_EMAIL ? "" : " Tip: add your email on Profile now, so you can reset it yourself next time."}`, go: () => ME_EMAIL ? "" : askGo("profile", "Add my email") },
+  { id: "forgot", q: "I forgot my PIN", k: "forgot pin reset login", a: () => `On the log-in page, under <b>Forgot your PIN?</b>, tap <b>Reset it</b>. If you've added an email, we send you a code to set a new PIN. No email added? WhatsApp us and we'll help.${ME_EMAIL ? "" : " Tip: add your email on Profile now, so you can reset it yourself next time."}`, go: () => ME_EMAIL ? "" : askGo("profile", "Add my email") },
   { id: "email", q: "How do I add my email?", k: "email add change", a: () => `Open <b>Profile</b> (tap your store name on Account) and tap the pencil next to <b>Email</b>. You can then log in with it, and reset your PIN yourself if you forget it.`, go: () => askGo("profile", "Open Profile") },
   { id: "login", q: "How do I stay logged in or log out?", k: "login logout stay keep sign", a: () => `When you log in, tick <b>Keep me logged in on this phone</b> and you won't need your PIN on that phone for 90 days. To log out, go to <b>Account</b> and tap <b>Log out</b>.`, go: () => askGo("account", "Open Account") },
   { id: "delacct", q: "How do I delete my account?", k: "delete account permanently quit forever", a: () => `Open <b>Profile</b> and scroll to <b>Danger zone</b>. Deleting removes your store, items and photos for good, and your link stops working. It can't be undone, and the fee isn't refunded once you've gone live. To take a break instead, just set your store to Closed.`, go: () => askGo("profile", "Open Profile") },
@@ -2777,6 +2779,8 @@ const ASK_KB = [
   { id: "slow", q: "The app is slow or not working", k: "slow load error not working blank refresh", a: () => `Check your internet first, then close the app fully and open it again. Still stuck? WhatsApp us and tell us what you see.`, go: () => askWa() },
   { id: "human", q: "How do I talk to a person?", k: "contact help talk person human whatsapp call", a: () => `Tap below to chat with us on WhatsApp. You'll also find <b>Help</b> under Account.`, go: () => askWa() }
 ];
+// Example pictures (help/<id>.webp): the app screen with a red circle and arrow on what to tap
+const ASK_SHOTS = new Set("additem affiliate chpin currency daysoff delacct delitem delivery email forgot human insights link linkname login look map name news openclose orders phone photo pin preview price publish removed reorder sections sizes soldout spotit status trial verified".split(" "));
 const ASK_POPULAR = ["additem", "orders", "trial", "link", "openclose", "spotit"];
 const ASK_SMALL = [
   [/^(hi|hai|hello|helo|hey|assalamualaikum|salam|morning|selamat\b.*)$/, () => `Hi! Ask me anything about your store, like "how do I add a photo?" or "macam mana nak tutup kedai?".`],
@@ -2799,9 +2803,9 @@ function askFind(text){
 let ASKLOG = [], ASKID = "", ASKBACK = "home";
 function askMsgHtml(m){
   if (m.me) return `<div class="askme"><span class="sr">You asked: </span>${esc(m.me)}</div>`;
-  return `<article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>${m.bot}</p>${m.cta ? `<div class="bulcta">${m.cta}</div>` : ""}${m.more && m.more.length ? `<div class="askmore"><span class="bulmeta">Or did you mean</span><div class="sechips">${m.more.map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div></div>` : ""}</div></article>`;
+  return `<article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>${m.bot}</p>${m.shot ? `<figure class="askshot"><a href="help/${m.shot}.webp" target="_blank" rel="noopener" aria-label="See the example picture full size"><img src="help/${m.shot}.webp" width="360" height="430" loading="lazy" alt="Example: the app screen, with a red circle on where to tap"></a><figcaption>Tap where the red circle is</figcaption></figure>` : ""}${m.cta ? `<div class="bulcta">${m.cta}</div>` : ""}${m.more && m.more.length ? `<div class="askmore"><span class="bulmeta">Or did you mean</span><div class="sechips">${m.more.map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div></div>` : ""}</div></article>`;
 }
-function askReply(e){ return { bot: e.a(), cta: e.go ? e.go() : "" }; }
+function askReply(e){ return { bot: e.a(), cta: e.go ? e.go() : "", shot: ASK_SHOTS.has(e.id) ? e.id : "" }; }
 function askPush(me, reply){
   ASKLOG.push({ me }, reply); ASKLOG = ASKLOG.slice(-40);
   const log = $("askLog"); if (!log) return;
