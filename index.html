@@ -102,6 +102,7 @@ textarea{min-height:72px;resize:vertical}
 .bh h1{font-size:32px;line-height:1.1;letter-spacing:-.025em;font-weight:800;margin:6px 0 6px}
 .bh p{margin:0 0 20px;color:var(--muted)}
 .exwrap{margin:4px 0 14px}
+.seg.kinds{display:grid;grid-template-columns:1fr 1fr;gap:4px}   /* What do you sell?: 4 choices in 2 rows, so none is cut off */
 .expill{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--accent-ink,var(--accent));background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink,var(--accent));font-weight:700;font-size:14.5px;cursor:pointer}
 .expill svg:last-child{transition:transform .2s ease}
 .expill[aria-expanded="true"] svg:last-child{transform:rotate(180deg)}
@@ -1876,7 +1877,8 @@ function svBtn(d){
   const def = isAgent(d) ? BK_PICKS[1] : cat === "homestay" ? BK_PICKS[2] : BK_PICKS[0];
   return { t: String(own.t || "").trim() || def[0], s: String(own.s || "").trim() || def[1] };
 }
-// Built-in demo stores (no account, nothing is sent): /demo-food, /demo-products, /demo-aircond, /demo-insurance, /demo-digital and /demo-affiliate. Names starting with demo- are kept for these.
+// Built-in demo stores (no account, nothing is sent): /demo-food, /demo-products, /demo-aircond, /demo-insurance, /demo-digital and /demo-affiliate.
+// Only these exact names are kept for them; other demo-... stores (like the owner's demo-store) work as normal.
 var STORE_DEMO = false;
 const DEMO_IMG = n => "https://linkedaiapp.github.io/linkedaiapp/demo/" + n;
 const DEMOS = {
@@ -2458,7 +2460,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your phone number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id) || /^demo-/.test(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id) || !!DEMOS[id]) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
@@ -2739,7 +2741,7 @@ function edDetails(){
     <div class="warow"><b>${esc(fmtWa(S.wa) || "Not added yet")}</b><button type="button" class="btn small" data-act="chwa">Change number</button></div>
     <p class="hint">Orders are sent here, and you log in with this number.</p>
     <label>What do you sell?</label>
-    <div class="seg">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
+    <div class="seg kinds">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
     <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
   </section>
   ${isService(S) ? `<section class="card">
@@ -3292,7 +3294,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 102;
+const APP_VERSION = 103;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3818,7 +3820,7 @@ function legacyEditor(msg){
     <label>Brand colour</label>
     <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
     <label>What do you sell?</label>
-    <div class="seg">
+    <div class="seg kinds">
       ${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}
     </div>
     <label>Store style</label>
