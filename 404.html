@@ -102,7 +102,10 @@ textarea{min-height:72px;resize:vertical}
 .bh h1{font-size:32px;line-height:1.1;letter-spacing:-.025em;font-weight:800;margin:6px 0 6px}
 .bh p{margin:0 0 20px;color:var(--muted)}
 .exwrap{margin:4px 0 14px}
-.seg.kinds{display:grid;grid-template-columns:1fr 1fr;gap:4px}   /* What do you sell?: 4 choices in 2 rows, so none is cut off */
+/* What do you sell?: one row of wide choices that slides sideways, so none is ever squeezed or cut off */
+.seg.kinds{display:flex;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.seg.kinds::-webkit-scrollbar{display:none}
+.seg.kinds button{flex:none;min-width:116px;padding-left:18px;padding-right:18px;scroll-snap-align:start}
 .expill{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--accent-ink,var(--accent));background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink,var(--accent));font-weight:700;font-size:14.5px;cursor:pointer}
 .expill svg:last-child{transition:transform .2s ease}
 .expill[aria-expanded="true"] svg:last-child{transform:rotate(180deg)}
@@ -3294,7 +3297,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 103;
+const APP_VERSION = 104;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3974,7 +3977,7 @@ $("builder").addEventListener("click", async e => {
   else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ touch(); edGo("product", S.items.length - 1); } else redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
-  else if (a === "kind"){ S.kind = b.dataset.v; redraw(); }
+  else if (a === "kind"){ const x = b.parentNode.scrollLeft; S.kind = b.dataset.v; redraw(); const sg = document.querySelector(".seg.kinds"); if (sg) sg.scrollLeft = x; }
   else if (a === "open"){ S.closed = b.dataset.v === "0"; redraw(); }
   else if (a === "offday"){ const i = +b.dataset.v; S.off.days = S.off.days.includes(i) ? S.off.days.filter(x => x !== i) : [...S.off.days, i].sort(); redrawOff(); }
   else if (a === "offclear"){ S.off.dates = []; redrawOff(); }
