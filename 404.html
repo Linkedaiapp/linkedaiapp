@@ -913,7 +913,15 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxsearch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:46px;border-radius:var(--r-md);padding:0 6px 0 14px;color:var(--muted);margin:0}
 .mxsearch{font-weight:500}
 .mxsearch{position:relative;overflow:hidden}
-.mxtrain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:2}
+.mxtrain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:0}
+.mxsearch > svg,.mxsearch > input,.mxsearch > .mxclr{position:relative;z-index:1}
+.mxsearch:has(.tset.ad) > input{pointer-events:none}   /* taps reach the train through the glass; a tap beside it still opens search (the bar is a label) */
+/* the search bar is a pane of glass and the train runs behind it: a light frost, a tint and two reflection streaks on top */
+.mxtrain::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;-webkit-backdrop-filter:blur(.7px);backdrop-filter:blur(.7px);
+  background:linear-gradient(104deg,transparent 22%,rgba(255,255,255,.42) 27%,rgba(255,255,255,.1) 31%,transparent 34%,transparent 58%,rgba(255,255,255,.26) 61%,transparent 64%),
+    linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,.08) 55%,rgba(255,255,255,.18));box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+:root[data-theme="dark"] .mxtrain::after{background:linear-gradient(104deg,transparent 22%,rgba(255,255,255,.2) 27%,rgba(255,255,255,.05) 31%,transparent 34%,transparent 58%,rgba(255,255,255,.12) 61%,transparent 64%),linear-gradient(rgba(40,34,36,.34),rgba(40,34,36,.16) 55%,rgba(40,34,36,.3));box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mxtrain::after{background:linear-gradient(104deg,transparent 22%,rgba(255,255,255,.2) 27%,rgba(255,255,255,.05) 31%,transparent 34%,transparent 58%,rgba(255,255,255,.12) 61%,transparent 64%),linear-gradient(rgba(40,34,36,.34),rgba(40,34,36,.16) 55%,rgba(40,34,36,.3));box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}}
 .tset{position:absolute;left:0;display:flex;align-items:flex-end;height:40px;transform-origin:0 100%;will-change:transform}
 .tset.mini{bottom:1px;opacity:.9}.tset.ad{top:3px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .mxtrain{--train:#18395C;--train-ink:#fff}
@@ -2991,7 +2999,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 80;
+const APP_VERSION = 81;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
