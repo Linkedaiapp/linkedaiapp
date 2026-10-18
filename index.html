@@ -268,15 +268,18 @@ textarea{min-height:72px;resize:vertical}
 .skyhit{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:grid;place-items:center}
 .skyjetwrap{display:block;width:32px;height:32px}.skyjet{width:32px;height:32px;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .skyrope{position:absolute;left:0;top:0;width:46px;height:0;border-top:1.5px dashed #9AA3AD;transform-origin:0 0;pointer-events:none}
-.skybanner{position:absolute;left:0;top:0;max-width:180px;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy)));cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
-.skyflag{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:5px;color:#1C1917;font-size:12.5px;font-weight:800;line-height:1.15;white-space:nowrap;border:1.5px solid #E7B416;
-  background:repeating-linear-gradient(100deg,rgba(255,255,255,0) 0 18px,rgba(160,110,0,.10) 26px,rgba(255,255,255,.35) 34px,rgba(255,255,255,0) 42px) 0 0/84px 100%,#FFF8E1;
-  transform-origin:var(--ox,100%) 50%;animation:skyWave .9s ease-in-out infinite,skyRipple .7s linear infinite}
-.skyflag span{overflow:hidden;text-overflow:ellipsis}
-.skyflight.held .skyflag{animation-play-state:paused}
-@keyframes skyWave{0%,100%{transform:perspective(160px) rotateY(0) skewY(0) scaleY(1)}25%{transform:perspective(160px) rotateY(9deg) skewY(2.5deg) scaleY(.95)}50%{transform:perspective(160px) rotateY(0) skewY(0) scaleY(1)}75%{transform:perspective(160px) rotateY(-9deg) skewY(-2.5deg) scaleY(.95)}}
-@keyframes skyRipple{to{background-position:var(--rip,84px) 0,0 0}}
-.skybanner span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skybanner img{width:22px;height:22px;border-radius:5px;object-fit:cover;flex:none;background:#fff}
+.skybanner{position:absolute;left:0;top:0;width:max-content;max-width:240px;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy)));cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
+.skyflag{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:5px;background:#FFF8E1;color:#1C1917;font-size:12.5px;font-weight:800;line-height:1.15;white-space:nowrap;border:1.5px solid #E7B416}
+
+.skycloth{position:relative;display:block}
+.skyslice{position:absolute;top:0;height:100%;overflow:hidden;animation:skyCloth .85s ease-in-out infinite;will-change:transform}
+.skyslicein{position:absolute;top:0;display:block}
+.skyflight.held .skyslice{animation-play-state:paused}
+@keyframes skyCloth{0%,100%{transform:translateY(calc(var(--a) * -1))}50%{transform:translateY(var(--a))}}
+.skyslice::after{content:"";position:absolute;inset:0;background:#6B4E00;opacity:0;pointer-events:none;animation:skyShade .85s ease-in-out infinite;animation-delay:inherit}
+.skyflight.held .skyslice::after{animation-play-state:paused}
+@keyframes skyShade{0%,100%{opacity:0}50%{opacity:.08}}
+.skyflag>span{display:block;flex:none;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skyflag img{width:22px;height:22px;border-radius:5px;object-fit:cover;flex:none;background:#fff}
 
 .skycard{position:fixed;left:12px;right:12px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:9;padding:14px 14px 16px;border-radius:var(--r-card,20px);color:var(--ink)}
 .skycard .mxx{position:absolute;top:10px;right:10px}
@@ -5033,8 +5036,7 @@ function skyFly(){
   const bn = el.querySelector(".skybanner"), rad = deg * Math.PI / 180, cx = Math.cos(rad), cy = Math.sin(rad);
   const half = Math.abs(cx) * bn.offsetWidth / 2 + Math.abs(cy) * bn.offsetHeight / 2, gap = 14 + 32 + half;   // plane half + tow line + banner half
   bn.style.setProperty("--dx", (-cx * gap).toFixed(1) + "px"); bn.style.setProperty("--dy", (-cy * gap).toFixed(1) + "px");
-  bn.style.setProperty("--ox", cx >= 0 ? "100%" : "0%");   // the flag waves out from the end tied to the plane
-  bn.style.setProperty("--rip", cx >= 0 ? "-84px" : "84px");   // and its ripples run away from the plane
+  skyCloth(bn, cx >= 0);   // the banner flutters like cloth, waves running from the plane end to the loose end
   SKY.el = el; SKY.mk = mk;
   // the dashed trail it leaves behind
   const trail = { type: "Feature", geometry: { type: "LineString", coordinates: [[from.lng, from.lat], [from.lng, from.lat]] } };
@@ -5059,6 +5061,19 @@ function skyFly(){
   skyHit("skyview");
   el.querySelector(".skyhit").addEventListener("click", e => { e.stopPropagation(); skyOpen(ad); });
   el.querySelector(".skybanner").addEventListener("click", e => { e.stopPropagation(); skyOpen(ad); });
+}
+// Flag flutter: the banner is cut into thin strips that rise and fall a moment after each other, so a wave runs along it.
+// The end tied to the tow line barely moves; the loose end flaps the most, and each fold catches the light.
+function skyCloth(bn, poleRight){
+  const flag = bn.querySelector(".skyflag"); if (!flag) return;
+  const W = flag.offsetWidth, H = flag.offsetHeight, N = Math.max(18, Math.round(W / 6)), html = flag.outerHTML, T = .85;
+  const cloth = document.createElement("span"); cloth.className = "skycloth"; cloth.style.width = W + "px"; cloth.style.height = H + "px";
+  let out = "";
+  for (let i = 0; i < N; i++){
+    const d = i / (N - 1), far = poleRight ? 1 - d : d;   // 0 at the tow line, 1 at the loose end
+    out += `<span class="skyslice" style="left:${(i * W / N).toFixed(2)}px;width:${(W / N + .7).toFixed(2)}px;--a:${(.4 + far * 3.8).toFixed(2)}px;animation-delay:${(-(1 - far) * T * 1.6).toFixed(3)}s"><span class="skyslicein" style="left:${(-i * W / N).toFixed(2)}px;width:${W}px">${html}</span></span>`;
+  }
+  cloth.innerHTML = out; flag.replaceWith(cloth);
 }
 // the flight is over: the plane and its trail leave the map
 function skyLand(){
