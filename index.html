@@ -2260,6 +2260,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the Sepang International Circuit and KLIA with its control tower. Zoom in near Sepang to see them." },
   { id: "u-20261018-more-landmarks", at: "2026-10-18", title: "Every state on Spot It!", body: "Four more landmarks on the Spot It! map: Istana Jahar in Kota Bharu, the floating mosque in Kuala Perlis, the Minangkabau house in Seremban and the Chimney in Labuan. Now every state has one." },
   { id: "u-20261018-city-landmarks", at: "2026-10-18", title: "Every city's landmark on Spot It!", body: "Spot It! now shows a landmark in each big city, right where it really stands: KOMTAR in Penang, the Crystal Mosque in Kuala Terengganu, Mount Kinabalu, the Sarawak Assembly in Kuching, Christ Church in Melaka, Ipoh Railway Station and more. Zoom out to see them all across Malaysia." },
   { id: "u-20261018-kl-skyline", at: "2026-10-18", title: "KL's skyline on Spot It!", body: "KL's tallest landmarks now stand on the Spot It! map, each right where it really is: the twin towers at KLCC, KL Tower, The Exchange 106 at TRX and Merdeka 118. Zoom in on Kuala Lumpur to see them all." },
@@ -3004,7 +3005,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 89;
+const APP_VERSION = 90;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5354,6 +5355,27 @@ function kltChimney(){   // The Chimney, Labuan: the old square red-brick tower
     ${kltBox(9.5, 12, 15, 5, "#D06A4C", "#97412B")}<rect x="8.6" y="11" width="16.8" height="1.6" fill="#E08A6E"/>
     <path d="M14 144 v-12 a3 3 0 0 1 6 0 v12z" fill="#4A1E12"/></svg>`;
 }
+function kltKLIA(){   // KLIA: the torch-shaped control tower and the terminal under its rows of curved "umbrella" roofs, a plane taking off
+  let roof = ""; for (let i = 0; i < 7; i++){ const x = 6 + i * 11; roof += `<path d="M${x} 82 Q${x + 5.5} 74 ${x + 11} 82 Z" fill="${i < 4 ? "#F2F4F6" : "#C3CBD3"}"/>`; }
+  return `<svg viewBox="0 0 110 110" aria-hidden="true">${kltGround(55, 104, 52)}
+    ${kltBox(8, 82, 74, 22, "#9DB9D2", "#5F7F9E")}${Array.from({ length: 12 }, (_, i) => `<rect x="${10 + i * 6}" y="84" width=".6" height="20" fill="rgba(255,255,255,.5)"/>`).join("")}${roof}
+    <rect x="7" y="81" width="76" height="1.6" fill="#E3E8ED"/>
+    ${kltPoly([[89, 104], [91.5, 40], [94, 40], [94, 104]], "#EEF1F4")}${kltPoly([[94, 104], [94, 40], [96.5, 40], [99, 104]], "#A4B0BC")}
+    ${kltPoly([[86, 40], [84, 30], [94, 30], [94, 40]], "#EEF1F4")}${kltPoly([[94, 40], [94, 30], [104, 30], [102, 40]], "#A4B0BC")}
+    <rect x="84" y="31.5" width="20" height="4" fill="#2E4A66" opacity=".75"/>${kltBox(87, 25, 14, 5, "#EEF1F4", "#A4B0BC")}
+    <path d="M94 25 V13" stroke="#7D8FA3" stroke-width="1"/><circle class="kltlight" cx="94" cy="13" r="1.2"/>
+    <g transform="translate(26 40) rotate(-18)" fill="#5E7489"><path d="M0 3 L22 2 Q26 2.5 22 4 L0 4.5 Z"/><path d="M9 3 L5 -5 L8 -5 L14 3 Z"/><path d="M10 4 L6 11 L9 11 L15 4 Z"/><path d="M1 3 L-1 -1.5 L1.5 -1.5 L4 3 Z"/></g></svg>`;
+}
+function kltSepang(){   // Sepang International Circuit: the grandstand under its leaf-shaped canopies, the track with red-and-white kerbs and a race car
+  let leaves = ""; for (let i = 0; i < 6; i++){ const x = 10 + i * 17; leaves += `<path d="M${x} 30 Q${x + 9} 16 ${x + 18} 26 Q${x + 9} 24 ${x} 30 Z" fill="${i < 3 ? "#F4F6F8" : "#C9D1D9"}"/><path d="M${x + 9} 24 V40" stroke="#8A97A4" stroke-width=".8"/>`; }
+  const kerb = Array.from({ length: 24 }, (_, i) => `<rect x="${4 + i * 5}" y="58" width="5" height="2.2" fill="${i % 2 ? "#FFFFFF" : "#D32F2F"}"/>`).join("");
+  return `<svg viewBox="0 0 120 72" aria-hidden="true">${kltGround(60, 66, 58)}
+    <polygon points="8,52 20,32 112,32 112,52" fill="#B9C3CD"/><polygon points="66,32 112,32 112,52 66,52" fill="#8996A4"/>
+    ${Array.from({ length: 5 }, (_, i) => `<path d="M${16 - i * 2.2} ${36 + i * 3.4} H112" stroke="${["#1E88E5", "#E53935", "#FDD835", "#1E88E5", "#E53935"][i]}" stroke-width="1.3" opacity=".75"/>`).join("")}
+    ${leaves}<rect x="4" y="52" width="114" height="6" fill="#55606B"/><rect x="4" y="60" width="114" height="6" fill="#46505A"/>${kerb}
+    <path d="M10 55 H112" stroke="#FFFFFF" stroke-width=".5" stroke-dasharray="4 3" opacity=".8"/>
+    <g transform="translate(70 61.5)"><path d="M0 2 L4 0 L14 0 L18 1.5 L22 2 L22 3.4 L0 3.4 Z" fill="#D32F2F"/><circle cx="4" cy="3.6" r="1.6" fill="#1F1F1F"/><circle cx="17" cy="3.6" r="1.6" fill="#1F1F1F"/><rect x="-1" y="-.6" width="3" height="2.6" fill="#1F1F1F"/></g></svg>`;
+}
 const kltTowerAs = p => () => kltKLTower().replaceAll("kltk", p);   // the observation-tower drawing, for Alor Setar and Kuantan
 // h: height compared with the KL twin towers (drawn bigger than true where needed, so each one is still easy to see).
 // from: the zoom where it first shows (towns close to KL wait until you zoom in, so the country view isn't crowded).
@@ -5377,7 +5399,9 @@ const KL_SKY = [
   { at: [102.23712, 6.13153], h: .4, vb: [90, 80], svg: kltJahar, from: 0 },          // Istana Jahar, Kota Bharu
   { at: [100.12691, 6.39733], h: .5, vb: [90, 98], svg: kltAlHussain, from: 6.5 },    // Masjid Al-Hussain, Kuala Perlis
   { at: [101.92036, 2.718], h: .42, vb: [100, 82], svg: kltMinang, from: 6 },         // Minangkabau house, Seremban
-  { at: [115.24862, 5.38117], h: .5, vb: [34, 150], svg: kltChimney, from: 0 }        // The Chimney, Labuan
+  { at: [115.24862, 5.38117], h: .5, vb: [34, 150], svg: kltChimney, from: 0 },       // The Chimney, Labuan
+  { at: [101.73692, 2.75997], h: .4, vb: [120, 72], svg: kltSepang, from: 9 },        // Sepang International Circuit
+  { at: [101.70552, 2.75273], h: .5, vb: [110, 110], svg: kltKLIA, from: 9 }          // KLIA Terminal 1 and its control tower
 ].sort((a, b) => b.at[1] - a.at[1]);   // north to south, so the one lower on the screen stands in front
 function kltAdd(map){
   MX.klt = KL_SKY.map(b => { const el = document.createElement("div"); el.className = "mxklt"; el.innerHTML = b.svg();
