@@ -2946,15 +2946,17 @@ function edSettings(){
     <button class="lk-row" data-act="checkupdate"><span class="tile">${ico("upload")}</span><span class="tt"><b>Check for updates</b><span id="appVer">${esc(APP_VER || "Version …")}</span></span></button>
   </section>`;
 }
-let APP_VER = "";
-async function appVersion(){ try { const ks = await caches.keys(), v = ks.map(k => (k.match(/^linkedai-v(\d+)$/) || [])[1]).filter(Boolean).map(Number).sort((a, b) => b - a)[0]; APP_VER = v ? "Version " + v : "Version (online)"; } catch(e){ APP_VER = "Version (online)"; } const el = $("appVer"); if (el) el.textContent = APP_VER; }
+// The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
+const APP_VERSION = 73;
+let APP_VER = "Version " + APP_VERSION;
+async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
   const el = $("appVer"); if (el) el.textContent = "Checking…";
   try {
     const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (!reg) throw 0;
     await reg.update();
     const nw = reg.installing || reg.waiting;
-    if (!nw){ await appVersion(); return notify("You have the latest version."); }
+    if (!nw){ await appVersion(); return notify(`You have the latest version (${APP_VERSION}).`); }
     if (el) el.textContent = "Updating…";
     if (DIRTY) await autoSave();
     navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), { once: true });
