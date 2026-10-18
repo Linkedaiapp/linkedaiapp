@@ -533,6 +533,41 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .dgsmpadd{position:relative;width:64px;height:85px;border:1.5px dashed var(--line2);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;margin:0;overflow:hidden}
 .dgsmpadd input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .seg.dghow button{font-size:13px;line-height:1.2}
+/* Services: a booking page. Seller bio with the areas they cover, a catalogue of services, one wide Book now button */
+.svbio{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);text-align:left}
+.svbio p{margin:0 0 10px;font-size:14.5px;line-height:1.5;color:var(--ink-2,var(--ink))}
+.svarea{display:flex;gap:10px;align-items:flex-start}
+.svpin{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent-ink)}
+.svat{display:flex;flex-direction:column;gap:6px;min-width:0}
+.svat b{font-size:13px;color:var(--muted);font-weight:700;margin-top:6px}
+.svchips{display:flex;flex-wrap:wrap;gap:6px}
+.svchips span{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--soft);color:var(--ink)}
+.plist.svlist{display:grid;gap:10px;background:none;border:0;border-radius:0;overflow:visible}
+.plist.svlist .prow.svrow{align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md)}
+.plist.svlist .prow.svrow.on{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent) inset}
+.svrow .ptext{flex:1;min-width:0}
+.svrow h3{font-size:16px;margin:0}
+.svrow .pmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.svimg{flex:none;width:64px;height:64px;border-radius:var(--r-sm);overflow:hidden;background:var(--soft)}
+.svimg img{width:100%;height:100%;object-fit:cover;display:block}
+.svopts{font-size:12px;font-weight:700;color:var(--muted)}
+.svpick{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;padding:7px 14px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent-ink)}
+.svrow.on .svpick{background:var(--accent);color:#fff;border-color:var(--accent)}
+.svbook{width:100%;max-width:692px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--accent);color:#fff;border:0;border-radius:var(--r-md);padding:13px 18px;cursor:pointer;box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 40%,transparent)}
+.svbook .svb1{font-size:18px;font-weight:800;letter-spacing:.01em}
+.svbook .svb2{font-size:12.5px;font-weight:600;opacity:.88}
+.svbook[hidden],.cartbtn[hidden]{display:none}
+.svpickhint{margin:0 0 6px;font-size:13px;font-weight:700;color:var(--muted)}
+.svline{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:8px}
+.svline.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.svline.out{opacity:.55}
+.svcheck{display:flex;gap:10px;align-items:flex-start;margin:0;cursor:pointer}
+.svcheck input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--accent)}
+.svcheck .cn{display:flex;flex-direction:column}
+.svcheck .cn span{font-size:13px;color:var(--muted)}
+.svline select{margin:0}
+.seg.svtime button{font-size:13px}
+.bar.svmode{padding-top:10px}
 .empty{color:var(--muted);text-align:center;padding:40px 16px}
 .foot{text-align:center;color:var(--muted);font-size:13px;margin:32px 16px 0}
 .foot a{color:inherit}
@@ -1483,6 +1518,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <h1 class="stname" id="stName"></h1>
       <span class="stnew" id="stNew" hidden>New store</span>
       <p class="tag" id="stTag"></p>
+      <div class="svbio" id="stBio" hidden></div>
       <div class="stvisit" id="stVisit" hidden></div>
     </section>
     <div class="pwabar" id="stPwaBar" hidden></div>
@@ -1521,6 +1557,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 
   <div class="bar" id="bar">
     <button class="cartbtn" id="viewCart"><span class="cnt" id="count">0</span><span class="lbl">View cart</span><span id="total"></span></button>
+    <button class="svbook" id="svBook" hidden><span class="svb1">Book now</span><span class="svb2" id="svBookSub">Set your appointment</span></button>
   </div>
 
   <div class="overlay" id="pOverlay" role="dialog" aria-modal="true" aria-labelledby="pTitle">
@@ -1553,11 +1590,17 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <button type="button" class="datebtn empty" id="dateBtn" aria-expanded="false"><span id="dateTxt">Pick a date</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
       <div class="cal" id="dateCal" hidden></div>
       </div>
+      <div id="svExtra" hidden>
+        <label id="svTimeLabel">Preferred time</label>
+        <div class="seg svtime" id="svTime" role="group" aria-labelledby="svTimeLabel"><button type="button" data-t="Morning" aria-pressed="false">Morning</button><button type="button" data-t="Afternoon" aria-pressed="false">Afternoon</button><button type="button" data-t="Evening" aria-pressed="false">Evening</button><button type="button" data-t="Any time" aria-pressed="false">Any time</button></div>
+        <label for="cAddr">Your address or area (optional)</label>
+        <input type="text" id="cAddr" autocomplete="street-address" placeholder="e.g. Taman Sri Muda, Shah Alam">
+      </div>
       <label for="note">Note to the shop (optional)</label>
       <textarea id="note" placeholder="e.g. Pickup Saturday 3pm"></textarea>
       <p class="err" id="err" role="alert"></p>
       <a class="btn wa full" id="send" href="#" target="_blank" rel="noopener" style="padding:15px">Send order on WhatsApp</a>
-      <p class="hint" style="text-align:center">Opens a chat with the shop, with your order written in. Just tap send.</p>
+      <p class="hint" style="text-align:center" id="sendHint">Opens a chat with the shop, with your order written in. Just tap send.</p>
     </div>
   </div>
 </div>
@@ -1800,6 +1843,8 @@ const KINDS = {
               ex: { shop: "e.g. Kak Ina Templates", tag: "e.g. Canva templates & e-books for small businesses", name: "e.g. 30 Raya Canva Templates", desc: "e.g. Edit on your phone or laptop", opt: "e.g. Commercial licence", price: "e.g. 19", note: "e.g. Please send it to my email too" } }
 };
 const isDigital = d => !!d && d.kind === "digital";
+const isService = d => !!d && d.kind === "services";
+const svAreas = d => String((d && d.areas) || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean).slice(0, 12);
 // Sold online, so never a pin on the map: link-only shops (Affiliate Shops) and digital stores
 const noPin = d => affOnly(d) || isDigital(d);
 // "Payhip" rather than "payhip.com" on the Buy button
@@ -1863,6 +1908,9 @@ function normalize(d){
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
   if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
   x.shareMsg = String(x.shareMsg || "").replace(/\s+/g, " ").trim().slice(0, 160);
+  // Services: a short bio and the areas the seller travels to (shown on the store with a pin)
+  x.bio = String(x.bio || "").replace(/[<>]/g, "").slice(0, 300);
+  x.areas = String(x.areas || "").replace(/[<>]/g, "").slice(0, 200);
   if (!KINDS[x.kind]) x.kind = "products";
   const l = d && d.loc && typeof d.loc === "object" ? d.loc : {};
   x.loc = { on: !!l.on, state: STATES.includes(l.state) ? l.state : "", city: String(l.city || "").slice(0, 40), lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60),
@@ -2329,6 +2377,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-service-booking", at: "2026-10-18", title: "A booking page for services", body: "Selling services, like aircond service, Coway or insurance? Your store is now a booking page: a list of your services and one big Book now button where customers pick a date, a time and their address. In Shop details, add About you and Areas you cover: customers see them at the top with a pin. No fixed price? Leave it empty and customers see Get a quote." },
   { id: "u-20261018-digital-stores", at: "2026-10-18", title: "Sell digital products", body: "You can now sell e-books, templates, presets and online classes. In Shop details, under What do you sell?, pick Digital. Each product gets a book-shaped cover, sample pages, a What you get list and a Best value badge for bundles. Choose how buyers get it: on WhatsApp, a private download link you send after payment, or your own checkout page. Customers find you under Digital on Spot It!." },
   { id: "u-20261018-bridges", at: "2026-10-18", title: "Bridges on Spot It!", body: "The Penang Bridge now crosses the channel on the Spot It! map at its real length, with its cable-stayed towers in the middle, and the Kuala Terengganu Drawbridge stands with its deck split open. Zoom in on Penang or Kuala Terengganu to see them." },
   { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the real shape of the Sepang International Circuit, raised like a model and lying right on the track, and KLIA with its control tower. Zoom in near Sepang to see them." },
@@ -2501,7 +2550,7 @@ function edSteps(){
   const named = S.items.filter(it => it.n.trim());
   return {
     details: !!(S.name.trim() && S.wa),
-    products: named.some(it => it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
+    products: named.some(it => isService(S) || it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
     listing: !!(S.loc.on && S.loc.state && (S.loc.city || noPin(S))),
     status: true
   };
@@ -2530,7 +2579,7 @@ function edTabs(){
 }
 function priceText(it){
   const ps = it.o.map(o => +o.p).filter(x => x > 0);
-  if (!ps.length) return "No price yet";
+  if (!ps.length) return isService(S) ? "Get a quote" : "No price yet";
   const lo = Math.min(...ps);
   return (ps.length > 1 ? "From " : "") + fmtMoney(S.cur || curSymbol(S.curCode), lo);
 }
@@ -2587,6 +2636,12 @@ function edDetails(){
     <div class="seg">${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}</div>
     <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
   </section>
+  ${isService(S) ? `<section class="card">
+    <h2 style="margin:0">About you and where you go</h2>
+    <label>About you (optional)<textarea data-f="bio" maxlength="300" rows="3" placeholder="e.g. Certified Coway agent since 2018. Free filter check with every service.">${esc(S.bio || "")}</textarea></label>
+    <label>Areas you cover (optional)<input type="text" data-f="areas" maxlength="200" value="${esc(S.areas || "")}" placeholder="e.g. Shah Alam, Klang, Petaling Jaya"></label>
+    <p class="hint">Separate areas with commas. Customers see them at the top of your store, next to a pin.</p>
+  </section>` : ""}
   ${edLook()}`;
 }
 function edLook(){   // the logo, cover, colour and style cards, shown on Shop details
@@ -2780,10 +2835,11 @@ function edProduct(i){
   </section>
   ${it.o.length === 1 && !it.o[0].l.trim() ? `<section class="card">
     <label style="margin-top:0">Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="${i}" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
-    <button class="btn small" style="margin-top:12px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}${isDigital(S) ? "Add versions" : "Add sizes or flavours"}</button>
+    ${isService(S) ? `<p class="hint">No fixed price? Leave it empty and customers see <b>Get a quote</b>.</p>` : ""}
+    <button class="btn small" style="margin-top:12px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}${isDigital(S) ? "Add versions" : isService(S) ? "Add packages" : "Add sizes or flavours"}</button>
     <p class="hint">${isDigital(S) ? "Only if buyers choose between versions with different prices, like a Personal and a Commercial licence, or Basic and Full pack." : "Only if customers choose between versions with different prices, like Small and Large, or Chocolate and Pandan."}</p>
   </section>` : `<section class="card">
-    <div class="between"><h2 style="margin:0">${isDigital(S) ? "Versions" : "Sizes or flavours"}</h2><span class="hint" style="margin:0">Customers pick one</span></div>
+    <div class="between"><h2 style="margin:0">${isDigital(S) ? "Versions" : isService(S) ? "Packages" : "Sizes or flavours"}</h2><span class="hint" style="margin:0">Customers pick one</span></div>
     <div class="opthead"><span>Name</span><span>Price (${esc(S.cur || curSymbol(S.curCode))})</span><i></i></div>
     ${it.o.map((o,j)=>`
       <div class="opt">
@@ -2972,6 +3028,7 @@ const ASK_KB = [
   { id: "reorder", q: "How do I change the order of my items?", k: "reorder move up down top first", a: () => `Open an item and use the up and down arrows next to <b>Position in your list</b>.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "sections", q: "How do I group items into sections?", k: "section group category heading drink dessert", a: () => `Open an item and tap a <b>Section</b> chip, like Drinks or Desserts, or tap <b>+ New</b> to type your own. Items in the same section show together on your store.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "orders", q: "How do I receive orders?", k: "order receive where see go enter whatsapp come customer", a: () => `Customers pick items on your store and tap <b>Send order on WhatsApp</b>. A chat opens to your phone number (<b>${esc(fmtWa(S.wa) || "the one on your Profile")}</b>) with the order already written in: items, total, their name, date and note. You reply to them on WhatsApp as usual.` },
+  { id: "svareas", q: "How do I show the areas I cover?", k: "area areas cover covering kawasan liputan service booking appointment bio about me agent coway insurance aircond technician", a: () => `Pick <b>Services</b> under <b>What do you sell?</b> in <b>Shop details</b>. Then fill in <b>About you</b> and <b>Areas you cover</b> (separate areas with commas). Customers see them at the top of your store with a pin, a list of your services, and one big <b>Book now</b> button to set an appointment. No fixed price? Leave it empty and customers see <b>Get a quote</b>.`, go: () => askGo("details", "Open Shop details") },
   { id: "digital", q: "Can I sell digital products like e-books or templates?", k: "digital ebook e-book ebooks template templates canva preset presets lightroom pdf printable printables course courses class online download file files", a: () => `Yes. In <b>Shop details</b>, under <b>What do you sell?</b>, pick <b>Digital</b>. Each product then gets a book-shaped cover, sample pages, a <b>What you get</b> list, and a choice of how buyers get it: on <b>WhatsApp</b>, a private <b>download link</b> you send after payment, or <b>your own checkout page</b> (Payhip, Gumroad and so on). Customers find you under <b>Digital</b> on Spot It!.`, go: () => askGo("details", "Open Shop details") },
   { id: "custpay", q: "How do customers pay me?", k: "customer pay me receive money bank transfer cash online gateway card cod", a: () => `Customers pay you directly, the way you agree on WhatsApp: bank transfer, DuitNow, cash and so on. ${esc(APP_NAME)} takes <b>no commission</b> on your sales.` },
   { id: "delivery", q: "How do I set delivery or pickup?", k: "delivery pickup area courier postage", a: () => `You agree delivery or pickup with each customer on WhatsApp. Customers can write it in their order note, for example "Pickup Saturday 3pm". You can mention your delivery areas in the short line under your shop name in <b>Shop details</b>.`, go: () => askGo("details", "Open Shop details") },
@@ -3103,7 +3160,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 95;
+const APP_VERSION = 96;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3741,7 +3798,7 @@ $("builder").addEventListener("click", async e => {
   if (a === "frback"){ EDSTEP = Math.max(1, EDSTEP - 1); renderEditor(); window.scrollTo(0, 0); return; }
   if (a === "frnext"){
     const it = S.items[0];
-    if (!it || !it.n.trim() || !(+it.o[0].p > 0)){ $("frErr").textContent = "Add a name and a price, or tap Skip for now."; return; }
+    if (!it || !it.n.trim() || (!isService(S) && !(+it.o[0].p > 0))){ $("frErr").textContent = isService(S) ? "Add a name, or tap Skip for now." : "Add a name and a price, or tap Skip for now."; return; }
     EDSTEP = 3; renderEditor(); window.scrollTo(0, 0); return;
   }
   if (a === "frskip" || a === "frhome" || a === "frpublish"){
@@ -4080,8 +4137,13 @@ async function showStore(data, isPreview, refresh){
   if (!refresh || dayOff(D.off, $("date").value)) setDate("");   // a day the shop has since marked off can't stay picked
   $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false");
   $("dateLabel").textContent = W(D).date;
-  $("dateWrap").hidden = isDigital(D); $("cEmailWrap").hidden = !isDigital(D);
-  $("sheetTitle").textContent = isDigital(D) ? "Your order" : "Your cart";
+  $("dateWrap").hidden = isDigital(D); $("cEmailWrap").hidden = !isDigital(D); $("svExtra").hidden = !isService(D);
+  $("sheetTitle").textContent = isDigital(D) ? "Your order" : isService(D) ? "Book an appointment" : "Your cart";
+  $("sendHint").textContent = `Opens a chat with the shop, with your ${isService(D) ? "booking" : "order"} written in. Just tap send.`;
+  // Services: who the seller is and where they go, with a pin
+  const bio = isService(D) ? String(D.bio || "").trim() : "", areas = isService(D) ? svAreas(D) : [];
+  $("stBio").hidden = !bio && !areas.length;
+  $("stBio").innerHTML = (bio ? `<p>${esc(bio)}</p>` : "") + (areas.length ? `<div class="svarea"><span class="svpin">${ico("pin", 17, 2.2)}</span><span class="svat"><b>Areas covered</b><span class="svchips">${areas.map(a => `<span>${esc(a)}</span>`).join("")}</span></span></div>` : "");
   $("note").placeholder = W(D).ex.note;
   $("send").textContent = D.kind === "services" ? "Send booking on WhatsApp" : "Send order on WhatsApp";
   $("err").textContent = "";
@@ -4089,7 +4151,7 @@ async function showStore(data, isPreview, refresh){
   // C2: a product sheet from another store, or for an item that changed, never stays open
   if (!refresh){ closeSheet("pOverlay"); closeSheet("overlay"); ORDER_SENT = false; }
   else if ($("pOverlay").classList.contains("open") && (!D.items[pSel.i] || D.items[pSel.i].out || D.closed || pSig(D.items[pSel.i]) !== pSel.sig)) dismissSheet("pOverlay");
-  if (!refresh){ $("note").value = ""; $("cEmail").value = ""; MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
+  if (!refresh){ $("note").value = ""; $("cEmail").value = ""; $("cAddr").value = ""; svSetTime(""); MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
   renderMenu(); renderBar();
   if (!refresh) showAd();
 }
@@ -4189,8 +4251,20 @@ function dgRow(i){
       <div class="pmeta"><span class="pprice">${priceLabel(p)}</span>${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">In your order</span>` : `<span class="dgget">${ext ? "Buy" : "Get it"}</span>`}</div></div>
   </button>`;
 }
+// Services: a catalogue card; tapping it picks the service and opens the booking sheet
+const svPrice = p => p.o.some(o => o.p > 0) ? priceLabel(p) : "Get a quote";
+function svRow(i){
+  const p = D.items[i], img = safeImg(p.img), on = inCart(i) > 0, n = p.o.length;
+  return `<button class="prow svrow${p.out ? " out" : ""}${on ? " on" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
+    ${img ? `<div class="svimg"><img src="${esc(sized(img, 240))}" alt="" loading="lazy" decoding="async"></div>` : ""}
+    <div class="ptext"><h3>${esc(p.n)}</h3>${p.d ? `<p class="pdesc">${esc(p.d)}</p>` : ""}
+      <div class="pmeta"><span class="pprice">${svPrice(p)}</span>${n > 1 ? `<span class="svopts">${n} packages</span>` : ""}${p.out ? `<span class="pill dark">Not available</span>` : ""}</div></div>
+    ${p.out ? "" : `<span class="svpick" aria-hidden="true">${on ? ico("check", 16, 2.8) + "Chosen" : "Book"}</span>`}
+  </button>`;
+}
 function productRow(i){
   if (isDigital(D)) return dgRow(i);
+  if (isService(D)) return svRow(i);
   const p = D.items[i], img = safeImg(p.img), n = inCart(i), bare = !img && D.layout === "list";   // Minimal draws its own "+"
   return `<button class="prow${p.out ? " out" : ""}${bare ? " nophoto" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
     <div class="ptext">
@@ -4238,7 +4312,7 @@ function renderMenu(){
   if (sb.hidden) MQ = "";
   $("stQ").placeholder = both ? `Search ${W(D).list.toLowerCase()} and shop links` : list.length ? `Search the ${W(D).list.toLowerCase()}` : "Search shop links";
   if (!total){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
-  const gridCls = isDigital(D) ? " dggrid" : D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
+  const gridCls = isDigital(D) ? " dggrid" : isService(D) ? " svlist" : D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
   const affNote = `<p class="affnote">${ico("ext", 13, 2.2)}<span>Opens the shop's own page. The seller may earn a commission, at no extra cost to you.</span></p>`;
   const block = (title, rows, note, links) => `<section class="group">${title ? `<h2>${esc(title)}</h2>` : ""}${note ? affNote : ""}<div class="plist${links ? " llist" : gridCls}">${rows}</div></section>`;
   const q = MQ.trim().toLowerCase();
@@ -4295,8 +4369,11 @@ $("stShare").addEventListener("click", async () => {
   else window.open("https://wa.me/?text=" + encodeURIComponent(shareText(D, url, true)), "_blank", "noopener");
 });
 const pSig = p => JSON.stringify([p.n, p.o]);
+function svChoose(i, j){ Object.keys(cart).forEach(k => { if (k.startsWith(i + "|")) delete cart[k]; }); cart[i + "|" + (j || 0)] = 1; saveCart(); }
+function openBooking(){ renderBar(); openSheet("overlay"); }
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
+  if (isService(D)){ if (!inCart(i)) svChoose(i, 0); renderMenu(); return openBooking(); }
   pSel = { i, j: 0, q: 1, sig: pSig(p) };
   const img = safeImg(p.img);
   $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : ""; $("pImg").hidden = !img;
@@ -4348,13 +4425,16 @@ function message(){
   const name = $("cName").value.trim(), dv = $("date").value;
   const dt = dv ? new Date(dv + "T00:00").toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short" }) : "";
   const dg = isDigital(D), email = dg ? $("cEmail").value.trim() : "";
-  let m = `Hi ${D.name}, I'd like to ${D.kind === "services" ? "book" : dg ? "buy" : "order"}:\n\n`;
+  const sv = isService(D), tm = sv ? SV_TIME : "", addr = sv ? $("cAddr").value.trim() : "";
+  let m = `Hi ${D.name}, I'd like to ${sv ? "book" : dg ? "buy" : "order"}:\n\n`;
   if (name) m += `Name: ${name}\n`;
   if (email) m += `Email: ${email}\n`;
   if (dt && !dg) m += `Date: ${dt}\n`;
-  if (name || email || (dt && !dg)) m += `\n`;
-  m += it.map(x => dg ? `• ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}` : `${x.q} × ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}`).join("\n");
-  m += `\n\n*Total: ${money(total)}*`;
+  if (tm) m += `Time: ${tm}\n`;
+  if (addr) m += `Address: ${addr}\n`;
+  if (name || email || (dt && !dg) || tm || addr) m += `\n`;
+  m += it.map(x => sv ? `• ${x.name}${x.opt ? ", " + x.opt : ""}${x.sub > 0 ? " = " + money(x.sub) : " (please quote)"}` : dg ? `• ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}` : `${x.q} × ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}`).join("\n");
+  if (!sv || total > 0) m += `\n\n*Total: ${money(total)}*${sv && it.some(x => !(x.sub > 0)) ? " + quote" : ""}`;
   if (dg) m += `\n\nPlease send me the payment details. Thank you!`;
   const note = $("note").value.trim();
   if (note) m += `\n\nNote: ${note}`;
@@ -4363,6 +4443,8 @@ function message(){
 function renderBar(){
   const it = items();
   const n = it.reduce((a,b)=>a+b.q,0), total = Math.round(it.reduce((a,b)=>a+b.sub,0) * 100) / 100;
+  if (isService(D)) return renderBooking(it, n, total);
+  $("viewCart").hidden = false; $("svBook").hidden = true;
   $("bar").classList.toggle("show", n > 0 && !D.closed);
   $("count").textContent = n;
   $("total").textContent = money(total);
@@ -4374,6 +4456,32 @@ function renderBar(){
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   if (!n) dismissSheet("overlay");
 }
+// Services: the Book now button is always there; the booking sheet lists every service to tick
+function renderBooking(it, n, total){
+  const named = D.items.map((p, i) => p.n.trim() ? i : -1).filter(i => i >= 0);
+  $("viewCart").hidden = true; $("svBook").hidden = false;
+  $("bar").classList.toggle("show", named.length > 0 && !D.closed);
+  $("svBookSub").textContent = n ? `${n} ${n === 1 ? "service" : "services"} chosen${total > 0 ? " · " + money(total) : ""}` : "Set your appointment";
+  $("lines").innerHTML = `<p class="svpickhint">Choose what you need</p>` + named.map(i => {
+    const p = D.items[i], j = Object.keys(cart).filter(k => k.startsWith(i + "|")).map(k => +k.split("|")[1])[0], on = j != null;
+    return `<div class="svline${on ? " on" : ""}${p.out ? " out" : ""}"><label class="svcheck"><input type="checkbox" data-sv="${i}" ${on ? "checked" : ""} ${p.out ? "disabled" : ""}>
+      <span class="cn"><b>${esc(p.n)}</b><span>${p.out ? "Not available right now" : p.o.length > 1 ? "" : (p.o[0].p > 0 ? money(p.o[0].p) : "Get a quote")}</span></span></label>
+      ${p.o.length > 1 && !p.out ? `<select data-svo="${i}" aria-label="Package for ${esc(p.n)}">${p.o.map((o, k) => `<option value="${k}" ${k === (j || 0) ? "selected" : ""}>${esc(o.l || p.n)} · ${o.p > 0 ? esc(money(o.p)) : "quote"}</option>`).join("")}</select>` : ""}</div>`;
+  }).join("") + (n ? `<div class="ctotal"><span>Total</span><span>${total > 0 ? money(total) + (it.some(x => !(x.sub > 0)) ? " + quote" : "") : "To be quoted"}</span></div>` : "");
+  $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
+}
+$("lines").addEventListener("change", e => {
+  if (!isService(D)) return;
+  const c = e.target.closest("[data-sv]"), o = e.target.closest("[data-svo]");
+  if (c){ const i = +c.dataset.sv; if (c.checked){ const sel = document.querySelector(`[data-svo="${i}"]`); svChoose(i, sel ? +sel.value : 0); } else { Object.keys(cart).forEach(k => { if (k.startsWith(i + "|")) delete cart[k]; }); saveCart(); } }
+  else if (o) svChoose(+o.dataset.svo, +o.value);
+  else return;
+  $("err").textContent = ""; renderBar(); renderMenu();
+});
+$("svBook").onclick = () => openBooking();
+var SV_TIME = "";   // var: showStore can run before this line
+function svSetTime(t){ SV_TIME = t; document.querySelectorAll("#svTime [data-t]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.t === t))); }
+$("svTime").addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (!b) return; svSetTime(SV_TIME === b.dataset.t ? "" : b.dataset.t); $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); });
 $("lines").addEventListener("click", e => {
   const b = e.target.closest("button[data-k]"); if (!b) return;
   const k = b.dataset.k; cart[k] = Math.min(99, Math.max(0, (cart[k] || 0) + Number(b.dataset.d))); if (!cart[k]) delete cart[k];
@@ -4403,13 +4511,13 @@ $("dateCal").addEventListener("click", e => {
   if (e.target.closest("[data-nodate]")){ setDate(""); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); return; }
   if (day && !day.disabled){ setDate(day.dataset.day); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); $("err").textContent = ""; }
 });
-["note","cName","date","cEmail"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $(id).removeAttribute("aria-invalid"); $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
+["note","cName","date","cEmail","cAddr"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $(id).removeAttribute("aria-invalid"); $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
   let msg = "", bad = null;
   setDateMin();
   ["cName","date","cEmail"].forEach(id => $(id).removeAttribute("aria-invalid"));
   if (D.closed) msg = "This store is closed right now.";
-  else if (!items().length) msg = "Add something to your cart first.";
+  else if (!items().length) msg = isService(D) ? "Choose a service first." : "Add something to your cart first.";
   else if (!$("cName").value.trim()){ msg = "Add your name so the shop knows who the order is for."; bad = "cName"; }
   else if (isDigital(D) && $("cEmail").value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("cEmail").value.trim())){ msg = "That email doesn't look right. Check it, or leave it empty."; bad = "cEmail"; }
   else if (W(D).dateNeeded && !isDigital(D) && !$("date").value){ msg = "Pick a date first."; bad = "date"; }
