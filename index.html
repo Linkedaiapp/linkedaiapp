@@ -2411,6 +2411,11 @@ $("gwrap").addEventListener("click", e => {
   const open = b.getAttribute("aria-expanded") !== "true";
   b.setAttribute("aria-expanded", String(open)); $("exGrid").hidden = !open;
 });
+// A sliding row of choices (What do you sell?, Store style) stays where it was slid after the page redraws
+function keepSlide(b, fn){
+  const rows = () => [...document.querySelectorAll(".seg.kinds")], k = rows().indexOf(b.parentNode), x = b.parentNode.scrollLeft;
+  fn(); const r = rows()[k]; if (r) r.scrollLeft = x;
+}
 function renderStart(msg, mode){
   const signup = mode === "signup";
   closeSheet("payOverlay");
@@ -2780,7 +2785,7 @@ function edLook(){   // the logo, cover, colour and style cards, shown on Shop d
     <label style="margin-top:0">Brand colour</label>
     <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
     <label>Store style</label>
-    <div class="seg">
+    <div class="seg kinds">
       <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
       <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
       <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
@@ -3297,7 +3302,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 104;
+const APP_VERSION = 105;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3827,7 +3832,7 @@ function legacyEditor(msg){
       ${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}
     </div>
     <label>Store style</label>
-    <div class="seg">
+    <div class="seg kinds">
       <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
       <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
       <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
@@ -3976,8 +3981,8 @@ $("builder").addEventListener("click", async e => {
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
   else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ touch(); edGo("product", S.items.length - 1); } else redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
-  else if (a === "layout"){ S.layout = b.dataset.v; redraw(); }
-  else if (a === "kind"){ const x = b.parentNode.scrollLeft; S.kind = b.dataset.v; redraw(); const sg = document.querySelector(".seg.kinds"); if (sg) sg.scrollLeft = x; }
+  else if (a === "layout"){ keepSlide(b, () => { S.layout = b.dataset.v; redraw(); }); }
+  else if (a === "kind"){ keepSlide(b, () => { S.kind = b.dataset.v; redraw(); }); }
   else if (a === "open"){ S.closed = b.dataset.v === "0"; redraw(); }
   else if (a === "offday"){ const i = +b.dataset.v; S.off.days = S.off.days.includes(i) ? S.off.days.filter(x => x !== i) : [...S.off.days, i].sort(); redrawOff(); }
   else if (a === "offclear"){ S.off.dates = []; redrawOff(); }
