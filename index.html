@@ -101,6 +101,17 @@ textarea{min-height:72px;resize:vertical}
 .brand{font-size:20px;}
 .bh h1{font-size:32px;line-height:1.1;letter-spacing:-.025em;font-weight:800;margin:6px 0 6px}
 .bh p{margin:0 0 20px;color:var(--muted)}
+.exwrap{margin:4px 0 14px}
+.expill{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--accent-ink,var(--accent));background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink,var(--accent));font-weight:700;font-size:14.5px;cursor:pointer}
+.expill svg:last-child{transition:transform .2s ease}
+.expill[aria-expanded="true"] svg:last-child{transform:rotate(180deg)}
+.exgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.exgrid[hidden]{display:none}
+.exst{display:flex;gap:10px;align-items:center;padding:10px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none;min-width:0}
+.exst .tile{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink,var(--accent))}
+.exst .tt{display:flex;flex-direction:column;min-width:0}
+.exst b{font-size:14px}
+.exst .tt span{font-size:12px;color:var(--muted);line-height:1.3}
 .card{padding:16px;margin-bottom:14px}
 .card h2{margin:0 0 2px}
 .linkcard .url{overflow-wrap:anywhere;margin:6px 0 12px}
@@ -2383,12 +2394,25 @@ function normWa(v){
   return d;
 }
 
+// Sign up: one pill that opens the built-in demo stores, so new sellers can see what theirs could look like
+const EXAMPLES = [["demo-food", "food", "Food", "Menu, cart and pickup date"], ["demo-products", "shirt", "Products", "Sizes, colours and delivery"], ["demo-aircond", "wrench", "Services", "Book now, areas covered"],
+  ["demo-insurance", "shield", "Agent", "Brochures and consultations"], ["demo-digital", "download", "Digital", "E-books, templates, presets"], ["demo-affiliate", "link", "Affiliate", "Shopee and TikTok Shop links"]];
+function exampleStoresHtml(){
+  return `<div class="exwrap"><button type="button" class="expill" id="exPill" aria-expanded="false" aria-controls="exGrid">${ico("eye", 17, 2)}<span>Preview example stores</span>${ico("down", 16, 2.2)}</button>
+    <div class="exgrid" id="exGrid" hidden>${EXAMPLES.map(([id, ic, t, d]) => `<a class="exst" href="${esc(home() + id)}"><span class="tile">${ico(ic, 20)}</span><span class="tt"><b>${t}</b><span>${d}</span></span></a>`).join("")}</div></div>`;
+}
+$("gwrap").addEventListener("click", e => {
+  const b = e.target.closest("#exPill"); if (!b) return;
+  const open = b.getAttribute("aria-expanded") !== "true";
+  b.setAttribute("aria-expanded", String(open)); $("exGrid").hidden = !open;
+});
 function renderStart(msg, mode){
   const signup = mode === "signup";
   closeSheet("payOverlay");
   setAccent(COLORS[0]); document.title = APP_NAME + (signup ? " · Sign up" : " · Seller login");
   $("gwrap").innerHTML = `
     <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    ${signup ? exampleStoresHtml() : ""}
     <header class="bh"><h1>${signup ? "Sign up" : "Seller login"}</h1><p>${signup ? "Create your store. You can build and preview it for free." : PENDING_VIEW === "status" ? "Log in to open or close your shop." : "Log in to edit your store."}</p></header>
     ${signup ? "" : loginCardHtml(msg)}
     ${!signup && signupOpen() ? `<a class="btn full" href="${esc(home())}signup">New seller? Sign up</a>` : ""}
@@ -3268,7 +3292,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 101;
+const APP_VERSION = 102;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
