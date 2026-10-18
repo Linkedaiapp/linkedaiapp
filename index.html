@@ -2079,6 +2079,7 @@ function renderStart(msg, mode){
       <label>Choose a 6-digit PIN<span class="pinwrap"><input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="hint">You'll log in with your phone number and this PIN.</p>
+      <p class="hint">Building and previewing is free. Publish (pay) within 10 days of signing up, or your unpaid store is removed and the link name is free again.</p>
       <div class="rules">
         <b>Not allowed on ${esc(APP_NAME)}</b>
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
@@ -2131,6 +2132,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-unpaid", at: "2026-10-18", title: "Publish within 10 days", body: "Stores that aren't published (paid for) within 10 days of signing up are now removed, so link names and phone numbers don't get stuck. If your store isn't live yet, the Publish card on your Store page shows how many days you have left. Stores already waiting today get the full 10 days from now." },
   { id: "u-20261017-polish", at: "2026-10-17", title: "A faster, clearer app", body: "We gave the whole app a check-up. It opens faster on slow internet, and store photos load much quicker for your customers. Dark mode is easier to read, with clear badges and buttons. Prices now always show two decimals, like RM13.00. If your store isn't live yet, Publish my store is now at the top of your Store page. Nothing you need to do." },
   { id: "u-20261017-profile2", at: "2026-10-17", title: "Phone number, email and PIN in one place", body: "Tap your store name at the top of Account to open Profile. Your phone number, email and PIN are all there: tap the pencil next to one to change it. We now say \"phone number\" everywhere instead of \"WhatsApp number\". Orders still come to that number on WhatsApp." },
   { id: "u-20261017-buttons", at: "2026-10-17", title: "A lighter look for buttons", body: "Every button in the app now has the same clean look: a light button with a coloured outline, coloured words and icon. Save, Share, Add to cart, Log in and the rest all work the same as before." },
@@ -2183,7 +2185,7 @@ function bulletinItems(){
   else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Link Kedai App Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
   else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a blue Verified tick on your store logo. It shows your payment was confirmed and your store passed our safety check.");
   else if (b.status === "live" && b.paid) push("st-paid-" + b.paidAt, "shield", "Store status", "Payment received", "Your store is live. Once your payment is confirmed, you'll get the Verified badge.");
-  else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store on your Store page to go live.");
+  else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store on your Store page to go live." + (unpaidLeft() ? " " + unpaidLeft() : ""));
   // shop insights, this week vs last week
   const st = Array.isArray(b.stats) ? b.stats : [];
   if (b.status === "live" && st.length >= 7){
@@ -2256,6 +2258,7 @@ async function loadBulletin(){
   BUL = b; updateBell();
   if (b && !SESSION.admin) try { if (b.verified) localStorage.setItem("lk-ver:" + id, "1"); else localStorage.removeItem("lk-ver:" + id); } catch(e) {}
   const tags = $("linkTags"); if (tags) tags.innerHTML = linkTags();
+  const left = $("pubLeft"); if (left) left.textContent = unpaidLeft();
 }
 function openBulletin(){
   const items = bulletinItems(), seen = bulSeen();
@@ -2953,6 +2956,12 @@ function tipHtml(){
   </section>`;
 }
 
+// A store that isn't paid for within 10 days of sign-up is removed by the server; the seller always sees how long is left
+function unpaidLeft(){
+  const exp = BUL && Number(BUL.expiresAt); if (!exp) return "";
+  const days = Math.ceil((exp - Date.now()) / 864e5), when = new Date(exp).toLocaleDateString("en-MY", { day: "numeric", month: "short" });
+  return days <= 0 ? "Publish today, or your store will be removed tonight." : `Publish within ${days} day${days === 1 ? "" : "s"} (by ${when}), or your unpaid store is removed.`;
+}
 function publishCardHtml(){
   if (STATUS === "review") return "";
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -2966,6 +2975,7 @@ function publishCardHtml(){
   return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Publish your store</h2>
     <p class="hint">When your store looks right, publish it. Pay once${shownPrice() ? `, <b>${esc(shownPrice())}</b>` : ""}, and most stores go live straight away. A few get a quick safety check first (up to 24 hours).</p>
+    <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
     <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Publish my store</button>
   </section>`;
 }
@@ -4270,7 +4280,7 @@ function legalDoc(which){
     <p>Your information is stored using trusted providers: Google (store data, photos and receipts), GitHub (the website), WhatsApp/Meta (orders you send), and link preview services (Microlink and Jina Reader), which read the public shop pages of affiliate links you paste to fetch their photo and name. Payments are handled by your bank, DuitNow or PayPal. Each of these follows its own privacy policy.</p>
     <h2>5. How long we keep it</h2>
     <ul>
-      <li>Store information is kept while your store exists. When you delete your account (Account, then your store name, then Danger zone), your store and photos are removed.</li>
+      <li>Store information is kept while your store exists. An unpaid store is removed 10 days after sign-up. When you delete your account (Account, then your store name, then Danger zone), your store and photos are removed.</li>
       <li>Payment receipts may be kept for our records, as required for accounting.</li>
     </ul>
     <h2>6. Your rights</h2>
@@ -4310,6 +4320,7 @@ function legalDoc(which){
     <h2>3. Fees</h2>
     <ul>
       <li>Publishing a store costs a one-time fee of ${price}. There are no monthly fees and no commission on your sales.</li>
+      <li>A store that isn't published (paid for) within 10 days of signing up is removed, with its items and photos, so its link name and phone number can be used again.</li>
       <li>Ad banners are sold separately.</li>
       <li>Refunds follow our <a href="${esc(home())}refund">Refund Policy</a>.</li>
     </ul>
