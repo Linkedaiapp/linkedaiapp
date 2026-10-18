@@ -265,7 +265,7 @@ textarea{min-height:72px;resize:vertical}
 .botav{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}   /* the News bot's picture */
 .bulhead .botav{width:56px;height:56px}
 .skyslot{border-top:1px solid var(--line);padding:2px 0}.skyslot:first-of-type{margin-top:10px}.skyslot summary{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer}.skyslot summary b{flex:none}.skyslot summary span:not(.tag2){flex:1;min-width:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skyslot[open]{padding-bottom:12px}
-.skyflight{position:relative;width:0;height:0;z-index:4}
+.skyflight{position:relative;width:0;height:0;z-index:4}.skyscale{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0}
 .skyhit{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:grid;place-items:center}
 .skyjetwrap{display:block;width:32px;height:32px}.skyjet{width:32px;height:32px;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .skyrope{position:absolute;left:0;top:0;width:31px;height:0;border-top:1.5px dashed #9AA3AD;transform-origin:0 0;pointer-events:none}
@@ -5063,9 +5063,9 @@ function skyFly(){
   const deg = Math.atan2(B[1] - A[1], B[0] - A[0]) * 180 / Math.PI;   // the map never rotates, so the screen heading is the map heading
   const logo = safeImg(ad.logo), el = document.createElement("div");
   el.className = "skyflight";
-  el.innerHTML = `<i class="skyrope" style="transform:rotate(${(deg + 180).toFixed(1)}deg) translateX(13px)"></i>
+  el.innerHTML = `<span class="skyscale"><i class="skyrope" style="transform:rotate(${(deg + 180).toFixed(1)}deg) translateX(13px)"></i>
     <span class="skybanner"><span class="skyflag">${logo ? `<img src="${esc(logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(ad.text)}</span></span></span>
-    <button type="button" class="skyhit" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."><span class="skyjetwrap" style="transform:rotate(${deg.toFixed(1)}deg)">${SKY_PLANE}</span></button>`;
+    <button type="button" class="skyhit" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."><span class="skyjetwrap" style="transform:rotate(${deg.toFixed(1)}deg)">${SKY_PLANE}</span></button></span>`;
   const mk = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(from).addTo(map);
   // the banner hangs behind the plane on its tow line, the right distance away whichever way it flies
   const bn = el.querySelector(".skybanner"), rad = deg * Math.PI / 180, cx = Math.cos(rad), cy = Math.sin(rad);
@@ -5080,6 +5080,7 @@ function skyFly(){
   try {
     if (!map.getSource("skytrail")){ map.addSource("skytrail", { type: "geojson", data: { type: "FeatureCollection", features: [] } }); map.addLayer({ id: "skytrail", type: "line", source: "skytrail", paint: { "line-color": mxDark() ? "#3A5F8F" : "#8DB6E8", "line-width": 2, "line-opacity": .85, "line-dasharray": [2, 2] } }); }   // the dark map is drawn inverted, so a deeper blue shows up light
   } catch(e) {}
+  skyScale();
   if (!SKY.raf){ SKY.last = performance.now(); SKY.raf = requestAnimationFrame(skyLoop); }
   clearTimeout(SKY.t); SKY.t = setTimeout(skyFly, 50000 + Math.random() * 10000);   // the next plane takes off in about a minute, wherever this one is
   skyHit("skyview", ad); SKY.i++;   // the next flight carries the next banner
@@ -5113,6 +5114,8 @@ function skyLoop(now){
   try { const src = map.getSource("skytrail"); if (src) src.setData({ type: "FeatureCollection", features: SKY.flights.map(f => f.trail) }); } catch(e) {}
   SKY.raf = SKY.flights.length ? requestAnimationFrame(skyLoop) : 0;
 }
+// planes look smaller as the map zooms out, like things really on the map: full size at street and town level, about half over the whole country
+function skyScale(){ const z = MX && MX.map ? MX.map.getZoom() : 10, k = Math.max(.5, Math.min(1, .5 + (z - 5) * .1)); document.querySelectorAll(".skyscale").forEach(x => x.style.transform = `scale(${k.toFixed(3)})`); }
 function skyOnScreen(f){ const el = MX && MX.map && MX.map.getContainer(); if (!el) return false; const p = MX.map.project(f.mk.getLngLat()), m = 60; return p.x > -m && p.y > -m && p.x < el.clientWidth + m && p.y < el.clientHeight + m; }
 // all planes and trails leave the map
 function skyLand(){
@@ -5467,6 +5470,7 @@ async function renderExplore(){
   });
   map.on("moveend", () => { mxDraw(); exRemember(); });
   map.on("dragstart", () => { SKY.drag = true; }); map.on("dragend", () => { SKY.drag = false; });
+  map.on("zoom", skyScale);
   skyStart();
   map.on("click", e => {
     const t = e.originalEvent && e.originalEvent.target;
