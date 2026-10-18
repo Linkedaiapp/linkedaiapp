@@ -912,6 +912,10 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxmark img{width:40px;height:auto;display:block}
 .mxsearch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:46px;border-radius:var(--r-md);padding:0 6px 0 14px;color:var(--muted);margin:0}
 .mxsearch{font-weight:500}
+.mxsearch{position:relative;overflow:hidden}
+.mxtrain{position:absolute;left:0;right:0;bottom:2px;height:13px;pointer-events:none;color:var(--plum-ink);opacity:.75}
+.mxtrainin{position:absolute;left:0;bottom:0;display:block;transform:translateX(-96px)}.mxtrainin svg{display:block;width:74px;height:12px;animation:trainBob .35s ease-in-out infinite alternate}
+@keyframes trainBob{to{transform:translateY(-.6px)}}
 .mxsearch input[type=search],.mxsearch input[type=search]:focus{flex:1;width:auto;min-width:0;margin:0;min-height:0;height:100%;padding:0;border:0;border-radius:0;background:none;box-shadow:none;outline:none;font:inherit;font-size:16px;font-weight:500;color:var(--ink)}
 .mxsearch input::placeholder{color:var(--muted)}
 .mxsearch input::-webkit-search-cancel-button{display:none}
@@ -2238,6 +2242,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-train", at: "2026-10-18", title: "All aboard Spot It!", body: "Look out for the little train that runs along the search bar on Spot It! now and then. Just for fun." },
   { id: "u-20261018-sky", at: "2026-10-18", title: "A plane over Spot It!", body: "Now and then, a little plane flies across the Spot It! map towing a banner. Want your shop on it? Message us to book the plane banner." },
   { id: "u-20261018-settings", at: "2026-10-18", title: "New: Settings", body: "Under Account, open Settings to pick Light or Dark (or Auto, to match your phone), make text Large, write your own share message (it goes with your link whenever you or your customers tap Share), log out other phones, and check for app updates." },
   { id: "u-20261018-help", at: "2026-10-18", title: "Help is all in one place", body: "Under Account, Help now opens your assistant. Ask anything there, and if you still need a hand, Chat with us on WhatsApp is at the bottom of the page." },
@@ -2978,7 +2983,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 77;
+const APP_VERSION = 78;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5147,8 +5152,22 @@ function skyStill(ad){
   el.querySelector(".skystillgo").onclick = () => skyOpen(ad);
   el.querySelector(".mxx").onclick = () => { el.remove(); SKY.el = null; try { sessionStorage.setItem("lk-skyx", "1"); } catch(e) {} };
 }
+// ---------- A tiny train runs along the bottom of the Spot It! search bar now and then, just for fun ----------
+const TRAIN_SVG = '<svg viewBox="0 0 86 14" aria-hidden="true"><g fill="currentColor"><rect x="1" y="3" width="16" height="7" rx="2"/><rect x="20" y="3" width="16" height="7" rx="2"/><rect x="39" y="3" width="16" height="7" rx="2"/><path d="M58 2.5h14l4 2.5h6.5a2.5 2.5 0 0 1 2.5 2.5V10H58z"/><rect x="61" y="0" width="3" height="3" rx=".8"/></g><g fill="#8DB6E8"><rect x="4" y="4.6" width="3" height="2.4" rx=".6"/><rect x="9.5" y="4.6" width="3" height="2.4" rx=".6"/><rect x="23" y="4.6" width="3" height="2.4" rx=".6"/><rect x="28.5" y="4.6" width="3" height="2.4" rx=".6"/><rect x="42" y="4.6" width="3" height="2.4" rx=".6"/><rect x="47.5" y="4.6" width="3" height="2.4" rx=".6"/><rect x="66" y="4.4" width="4.5" height="2.6" rx=".6"/></g><g stroke="currentColor" stroke-width="1.2"><path d="M17 7.5h3M36 7.5h3M55 7.5h3"/></g><g fill="currentColor"><circle cx="5" cy="11.6" r="1.6"/><circle cx="13" cy="11.6" r="1.6"/><circle cx="24" cy="11.6" r="1.6"/><circle cx="32" cy="11.6" r="1.6"/><circle cx="43" cy="11.6" r="1.6"/><circle cx="51" cy="11.6" r="1.6"/><circle cx="63" cy="11.6" r="1.6"/><circle cx="71" cy="11.6" r="1.6"/><circle cx="79" cy="11.6" r="1.6"/></g></svg>';
+let TRAIN = { t: 0, anim: null };
+function trainStop(){ clearTimeout(TRAIN.t); if (TRAIN.anim) try { TRAIN.anim.cancel(); } catch(e) {} TRAIN = { t: 0, anim: null }; }
+function trainStart(){ trainStop(); if (reduceMotion()) return; TRAIN.t = setTimeout(trainRun, 4000); }
+function trainRun(){
+  const box = $("mxTrain"), q = $("exQ"); if (!box) return;
+  // not while someone is typing a search
+  if (document.hidden || (q && (document.activeElement === q || q.value))) { TRAIN.t = setTimeout(trainRun, 8000); return; }
+  if (!box.firstChild) box.innerHTML = `<span class="mxtrainin">${TRAIN_SVG}</span>`;
+  const w = box.parentNode.clientWidth, car = box.firstChild;
+  TRAIN.anim = car.animate([{ transform: "translateX(-96px)" }, { transform: `translateX(${w + 6}px)` }], { duration: Math.max(5500, w * 22), easing: "linear" });
+  TRAIN.anim.onfinish = () => { TRAIN.anim = null; TRAIN.t = setTimeout(trainRun, 16000 + Math.random() * 8000); };
+}
 function mxDestroy(){
-  skyStop();
+  skyStop(); trainStop();
   if (!MX) return;
   clearTimeout(MX.qt); clearTimeout(MX.tt); document.removeEventListener("keydown", MX.key);
   try { MX.map.remove(); } catch(e) {}
@@ -5406,7 +5425,7 @@ async function renderExplore(){
     <div class="mxtop">
       <div class="mxbar">
         <span class="mxmark mxg"><img src="logo.png" alt="${esc(APP_NAME)}"></span>
-        <label class="mxsearch mxg">${ico("search", 20, 1.8)}<input type="search" id="exQ" placeholder="Search stores or items" aria-label="Search stores or items" autocomplete="off" enterkeyhint="search"><button type="button" class="mxclr" id="mxClr" aria-label="Clear search" hidden>${ico("x", 16, 2)}</button></label>
+        <label class="mxsearch mxg"><span class="mxtrain" id="mxTrain" aria-hidden="true"></span>${ico("search", 20, 1.8)}<input type="search" id="exQ" placeholder="Search stores or items" aria-label="Search stores or items" autocomplete="off" enterkeyhint="search"><button type="button" class="mxclr" id="mxClr" aria-label="Clear search" hidden>${ico("x", 16, 2)}</button></label>
         <a class="mxib mxg" href="${esc(home())}" aria-label="For sellers" title="For sellers">${ico("store", 21)}</a>
       </div>
       <div class="mxchips" id="exCats" role="group" aria-label="Filters"><button type="button" class="mxchip t mxg" id="exAff">${ico("link", 18, 2)}Affiliate Shops</button><i class="mxsep"></i><button type="button" class="mxchip mxg" data-excat="all">${ico("grid", 19, 1.9)}All</button>${Object.keys(CATS).map(k => `<button type="button" class="mxchip mxg" data-excat="${k}">${ico(CAT_ICON[k], 19, 1.9)}${CATS[k]}</button>`).join("")}<i class="mxsep"></i><button type="button" class="mxchip t mxg" id="exOpen">Open now</button><button type="button" class="mxchip t mxg" id="exVer">Verified</button></div>
@@ -5471,6 +5490,7 @@ async function renderExplore(){
   map.on("moveend", () => { mxDraw(); exRemember(); });
   map.on("dragstart", () => { SKY.drag = true; }); map.on("dragend", () => { SKY.drag = false; });
   map.on("zoom", skyScale);
+  trainStart();
   skyStart();
   map.on("click", e => {
     const t = e.originalEvent && e.originalEvent.target;
