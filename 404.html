@@ -3006,7 +3006,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 92;
+const APP_VERSION = 93;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5430,10 +5430,10 @@ const KL_SKY = [
   { at: [100.12691, 6.39733], h: .5, vb: [90, 98], svg: kltAlHussain, from: 6.5 },    // Masjid Al-Hussain, Kuala Perlis
   { at: [101.92036, 2.718], h: .42, vb: [100, 82], svg: kltMinang, from: 6 },         // Minangkabau house, Seremban
   { at: [115.24862, 5.38117], h: .5, vb: [34, 150], svg: kltChimney, from: 0 },       // The Chimney, Labuan
-  { at: [101.737803, 2.761088], geo: 1158, vb: [579, 498], svg: kltSepang, scaled: kltSepangScale, from: 9 },   // Sepang International Circuit, true size
+  { at: [101.737803, 2.761088], geo: 1158, min: 0, vb: [579, 498], svg: kltSepang, scaled: kltSepangScale, from: 11.5 },   // Sepang International Circuit, true size
   { at: [101.70552, 2.75273], h: .5, vb: [110, 110], svg: kltKLIA, from: 9 },         // KLIA Terminal 1 and its control tower
-  { at: [100.355, 5.3549], geo: 7847, min: 0, max: 40000, vb: [981, 92], svg: kltPenangDeck, scaled: kltSepangScale, from: 9 },   // Penang Bridge deck, true length
-  { at: [100.348, 5.35376], h: .7, vb: [130, 90], svg: kltPenangSpan, from: 9 },     // Penang Bridge, the cable-stayed main span
+  { at: [100.355, 5.3549], geo: 7847, min: 0, max: 40000, vb: [981, 92], svg: kltPenangDeck, scaled: kltSepangScale, from: 10.5 },   // Penang Bridge deck, true length
+  { at: [100.348, 5.35376], h: .7, vb: [130, 90], svg: kltPenangSpan, from: 10.5 },     // Penang Bridge, the cable-stayed main span
   { at: [103.14496, 5.33974], h: .62, vb: [100, 100], svg: kltDrawbridge, from: 11 }  // Kuala Terengganu Drawbridge
 ].sort((a, b) => b.at[1] - a.at[1]);   // north to south, so the one lower on the screen stands in front
 function kltAdd(map){
