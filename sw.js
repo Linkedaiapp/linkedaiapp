@@ -1,6 +1,6 @@
 // Link Kedai App helper: opens fast and shows a friendly page when offline.
 // Pages, the manifest and the icons are always fetched fresh first, so updates arrive straight away.
-const V = "linkedai-v64";
+const V = "linkedai-v67";
 // Only what the app needs to open offline (the splash logo and loader logo included). Big icons and shortcut pictures
 // are fetched when the phone asks for them, so a first visit doesn't download them all over a slow connection.
 const SHELL = ["./index.html", "./manifest.webmanifest", "./icon-192.png", "./favicon.png", "./logo.png", "./logo-white.png", "./bot.jpg"];
@@ -29,7 +29,7 @@ self.addEventListener("fetch", e => {
     e.waitUntil(net.catch(() => {}));
     return;
   }
-  if (/\.(png|jpg|webmanifest|json)$/.test(url.pathname)) {
+  if (/\.(png|jpg|webp|webmanifest|json)$/.test(url.pathname)) {
     // network first so a changed name or icon shows up right away; cache only when offline
     // stored without the ?t= cache-buster, so there is one copy per file instead of a new one on every visit
     const key = url.origin + url.pathname;

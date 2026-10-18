@@ -264,6 +264,7 @@ textarea{min-height:72px;resize:vertical}
 .bulhead .botav{width:56px;height:56px}
 .askbot .bulbody p{color:var(--ink)}.askbot .bulcta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .askme{margin:0 0 10px auto;max-width:85%;width:fit-content;padding:10px 14px;border-radius:18px 18px 4px 18px;background:var(--soft);border:1px solid var(--line);color:var(--ink);font-size:14px;line-height:1.4;overflow-wrap:anywhere;scroll-margin-top:72px}
+.askshot{margin:12px 0 0}.askshot a{display:block}.askshot img{display:block;width:100%;max-width:300px;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}.askshot figcaption{font-size:12px;font-weight:600;color:var(--muted);margin-top:6px}
 .askmore{margin-top:12px}.askmore .sechips{margin-top:6px}
 .askrow{display:flex;gap:8px;align-items:stretch}.askrow input{flex:1;min-width:0;margin:0}.askrow .btn{flex:none}
 .askall summary{padding:14px 16px;font-weight:700;cursor:pointer}
@@ -361,7 +362,7 @@ textarea{min-height:72px;resize:vertical}
 .stvisit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
 .stvisit .addr{flex:1 1 100%;display:flex;gap:6px;align-items:flex-start;font-size:14px;color:var(--muted);line-height:1.35}
 .stvisit .addr svg{flex:none;margin-top:1px}
-.mxmk.exact .mxpin{border-radius:50% 50% 50% 4px;transform:rotate(-45deg)}.mxmk.exact .mxpin>svg{transform:rotate(45deg)}
+
 .mxdir{display:flex;gap:8px;margin-top:8px}.mxdir .btn{flex:1;white-space:nowrap}.stvisit .mxdir{flex:1 1 100%;margin-top:0}
 .shoptag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--ink);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:1px}
 .exinstall{margin-top:12px}.dangercard{border-color:var(--err)}
@@ -906,19 +907,21 @@ body.exploring #gwrap{padding:0;max-width:none}
 
 /* markers */
 .mxmk,.mxcl,.mxme{background:none;border:0}
-.mxmk{width:36px;height:36px;cursor:pointer;outline:none}
+.mxmk{width:44px;height:56px;cursor:pointer;outline:none}
 .mxcl{width:46px;height:46px;cursor:pointer;outline:none}
 .mxme{width:18px;height:18px;pointer-events:none}
-.mxmk:focus-visible .mxpin,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
-.mxpin{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
-.mxpin svg{width:17px;height:17px}
-.mxpin.haslogo{overflow:hidden;background:#fff}
-.mxpin .mxlg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
-.mxmk.exact .mxpin .mxlg{transform:rotate(45deg) scale(1.42)}
-.mxvb{position:absolute;left:24px;top:22px;width:17px;height:17px;border-radius:50%;background:var(--verify);border:2px solid #fff;display:grid;place-items:center;color:#fff}
+.mxmk:focus-visible .mxdot,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
+.mxpin{position:absolute;left:0;top:0;width:44px;height:56px;display:block;transform-origin:50% 100%;filter:drop-shadow(0 3px 4px rgba(20,10,15,.35));transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.mxdrop{position:absolute;inset:0;width:44px;height:56px;overflow:visible}.mxdrop path{fill:var(--c);stroke:#fff;stroke-width:2.5;stroke-linejoin:round}
+.mxdot{position:absolute;left:7px;top:7px;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--c);display:grid;place-items:center;overflow:hidden}
+.mxdot svg{width:16px;height:16px}
+
+.mxdot .mxlg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;background:#fff}
+
+.mxvb{position:absolute;left:29px;top:1px;width:17px;height:17px;border-radius:50%;background:var(--verify);border:2px solid #fff;display:grid;place-items:center;color:#fff}
 .mxvb svg{width:9px;height:9px}
-.mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05);opacity:.8}
-.mxnm{position:absolute;left:50%;top:40px;transform:translateX(-50%);max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
+.mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05) drop-shadow(0 3px 4px rgba(20,10,15,.3));opacity:.8}
+.mxnm{position:absolute;left:50%;top:59px;transform:translateX(-50%);max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
   background:var(--glass);color:var(--ink);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;transition:opacity .2s ease;pointer-events:none}
 #mxMap.mxzoom .mxnm,.mxmk.sel .mxnm{opacity:1}
 .mxmk.sel .mxpin{transform:scale(1.22)}
@@ -1061,6 +1064,18 @@ a.prow{text-decoration:none;color:inherit}
 .plink .pill{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink)}
 /* footer: one calm block instead of five stacked lines */
 .stfoot{margin:22px 14px 0;text-align:center}
+.stnear{margin:0 0 10px;padding:10px 12px 8px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);text-align:left}
+.nearhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}.stnear h2{font-size:14px;font-weight:700;margin:0;color:var(--ink)}.nearhead a{font-size:13px;font-weight:700;color:var(--plum-ink);text-decoration:none;padding:4px 2px;flex:none}
+.nearrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0}
+#nearOverlay .nearrow{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0 0}
+.nearst{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--ink);text-align:center;min-width:0;padding:4px 2px;border-radius:12px}
+.nearst:active{transform:scale(.96)}
+.nearst b{font-size:12px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.stnear .nearst>span:last-child{display:none}.nearst>span:last-child{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.nearpin{position:relative;width:44px;height:56px;flex:none;filter:drop-shadow(0 2px 3px rgba(20,10,15,.3))}.stnear .nearpin{width:34px;height:43px}.nearpin .mxdrop{width:100%;height:100%}
+.nearpin .mxdot{left:15.9%;top:12.5%;width:68.2%;height:53.6%;font-weight:800;font-size:15px}.stnear .nearpin .mxdot{font-size:12px}
+.nearpin .mxvb{left:auto;right:-5px;top:-2px}.stnear .nearpin .mxvb{width:14px;height:14px;right:-5px;top:-3px}.stnear .nearpin .mxvb svg{width:7px;height:7px}
+
 .stfoot .safenote{margin:0 0 14px;text-align:left}
 .stfoot .stcta{margin:0 0 6px;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);justify-content:center;text-align:center;column-gap:12px;row-gap:10px}
 .stfoot .stcta span{font-weight:600;color:var(--ink)}
@@ -1212,6 +1227,18 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <label>More details (optional)<input type="text" id="repNote" maxlength="140" placeholder="e.g. They sell vape in the second item"></label>
     <p class="err" id="repErr" role="alert"></p>
     <button class="btn solid full" type="button" id="repGo" style="margin-top:6px">Send report</button>
+  </div>
+</div>
+
+<!-- ============ AFTER AN ORDER: MORE STORES ON SPOT IT! ============ -->
+<div class="overlay" id="nearOverlay" role="dialog" aria-modal="true" aria-labelledby="nearTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="nearOverlay" aria-label="Close">×</button>
+    <h2 id="nearTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Thanks for your order!</h2>
+    <p class="hint" style="margin:0">Your cart is cleared. Looking for more? Discover other home sellers near you on Spot It!</p>
+    <div id="nearSheetList"></div>
+    <a class="btn solid full" id="nearGo" href="#" style="margin-top:14px;padding:15px">Open Spot It!</a>
+    <button type="button" class="btn full" data-close="nearOverlay" style="margin-top:8px">Not now</button>
   </div>
 </div>
 
@@ -1381,6 +1408,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     </div>
     <main id="menu" style="margin-top:4px"></main>
     <footer class="stfoot">
+    <section class="stnear" id="stNear" hidden aria-labelledby="stNearTitle"></section>
     <div class="stcta" id="stCta" hidden>
       <span>Made with <a id="brandLink" href="#" style="color:inherit">Link Kedai App</a></span>
       <a class="stcta-btn" id="stCtaBtn" href="#">Get your own store</a>
@@ -2162,6 +2190,9 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-map-pins", at: "2026-10-18", title: "New map pins with your logo", body: "On Spot It!, every store is now a navy map pin with your logo in its round head. The tip of the pin points at your area. The same pins show in More stores near you at the end of store pages. No logo yet? Add one under Shop details." },
+  { id: "u-20261018-more-stores", at: "2026-10-18", title: "Customers discover more stores", body: "At the end of every store page, customers now see a few other Link Kedai App stores near them, with a button to Spot It! After a customer's order goes through, we also suggest nearby stores once. Your store shows up on other sellers' pages too when you're listed on Spot It! (turn it on under Spot It! listing)." },
+  { id: "u-20261018-ask-pictures", at: "2026-10-18", title: "Answers now come with pictures", body: "When you ask your assistant a question, most answers now show a picture of the screen with a red circle and arrow on exactly where to tap. Tap the picture to see it bigger." },
   { id: "u-20261018-share", at: "2026-10-18", title: "Customers can share your store", body: "Your store page now has a Share button at the top right. Customers tap it to send your store to friends on WhatsApp, Telegram, Facebook and more, so word about your shop spreads further." },
   { id: "u-20261018-link-list", at: "2026-10-18", title: "Shop links are now a tidy list", body: "On your store, shop links now always show as a simple list: a small photo, the name, the price and the shop. Customers can scroll through lots of links quickly. Your store style (List, Photo grid or Minimal) still applies to your own items." },
   { id: "u-20261018-ask", at: "2026-10-18", title: "Ask your assistant anything", body: "Got a question about the app? Tap Got a question? on your Store page (or Ask your assistant under Account) and type it in English or Malay, like \"how do I add a photo?\" or \"macam mana nak tutup kedai?\". Your assistant answers right away, with a button that takes you straight there." },
@@ -2765,7 +2796,7 @@ const ASK_KB = [
   { id: "news", q: "Where do I see news and updates?", k: "news update new bell red tip", a: () => `Tap the bell at the top of your Store page. A red number means something new. You can also find News under Account.`, go: () => askGo("news", "Open News") },
   { id: "phone", q: "How do I change my phone number?", k: "change phone number whatsapp", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>Phone number</b>. Orders go to the new number, and your store link stays the same.`, go: () => askGo("profile", "Open Profile") },
   { id: "chpin", q: "How do I change my PIN?", k: "change pin new", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>PIN</b>.`, go: () => askGo("profile", "Open Profile") },
-  { id: "forgot", q: "I forgot my PIN", k: "forgot pin reset login", a: () => `On the log-in page, tap <b>Forgot PIN</b>. If you've added an email, we send you a code to set a new PIN. No email added? WhatsApp us and we'll help.${ME_EMAIL ? "" : " Tip: add your email on Profile now, so you can reset it yourself next time."}`, go: () => ME_EMAIL ? "" : askGo("profile", "Add my email") },
+  { id: "forgot", q: "I forgot my PIN", k: "forgot pin reset login", a: () => `On the log-in page, under <b>Forgot your PIN?</b>, tap <b>Reset it</b>. If you've added an email, we send you a code to set a new PIN. No email added? WhatsApp us and we'll help.${ME_EMAIL ? "" : " Tip: add your email on Profile now, so you can reset it yourself next time."}`, go: () => ME_EMAIL ? "" : askGo("profile", "Add my email") },
   { id: "email", q: "How do I add my email?", k: "email add change", a: () => `Open <b>Profile</b> (tap your store name on Account) and tap the pencil next to <b>Email</b>. You can then log in with it, and reset your PIN yourself if you forget it.`, go: () => askGo("profile", "Open Profile") },
   { id: "login", q: "How do I stay logged in or log out?", k: "login logout stay keep sign", a: () => `When you log in, tick <b>Keep me logged in on this phone</b> and you won't need your PIN on that phone for 90 days. To log out, go to <b>Account</b> and tap <b>Log out</b>.`, go: () => askGo("account", "Open Account") },
   { id: "delacct", q: "How do I delete my account?", k: "delete account permanently quit forever", a: () => `Open <b>Profile</b> and scroll to <b>Danger zone</b>. Deleting removes your store, items and photos for good, and your link stops working. It can't be undone, and the fee isn't refunded once you've gone live. To take a break instead, just set your store to Closed.`, go: () => askGo("profile", "Open Profile") },
@@ -2777,6 +2808,8 @@ const ASK_KB = [
   { id: "slow", q: "The app is slow or not working", k: "slow load error not working blank refresh", a: () => `Check your internet first, then close the app fully and open it again. Still stuck? WhatsApp us and tell us what you see.`, go: () => askWa() },
   { id: "human", q: "How do I talk to a person?", k: "contact help talk person human whatsapp call", a: () => `Tap below to chat with us on WhatsApp. You'll also find <b>Help</b> under Account.`, go: () => askWa() }
 ];
+// Example pictures (help/<id>.webp): the app screen with a red circle and arrow on what to tap
+const ASK_SHOTS = new Set("additem affiliate chpin currency daysoff delacct delitem delivery email forgot human insights link linkname login look map name news openclose orders phone photo pin preview price publish removed reorder sections sizes soldout spotit status trial verified".split(" "));
 const ASK_POPULAR = ["additem", "orders", "trial", "link", "openclose", "spotit"];
 const ASK_SMALL = [
   [/^(hi|hai|hello|helo|hey|assalamualaikum|salam|morning|selamat\b.*)$/, () => `Hi! Ask me anything about your store, like "how do I add a photo?" or "macam mana nak tutup kedai?".`],
@@ -2799,9 +2832,9 @@ function askFind(text){
 let ASKLOG = [], ASKID = "", ASKBACK = "home";
 function askMsgHtml(m){
   if (m.me) return `<div class="askme"><span class="sr">You asked: </span>${esc(m.me)}</div>`;
-  return `<article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>${m.bot}</p>${m.cta ? `<div class="bulcta">${m.cta}</div>` : ""}${m.more && m.more.length ? `<div class="askmore"><span class="bulmeta">Or did you mean</span><div class="sechips">${m.more.map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div></div>` : ""}</div></article>`;
+  return `<article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>${m.bot}</p>${m.shot ? `<figure class="askshot"><a href="help/${m.shot}.webp" target="_blank" rel="noopener" aria-label="See the example picture full size"><img src="help/${m.shot}.webp" width="360" height="430" loading="lazy" alt="Example: the app screen, with a red circle on where to tap"></a><figcaption>Tap where the red circle is</figcaption></figure>` : ""}${m.cta ? `<div class="bulcta">${m.cta}</div>` : ""}${m.more && m.more.length ? `<div class="askmore"><span class="bulmeta">Or did you mean</span><div class="sechips">${m.more.map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div></div>` : ""}</div></article>`;
 }
-function askReply(e){ return { bot: e.a(), cta: e.go ? e.go() : "" }; }
+function askReply(e){ return { bot: e.a(), cta: e.go ? e.go() : "", shot: ASK_SHOTS.has(e.id) ? e.id : "" }; }
 function askPush(me, reply){
   ASKLOG.push({ me }, reply); ASKLOG = ASKLOG.slice(-40);
   const log = $("askLog"); if (!log) return;
@@ -3740,7 +3773,8 @@ async function showStore(data, isPreview, refresh){
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   $("stSafeLink").href = home() + "safe";
   $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
-  $("stShare").classList.toggle("solo", !!isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
+  $("stShare").classList.toggle("solo", !!isPreview);
+  if (!refresh) loadNear(isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
   const verified = !isPreview && STORE_VERIFIED;   // blue ring + tick on the logo, like verified accounts elsewhere
   $("stVerified").hidden = !verified; $("stLogoWrap").classList.toggle("verified", verified);
   $("stNew").hidden = isPreview || !STORE_TRIAL;
@@ -3873,7 +3907,7 @@ function productRow(i){
 function linkRow(j){   // shop links are always a compact list, whatever the store style: sellers often add dozens
   const l = D.links[j], info = linkInfo(l.u), img = safeImg(l.img), name = tidyName(l.n);
   return `<a class="prow plink lrow" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="${esc(name || info.brand)}${l.p > 0 ? ", " + esc(money(l.p)) : ""}, opens ${esc(info.brand)} in a new tab">
-    <span class="lthumb" aria-hidden="true">${esc(initial(name || info.brand))}${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>
+    <span class="lthumb" aria-hidden="true">${initial(name || info.brand)}${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>
     <span class="ptext"><h3>${esc(name || "View on " + info.brand)}</h3>
       <span class="pmeta">${l.p > 0 ? `<span class="pprice">${esc(money(l.p))}</span>` : ""}<span class="lbrand">${esc(info.brand)}</span></span></span>
     <span class="lgo" aria-hidden="true">${ico("ext", 18, 2)}</span>
@@ -4064,11 +4098,60 @@ $("send").addEventListener("click", e => {
   if ($("backBtn").hidden) track("order");
   ORDER_SENT = true;   // the cart stays until they come back and say the order went through
 });
+// ---------- More stores on Spot It!: a card at the end of every store page, and once after an order ----------
+// Other live stores, nearest first: same town, then same state, then by distance. Never the store itself, closed stores or link-only shops.
+let NEAR_LIST = null, NEAR_TOK = 0, NEAR_OBS = null;
+function nearPick(list, n){
+  const me = STORE_PLACE || {}, has = me.lat != null && me.lng != null;
+  return (list || []).filter(x => x && x.id && x.id !== STORE_ID && !x.closed && !x.aff)
+    .map(x => ({ x, t: me.city && x.city === me.city && x.state === me.state ? 0 : me.state && x.state === me.state ? 1 : 2,
+      d: has && x.lat != null && x.lng != null ? kmBetween(me.lat, me.lng, x.lat, x.lng) : 1e9 }))
+    .sort((a, b) => a.t - b.t || a.d - b.d || (b.x.v - a.x.v) || String(a.x.name).localeCompare(String(b.x.name)))
+    .slice(0, n).map(o => o.x);
+}
+function nearCards(picks){
+  return `<div class="nearrow">${picks.map(x => { const logo = safeImg(x.logo);
+    return `<a class="nearst" href="${esc(storeLink(x.id))}"><span class="nearpin" style="--c:${PIN_COL}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot">${initial(x.name || x.id)}${logo ? `<img class="mxlg" src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>${x.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}</span><b>${esc(x.name || x.id)}</b><span>${esc(x.city || x.state || "")}</span></a>`; }).join("")}</div>`;
+}
+function renderNear(){
+  const box = $("stNear"); if (!box) return;
+  const picks = nearPick(NEAR_LIST, 4), me = STORE_PLACE || {};
+  if (!picks.length){ box.hidden = true; box.innerHTML = ""; return; }
+  const close = me.state && picks.some(x => x.state === me.state);
+  box.innerHTML = `<div class="nearhead"><h2 id="stNearTitle">${close ? "More stores near you" : "More stores on Spot It!"}</h2><a href="${esc(home())}explore">See all<span class="sr"> on Spot It!</span></a></div>${nearCards(picks)}`;
+  box.hidden = false;
+}
+function nearFetch(){
+  const saved = keep.get("lk-near");
+  if (Array.isArray(saved) && !NEAR_LIST) NEAR_LIST = saved;
+  return apiGet({ action: "near" }).then(r => { const st = r.stores || []; keep.set("lk-near", st); NEAR_LIST = st; return st; });
+}
+// called each time a store opens: the list is only fetched once the customer scrolls near the end of the page
+function loadNear(isPreview){
+  const box = $("stNear"), tok = ++NEAR_TOK; box.hidden = true; box.innerHTML = "";
+  if (NEAR_OBS){ NEAR_OBS.disconnect(); NEAR_OBS = null; }
+  if (isPreview || !safeUrl(SITE.api)) return;
+  const start = () => { if (tok !== NEAR_TOK) return; if (NEAR_LIST) renderNear(); nearFetch().then(() => { if (tok === NEAR_TOK) renderNear(); }).catch(() => {}); };
+  if (!("IntersectionObserver" in window)) return start();
+  NEAR_OBS = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)){ NEAR_OBS.disconnect(); NEAR_OBS = null; start(); } }, { rootMargin: "600px 0px" });
+  NEAR_OBS.observe(document.querySelector(".stfoot"));
+}
+// after the customer says the order went through: once per store per day, and only if there are other stores to show
+async function nearAfterOrder(){
+  const k = `lk-nearask:${STORE_ID}:${new Date().toISOString().slice(0, 10)}`;
+  try { if (localStorage.getItem(k)) return; } catch(e) {}
+  if (!NEAR_LIST) try { await nearFetch(); } catch(e) { return; }
+  const picks = nearPick(NEAR_LIST, 3); if (!picks.length || $("store").hidden) return;
+  try { localStorage.setItem(k, "1"); } catch(e) {}
+  $("nearSheetList").innerHTML = nearCards(picks);
+  $("nearGo").href = home() + "explore";
+  openSheet("nearOverlay");
+}
 let ORDER_SENT = false;
 document.addEventListener("visibilitychange", async () => {
   if (document.hidden || !ORDER_SENT || $("store").hidden || !Object.keys(cart).length) return;
   ORDER_SENT = false;
-  if (await ask("Did your order go through on WhatsApp?", "Yes, clear my cart")){ cart = {}; saveCart(); renderMenu(); renderBar(); }
+  if (await ask("Did your order go through on WhatsApp?", "Yes, clear my cart")){ cart = {}; saveCart(); renderMenu(); renderBar(); if ($("backBtn").hidden) nearAfterOrder(); }
 });
 $("viewCart").onclick = () => openSheet("overlay");
 document.addEventListener("click", e => {
@@ -4617,6 +4700,7 @@ const mxHash = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.ch
 const mxHasCoords = st => st.lat != null && st.lng != null && st.lat !== "" && st.lng !== "" && isFinite(+st.lat) && isFinite(+st.lng) && !(+st.lat === 0 && +st.lng === 0);
 const mxPlace = st => [st.city || st.area, st.state].filter(Boolean).join(", ");
 const mxCol = st => /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
+const PIN_COL = "#18395C";   // every map pin wears the app's own navy, so the map looks like one app (the logo inside shows whose store it is)
 function mxArea(st){
   if (st.aff) return null;   // Affiliate Shops sell online through Shopee, TikTok Shop and others: never a pin
   if (st.pub && mxHasCoords(st)) return { lat: +st.lat, lng: +st.lng, r: 0, exact: true };   // a shop that chose to show its door
@@ -4714,7 +4798,7 @@ function mxCluster(list){
   out.forEach(c => { if (c.items.length === 1) c.ll = [c.items[0]._a.lng, c.items[0]._a.lat]; else { const q = map.unproject([c.x, c.y]); c.ll = [q.lng, q.lat]; } });
   return out;
 }
-function mxMarker(el, ll){ return new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(ll).addTo(MX.map); }
+function mxMarker(el, ll, anchor){ return new maplibregl.Marker({ element: el, anchor: anchor || "center" }).setLngLat(ll).addTo(MX.map); }
 function mxDraw(force){
   if (!MX || !MX.map) return;
   const map = MX.map, z = map.getZoom(), all = exList(), list = all.filter(s => s._a);
@@ -4733,17 +4817,18 @@ function mxDraw(force){
         el.addEventListener("click", go); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } });
         MX.mk.push(mxMarker(el, c.ll)); return;
       }
-      const st = c.items[0], col = mxCol(st), sel = st.id === MX.sel;
+      const st = c.items[0], col = PIN_COL, sel = st.id === MX.sel;
       const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
       if (!st._a.exact) feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
       const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
       // the shop's own logo on its pin (the shop icon shows if there's no logo, or it doesn't load)
       const lg = safeImg(st.logo);
-      el.innerHTML = `<span class="mxpin${lg ? " haslogo" : ""}" style="--c:${col}">${ico("store", 17, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
+      // a map pin: the store's colour, with its logo in the round head (the shop icon if there's no logo, or it doesn't load)
+      el.innerHTML = `<span class="mxpin" style="--c:${col}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot${lg ? " haslogo" : ""}">${ico("store", 16, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span></span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
       el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
       if (sel) el.style.zIndex = 5;
       el.addEventListener("click", () => mxSelect(st.id)); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); mxSelect(st.id); } });
-      MX.mk.push(mxMarker(el, c.ll));
+      MX.mk.push(mxMarker(el, c.ll, "bottom"));   // the pin's tip sits on the shop
     });
     const src = MX.ready && map.getSource("mxareas"); if (src) src.setData({ type: "FeatureCollection", features: feats });
   }
