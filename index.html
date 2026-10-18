@@ -268,8 +268,8 @@ textarea{min-height:72px;resize:vertical}
 .skyflight{position:relative;width:0;height:0;z-index:4}
 .skyhit{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:grid;place-items:center}
 .skyjetwrap{display:block;width:32px;height:32px}.skyjet{width:32px;height:32px;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
-.skyrope{position:absolute;left:0;top:0;width:46px;height:0;border-top:1.5px dashed #9AA3AD;transform-origin:0 0;pointer-events:none}
-.skybanner{position:absolute;left:0;top:0;width:max-content;max-width:240px;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy)));cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
+.skyrope{position:absolute;left:0;top:0;width:31px;height:0;border-top:1.5px dashed #9AA3AD;transform-origin:0 0;pointer-events:none}
+.skybanner{position:absolute;left:0;top:0;width:max-content;max-width:240px;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--rot,0deg));cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
 .skyflag{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:5px;background:#FFF8E1;color:#1C1917;font-size:12.5px;font-weight:800;line-height:1.15;white-space:nowrap;border:1.5px solid #E7B416}
 
 .skycloth{position:relative;display:block}
@@ -5052,14 +5052,16 @@ function skyFly(){
   const deg = Math.atan2(B[1] - A[1], B[0] - A[0]) * 180 / Math.PI;   // the map never rotates, so the screen heading is the map heading
   const logo = safeImg(ad.logo), el = document.createElement("div");
   el.className = "skyflight";
-  el.innerHTML = `<i class="skyrope" style="transform:rotate(${(deg + 180).toFixed(1)}deg)"></i>
+  el.innerHTML = `<i class="skyrope" style="transform:rotate(${(deg + 180).toFixed(1)}deg) translateX(13px)"></i>
     <span class="skybanner"><span class="skyflag">${logo ? `<img src="${esc(logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(ad.text)}</span></span></span>
     <button type="button" class="skyhit" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."><span class="skyjetwrap" style="transform:rotate(${deg.toFixed(1)}deg)">${SKY_PLANE}</span></button>`;
   const mk = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(from).addTo(map);
   // the banner hangs behind the plane on its tow line, the right distance away whichever way it flies
   const bn = el.querySelector(".skybanner"), rad = deg * Math.PI / 180, cx = Math.cos(rad), cy = Math.sin(rad);
-  const half = Math.abs(cx) * bn.offsetWidth / 2 + Math.abs(cy) * bn.offsetHeight / 2, gap = 14 + 32 + half;   // plane half + tow line + banner half
+  // the banner lies along the flight line, straight behind the tail; it's turned the readable way round when flying leftwards
+  const gap = 13 + 30 + bn.offsetWidth / 2;   // plane half (to the tail) + tow line + banner half
   bn.style.setProperty("--dx", (-cx * gap).toFixed(1) + "px"); bn.style.setProperty("--dy", (-cy * gap).toFixed(1) + "px");
+  bn.style.setProperty("--rot", (cx >= 0 ? deg : deg + 180).toFixed(1) + "deg");
   skyCloth(bn, cx >= 0);   // the banner flutters like cloth, waves running from the plane end to the loose end
   SKY.el = el; SKY.mk = mk;
   // the dashed trail it leaves behind
