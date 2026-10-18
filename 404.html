@@ -576,6 +576,8 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .pbig > a > img{width:100%;height:100%;object-fit:cover}
 .brpdf{display:flex;align-items:center;justify-content:center;gap:8px}
 .svopts svg{vertical-align:-2px}
+.mxcov{display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mxcovline b{margin-right:2px}
 .empty{color:var(--muted);text-align:center;padding:40px 16px}
 .foot{text-align:center;color:var(--muted);font-size:13px;margin:32px 16px 0}
 .foot a{color:inherit}
@@ -2404,7 +2406,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261018-service-booking", at: "2026-10-18", title: "A booking page for services", body: "Selling services, like aircond service, Coway or insurance? Your store is now a booking page: a list of your services and one big Book now button where customers pick a date, a time and their address. In Shop details, add About you and Areas you cover: customers see them at the top with a pin. No fixed price? Leave it empty and customers see Get a quote. Make the big button your own, like Book a shoot, Check availability or Rent now, in Shop details under Book button. Agents with brochures (insurance, takaful, property): pick Page style Agent, add your brochure pages and a PDF to each plan, and customers book a consultation." },
+  { id: "u-20261018-service-booking", at: "2026-10-18", title: "A booking page for services", body: "Selling services, like aircond service, Coway or insurance? Your store is now a booking page: a list of your services and one big Book now button where customers pick a date, a time and their address. In Shop details, add About you and Areas you cover: customers see them at the top with a pin, and people searching those areas on Spot It! find you too. No fixed price? Leave it empty and customers see Get a quote. Make the big button your own, like Book a shoot, Check availability or Rent now, in Shop details under Book button. Agents with brochures (insurance, takaful, property): pick Page style Agent, add your brochure pages and a PDF to each plan, and customers book a consultation." },
   { id: "u-20261018-digital-stores", at: "2026-10-18", title: "Sell digital products", body: "You can now sell e-books, templates, presets and online classes. In Shop details, under What do you sell?, pick Digital. Each product gets a book-shaped cover, sample pages, a What you get list and a Best value badge for bundles. Choose how buyers get it: on WhatsApp, a private download link you send after payment, or your own checkout page. Customers find you under Digital on Spot It!." },
   { id: "u-20261018-bridges", at: "2026-10-18", title: "Bridges on Spot It!", body: "The Penang Bridge now crosses the channel on the Spot It! map at its real length, with its cable-stayed towers in the middle, and the Kuala Terengganu Drawbridge stands with its deck split open. Zoom in on Penang or Kuala Terengganu to see them." },
   { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the real shape of the Sepang International Circuit, raised like a model and lying right on the track, and KLIA with its control tower. Zoom in near Sepang to see them." },
@@ -5339,7 +5341,7 @@ function exList(){
   const q = EX.q.trim().toLowerCase();
   const list = EX.stores.filter(st =>
     (EX.cat === "all" || st.cat === EX.cat) &&
-    (!q || matchWords(st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag, q)) &&
+    (!q || matchWords(st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag + " " + (st.cov || ""), q)) &&
     (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)) &&
     (EX.aff ? !!st.aff : EX.dg ? !!st.dg : ((!st.aff && !st.dg) || !!q || EX.fav)));   // Affiliate Shops and Digital stores show under their own pills, in search and in Saved
   list.forEach(st => { st._a = mxArea(st); st._km = EX.me && st._a ? kmBetween(EX.me.lat, EX.me.lng, st._a.lat, st._a.lng) : null; });
@@ -5983,7 +5985,7 @@ function mxRow(st, mapped){
       : st.aff
       ? `<span class="mxmeta">${esc(affShops(st) || "Online shop links")}</span>
     <span class="mxmeta">${n ? `${n} ${n === 1 ? "link" : "links"} · ` : ""}${esc(CATS[st.cat] || "Other")}</span></span>`
-      : `<span class="mxmeta">${esc(mxMeta(st))} · ${esc(CATS[st.cat] || "Other")}</span>
+      : `<span class="mxmeta">${esc(mxMeta(st))} · ${esc(CATS[st.cat] || "Other")}</span>${st.cov ? `<span class="mxmeta mxcov">${ico("pin", 12, 2.2)}Covers ${esc(mxCov(st))}</span>` : ""}
     <span class="mxmeta">${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></span>`}
     <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></a>`;
 }
@@ -6014,6 +6016,8 @@ function dirButtons(lat, lng, cls){
   const ll = (+lat).toFixed(6) + "," + (+lng).toFixed(6);
   return `<div class="${cls}"><a class="btn small" href="https://www.google.com/maps/dir/?api=1&destination=${ll}" target="_blank" rel="noopener">${ico("pin", 16)}Google Maps</a><a class="btn small" href="https://waze.com/ul?ll=${ll}&navigate=yes" target="_blank" rel="noopener">${ico("ext", 16)}Waze</a></div>`;
 }
+// "Klang, PJ, Subang +2": the areas a service seller covers, short enough for one line
+function mxCov(st){ const a = String(st.cov || "").split(/[,;]+/).map(x => x.trim()).filter(Boolean); return a.slice(0, 3).join(", ") + (a.length > 3 ? ` +${a.length - 3}` : ""); }
 function mxShowCard(st){
   const c = $("mxCard"), logo = safeImg(st.logo), blurb = st.tag || st.items || "";
   c.dataset.store = st.id;
@@ -6021,6 +6025,7 @@ function mxShowCard(st){
     <div class="mxci"><b><span>${esc(st.name)}</span>${st._a && st._a.exact ? `<span class="shoptag">Shop</span>` : ""}</b>${st.v ? `<span class="vlabel">Verified by ${esc(APP_NAME)}</span>` : ""}<span class="mxmeta">${esc(mxMeta(st))}</span>
     <span class="mxmeta">${st.closed ? `<span class="exshut">Closed now</span>` : `<span class="exopen">Open now</span>`} · ${esc(CATS[st.cat] || "Other")}${st._km != null ? " · " + esc(exFmt(st._km)) : ""}</span></div>
     <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></div>
+    ${st.cov ? `<p class="mxhint mxcovline">${ico("pin", 14, 2)}<span><b>Covers</b> ${esc(String(st.cov).split(/[,;]+/).map(x => x.trim()).filter(Boolean).join(" · "))}</span></p>` : ""}
     ${blurb ? `<p class="mxitems">${esc(blurb)}</p>` : ""}
     <div class="mxgo"><a class="btn solid full" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" id="mxVisit">Visit store ${ico("chevron", 18, 2.2)}</a></div>
     ${st._a && st._a.exact ? `${st.addr ? `<p class="mxhint">${ico("pin", 14, 2)}<span>${esc(st.addr)}</span></p>` : ""}${dirButtons(st.lat, st.lng, "mxdir")}`
