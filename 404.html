@@ -2141,6 +2141,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-malaysia-map", at: "2026-10-18", title: "Browse shows Malaysia only", body: "The Browse map now stays on Malaysia: Peninsular Malaysia, Sabah and Sarawak, with nothing from other countries. Customers find your store faster, without wandering off the map." },
   { id: "u-20261018-council", at: "2026-10-18", title: "Sharper look, easier start", body: "Dark mode is clearer: main buttons and the option you picked now stand out. Insights shows the number on each day's bar. A new store starts with Add your first item, and if something is missing when you publish, the app takes you straight to it. On store pages, customers now see your first menu section before any ad." },
   { id: "u-20261018-unpaid", at: "2026-10-18", title: "Publish within 10 days", body: "Stores that aren't published (paid for) within 10 days of signing up are now removed, so link names and phone numbers don't get stuck. If your store isn't live yet, the Publish card on your Store page shows how many days you have left. Stores already waiting today get the full 10 days from now." },
   { id: "u-20261017-polish", at: "2026-10-17", title: "A faster, clearer app", body: "We gave the whole app a check-up. It opens faster on slow internet, and store photos load much quicker for your customers. Dark mode is easier to read, with clear badges and buttons. Prices now always show two decimals, like RM13.00. If your store isn't live yet, Publish my store is now at the top of your Store page. Nothing you need to do." },
@@ -4433,6 +4434,16 @@ function exList(){
 }
 
 // ----- MapLibre (loaded only when this page opens) -----
+// Browse shows Malaysia only: the map can't leave Malaysia, and every other country is covered in the page colour.
+// The cover (malaysia-mask.json) reaches a little past the coast, so no seaside shop is ever under it.
+const MY_BOUNDS = [[98.6, -0.4], [120.4, 8.4]];
+function mxMaskMalaysia(map){
+  getJson("malaysia-mask.json").then(g => {
+    if (!g || !g.type || !MX || MX.map !== map || map.getLayer("mymask")) return;
+    map.addSource("mymask", { type: "geojson", data: { type: "Feature", properties: {}, geometry: g } });
+    map.addLayer({ id: "mymask", type: "fill", source: "mymask", paint: { "fill-color": mxDark() ? "#141112" : "#F7F5F3", "fill-antialias": false } }, map.getLayer("mxfill") ? "mxfill" : undefined);
+  }).catch(() => {});   // without it the map still works, just with the neighbours showing
+}
 function mxLoadMap(){
   if (window.maplibregl) return Promise.resolve();
   if (mxLoadMap.p) return mxLoadMap.p;
@@ -4746,6 +4757,7 @@ async function renderExplore(){
   if (!$("mxMap") || rtok !== ROUTE_TOK || MX) return;   // the person already left this page, or it opened again meanwhile
 
   const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: view ? view.center : me ? [me.lng, me.lat] : [108.3, 4.2], zoom: view ? view.zoom : me ? 11 : 5, minZoom: 4, maxZoom: 17,
+    maxBounds: MY_BOUNDS,   // the map stays on Malaysia
     attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false });
   map.touchZoomRotate.disableRotation();
   MX = { map, sel: null, sig: "", view: [], noarea: [], loaded: false, ready: false, me: null, mk: [], qt: 0, tt: 0, err: null, moved: !!view };   // a restored view counts as moved: don't jump away from it
@@ -4757,6 +4769,7 @@ async function renderExplore(){
     if (MX && MX.map === map){
       map.addSource("mxareas", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "mxfill", type: "fill", source: "mxareas", paint: { "fill-color": ["get", "c"], "fill-opacity": ["case", ["==", ["get", "sel"], 1], .26, .16] } });
+      mxMaskMalaysia(map);
       map.addLayer({ id: "mxline", type: "line", source: "mxareas", paint: { "line-color": ["get", "c"], "line-width": 1.5, "line-opacity": ["case", ["==", ["get", "sel"], 1], .9, .6], "line-dasharray": [3, 3] } });
       MX.ready = true; mxDraw(true);
     }
