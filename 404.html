@@ -262,6 +262,8 @@ textarea{min-height:72px;resize:vertical}
 .bulic svg{width:19px;height:19px}
 .botav{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}   /* the News bot's picture */
 .bulhead .botav{width:56px;height:56px}
+.sharesample{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14px;overflow-wrap:anywhere;color:var(--ink)}.sharesample span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
+html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left alone, so dragging a pin lands exactly where the finger is */
 .askbot .bulbody p{color:var(--ink)}.askbot .bulcta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .askme{margin:0 0 10px auto;max-width:85%;width:fit-content;padding:10px 14px;border-radius:18px 18px 4px 18px;background:var(--soft);border:1px solid var(--line);color:var(--ink);font-size:14px;line-height:1.4;overflow-wrap:anywhere;scroll-margin-top:72px}
 .askshot{margin:12px 0 0}.askshot a{display:block}.askshot img{display:block;width:100%;max-width:300px;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}.askshot figcaption{font-size:12px;font-weight:600;color:var(--muted);margin-top:6px}
@@ -1174,6 +1176,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 .sechip{height:32px;padding:0 12px;font-size:13px}
 .tag2.paid{background:var(--ok-bg);color:var(--ok)}.tag2.claim{background:var(--warn-bg);color:var(--warn)}.tag2.unpaid{background:var(--err-bg);color:var(--err)}
 </style>
+<script>(function(){ try { var t = localStorage.getItem("lk-look"), z = localStorage.getItem("lk-text"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); if (z === "large") document.documentElement.classList.add("lk-large"); } catch(e) {} })();</script>
 </head>
 <body>
 <div id="splash" aria-hidden="true">
@@ -1508,7 +1511,7 @@ const BLANK = {
   cur: "RM", curCode: "MYR", color: COLORS[0], layout: "list",
   items: [{ n: "", d: "", img: "", out: false, o: [{ l: "", p: 0 }] }],
   links: [],
-  closed: false, closedMsg: ""
+  closed: false, closedMsg: "", shareMsg: ""
 };
 
 /* ---------- Helpers ---------- */
@@ -1736,6 +1739,7 @@ function normalize(d){
   }));
   if (!/^#[0-9a-f]{6}$/i.test(x.color)) x.color = COLORS[0];
   if (!["list","grid","minimal"].includes(x.layout)) x.layout = "list";
+  x.shareMsg = String(x.shareMsg || "").replace(/\s+/g, " ").trim().slice(0, 160);
   if (!KINDS[x.kind]) x.kind = "products";
   const l = d && d.loc && typeof d.loc === "object" ? d.loc : {};
   x.loc = { on: !!l.on, state: STATES.includes(l.state) ? l.state : "", city: String(l.city || "").slice(0, 40), lat: isFinite(+l.lat) && l.lat !== null && l.lat !== "" ? +l.lat : null, lng: isFinite(+l.lng) && l.lng !== null && l.lng !== "" ? +l.lng : null, area: String(l.area || "").slice(0, 60),
@@ -1870,6 +1874,7 @@ function openSheet(id){
 }
 function show(id){
   ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
+  if (id !== "builder") document.body.classList.remove("pinning");
   if (id !== "builder" && $("savePill")) $("savePill").classList.remove("show");
   const el = $(id); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
   clearTimeout(el._enterT); el._enterT = setTimeout(() => el.classList.remove("enter"), 800);   // only animate when a page opens, not on every redraw
@@ -1950,10 +1955,16 @@ $("askOverlay").addEventListener("click", e => { if (e.target === $("askOverlay"
 
 
 
-// ---------- Light or dark: always the same as the phone (no setting) ----------
-const isDark = () => matchMedia("(prefers-color-scheme: dark)").matches;
+// ---------- Light or dark: the phone's choice, unless the seller picked one in Settings (saved on this phone) ----------
+const lookPref = () => { try { const t = localStorage.getItem("lk-look"); return t === "light" || t === "dark" ? t : "auto"; } catch(e){ return "auto"; } };
+const isDark = () => { const t = lookPref(); return t === "dark" || (t === "auto" && matchMedia("(prefers-color-scheme: dark)").matches); };
+function setLook(t){
+  try { if (t === "auto") localStorage.removeItem("lk-look"); else localStorage.setItem("lk-look", t); } catch(e) {}
+  if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t);
+  paintBars();
+}
+function setTextSize(z){ try { if (z === "large") localStorage.setItem("lk-text", "large"); else localStorage.removeItem("lk-text"); } catch(e) {} document.documentElement.classList.toggle("lk-large", z === "large"); }
 function paintBars(){ document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.content = isDark() ? "#141112" : "#F7F5F3"); }   // the phone's bars match the page
-try { localStorage.removeItem("lk-theme"); } catch(e) {}   // a choice saved by an earlier version
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paintBars(); if (MX && $("mxMap")){ exRemember(); EX_BACK = true; renderExplore(); } });   // the map has its own light and dark style
 paintBars();
 // iPhones ignore "no zoom" in the page settings: stop the pinch gesture too, except on a map (it zooms itself)
@@ -2190,6 +2201,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-settings", at: "2026-10-18", title: "New: Settings", body: "Under Account, open Settings to pick Light or Dark (or Auto, to match your phone), make text Large, write your own share message (it goes with your link whenever you or your customers tap Share), log out other phones, and check for app updates." },
   { id: "u-20261018-help", at: "2026-10-18", title: "Help is all in one place", body: "Under Account, Help now opens your assistant. Ask anything there, and if you still need a hand, Chat with us on WhatsApp is at the bottom of the page." },
   { id: "u-20261018-ask-learns", at: "2026-10-18", title: "Your assistant keeps learning", body: "When your assistant can't answer a question, it's now passed to us (without your name, store or number) so we can teach it the answer. The more you ask, the smarter it gets." },
   { id: "u-20261018-ask-smarter", at: "2026-10-18", title: "Your assistant understands you better", body: "Your assistant now understands short forms and Manglish, like \"camne nak letak gmbr\" or \"kedai x keluar kat map\", and has new answers about opening hours, order alerts, discounts, stock limits, cancelled orders and putting your link in your Instagram bio." },
@@ -2407,7 +2419,7 @@ function edHome(msg){
   <section class="card linkcard">
     <div class="linkhead"><h2>${live ? "Your store link" : "Your store"}</h2><div class="linktags" id="linkTags">${linkTags()}</div></div>
     ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link).replace(/\//g, "/<wbr>")}</span></p>
-      <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
+      <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(shareText(S, link))}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
     : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
     ${live ? "" : `<button class="btn small" style="margin-top:12px" data-act="preview">${ico("eye",16)}Preview my store</button>`}
     <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Saving your changes..." : ""))}</p>
@@ -2909,12 +2921,46 @@ function edAsk(){
   </details>
   ${askTo() ? `<h2 class="edsub">Still need help?</h2><section class="card lk-group"><a class="lk-row askhuman" href="https://wa.me/${askTo()}?text=${encodeURIComponent(`Hi ${APP_NAME}, I need help with my store ${SESSION.id}.`)}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Chat with us on WhatsApp</b><span>A real person replies</span></span><span class="chev">${ico("chevron",18)}</span></a></section>` : ""}`;
 }
+function edSettings(){
+  const look = lookPref(), big = document.documentElement.classList.contains("lk-large"), me = SESSION && !SESSION.admin;
+  const seg = (act, cur, opts) => `<div class="seg">${opts.map(([v, l]) => `<button type="button" data-act="${act}" data-v="${v}" aria-pressed="${cur === v}">${l}</button>`).join("")}</div>`;
+  const sample = shareText(S, STATUS === "live" ? storeLink(SESSION.id) : storeLink(SESSION.id));
+  return `${edTop("Settings", "account")}
+  <p class="hint" style="margin:-4px 2px 14px">Appearance and text size are saved on this phone. Your share message is saved with your store.</p>
+  <section class="card"><h2>Appearance</h2>${seg("setlook", look, [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]])}<p class="hint">Auto matches your phone's light or dark setting.</p></section>
+  <section class="card"><h2>Text size</h2>${seg("settext", big ? "large" : "normal", [["normal", "Normal"], ["large", "Large"]])}<p class="hint">Large makes words and buttons bigger in the app and on store pages, on this phone. Pages with a map stay the same size.</p></section>
+  <section class="card"><h2>Share message</h2>
+    <label>Words that go with your store link<input type="text" data-f="shareMsg" value="${esc(S.shareMsg || "")}" maxlength="160" placeholder="Order here:"></label>
+    <p class="hint">Used when you or your customers tap Share. Leave it empty for "Order here:".</p>
+    <p class="sharesample" id="shareSample"><span>Preview</span>${esc(sample)}</p>
+  </section>
+  <section class="card lk-group">
+    ${me ? `<button class="lk-row" data-act="forgetothers"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out other phones</b><span>Ends "Keep me logged in" everywhere except this phone</span></span></button>` : ""}
+    <button class="lk-row" data-act="checkupdate"><span class="tile">${ico("upload")}</span><span class="tt"><b>Check for updates</b><span id="appVer">${esc(APP_VER || "Version …")}</span></span></button>
+  </section>`;
+}
+let APP_VER = "";
+async function appVersion(){ try { const ks = await caches.keys(), v = ks.map(k => (k.match(/^linkedai-v(\d+)$/) || [])[1]).filter(Boolean).map(Number).sort((a, b) => b - a)[0]; APP_VER = v ? "Version " + v : "Version (online)"; } catch(e){ APP_VER = "Version (online)"; } const el = $("appVer"); if (el) el.textContent = APP_VER; }
+async function checkUpdate(){
+  const el = $("appVer"); if (el) el.textContent = "Checking…";
+  try {
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (!reg) throw 0;
+    await reg.update();
+    const nw = reg.installing || reg.waiting;
+    if (!nw){ await appVersion(); return notify("You have the latest version."); }
+    if (el) el.textContent = "Updating…";
+    if (DIRTY) await autoSave();
+    navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), { once: true });
+    setTimeout(() => location.reload(), 6000);   // in case the new version was already in charge
+  } catch(e){ await appVersion(); notify("Couldn't check right now. Check your internet and try again."); }
+}
 function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
     <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Phone, email and PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
     <button class="lk-row" data-act="go" data-v="ask"><span class="tile asktile"><img src="bot.jpg" alt=""></span><span class="tt"><b>Help</b><span>Your assistant, or WhatsApp us</span></span><span class="chev">${ico("chevron",18)}</span></button>
+    <button class="lk-row" data-act="go" data-v="settings"><span class="tile">${ico("sliders")}</span><span class="tt"><b>Settings</b><span>Appearance, text size, share message</span></span><span class="chev">${ico("chevron",18)}</span></button>
     ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How we work and protect you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in" : "You can log in again anytime"}</span></span></button>
@@ -2947,10 +2993,11 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, settings: () => { setTimeout(appVersion, 0); return edSettings(); }, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
+  document.body.classList.toggle("pinning", EDV === "listing");
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
-  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask");   // nothing to save or preview on News or Profile
+  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask" || EDV === "settings");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
@@ -3375,7 +3422,7 @@ function legacyEditor(msg){
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn small" data-act="copy">Copy</button>
       <a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Open</a>
-      <a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">Share</a>
+      <a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(shareText(S, link))}" target="_blank" rel="noopener">Share</a>
     </div>
     <p class="hint">This link never changes. Your changes save by themselves and show on your store straight away.</p>` : `
     <div class="between"><h2>Your store</h2>${STATUS === "review" ? `<span class="tag2 claim">In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
@@ -3500,6 +3547,7 @@ function onField(e){
   touch();
 }
 $("bwrap").addEventListener("input", onField);
+$("bwrap").addEventListener("input", e => { if (e.target.dataset && e.target.dataset.f === "shareMsg"){ const p = $("shareSample"); if (p) p.lastChild.textContent = shareText(S, storeLink(SESSION.id)); } });
 $("bwrap").addEventListener("keydown", e => { if (e.target.id === "askIn" && e.key === "Enter"){ e.preventDefault(); askSend(); } });
 // prices read like money once you leave the box: 8.5 becomes 8.50
 $("bwrap").addEventListener("focusout", e => { const t = e.target; if (t.matches && t.matches('input[data-f="p"]') && t.value !== "" && isFinite(+t.value)) t.value = (+t.value).toFixed(2); });
@@ -3529,6 +3577,15 @@ $("builder").addEventListener("click", async e => {
   if (a === "frskip" || a === "frhome" || a === "frpublish"){
     markStartDone(); edTidy(); EDV = a === "frhome" ? "products" : "home"; renderEditor(); window.scrollTo(0, 0);
     if (a === "frpublish"){ const t = document.querySelector('#publishCard [data-act="trial"]'); if (t) t.click(); else openPublishCheck(); }   // the free trial when it's offered, otherwise pay
+    return;
+  }
+  if (a === "setlook"){ setLook(b.dataset.v); renderEditor(); return; }
+  if (a === "settext"){ setTextSize(b.dataset.v); renderEditor(); return; }
+  if (a === "checkupdate"){ checkUpdate(); return; }
+  if (a === "forgetothers"){
+    if (!(await ask("Log out every other phone? They'll need your phone number and PIN to log in again. This phone stays as it is.", "Log out others"))) return;
+    try { const r = await apiPost({ action: "forgetothers", id: SESSION.id, ...(SESSION.tok ? {} : { pin: SESSION.pin }) }); notify(r.ended ? `Done. ${r.ended} other phone${r.ended === 1 ? " was" : "s were"} logged out.` : "Done. No other phones were logged in."); }
+    catch(e){ notify(friendly(e, "Couldn't do that right now. Check your internet and try again.")); }
     return;
   }
   if (a === "asksend"){ askSend(); return; }
@@ -4023,15 +4080,17 @@ $("viewTabs").addEventListener("click", e => {
 let MQ_T = 0;
 $("stQ").addEventListener("input", () => { clearTimeout(MQ_T); MQ_T = setTimeout(() => { MQ = $("stQ").value; renderMenu(); }, 150); });   // redraw once typing pauses, not on every letter
 $("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur(); });
+// The words that go with a store link when it's shared: the seller's own message from Settings, or a plain default
+function shareText(d, link, customer){ const m = String((d && d.shareMsg) || "").trim(); return (m || (customer ? `Order from ${(d && d.name) || "this store"} here:` : "Order here:")) + " " + link; }
 // Share this store: the phone's own share menu (WhatsApp, Telegram, Facebook...), or copy the link where there isn't one
 $("stShare").addEventListener("click", async () => {
   const url = storeLink(STORE_ID || (SESSION && SESSION.id) || ""), name = (D && D.name) || "this store";
   if (navigator.share){
-    try { await navigator.share({ title: name, text: `Order from ${name} here:`, url }); return; }
+    try { await navigator.share({ title: name, text: shareText(D, "", true).trim(), url }); return; }
     catch(e){ if (e && e.name === "AbortError") return; }
   }
   if (await copyText(url)){ notify(`Link copied: ${url}. Paste it in WhatsApp or anywhere to share ${name}.`); }
-  else window.open("https://wa.me/?text=" + encodeURIComponent(`Order from ${name} here: ${url}`), "_blank", "noopener");
+  else window.open("https://wa.me/?text=" + encodeURIComponent(shareText(D, url, true)), "_blank", "noopener");
 });
 const pSig = p => JSON.stringify([p.n, p.o]);
 function openProduct(i){
