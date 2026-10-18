@@ -1038,6 +1038,13 @@ a.prow{text-decoration:none;color:inherit}
 .pmeta{margin-top:6px}
 .addb{width:30px;height:30px;right:-5px;bottom:-5px}
 .plink h3{-webkit-line-clamp:2;line-clamp:2}
+.llist .lrow{align-items:center;padding:10px 12px;gap:12px;text-decoration:none;color:inherit}
+.lthumb{position:relative;width:56px;height:56px;border-radius:10px;overflow:hidden;flex:none;background:var(--soft);display:grid;place-items:center;font-weight:800;font-size:18px;color:var(--muted)}
+.lthumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.llist .ptext{flex:1;min-width:0}.llist h3{font-size:15px;font-weight:600;line-height:1.3;margin:0}
+.llist .pmeta{margin-top:4px;gap:6px}.llist .pprice{font-size:14px}
+.lbrand{font-size:12px;font-weight:600;color:var(--muted)}.llist .pprice+.lbrand::before{content:"· ";}
+.lgo{flex:none;color:var(--muted);display:grid;place-items:center;width:28px}
 .group{padding:0 14px 4px}
 .group h2{font-size:18px;margin:12px 2px 8px}
 /* items without a photo: no empty letter tile in the list, just the add button */
@@ -2154,6 +2161,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-link-list", at: "2026-10-18", title: "Shop links are now a tidy list", body: "On your store, shop links now always show as a simple list: a small photo, the name, the price and the shop. Customers can scroll through lots of links quickly. Your store style (List, Photo grid or Minimal) still applies to your own items." },
   { id: "u-20261018-ask", at: "2026-10-18", title: "Ask your assistant anything", body: "Got a question about the app? Tap Got a question? on your Store page (or Ask your assistant under Account) and type it in English or Malay, like \"how do I add a photo?\" or \"macam mana nak tutup kedai?\". Your assistant answers right away, with a button that takes you straight there." },
   { id: "u-20261018-bot-face", at: "2026-10-18", title: "Say hi to your assistant", body: "Your assistant, who posts your store status, tips and app news, now has a face. You'll see her on the What's new card and in News." },
   { id: "u-20261018-free-trial", at: "2026-10-18", title: "Go live free for 14 days", body: "New stores can now go live free for 14 days: tap Go live free on your Store page, share your link and take orders. Pay once any time to keep your store live for good. If a trial ends unpaid, the store goes offline (not deleted) and comes back as soon as you pay." },
@@ -2414,6 +2422,7 @@ function edLook(){   // the logo, cover, colour and style cards, shown on Shop d
       <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
       <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
     </div>
+    ${(S.links || []).some(l => safeUrl(l.u)) ? `<p class="hint">Shop links always show as a simple list, so customers can scan lots of them quickly.</p>` : ""}
   </section>`;
 }
 function edStatus(){
@@ -3858,15 +3867,13 @@ function productRow(i){
       ${p.out ? "" : `<span class="addb" aria-hidden="true">+</span>`}</div>`}
   </button>`;
 }
-function linkRow(j){
+function linkRow(j){   // shop links are always a compact list, whatever the store style: sellers often add dozens
   const l = D.links[j], info = linkInfo(l.u), img = safeImg(l.img), name = tidyName(l.n);
-  return `<a class="prow plink" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="${esc(name || info.brand)}, opens ${esc(info.brand)} in a new tab">
-    <div class="ptext">
-      <h3>${esc(name || "View on " + info.brand)}</h3>
-      <div class="pmeta">${l.p > 0 ? `<span class="pprice">${esc(money(l.p))}</span>` : ""}<span class="pill">${esc(info.brand)}</span></div>
-    </div>
-    <div class="pimg"><div class="ph">${initial(name || info.brand)}</div>${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}
-      <span class="addb" aria-hidden="true">${ico("ext", 15, 2.4)}</span></div>
+  return `<a class="prow plink lrow" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="${esc(name || info.brand)}${l.p > 0 ? ", " + esc(money(l.p)) : ""}, opens ${esc(info.brand)} in a new tab">
+    <span class="lthumb" aria-hidden="true">${esc(initial(name || info.brand))}${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>
+    <span class="ptext"><h3>${esc(name || "View on " + info.brand)}</h3>
+      <span class="pmeta">${l.p > 0 ? `<span class="pprice">${esc(money(l.p))}</span>` : ""}<span class="lbrand">${esc(info.brand)}</span></span></span>
+    <span class="lgo" aria-hidden="true">${ico("ext", 18, 2)}</span>
   </a>`;
 }
 // What the customer is looking at: the menu or the shop links, one section or all, and any search words
@@ -3896,7 +3903,7 @@ function renderMenu(){
   if (!total){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
   const gridCls = D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
   const affNote = `<p class="affnote">${ico("ext", 13, 2.2)}<span>Opens the shop's own page. The seller may earn a commission, at no extra cost to you.</span></p>`;
-  const block = (title, rows, note) => `<section class="group">${title ? `<h2>${esc(title)}</h2>` : ""}${note ? affNote : ""}<div class="plist${gridCls}">${rows}</div></section>`;
+  const block = (title, rows, note, links) => `<section class="group">${title ? `<h2>${esc(title)}</h2>` : ""}${note ? affNote : ""}<div class="plist${links ? " llist" : gridCls}">${rows}</div></section>`;
   const q = MQ.trim().toLowerCase();
   if (q){
     // searching looks through everything, menu and links together
@@ -3904,7 +3911,7 @@ function renderMenu(){
     const hitL = linkList.filter(j => { const l = D.links[j]; return matchWords([tidyName(l.n), l.sec, linkInfo(l.u).brand].join(" "), q); });
     tabs.hidden = true; tabs.innerHTML = "";
     $("menu").innerHTML = hitI.length || hitL.length
-      ? (hitI.length ? block(both ? W(D).list : "", hitI.map(productRow).join(""), false) : "") + (hitL.length ? block(both ? "Shop links" : "", hitL.map(linkRow).join(""), true) : "")
+      ? (hitI.length ? block(both ? W(D).list : "", hitI.map(productRow).join(""), false) : "") + (hitL.length ? block(both ? "Shop links" : "", hitL.map(linkRow).join(""), true, true) : "")
       : `<p class="empty">Nothing matches "${esc(MQ.trim())}". Try another word.</p>`;
     return;
   }
@@ -3917,7 +3924,7 @@ function renderMenu(){
   tabs.hidden = !showTabs;
   tabs.innerHTML = showTabs ? `<button class="tab" type="button" data-sec="all" aria-current="${MSEC === "all"}">All</button>` + secs.map(g => `<button class="tab" type="button" data-sec="${esc(key(g))}" aria-current="${MSEC === key(g)}">${esc(g.name || "Other")}</button>`).join("") : "";
   const shown = MSEC === "all" ? secs : secs.filter(g => key(g) === MSEC);
-  $("menu").innerHTML = shown.map((g, gi) => block(g.name, g.idx.map(isLinks ? linkRow : productRow).join(""), isLinks && gi === 0)).join("");
+  $("menu").innerHTML = shown.map((g, gi) => block(g.name, g.idx.map(isLinks ? linkRow : productRow).join(""), isLinks && gi === 0, isLinks)).join("");
   adPlace();
 }
 // After switching what's shown, bring the top of the list into view if the customer had scrolled past it
