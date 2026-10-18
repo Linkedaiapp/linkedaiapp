@@ -26,6 +26,8 @@
 <script>(function(){ try { var base = new URL(document.querySelector('meta[property="og:url"]').content).pathname, p = location.pathname;
   if (p.length > base.length && p.indexOf(base) === 0 && /\/$/.test(p)) history.replaceState(null, "", p.replace(/\/+$/, "") + location.search + location.hash); } catch(e){} })();</script>
 <link rel="manifest" href="manifest.webmanifest">
+<!-- the admin dashboard installs as its own app ("LK Admin"), which opens straight to the dashboard -->
+<script>(function(){ try { var q = location.search.slice(1).split("&")[0].toLowerCase(), p = location.pathname.replace(/\/+$/, ""); if (q === "admin" || /\/admin$/i.test(p)) { document.querySelector('link[rel="manifest"]').href = "admin.webmanifest"; var t = document.createElement("meta"); t.name = "apple-mobile-web-app-title"; t.content = "LK Admin"; document.head.appendChild(t); } } catch(e){} })();</script>
 <meta property="og:image" content="https://linkedaiapp.github.io/linkedaiapp/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -262,9 +264,12 @@ textarea{min-height:72px;resize:vertical}
 .bulic svg{width:19px;height:19px}
 .botav{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}   /* the News bot's picture */
 .bulhead .botav{width:56px;height:56px}
-.codelist .lk-row{flex-wrap:wrap;row-gap:8px}.codelist .tt{flex:1 1 180px}.codebtns{display:flex;gap:6px;flex-wrap:wrap}.codetxt{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em}
+.codehead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.codehead h2{margin:0}.codehead .hint{margin:0}
+.codemake{display:flex;gap:6px;margin-top:10px}.codemake input{margin:0;min-width:0}.codemake input[type=text]{flex:1}.codemake input[type=number]{width:58px;flex:none;text-align:center}.codemake .btn{flex:none}
+.codenew{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--soft)}.codenew b{flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.02em;white-space:nowrap}.codenew .btn{padding:6px 10px;font-size:13px}
+.codelist{margin-top:10px}.codelist summary{font-size:14px;font-weight:700;cursor:pointer;padding:4px 0}.codelist .lk-row{flex-wrap:wrap;row-gap:6px;padding:10px 0}.codelist .tt{flex:1 1 160px}.codebtns{display:flex;gap:6px;flex-wrap:wrap}.codetxt{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em}
 .codeline.off .codetxt{text-decoration:line-through;opacity:.6}
-.codenew{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--soft);border:1px dashed var(--line2)}.codenew span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}.codenew b{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:24px;letter-spacing:.08em;margin:2px 0 8px}.codenew .lbtns{display:flex;gap:8px;flex-wrap:wrap}
+.adminst{display:flex;gap:6px;align-items:center;margin:-4px 4px 12px}.adminst svg{flex:none}
 .sharesample{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14px;overflow-wrap:anywhere;color:var(--ink)}.sharesample span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
 html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left alone, so dragging a pin lands exactly where the finger is */
 .askbot .bulbody p{color:var(--ink)}.askbot .bulcta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -2947,7 +2952,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 73;
+const APP_VERSION = 74;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4683,12 +4688,10 @@ async function loadCodesCard(fresh){
       <span>${esc(x.note || "No note")} · used ${x.used} of ${x.uses}${x.stores.length ? " · " + x.stores.map(id => `<a href="${esc(storeLink(id))}" target="_blank" rel="noopener">/${esc(id)}</a>`).join(", ") : ""}</span></span>
       <span class="codebtns">${!x.off && x.used < x.uses ? `<button type="button" class="btn small" data-codecopy="${esc(x.code)}">${ico("copy",15)}Copy</button><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(msgFor(x.code))}" target="_blank" rel="noopener">${ico("share",15)}Send</a>` : ""}
       <button type="button" class="btn small" data-codeoff="${esc(x.code)}" data-v="${x.off ? 0 : 1}">${x.off ? "Turn on" : "Turn off"}</button></span></div>`;
-  box.innerHTML = `<h2>Free account codes</h2>
-    <p class="hint">Give a seller a code and they sign up free, with nothing to pay. When they sign up, they tap "Have a code?" and type it in. Codes aren't shown or mentioned anywhere else in the app.</p>
-    <div class="row2" style="margin-top:8px"><div><label>Note (optional)<input type="text" id="codeNote" maxlength="80" placeholder="e.g. Kak Yah, bazaar"></label></div><div><label>How many sellers can use it<input type="number" id="codeUses" min="1" max="500" value="1" inputmode="numeric"></label></div></div>
-    <button class="btn solid full" id="codeMake" style="margin-top:12px">${ico("plus",16,2.2)}Make a code</button>
-    ${fresh ? `<div class="codenew" role="status"><span>New code</span><b>${esc(fresh)}</b><div class="lbtns"><button type="button" class="btn small" data-codecopy="${esc(fresh)}">${ico("copy",15)}Copy</button><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(msgFor(fresh))}" target="_blank" rel="noopener">${ico("share",15)}Send on WhatsApp</a></div></div>` : ""}
-    ${list.length ? `<div class="lk-group codelist" style="margin-top:14px">${list.map(row).join("")}</div>` : `<p class="hint" style="margin-top:12px">No codes yet.</p>`}`;
+  box.innerHTML = `<div class="codehead"><h2>Free codes</h2><span class="hint">${list.filter(x => !x.off && x.used < x.uses).length} ready</span></div>
+    <div class="codemake"><input type="text" id="codeNote" maxlength="80" placeholder="Note (optional)" aria-label="Note (optional)"><input type="number" id="codeUses" min="1" max="500" value="1" inputmode="numeric" aria-label="How many sellers can use it" title="How many sellers can use it"><button class="btn small solid" id="codeMake">${ico("plus",15,2.2)}Make</button></div>
+    ${fresh ? `<div class="codenew" role="status"><b>${esc(fresh)}</b><button type="button" class="btn small" data-codecopy="${esc(fresh)}">${ico("copy",15)}Copy</button><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(msgFor(fresh))}" target="_blank" rel="noopener">${ico("share",15)}Send</a></div>` : ""}
+    ${list.length ? `<details class="codelist"${fresh ? "" : ""}><summary>All codes (${list.length})</summary><div class="lk-group">${list.map(row).join("")}</div></details>` : ""}`;
   $("codeMake").onclick = async () => {
     const btn = $("codeMake"); btn.disabled = true;
     try { const r = await apiPost({ action: "admin", key: ADMIN, op: "codenew", note: $("codeNote").value.trim(), uses: Number($("codeUses").value) || 1 }); loadCodesCard(r.code); }
@@ -4702,6 +4705,7 @@ function adminSettings(g, head, wire, cfg){
   const signup = cfg.signup !== undefined ? cfg.signup !== false : SITE.signup !== false;
   g.innerHTML = head + `
     <section class="card" id="codesCard">${loaderHtml("Loading free codes...")}</section>
+    ${isStandalone() ? "" : `<p class="hint adminst" id="admInstallCard">${ico("phone",15)}<span>On your phone: ${INSTALL_EVT ? `<button type="button" class="linkbtn" id="admInstall">Install LK Admin</button>` : isIos() ? "Share, then Add to Home Screen" : "⋮ menu, then Add to home screen"} to open this dashboard from an icon.</span></p>`}
     <section class="card">
       <h2>Your WhatsApp</h2>
       <label>Your phone number<input type="tel" id="stWaOwner" value="${esc(v("ownerWa"))}" placeholder="e.g. 012-345 6789"></label>
@@ -4731,6 +4735,7 @@ function adminSettings(g, head, wire, cfg){
     <section class="card guard" id="alertsCard" style="margin-top:22px">${loaderHtml("Loading alerts...")}</section>`;
   wire();
   loadAlertsCard(); loadCodesCard();
+  if ($("admInstall")) $("admInstall").onclick = async () => { const e = INSTALL_EVT; if (!e) return; INSTALL_EVT = null; e.prompt(); try { const r = await e.userChoice; if (r && r.outcome === "accepted") { const c = $("admInstallCard"); if (c) c.remove(); } } catch(err) {} };
   const prev = (inp, box) => $(inp).oninput = () => { const u = safeUrl($(inp).value.trim()); $(box).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
   prev("stQr", "qrPrev"); prev("stPpQr", "ppPrev");
   $("stSave").onclick = () => {
