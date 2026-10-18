@@ -5002,7 +5002,7 @@ const mxDark = () => { const t = document.documentElement.getAttribute("data-the
 // ---------- Sky banner: now and then a little plane tows an ad across the Spot It! map ----------
 // It flies through clear sky (away from the pins and buttons), never while someone is moving the map or reading a store,
 // pauses when tapped, and phones set to "reduce motion" get a still banner instead.
-let SKY = { t: 0, raf: 0, mk: null, el: null, n: 0, i: null, d: null, drag: false, open: false };
+let SKY = { t: 0, raf: 0, flights: [], el: null, n: 0, i: null, d: null, drag: false, open: false };
 const SKY_PLANE = '<svg class="skyjet" viewBox="0 0 48 48" aria-hidden="true"><path d="M44 24c0-1.6-1.6-2.6-3.4-2.6H29L19 6h-4.2l5.6 15.4H11L7.2 15H4l2.4 9L4 33h3.2l3.8-6.4h9.4L14.8 42H19l10-15.4h11.6c1.8 0 3.4-1 3.4-2.6z" fill="#fff" stroke="#18395C" stroke-width="2" stroke-linejoin="round"/><path d="M33 24h7" stroke="#8DB6E8" stroke-width="2.4" stroke-linecap="round"/></svg>';
 // up to 5 plane banners take turns; each flight comes from a different direction
 function skyAds(){ const x = SITE.sky; return (Array.isArray(x) ? x : x && x.text ? [x] : []).filter(a => a && a.text).slice(0, 5); }
@@ -5010,7 +5010,7 @@ function skyAd(){ const l = skyAds(); if (!l.length) return null; if (SKY.i == n
 const SKY_DIRS = [0, 180, 30, 210, -30, 150, 52, 232, -52, 128];   // screen headings: east, west, and gentle and steep diagonals both ways (straight up or down would hide under the search bar and menu)
 function skyHref(x){ return x.advertiserId ? storeLink(x.advertiserId) : safeUrl(x.link) || ""; }
 function skyHit(t, ad){ try { if (!safeUrl(SITE.api)) return; fetch(SITE.api + (SITE.api.includes("?") ? "&" : "?") + "action=hit&t=" + t + "&b=" + encodeURIComponent((ad && ad.k) || ""), { keepalive: true }).catch(() => {}); } catch(e) {} }
-function skyStop(){ clearTimeout(SKY.t); if (SKY.mk) skyLand(); else if (SKY.el) SKY.el.remove(); const c = $("skyCard"); if (c) c.remove(); SKY = { t: 0, raf: 0, mk: null, el: null, n: 0, i: null, d: null, drag: false, open: false }; }
+function skyStop(){ clearTimeout(SKY.t); skyLand(); if (SKY.el) SKY.el.remove(); const c = $("skyCard"); if (c) c.remove(); SKY = { t: 0, raf: 0, flights: [], el: null, n: 0, i: null, d: null, drag: false, open: false }; }
 function skyStart(){
   skyStop(); const ad = skyAd(); if (!ad || !$("mxMap")) return;
   if (reduceMotion()) return skyStill(ad);
@@ -5025,6 +5025,7 @@ function skyFly(){
   const map = MX.map;
   const busy = document.hidden || SKY.drag || SKY.open || MX.sel || ($("mxSheet") && $("mxSheet").classList.contains("open")) || !MX.ready;
   if (busy) { SKY.t = setTimeout(skyFly, 5000); return; }
+  if (SKY.flights.length >= 2 || SKY.flights.some(skyOnScreen)) { SKY.t = setTimeout(skyFly, 8000); return; }   // one plane in view at a time, at most two on the whole map
   if (SKY.n >= 8) return;   // a few flights per visit to the map is plenty
   SKY.n++;
   // pick a route across the screen through the clearest sky: between the filters and the bottom buttons, away from the pins
@@ -5051,7 +5052,14 @@ function skyFly(){
   if (Math.abs(uy) > 1e-6) ts.push((-m - best.py) / uy, (H + m - best.py) / uy);
   const tIn = Math.max(...ts.filter(t => t < 0)), tOut = Math.min(...ts.filter(t => t > 0));
   const A = [best.px + ux * tIn, best.py + uy * tIn], B = [best.px + ux * tOut, best.py + uy * tOut];
-  const from = map.unproject(A), to = map.unproject(B);
+  // the route starts just outside the screen, crosses it, and flies on across the map: about three more screens, or to the edge of Malaysia
+  const pxLen = Math.hypot(B[0] - A[0], B[1] - A[1]), from = map.unproject(A), exit = map.unproject(B);
+  const dLng = (exit.lng - from.lng) / pxLen, dLat = (exit.lat - from.lat) / pxLen;   // map degrees per screen pixel along the route
+  const [[w0, s0], [e0, n0]] = MY_BOUNDS, lim = [pxLen + 3 * Math.max(W, H)];
+  if (dLng > 0) lim.push((e0 - from.lng) / dLng); else if (dLng < 0) lim.push((w0 - from.lng) / dLng);
+  if (dLat > 0) lim.push((n0 - from.lat) / dLat); else if (dLat < 0) lim.push((s0 - from.lat) / dLat);
+  const far = Math.max(pxLen, Math.min(...lim)), to = { lng: from.lng + dLng * far, lat: from.lat + dLat * far };
+  const dur = Math.min(120000, Math.max(10000, pxLen * 22) * far / pxLen);   // about 12 seconds to cross the screen, then on it goes
   const deg = Math.atan2(B[1] - A[1], B[0] - A[0]) * 180 / Math.PI;   // the map never rotates, so the screen heading is the map heading
   const logo = safeImg(ad.logo), el = document.createElement("div");
   el.className = "skyflight";
@@ -5066,27 +5074,14 @@ function skyFly(){
   bn.style.setProperty("--dx", (-cx * gap).toFixed(1) + "px"); bn.style.setProperty("--dy", (-cy * gap).toFixed(1) + "px");
   bn.style.setProperty("--rot", (cx >= 0 ? deg : deg + 180).toFixed(1) + "deg");
   skyCloth(bn, cx >= 0);   // the banner flutters like cloth, waves running from the plane end to the loose end
-  SKY.el = el; SKY.mk = mk;
-  // the dashed trail it leaves behind
-  const trail = { type: "Feature", geometry: { type: "LineString", coordinates: [[from.lng, from.lat], [from.lng, from.lat]] } };
+  const f = { mk, el, from, to, dur, done: 0, trail: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[from.lng, from.lat], [from.lng, from.lat]] } } };
+  SKY.flights.push(f);
+  // the dashed trails the planes leave behind
   try {
-    if (!map.getSource("skytrail")){ map.addSource("skytrail", { type: "geojson", data: trail }); map.addLayer({ id: "skytrail", type: "line", source: "skytrail", paint: { "line-color": mxDark() ? "#3A5F8F" : "#8DB6E8", "line-width": 2, "line-opacity": .85, "line-dasharray": [2, 2] } }); }   // the dark map is drawn inverted, so a deeper blue shows up light
-    else map.getSource("skytrail").setData(trail);
+    if (!map.getSource("skytrail")){ map.addSource("skytrail", { type: "geojson", data: { type: "FeatureCollection", features: [] } }); map.addLayer({ id: "skytrail", type: "line", source: "skytrail", paint: { "line-color": mxDark() ? "#3A5F8F" : "#8DB6E8", "line-width": 2, "line-opacity": .85, "line-dasharray": [2, 2] } }); }   // the dark map is drawn inverted, so a deeper blue shows up light
   } catch(e) {}
-  const dur = Math.max(10000, Math.hypot(B[0] - A[0], B[1] - A[1]) * 22);
-  let done = 0, last = performance.now();
-  const step = now => {
-    if (SKY.mk !== mk) return;
-    if (!SKY.open && !document.hidden) done += now - last;   // paused while the card is open
-    last = now;
-    const t = Math.min(1, done / dur), lng = from.lng + (to.lng - from.lng) * t, lat = from.lat + (to.lat - from.lat) * t;
-    mk.setLngLat([lng, lat]);
-    trail.geometry.coordinates[1] = [lng, lat];
-    try { const src = map.getSource("skytrail"); if (src) src.setData(trail); } catch(e) {}
-    if (t < 1) { SKY.raf = requestAnimationFrame(step); return; }
-    skyLand(); clearTimeout(SKY.t); SKY.t = setTimeout(skyFly, 45000 + Math.random() * 15000);
-  };
-  SKY.raf = requestAnimationFrame(step);
+  if (!SKY.raf){ SKY.last = performance.now(); SKY.raf = requestAnimationFrame(skyLoop); }
+  clearTimeout(SKY.t); SKY.t = setTimeout(skyFly, 50000 + Math.random() * 10000);   // the next plane takes off in about a minute, wherever this one is
   skyHit("skyview", ad); SKY.i++;   // the next flight carries the next banner
   el.querySelector(".skyhit").addEventListener("click", e => { e.stopPropagation(); skyOpen(ad); });
   el.querySelector(".skybanner").addEventListener("click", e => { e.stopPropagation(); skyOpen(ad); });
@@ -5104,13 +5099,29 @@ function skyCloth(bn, poleRight){
   }
   cloth.innerHTML = out; flag.replaceWith(cloth);
 }
-// the flight is over: the plane and its trail leave the map
+// every plane in the sky moves a little each frame (they hold still while a banner's card is open)
+function skyLoop(now){
+  const map = MX && MX.map; if (!map){ SKY.raf = 0; return; }
+  const dt = now - SKY.last; SKY.last = now;
+  SKY.flights = SKY.flights.filter(f => {
+    if (!SKY.open && !document.hidden) f.done += dt;
+    const t = Math.min(1, f.done / f.dur), lng = f.from.lng + (f.to.lng - f.from.lng) * t, lat = f.from.lat + (f.to.lat - f.from.lat) * t;
+    if (t >= 1){ try { f.mk.remove(); } catch(e) {} return false; }   // landed
+    f.mk.setLngLat([lng, lat]); f.trail.geometry.coordinates[1] = [lng, lat];
+    return true;
+  });
+  try { const src = map.getSource("skytrail"); if (src) src.setData({ type: "FeatureCollection", features: SKY.flights.map(f => f.trail) }); } catch(e) {}
+  SKY.raf = SKY.flights.length ? requestAnimationFrame(skyLoop) : 0;
+}
+function skyOnScreen(f){ const el = MX && MX.map && MX.map.getContainer(); if (!el) return false; const p = MX.map.project(f.mk.getLngLat()), m = 60; return p.x > -m && p.y > -m && p.x < el.clientWidth + m && p.y < el.clientHeight + m; }
+// all planes and trails leave the map
 function skyLand(){
-  cancelAnimationFrame(SKY.raf); if (SKY.mk) try { SKY.mk.remove(); } catch(e) {} SKY.mk = null; SKY.el = null;
+  cancelAnimationFrame(SKY.raf); SKY.raf = 0;
+  (SKY.flights || []).forEach(f => { try { f.mk.remove(); } catch(e) {} }); SKY.flights = [];
   try { const m = MX && MX.map; if (m && m.getSource("skytrail")) m.getSource("skytrail").setData({ type: "FeatureCollection", features: [] }); } catch(e) {}
 }
 function skyOpen(ad){
-  SKY.open = true; if (SKY.el) SKY.el.classList.add("held");
+  SKY.open = true; document.querySelectorAll(".skyflight").forEach(x => x.classList.add("held"));
   skyHit("skytap", ad);
   const href = skyHref(ad), logo = safeImg(ad.logo), card = document.createElement("section");
   card.className = "skycard mxg"; card.id = "skyCard"; card.setAttribute("role", "dialog"); card.setAttribute("aria-label", "Sponsored");
@@ -5120,7 +5131,7 @@ function skyOpen(ad){
     ${href ? `<a class="btn solid full" href="${esc(href)}" ${ad.advertiserId ? "" : `target="_blank" rel="noopener sponsored"`}>${ad.advertiserId ? "See their store" : "Find out more"}</a>` : ""}`;
   $("mxMap").parentNode.appendChild(card);
   const pill = $("mxPill"); if (pill) card.style.bottom = Math.max(96, innerHeight - pill.getBoundingClientRect().top + 10) + "px";   // above the "stores in view" button
-  const close = () => { card.remove(); SKY.open = false; if (SKY.el) SKY.el.classList.remove("held"); };
+  const close = () => { card.remove(); SKY.open = false; document.querySelectorAll(".skyflight").forEach(x => x.classList.remove("held")); };
   $("skyX").onclick = close; $("skyX").focus();
 }
 // phones that ask for less motion: a still banner under the filters, once per visit, easy to close
