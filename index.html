@@ -362,7 +362,7 @@ textarea{min-height:72px;resize:vertical}
 .stvisit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
 .stvisit .addr{flex:1 1 100%;display:flex;gap:6px;align-items:flex-start;font-size:14px;color:var(--muted);line-height:1.35}
 .stvisit .addr svg{flex:none;margin-top:1px}
-.mxmk.exact .mxpin{border-radius:50% 50% 50% 4px;transform:rotate(-45deg)}.mxmk.exact .mxpin>svg{transform:rotate(45deg)}
+
 .mxdir{display:flex;gap:8px;margin-top:8px}.mxdir .btn{flex:1;white-space:nowrap}.stvisit .mxdir{flex:1 1 100%;margin-top:0}
 .shoptag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--ink);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:1px}
 .exinstall{margin-top:12px}.dangercard{border-color:var(--err)}
@@ -907,19 +907,21 @@ body.exploring #gwrap{padding:0;max-width:none}
 
 /* markers */
 .mxmk,.mxcl,.mxme{background:none;border:0}
-.mxmk{width:36px;height:36px;cursor:pointer;outline:none}
+.mxmk{width:44px;height:56px;cursor:pointer;outline:none}
 .mxcl{width:46px;height:46px;cursor:pointer;outline:none}
 .mxme{width:18px;height:18px;pointer-events:none}
-.mxmk:focus-visible .mxpin,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
-.mxpin{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:var(--sh-2);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
-.mxpin svg{width:17px;height:17px}
-.mxpin.haslogo{overflow:hidden;background:#fff}
-.mxpin .mxlg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
-.mxmk.exact .mxpin .mxlg{transform:rotate(45deg) scale(1.42)}
-.mxvb{position:absolute;left:24px;top:22px;width:17px;height:17px;border-radius:50%;background:var(--verify);border:2px solid #fff;display:grid;place-items:center;color:#fff}
+.mxmk:focus-visible .mxdot,.mxcl:focus-visible span{outline:3px solid var(--gold);outline-offset:2px}
+.mxpin{position:absolute;left:0;top:0;width:44px;height:56px;display:block;transform-origin:50% 100%;filter:drop-shadow(0 3px 4px rgba(20,10,15,.35));transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.mxdrop{position:absolute;inset:0;width:44px;height:56px;overflow:visible}.mxdrop path{fill:var(--c);stroke:#fff;stroke-width:2.5;stroke-linejoin:round}
+.mxdot{position:absolute;left:7px;top:7px;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--c);display:grid;place-items:center;overflow:hidden}
+.mxdot svg{width:16px;height:16px}
+
+.mxdot .mxlg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;background:#fff}
+
+.mxvb{position:absolute;left:29px;top:1px;width:17px;height:17px;border-radius:50%;background:var(--verify);border:2px solid #fff;display:grid;place-items:center;color:#fff}
 .mxvb svg{width:9px;height:9px}
-.mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05);opacity:.8}
-.mxnm{position:absolute;left:50%;top:40px;transform:translateX(-50%);max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
+.mxmk.closed .mxpin{filter:saturate(.15) brightness(1.05) drop-shadow(0 3px 4px rgba(20,10,15,.3));opacity:.8}
+.mxnm{position:absolute;left:50%;top:59px;transform:translateX(-50%);max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
   background:var(--glass);color:var(--ink);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;transition:opacity .2s ease;pointer-events:none}
 #mxMap.mxzoom .mxnm,.mxmk.sel .mxnm{opacity:1}
 .mxmk.sel .mxpin{transform:scale(1.22)}
@@ -1070,9 +1072,9 @@ a.prow{text-decoration:none;color:inherit}
 .nearst:active{transform:scale(.96)}
 .nearst b{font-size:12px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
 .stnear .nearst>span:last-child{display:none}.nearst>span:last-child{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-.nearlogo{position:relative;width:56px;height:56px;border-radius:50%;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;flex:none}.stnear .nearlogo{width:40px;height:40px;font-size:16px}
-.nearlogo.v{box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px #1D9BF0}
-.nearlogo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.nearpin{position:relative;width:44px;height:56px;flex:none;filter:drop-shadow(0 2px 3px rgba(20,10,15,.3))}.stnear .nearpin{width:34px;height:43px}.nearpin .mxdrop{width:100%;height:100%}
+.nearpin .mxdot{left:15.9%;top:12.5%;width:68.2%;height:53.6%;font-weight:800;font-size:15px}.stnear .nearpin .mxdot{font-size:12px}
+.nearpin .mxvb{left:auto;right:-5px;top:-2px}.stnear .nearpin .mxvb{width:14px;height:14px;right:-5px;top:-3px}.stnear .nearpin .mxvb svg{width:7px;height:7px}
 
 .stfoot .safenote{margin:0 0 14px;text-align:left}
 .stfoot .stcta{margin:0 0 6px;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);justify-content:center;text-align:center;column-gap:12px;row-gap:10px}
@@ -2188,6 +2190,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-map-pins", at: "2026-10-18", title: "New map pins with your logo", body: "On Spot It!, every store is now a map pin in your brand colour, with your logo in its round head. The tip of the pin points at your area. The same pins show in More stores near you at the end of store pages. No logo yet? Add one under Shop details." },
   { id: "u-20261018-more-stores", at: "2026-10-18", title: "Customers discover more stores", body: "At the end of every store page, customers now see a few other Link Kedai App stores near them, with a button to Spot It! After a customer's order goes through, we also suggest nearby stores once. Your store shows up on other sellers' pages too when you're listed on Spot It! (turn it on under Spot It! listing)." },
   { id: "u-20261018-ask-pictures", at: "2026-10-18", title: "Answers now come with pictures", body: "When you ask your assistant a question, most answers now show a picture of the screen with a red circle and arrow on exactly where to tap. Tap the picture to see it bigger." },
   { id: "u-20261018-share", at: "2026-10-18", title: "Customers can share your store", body: "Your store page now has a Share button at the top right. Customers tap it to send your store to friends on WhatsApp, Telegram, Facebook and more, so word about your shop spreads further." },
@@ -4108,7 +4111,7 @@ function nearPick(list, n){
 }
 function nearCards(picks){
   return `<div class="nearrow">${picks.map(x => { const logo = safeImg(x.logo);
-    return `<a class="nearst" href="${esc(storeLink(x.id))}"><span class="nearlogo${x.v ? " v" : ""}" style="background:${esc(/^#[0-9a-f]{3,8}$/i.test(x.color || "") ? x.color : "#18395C")}">${initial(x.name || x.id)}${logo ? `<img src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span><b>${esc(x.name || x.id)}</b><span>${esc(x.city || x.state || "")}</span></a>`; }).join("")}</div>`;
+    return `<a class="nearst" href="${esc(storeLink(x.id))}"><span class="nearpin" style="--c:${esc(/^#[0-9a-f]{3,8}$/i.test(x.color || "") ? x.color : "#18395C")}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot">${initial(x.name || x.id)}${logo ? `<img class="mxlg" src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>${x.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}</span><b>${esc(x.name || x.id)}</b><span>${esc(x.city || x.state || "")}</span></a>`; }).join("")}</div>`;
 }
 function renderNear(){
   const box = $("stNear"); if (!box) return;
@@ -4794,7 +4797,7 @@ function mxCluster(list){
   out.forEach(c => { if (c.items.length === 1) c.ll = [c.items[0]._a.lng, c.items[0]._a.lat]; else { const q = map.unproject([c.x, c.y]); c.ll = [q.lng, q.lat]; } });
   return out;
 }
-function mxMarker(el, ll){ return new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(ll).addTo(MX.map); }
+function mxMarker(el, ll, anchor){ return new maplibregl.Marker({ element: el, anchor: anchor || "center" }).setLngLat(ll).addTo(MX.map); }
 function mxDraw(force){
   if (!MX || !MX.map) return;
   const map = MX.map, z = map.getZoom(), all = exList(), list = all.filter(s => s._a);
@@ -4819,11 +4822,12 @@ function mxDraw(force){
       const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
       // the shop's own logo on its pin (the shop icon shows if there's no logo, or it doesn't load)
       const lg = safeImg(st.logo);
-      el.innerHTML = `<span class="mxpin${lg ? " haslogo" : ""}" style="--c:${col}">${ico("store", 17, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
+      // a map pin: the store's colour, with its logo in the round head (the shop icon if there's no logo, or it doesn't load)
+      el.innerHTML = `<span class="mxpin" style="--c:${col}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot${lg ? " haslogo" : ""}">${ico("store", 16, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span></span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
       el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
       if (sel) el.style.zIndex = 5;
       el.addEventListener("click", () => mxSelect(st.id)); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); mxSelect(st.id); } });
-      MX.mk.push(mxMarker(el, c.ll));
+      MX.mk.push(mxMarker(el, c.ll, "bottom"));   // the pin's tip sits on the shop
     });
     const src = MX.ready && map.getSource("mxareas"); if (src) src.setData({ type: "FeatureCollection", features: feats });
   }
