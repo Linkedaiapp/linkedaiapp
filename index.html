@@ -33,10 +33,13 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#F7F5F3" class="lktc">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sora:wght@700;800&family=Sacramento&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://linkkedai-api.synnamer.workers.dev" crossorigin>
+<!-- fonts load without holding up the first paint; until they arrive the phone's own font shows -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sora:wght@700;800&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
       
@@ -57,13 +60,14 @@
   --wa:#3DBE72; --err:#F2887F; --ok:#6FD39A; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{height:100%;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px));touch-action:pan-x pan-y}   /* pages scroll but never zoom; the map zooms itself */
+html{height:100%;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px));scroll-padding-bottom:calc(110px + env(safe-area-inset-bottom,0px));touch-action:pan-x pan-y}   /* pages scroll but never zoom; the map zooms itself */
 body{margin:0;min-height:100%;
   font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;
   }
 button,input,textarea,select{font:inherit;color:inherit}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 img{max-width:100%;display:block}
+a{color:var(--plum-ink)}   /* links in text match the app, not the browser's default blue */
 [hidden]{display:none!important}
 .wrap{max-width:640px;margin:0 auto;padding:20px 16px 140px}
 
@@ -257,7 +261,8 @@ textarea{min-height:72px;resize:vertical}
 .bulic svg{width:19px;height:19px}
 .bulbody{flex:1;min-width:0}
 .bulmeta{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.bulbody h3{font-size:16px;font-weight:800;margin:3px 18px 4px 0;letter-spacing:-.01em}
+.bulshout .bulbody .hint{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.bulbody h2,.bulbody h3{font-size:16px;font-weight:800;margin:3px 18px 4px 0;letter-spacing:-.01em}
 .bulbody p{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
 .bulnums{display:flex;gap:16px;margin:10px 0 4px}
 .bulnums div b{display:block;font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
@@ -298,7 +303,7 @@ textarea{min-height:72px;resize:vertical}
 .datebtn.empty{color:var(--muted)}
 .daychips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .daychips button{min-width:44px;height:40px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;color:var(--ink);cursor:pointer}
-.daychips button[aria-pressed="true"]{background:var(--err);border-color:var(--err);color:#fff;text-decoration:line-through}
+.daychips button[aria-pressed="true"]{background:color-mix(in srgb,var(--err) 12%,var(--surface));border-color:var(--err);color:var(--err);text-decoration:line-through}
 .chips button{flex:none;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;cursor:pointer;color:var(--ink)}
 .exlocbtn{display:flex;align-items:center;justify-content:center;gap:8px}
 .excard{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);margin-bottom:10px;text-decoration:none;color:inherit;position:relative}
@@ -342,7 +347,7 @@ textarea{min-height:72px;resize:vertical}
 .pinmap{height:280px;margin:10px 0 6px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);background:var(--surface);position:relative}
 .pinmap .maplibregl-ctrl-attrib{font-size:10px}
 .pinstate{font-size:13px;font-weight:700;margin:4px 0 8px}
-.pinstate.ok{color:#15803D}.pinstate.need{color:var(--warn,#B45309)}
+.pinstate.ok{color:var(--ok)}.pinstate.need{color:var(--warn,#B45309)}
 .stvisit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
 .stvisit .addr{flex:1 1 100%;display:flex;gap:6px;align-items:flex-start;font-size:14px;color:var(--muted);line-height:1.35}
 .stvisit .addr svg{flex:none;margin-top:1px}
@@ -553,6 +558,7 @@ html,body{overflow-x:hidden}
 .lines{background:var(--surface);border-radius:var(--r-md);padding:2px 14px;border:1px solid var(--line)}
 .cline{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
 .cline .cn{flex:1;min-width:0}
+#pubSummary .cline:last-child{border-bottom:0}
 .cline .cn b{display:block;font-weight:600;overflow-wrap:anywhere;word-break:break-word}
 .cline .cn span{color:var(--muted);font-size:14px}
 .ctotal{display:flex;justify-content:space-between;padding:12px 0;font-weight:800;font-size:18px}
@@ -617,9 +623,9 @@ html,body{overflow-x:hidden}
 .adban.swapping{animation:none !important;background:var(--surface) !important}
 .addots{display:flex;justify-content:center;gap:6px;margin-top:8px}
 .addots:empty{display:none}
-.addots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:var(--line);cursor:pointer;transition:width .3s ease,background .3s ease}
-.addots button{position:relative}.addots button::after{content:"";position:absolute;inset:-12px -4px}
-.addots button[aria-current="true"]{width:18px;background:var(--ink)}
+.addots button{width:24px;height:24px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}   /* a thumb-sized button, a small dot */
+.addots button::before{content:"";width:7px;height:7px;border-radius:999px;background:var(--muted);opacity:.5;transition:width .3s ease,opacity .3s ease}
+.addots button[aria-current="true"]::before{width:18px;background:var(--ink);opacity:1}
 .adtag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;pointer-events:none}
 .adx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}
 .brandbar{display:flex;justify-content:center;padding:10px 14px 0}
@@ -629,9 +635,9 @@ html,body{overflow-x:hidden}
    Link Kedai App design system v2: warm neutrals, navy + sky, liquid glass
    ===================================================================== */
 :root{--plum-ink:#18395C;--accent-ink:var(--accent);--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#18395C;--gold:#8DB6E8;
-  --glass:rgba(255,255,255,.62);--glass-edge:rgba(255,255,255,.85);--r-card:18px;--r-btn:14px;--r-field:12px}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}}
-:root[data-theme="dark"]{--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14)}
+  --glass:rgba(255,255,255,.62);--glass-edge:#DDD6D1;--r-card:18px;--r-btn:14px;--r-field:12px;--focus:#18395C;--hi:rgba(255,255,255,.9);--gloss:rgba(255,255,255,.34);--field-edge:#9A918C;--verify-ink:#0B6BB0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14);--ok-bg:#16301F;--ink-2:#D6CFCB;--warn:#E8A06A;--warn-bg:#3A2A17;--err-bg:#3A1F1D;--faint:#8A8180;--focus:#8DB6E8;--hi:rgba(255,255,255,.06);--gloss:transparent;--field-edge:#736A6C;--verify-ink:#7CC4FF}}
+:root[data-theme="dark"]{--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14);--ok-bg:#16301F;--ink-2:#D6CFCB;--warn:#E8A06A;--warn-bg:#3A2A17;--err-bg:#3A1F1D;--faint:#8A8180;--focus:#8DB6E8;--hi:rgba(255,255,255,.06);--gloss:transparent;--field-edge:#736A6C;--verify-ink:#7CC4FF}
 body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 .card{border-radius:var(--r-card);border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh-1)}
 .card h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
@@ -640,8 +646,8 @@ body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 .btn{height:48px;border-radius:var(--r-btn);font-weight:600;font-size:15px;position:relative;isolation:isolate;overflow:hidden;
   background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
   -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 1px rgba(20,10,15,.05),0 4px 14px rgba(20,10,15,.08)}
-.btn::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 52%);pointer-events:none;z-index:-1}
+  box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 1px rgba(20,10,15,.05),0 4px 14px rgba(20,10,15,.08)}
+.btn::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--gloss),transparent 52%);pointer-events:none;z-index:-1}
 /* every coloured button is an outline, like Delete account: the glass fill, with the colour on the edge, the words and the icon */
 .btn.solid{color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent-ink) 30%,transparent)}
 .btn.wa{color:var(--wa);border-color:color-mix(in srgb,var(--wa) 30%,transparent)}
@@ -653,8 +659,9 @@ body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.btn,.btn.solid,.btn.wa,.btn.danger{background:var(--surface)}}
 /* ---- fields ---- */
 input[type=text],input[type=tel],input[type=url],input[type=email],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input:not([type]),textarea,select{
-  border-radius:var(--r-field);border:1px solid var(--line2);background:var(--surface);min-height:48px;font-size:15px}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+  border-radius:var(--r-field);border:1px solid var(--field-edge);background-color:var(--surface);min-height:48px;font-size:15px}
+[aria-invalid="true"]{border-color:var(--err)!important}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 22%,transparent)}
 label{font-weight:600;font-size:14px}
 /* ---- checkbox rows: box on the left, text wraps as one paragraph ---- */
 .check{display:grid !important;grid-template-columns:22px minmax(0,1fr);gap:12px;align-items:start;font-weight:500;font-size:14px;line-height:1.5}
@@ -673,10 +680,10 @@ label{font-weight:600;font-size:14px}
 .brand::before{content:"";width:46px;height:28px;background:url(logo.png) center/contain no-repeat;flex:none}
 /* ---- glass icon buttons ---- */
 .bellbtn,.iconbtn{width:42px;height:42px;border-radius:var(--r-md);border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.1);display:grid;place-items:center;color:var(--ink);cursor:pointer;padding:0;position:relative;text-decoration:none}
+  box-shadow:inset 0 1px 0 var(--hi),0 4px 14px rgba(20,10,15,.1);display:grid;place-items:center;color:var(--ink);cursor:pointer;padding:0;position:relative;text-decoration:none}
 .iconbtn svg{width:21px;height:21px}
 /* ---- chips ---- */
-.chips button,.chip{border-radius:999px;border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(20,10,15,.06);font-weight:600}
+.chips button,.chip{border-radius:999px;border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 var(--hi),0 2px 8px rgba(20,10,15,.06);font-weight:600}
 .chips button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);border-color:rgba(255,255,255,.24);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 12px rgba(24,57,92,.25)}
 /* ---- category tiles (line icons, no stalls) ---- */
 .stalls button .stall{width:58px;height:58px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);color:var(--plum-ink);box-shadow:var(--sh-1)}
@@ -684,7 +691,7 @@ label{font-weight:600;font-size:14px}
 .stalls button[aria-pressed="true"] .stall{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 60%),var(--plum);color:#fff;border-color:var(--plum-ink);box-shadow:0 6px 16px rgba(24,57,92,.25)}
 /* ---- home page ---- */
 .brandmark img{border-radius:0;box-shadow:none}
-.signupbox{border-radius:var(--r-btn);background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 14px rgba(20,10,15,.07)}
+.signupbox{border-radius:var(--r-btn);background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 var(--hi),0 4px 14px rgba(20,10,15,.07)}
 .chatfab{background:var(--glass);color:var(--wa);border:1px solid color-mix(in srgb,var(--wa) 30%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 20px rgba(20,10,15,.14)}
 /* ---- sheets ---- */
 .overlay .sheet{border-radius:var(--r-xl) var(--r-xl) 0 0}
@@ -693,7 +700,7 @@ label{font-weight:600;font-size:14px}
 /* ---------- seller: store home + section pages ---------- */
 .lk-tabs{position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:560px;margin:0 auto;height:64px;border-radius:var(--r-xl);z-index:20;
   background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 12px 32px rgba(20,10,15,.16);display:flex;justify-content:space-around;align-items:center}
+  box-shadow:inset 0 1px 0 var(--hi),0 12px 32px rgba(20,10,15,.16);display:flex;justify-content:space-around;align-items:center}
 .lk-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;font:inherit;font-size:12px;font-weight:600;color:var(--muted);padding:6px 8px;border-radius:var(--r-md);cursor:pointer;position:relative}
 .lk-tabs button[aria-current="page"]{color:var(--plum-ink);background:color-mix(in srgb,var(--plum) 9%,transparent)}
 .lk-tabs button[aria-current="page"] .fillme path{fill:currentColor}
@@ -734,7 +741,7 @@ label{font-weight:600;font-size:14px}
 .excities button{flex:none;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line2);background:var(--surface);font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
 .excities button[aria-pressed="true"]{border-color:var(--plum-ink);color:var(--plum-ink);background:color-mix(in srgb,var(--plum) 8%,var(--surface))}
 .exshop{border-radius:var(--r-lg);}
-.exsfav{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--muted);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 8px rgba(20,10,15,.12)}
+.exsfav{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--muted);box-shadow:inset 0 1px 0 var(--hi),0 2px 8px rgba(20,10,15,.12)}
 .exsfav svg{width:18px;height:18px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
 .exsfav[aria-pressed="true"]{color:var(--alert)}
 .exsfav[aria-pressed="true"] svg path{fill:var(--alert)}
@@ -802,6 +809,7 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 .lk-prog i{transition:width .8s var(--soft-ease)}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
+  .overlay.open .sheet,.overlay.closing .sheet{animation:none}
   .exgrid > .exshop,.plist > .prow,.exsfav[aria-pressed="true"] svg,.lk-tabs button[aria-current="page"] svg,.status:not(:empty){animation:none}
   .btn:active,.iconbtn:active,.exshop:active,.stalls button:active .stall{transform:none}
 }
@@ -841,9 +849,11 @@ body.exploring #gwrap{padding:0;max-width:none}
 #mxMap .maplibregl-ctrl-attrib{font-size:11px;background:var(--glass);color:var(--muted);border-radius:var(--r-xs) 0 0 0}
 #mxMap .maplibregl-ctrl-attrib a{color:inherit}
 #mxMap .maplibregl-ctrl-attrib-button{background-color:transparent}
-.mxerr{position:fixed;left:16px;right:16px;top:40%;z-index:5;text-align:center;display:grid;gap:12px;justify-items:center}
+.mxerr{position:fixed;left:16px;right:16px;top:30%;bottom:16px;z-index:5;text-align:center;display:grid;gap:12px;justify-items:center;align-content:start;overflow-y:auto}
+.mxerrlist{width:100%;display:grid;gap:8px;text-align:left}
+.mxerrrow{display:block;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none}.mxerrrow span{display:block;font-size:13px;color:var(--muted)}
 .mxg{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 4px 16px rgba(20,10,15,.14)}
+  box-shadow:inset 0 1px 0 var(--hi),0 4px 16px rgba(20,10,15,.14)}
 .mxtop{position:fixed;z-index:10;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:560px;margin:0 auto}
 .mxtop > *{pointer-events:auto}
 .mxbar{display:flex;gap:8px;align-items:center}
@@ -938,7 +948,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxx{width:38px;height:38px;border-radius:var(--r-sm);border:0;background:var(--soft);display:grid;place-items:center;color:var(--ink);padding:0;cursor:pointer}
 .mxlist{flex:1;overflow-y:auto;padding:0 12px;-webkit-overflow-scrolling:touch}
 .mxrow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 6px;text-decoration:none;color:inherit;border-radius:var(--r-md)}
-.mxrow + .mxrow{border-top:1px solid var(--line)}
+.mxrow{position:relative}.mxrow + .mxrow::before{content:"";position:absolute;left:6px;right:6px;top:0;height:1px;background:var(--line)}   /* a straight divider, not one that bends with the rounded corners */
 .mxrow:active{background:var(--soft)}
 .mxrow .mxci b{font-size:15px}
 .mxnone{padding:30px 14px;text-align:center;color:var(--muted);font-size:14px}
@@ -989,7 +999,7 @@ a.prow{text-decoration:none;color:inherit}
 .vlabel{display:block;font-size:12px;font-weight:700;color:#0B6BB0;margin-top:1px}   /* darker blue: readable small text */
 .warow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;padding:10px 10px 10px 14px;border:1px solid var(--line2);border-radius:var(--r-field);background:var(--surface)}
 .warow b{font-size:16px}
-.tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:#0B6BB0}
+.tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:var(--verify-ink)}
 /* browse-stores button in the top-right corner, clear of the logo */
 .stmore{left:auto;right:12px}
 .stname{font-size:clamp(22px,6vw,28px);margin:8px 0 2px}
@@ -998,7 +1008,7 @@ a.prow{text-decoration:none;color:inherit}
 .stnav .tabs{position:static;padding:10px 14px 6px}
 .stnav .viewtabs{margin:10px 14px 0}
 .stnav .viewtabs:not([hidden]) + .tabs{padding-top:8px}
-.viewtabs button span{font-size:12px;font-weight:700;opacity:.55;margin-left:2px}
+.viewtabs button span{font-size:12px;font-weight:700;color:var(--muted);margin-left:2px}
 .stsearch{padding:10px 14px 0}
 .stsearch input{padding-top:9px;padding-bottom:9px;font-size:15px;border-radius:var(--r-sm)}
 .stnav .viewtabs{padding:3px}
@@ -1015,7 +1025,7 @@ a.prow{text-decoration:none;color:inherit}
 .group h2{font-size:18px;margin:12px 2px 8px}
 /* items without a photo: no empty letter tile in the list, just the add button */
 .prow.nophoto{align-items:center}
-.prow.nophoto .addb.solo{position:static;flex:none;width:32px;height:32px}
+.prow.nophoto .addb.solo{position:relative;flex:none;width:32px;height:32px}   /* relative: its bigger tap area stays round the button */
 .plist.grid .prow.nophoto{flex-direction:column;align-items:stretch}
 .plist.grid .prow.nophoto .addb.solo{align-self:flex-end}
 /* product sheet with no photo: room for the close button instead of a big grey box */
@@ -1069,9 +1079,16 @@ a.prow{text-decoration:none;color:inherit}
 /* iPhones zoom the whole page into any text box under 16px: keep every box at 16px */
 input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}
 /* a clear ring shows where you are when using a keyboard or switch control */
-:focus-visible{outline:2.5px solid var(--plum);outline-offset:2px}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px}
 input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 /* small buttons and close buttons big enough for a thumb */
+.xmini::after,.adx::after,.mxinfo::after,.addb::after,.step button::after{content:"";position:absolute;inset:-6px}   /* the tap area reaches 44px; the button looks the same */
+.mxinfo::after{inset:-11px}.addb::after{inset:-8px}
+.step button{position:relative}
+.filebtn:focus-within{outline:2.5px solid var(--focus);outline-offset:2px}
+.mxsearch:focus-within{box-shadow:0 0 0 2.5px var(--focus)}
+.mxpill.off{visibility:hidden}
+.sr{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0);white-space:nowrap;border:0}   /* read out, not shown */
 .btn.small{height:42px}
 .x{width:40px;height:40px}
 .sechip{height:36px}
@@ -1142,10 +1159,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <label class="check"><input type="checkbox" id="pubOk1"> My shop name, phone number and items are correct</label>
     <label class="check"><input type="checkbox" id="pubOk2"> I understand my store link can't be changed later</label>
     <label class="check"><input type="checkbox" id="pubOk3"> <span id="pubPayText">I understand this is a one-time payment</span></label>
-    <p class="err" id="pubErr"></p>
+    <p class="err" id="pubErr" role="alert"></p>
     <div class="row2">
       <div><button class="btn full" type="button" data-close="pubOverlay">Edit details</button></div>
-      <div><button class="btn solid full" type="button" id="pubGo">Continue to payment</button></div>
+      <div><button class="btn solid full" type="button" id="pubGo">Go to payment</button></div>
     </div>
   </div>
 </div>
@@ -1165,7 +1182,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <label class="optrow"><input type="radio" name="rep" value="other"><span>Something else</span></label>
     </div>
     <label>More details (optional)<input type="text" id="repNote" maxlength="140" placeholder="e.g. They sell vape in the second item"></label>
-    <p class="err" id="repErr"></p>
+    <p class="err" id="repErr" role="alert"></p>
     <button class="btn solid full" type="button" id="repGo" style="margin-top:6px">Send report</button>
   </div>
 </div>
@@ -1364,7 +1381,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <div class="pbody">
         <h2 id="pTitle"></h2>
         <p class="pdesc" id="pDesc"></p>
-        <div class="opts" id="pOpts"></div>
+        <div class="opts" id="pOpts" role="radiogroup" aria-label="Choose an option"></div>
         <div class="qtyrow"><b>Quantity</b>
           <div class="step"><button id="pMinus" aria-label="Less">−</button><span class="q" id="pQty">1</span><button id="pPlus" aria-label="More">+</button></div>
         </div>
@@ -1481,7 +1498,8 @@ function curSymbol(code){
 }
 function curOption(code, sel){ const sym = curSymbol(code).trim(); return `<option value="${code}" ${code===sel?"selected":""}>${code} ${esc(curName(code))}${sym && sym !== code ? " (" + esc(sym) + ")" : ""}</option>`; }
 function slug(t){ return String(t||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40) || "shop"; }
-const fmtMoney = (cur, n) => { n = Number(n) || 0; return esc(cur || "") + n.toLocaleString("en", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }); };
+// RM13.00 next to RM8.50, so prices line up; big round prices (Rp15,000) keep no cents
+const fmtMoney = (cur, n) => { n = Number(n) || 0; const d = Number.isInteger(n) && n >= 1000 ? 0 : 2; return esc(cur || "") + n.toLocaleString("en", { minimumFractionDigits: d, maximumFractionDigits: 2 }); };
 
 
 
@@ -1489,6 +1507,8 @@ const fmtMoney = (cur, n) => { n = Number(n) || 0; return esc(cur || "") + n.toL
 
 
 
+// the server address, so a first visit doesn't wait for site.json (which still decides: if it says otherwise, it wins)
+const DEFAULT_API = "https://linkkedai-api.synnamer.workers.dev";
 let SITE = { api: "", ownerWa: "", price: "", qr: "", duitnow: "", note: "", signup: true, paypal: "", priceIntl: "", paypalQr: "" };
 // Malaysia or elsewhere? Decides which price and payment tab people see first.
 const IN_MY = (() => { try { return /^Asia\/(Kuala_Lumpur|Kuching)$/.test(Intl.DateTimeFormat().resolvedOptions().timeZone); } catch(e){ return true; } })();
@@ -1543,7 +1563,8 @@ async function loadSite(){
   const saved = keep.get("lk-site");
   const moved = j => { const mv = keep.get("lk-moved"); if (mv && mv.from === j.api && safeUrl(mv.to)) j.api = mv.to; return j; };
   const freshSite = getJson("site.json").then(j => { j = moved(j); keep.set("lk-site", j); SITE = Object.assign(SITE, j); applyConfig(keep.get("lk-config")); }).catch(() => {});
-  if (saved && safeUrl(saved.api)) SITE = Object.assign(SITE, saved); else await freshSite;
+  if (saved && safeUrl(saved.api)) SITE = Object.assign(SITE, saved);
+  else { SITE.api = moved({ api: DEFAULT_API }).api; if (!safeUrl(SITE.api)) await freshSite; }   // site.json still arrives and wins; this just saves a wait
   if (!safeUrl(SITE.api)) { CONFIG_P = Promise.resolve(); return; }
   // Show the page straight away with the settings this phone remembers; fetch fresh ones in the background
   let remembered = null;
@@ -1749,6 +1770,7 @@ function closeSheet(id){
   if (o && o.id === "promptOverlay" && o._res){ const r = o._res; o._res = null; r(null); }   // a prompt closed any other way counts as Cancel
   if (o) o._hist = false;
   if (!o || !o.classList.contains("open") || o.classList.contains("closing")) return;
+  sheetRelease(o);
   if (matchMedia("(prefers-reduced-motion: reduce)").matches){ o.classList.remove("open"); return; }
   o.classList.add("closing");
   clearTimeout(o._closeT);
@@ -1756,12 +1778,36 @@ function closeSheet(id){
 }
 // Opening cancels any close still in progress, so a new pop-up never vanishes
 const BACK_SHEETS = ["pOverlay", "overlay", "repOverlay", "pinOverlay", "waOverlay", "emOverlay", "fpOverlay", "payOverlay", "pubOverlay", "bulOverlay", "promptOverlay"];
+// While a pop-up is open, everything behind it is out of reach (Tab, screen readers), and closing it puts you back on the button you tapped.
+// Only the top pop-up counts, worked out again every time one opens or closes, so pop-ups opened over each other always come out right.
+const SHEET_STACK = [], SHEET_INERT = new Set();
+function syncInert(){
+  SHEET_INERT.forEach(el => el.inert = false); SHEET_INERT.clear();
+  for (let k = SHEET_STACK.length - 1; k >= 0; k--) if (!SHEET_STACK[k].classList.contains("open")) SHEET_STACK.splice(k, 1);   // one closed some other way
+  const top = SHEET_STACK[SHEET_STACK.length - 1]; if (!top) return;
+  for (let el = top; el && el.parentElement && el !== document.body; el = el.parentElement)
+    for (const sib of el.parentElement.children)
+      if (sib !== el && !sib.inert && !/^(SCRIPT|STYLE|TEMPLATE)$/.test(sib.tagName)){ sib.inert = true; SHEET_INERT.add(sib); }
+}
+function sheetTrap(o){
+  if (SHEET_STACK.includes(o)) return;
+  const ret = document.activeElement;
+  o._ret = ret && ret !== document.body && !o.contains(ret) ? ret : null;
+  SHEET_STACK.push(o); syncInert();
+}
+function sheetRelease(o){
+  const k = SHEET_STACK.indexOf(o); if (k < 0) return;
+  SHEET_STACK.splice(k, 1); syncInert();
+  const r = o._ret; o._ret = null;
+  if (r && document.contains(r) && !r.closest("[inert]")) try { r.focus({ preventScroll: true }); } catch(e) {}
+}
 function openSheet(id){
   const o = $(id); if (!o) return;
   if (BACK_SHEETS.includes(id) && !o.classList.contains("open") && !o._hist){ inpagePush(Object.assign({}, history.state, { sheet: id })); o._hist = true; }
   clearTimeout(o._closeT);
   o.classList.remove("closing");
   o.classList.add("open");
+  sheetTrap(o);
   const x = o.querySelector(".xmini, [data-close]"); if (x) try { x.focus({ preventScroll: true }); } catch(e) {}
 }
 function show(id){
@@ -1926,7 +1972,7 @@ function loginCardHtml(msg){
       <p class="hint">The number your store gets orders on, or the email you added.</p>
       <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <label class="check keepme"><input type="checkbox" id="lKeep"><span>Keep me logged in on this phone</span></label>
-      <p class="err" id="lErr">${esc(msg || "")}</p>
+      <p class="err" id="lErr" role="alert">${esc(msg || "")}</p>
       <button class="btn solid full" id="lGo">Log in and edit my store</button>
       <p class="hint" style="margin-top:12px">Forgot your PIN? <button type="button" class="linkbtn" id="lForgot">Reset it</button></p>
     </section>`;
@@ -2038,7 +2084,7 @@ function renderStart(msg, mode){
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
       </div>
       <label class="check"><input type="checkbox" id="cAgree"><span>I agree to the <a href="${esc(home())}terms" target="_blank" rel="noopener">Terms</a> and <a href="${esc(home())}privacy" target="_blank" rel="noopener">Privacy Policy</a>, and I won't sell anything on this list. I understand ${esc(APP_NAME)} can remove stores that break these rules.</span></label>
-      <p class="err" id="cErr"></p>
+      <p class="err" id="cErr" role="alert"></p>
       <button class="btn solid full" id="cGo">Sign up</button>
     </section>`;
   show("page");
@@ -2085,6 +2131,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261017-polish", at: "2026-10-17", title: "A faster, clearer app", body: "We gave the whole app a check-up. It opens faster on slow internet, and store photos load much quicker for your customers. Dark mode is easier to read, with clear badges and buttons. Prices now always show two decimals, like RM13.00. If your store isn't live yet, Publish my store is now at the top of your Store page. Nothing you need to do." },
   { id: "u-20261017-profile2", at: "2026-10-17", title: "Phone number, email and PIN in one place", body: "Tap your store name at the top of Account to open Profile. Your phone number, email and PIN are all there: tap the pencil next to one to change it. We now say \"phone number\" everywhere instead of \"WhatsApp number\". Orders still come to that number on WhatsApp." },
   { id: "u-20261017-buttons", at: "2026-10-17", title: "A lighter look for buttons", body: "Every button in the app now has the same clean look: a light button with a coloured outline, coloured words and icon. Save, Share, Add to cart, Log in and the rest all work the same as before." },
   { id: "u-20261017-linkcard", at: "2026-10-17", title: "Your store link, clearly marked", body: "The top card on your store home is now titled \"Your store link\": the link to share with customers. The blue Verified tag also shows straight away when you open the app." },
@@ -2109,7 +2156,7 @@ const APP_UPDATES = [
   { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Link Kedai App news now appear here. Look for the red number on the bell." },
   { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Link Kedai App Guard now show a blue Verified tick on their logo, so customers can trust your link." },
   { id: "u-20260924-guard", at: "2026-09-24", title: "Link Kedai App Guard keeps stores safe", body: "Every store is checked automatically for prohibited items, and customers can report stores. This keeps Link Kedai App trusted for honest sellers like you." },
-  { id: "u-20260924-styles", at: "2026-09-24", title: "Three store styles", body: "Choose List, Photo grid or Minimal under Store style in your editor, to suit food, products or services." }
+  { id: "u-20260924-styles", at: "2026-09-24", title: "Three store styles", body: "Choose List, Photo grid or Minimal under Store style in Shop details, to suit food, products or services." }
 ];
 const IC = {
   chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
@@ -2136,7 +2183,7 @@ function bulletinItems(){
   else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Link Kedai App Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
   else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a blue Verified tick on your store logo. It shows your payment was confirmed and your store passed our safety check.");
   else if (b.status === "live" && b.paid) push("st-paid-" + b.paidAt, "shield", "Store status", "Payment received", "Your store is live. Once your payment is confirmed, you'll get the Verified badge.");
-  else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store in your editor to go live.");
+  else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store on your Store page to go live.");
   // shop insights, this week vs last week
   const st = Array.isArray(b.stats) ? b.stats : [];
   if (b.status === "live" && st.length >= 7){
@@ -2167,12 +2214,12 @@ function bulletinItems(){
     to ? `<a class="btn small solid" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Link Kedai App, I'd like to book an ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Book an ad</a>` : "");
   // smart tips from the store itself
   const named = S.items.filter(it => it.n.trim()), noPhoto = named.filter(it => !safeImg(it.img)).length;
-  if (noPhoto && S.layout !== "minimal") push("tip-photos-" + noPhoto, "tip", "Tip", `${noPhoto} item${noPhoto === 1 ? " has" : "s have"} no photo`, "Stores with a photo on every item get more orders. Tap Upload photo on each item in your editor.");
+  if (noPhoto && S.layout !== "minimal") push("tip-photos-" + noPhoto, "tip", "Tip", `${noPhoto} item${noPhoto === 1 ? " has" : "s have"} no photo`, "Stores with a photo on every item get more orders. Open each item under Products and tap Upload photo.");
   if (!safeImg(S.logo)) push("tip-logo", "tip", "Tip", "Add your logo", "A logo makes your store look professional and helps customers recognise you.");
   if (named.length === 1) push("tip-more", "tip", "Tip", "Add more items", "Stores with at least 5 items get more visits. Add your other products or services.");
   if (S.closed) push("tip-closed", "tip", "Tip", "Your store shows as Closed", "Customers can't order while your store is closed. Switch it to Open under Store status when you're ready.");
   // Link Kedai App updates
-  const since = b.created ? new Date(b.created - 14 * 864e5).toISOString().slice(0, 10) : "";
+  const since = b.created ? new Date(b.created).toISOString().slice(0, 10) : "";   // a new seller starts with a clean slate, not every update from before they joined
   APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
   if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm the Link Kedai App bot. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights.</p>");
   const gone = bulGone();   // posts the seller removed; insights and must-act status posts always stay
@@ -2187,7 +2234,7 @@ function bulCards(items, seen, canx){
   return items.map(x => `
     <article class="bulcard ${seen.has(x.id) ? "" : "unread"} ${canx && !x.keep ? "canx" : ""}">${canx && !x.keep ? `<button class="xmini" data-act="bulx" data-v="${esc(x.id)}" aria-label="Remove this post">×</button>` : ""}
       <div class="bulic">${IC[x.kind] || IC.news}</div>
-      <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h3>${esc(x.title)}</h3>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
+      <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h2>${esc(x.title)}</h2>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
     </article>`).join("");
 }
 // The app icon on the home screen shows the same red number while the app is open (Android)
@@ -2197,6 +2244,7 @@ function updateBell(){
   const el = $("bellCount"); if (!el) return;
   const n = unreadOf(window.LK_ALLVIEW ? bulletinItems() : newsItems());
   el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n);
+  if (el.parentElement) el.parentElement.setAttribute("aria-label", n ? `News, ${n > 9 ? "9+" : n} unread` : "News");
   const tab = document.querySelector('.lk-tabs [data-v="insights"]');
   if (tab && EDV !== "insights"){ const n = unreadOf(insItems()), d = tab.querySelector(".dotn"); if (d) d.remove(); if (n) tab.insertAdjacentHTML("beforeend", `<span class="dotn">${n > 9 ? "9+" : n}</span>`); }
 }
@@ -2243,7 +2291,7 @@ function shoutHtml(){
   if (!fresh.length) return "";
   const x = fresh[0], u = APP_UPDATES.find(u => u.id === x.id);
   return `<section class="card bulshout" id="bulShout"><div class="bulic">${IC.ad}</div>
-    <div class="bulbody"><div class="bulmeta">${fresh.length > 1 ? `What's new · ${fresh.length} updates` : "What's new"}</div><h3 style="margin:2px 0 0">${esc(x.title)}</h3><p class="hint">${esc(u ? u.body : "")}</p>
+    <div class="bulbody"><div class="bulmeta">${fresh.length > 1 ? `What's new · ${fresh.length} updates` : "What's new"}</div><h2 style="margin:2px 0 0">${esc(x.title)}</h2><p class="hint">${esc(u ? u.body : "")}</p>
     <button class="btn small solid" data-act="go" data-v="news">${fresh.length > 1 ? "See all updates" : "See news"}</button></div>
     <button class="xmini" data-act="shoutx" data-v="${esc(x.id)}" aria-label="Close">×</button></section>`;
 }
@@ -2253,7 +2301,7 @@ function edTop(title, back, right){
 function edTabs(){
   const unread = EDV === "insights" ? 0 : unreadOf(insItems());
   const t = (v, icon, label, n) => `<button data-act="go" data-v="${v}" ${EDV === v ? 'aria-current="page"' : ""}>${ico(icon,22)}<span>${label}</span>${n ? `<span class="dotn">${n > 9 ? "9+" : n}</span>` : ""}</button>`;
-  return `<nav class="lk-tabs" aria-label="Seller menu">${t("home","store","Store")}${t("products","box","Products")}${t("links","link","Links")}${t("insights","chart","Insights", unread)}${t("account","user","Account")}</nav>`;
+  return `<nav class="lk-tabs" aria-label="Seller menu">${t("home","store","Store")}${t("products","box",W(S).list)}${t("links","link","Links")}${t("insights","chart","Insights", unread)}${t("account","user","Account")}</nav>`;
 }
 function priceText(it){
   const ps = it.o.map(o => +o.p).filter(x => x > 0);
@@ -2277,6 +2325,7 @@ function edHome(msg){
   return `
   ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
+  ${SESSION.admin ? "" : publishCardHtml()}
   ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
     <div class="linkhead"><h2>${live ? "Your store link" : "Your store"}</h2><div class="linktags" id="linkTags">${linkTags()}</div></div>
@@ -2288,7 +2337,6 @@ function edHome(msg){
   </section>
   ${SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : ""}
   ${SESSION.admin ? "" : tipHtml()}
-  ${SESSION.admin ? "" : publishCardHtml()}
   ${allDone ? "" : `<section class="card">
     <div class="between"><h2 style="margin:0">Store setup</h2><span class="hint" style="margin:0">${done} of ${total} done</span></div>
     <div class="lk-prog"><i style="width:${Math.round(done / total * 100)}%"></i></div>
@@ -2342,7 +2390,7 @@ function edStatus(){
       <button data-act="open" data-v="0" aria-pressed="${S.closed}">Closed</button>
     </div>
     <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Closed for Hari Raya. Back on 5 April, 9am"></label>
-    <p class="hint">While closed, customers can still see your store, but can't send orders.</p>
+    <p class="hint">While closed, customers see your closed message instead of your menu, and can't send orders.</p>
   </section>
   ${offCardHtml()}`;
 }
@@ -2449,7 +2497,7 @@ async function fetchLinkMeta(l){
 function edLinks(){
   const rows = S.links.map((l, j) => {
     const info = linkInfo(l.u), img = safeImg(l.img), name = tidyName(l.n);
-    return `<button class="lk-row" data-act="go" data-v="link" data-i="${j}"><span class="thumb">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer">` : ico("link", 20)}</span><span class="tt"><b>${esc(name || (safeUrl(l.u) ? "No name yet" : "New link"))}</b><span>${esc([l.sec.trim(), info.brand, l.p > 0 ? fmtMoney(S.cur || curSymbol(S.curCode), l.p) : ""].filter(Boolean).join(" · ") || "Paste a link")}</span></span>${safeUrl(l.u) && !img ? `<span class="tag2 claim">No photo</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
+    return `<button class="lk-row" data-act="go" data-v="link" data-i="${j}"><span class="thumb">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer">` : ico("link", 20)}</span><span class="tt"><b>${esc(name || (safeUrl(l.u) ? "No name yet" : "New link"))}</b><span>${esc([l.sec.trim().toLowerCase() === String(info.brand || "").toLowerCase() ? "" : l.sec.trim(), info.brand, l.p > 0 ? fmtMoney(S.cur || curSymbol(S.curCode), l.p) : ""].filter(Boolean).join(" · ") || "Paste a link")}</span></span>${safeUrl(l.u) && !img ? `<span class="tag2 claim">No photo</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
   }).join("");
   return `${edTop("Affiliate links", "", `<button type="button" class="btn small solid" data-act="lkadd">${ico("plus", 16, 2.2)}Add</button>`)}
   ${S.links.length ? `<section class="card lk-group">${rows}</section><p class="hint" style="margin:4px 4px 0">Links open the shop's page in a new tab. Customers see a short note that some links are affiliate links.</p>`
@@ -2478,7 +2526,7 @@ function secCard(secs, cur, pick, field, ph){
 function edProducts(){
   const rows = S.items.map((it, i) => {
     const u = safeImg(it.img);
-    return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(u)}" alt="">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${it.sec ? esc(it.sec) + " · " : ""}${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
+    return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(sized(u, 160))}" alt="" decoding="async">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}${it.sec ? " · " + esc(it.sec) : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
   }).join("");
   return `${edTop(W(S).list, "", `<button class="btn small solid" data-act="additem">${ico("plus",16,2.2)}Add</button>`)}
   ${S.items.length ? `<section class="card lk-group">${rows}</section>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button></section>`}`;
@@ -2616,17 +2664,17 @@ function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
-    <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Profile: phone number, email and PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
-    ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with ${esc(APP_NAME)} on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
-    ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new from ${esc(APP_NAME)}</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
-    <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How ${esc(APP_NAME)} works and protects you</span></span><span class="chev">${ico("chevron",18)}</span></a>
-    <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in until you log out" : "You can log in again anytime"}</span></span></button>
+    <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Phone, email and PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
+    ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with us on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
+    ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
+    <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How we work and protect you</span></span><span class="chev">${ico("chevron",18)}</span></a>
+    <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in" : "You can log in again anytime"}</span></span></button>
   </section>`;
 }
 // Profile: the store's account details, with a small Danger zone at the bottom (one step away from Account, so it isn't tapped by chance)
 function edProfile(){
   const link = storeLink(SESSION.id), me = SESSION && !SESSION.admin;
-  const row = (act, icon, title, value) => `<button class="lk-row" data-act="${act}" aria-label="Change ${esc(title.toLowerCase())}"><span class="tile">${ico(icon)}</span><span class="tt"><b>${esc(title)}</b><span>${esc(value)}</span></span><span class="pen">${ico("pencil",16)}</span></button>`;
+  const row = (act, icon, title, value) => `<button class="lk-row" data-act="${act}"><span class="tile">${ico(icon)}</span><span class="tt"><b><span class="sr">Change </span>${esc(title)}</b><span>${esc(value)}</span></span><span class="pen">${ico("pencil",16)}</span></button>`;
   return `${edTop("Profile", "account")}
   <section class="card">
     <label style="margin-top:0">Store name</label><p style="margin:2px 0 0;font-weight:600">${esc(S.name || "Not set yet")}</p>
@@ -2653,7 +2701,7 @@ function renderEditor(msg){
   const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
-  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile");   // nothing to save or preview on News or Profile
+  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
@@ -2917,7 +2965,7 @@ function publishCardHtml(){
   const qr = safeUrl(SITE.qr);
   return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Publish your store</h2>
-    <p class="hint">When your store looks right, publish it. Pay once${shownPrice() ? `, <b>${esc(shownPrice())}</b>` : ""}, and it goes live straight away.</p>
+    <p class="hint">When your store looks right, publish it. Pay once${shownPrice() ? `, <b>${esc(shownPrice())}</b>` : ""}, and most stores go live straight away. A few get a quick safety check first (up to 24 hours).</p>
     <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Publish my store</button>
   </section>`;
 }
@@ -2965,23 +3013,23 @@ function renderPayment(){
           ? `Save the QR to your gallery (press and hold it), then scan it in your PayPal app. Pay <b>${esc(price)}</b> and add your shop name <b>${esc(S.name)}</b> in the note.`
           : `Tap <b>Pay with PayPal</b> and pay <b>${esc(price)}</b>. Add your shop name <b>${esc(S.name)}</b> in the note.`}</li>
         <li>Take a screenshot of your PayPal receipt.</li>
-        <li>Come back here, tap the button below and choose that screenshot. Your store goes live at once.</li>
+        <li>Come back here, tap the button below and choose that screenshot. Most stores go live straight away.</li>
       </ol>
     </div>` : `
     <div class="qrbox">
       <p class="hint" style="margin:0 0 6px">Pay with DuitNow</p>
       ${price ? `<p class="amt">${esc(price)}</p>` : ""}
       ${qr ? `<img src="${esc(qr)}" alt="DuitNow QR for payment" onerror="qrFailed(this)">` : ""}
-      ${SITE.duitnow ? `<p class="hint">DuitNow ID: <b>${esc(SITE.duitnow)}</b></p>` : ""}
+      ${SITE.duitnow ? `<p class="hint" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">DuitNow ID: <b>${esc(SITE.duitnow)}</b><button type="button" class="btn small" data-act="copyduit">${ico("copy",16)}Copy</button></p>` : ""}
       <ol>
         <li id="payStep1">${qr ? "Save the QR to your gallery (press and hold it), then scan it from your gallery in your bank app or Touch 'n Go." : "Pay by DuitNow to the ID above in your bank app or Touch 'n Go."}</li>
         <li>Take a screenshot of your payment receipt.</li>
-        <li>Tap the button below and choose that screenshot. Your store goes live at once.</li>
+        <li>Tap the button below and choose that screenshot. Most stores go live straight away.</li>
       </ol>
     </div>`;
   $("payBody").innerHTML = `
     <h2 id="payTitle" style="font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 44px 4px 0">Pay and publish</h2>
-    <p class="hint" style="margin:0">Pay once${price ? `, <b>${esc(price)}</b>` : ""}, then upload your receipt. Your store goes live straight away.</p>
+    <p class="hint" style="margin:0">Pay once${price ? `, <b>${esc(price)}</b>` : ""}, then upload your receipt. Most stores go live straight away; a few get a quick safety check first (up to 24 hours).</p>
     ${tabs}
     ${how}
     <label class="btn wa full filebtn" style="margin-top:14px;padding:15px">I've paid: upload receipt and publish<input type="file" accept="image/*" data-media="receipt" aria-label="Upload payment receipt"></label>
@@ -3002,7 +3050,7 @@ function openPublishCheck(){
   $("pubSummary").innerHTML =
     row("Shop name", S.name) +
     row("Store link", storeLink(SESSION.id)) +
-    row("Phone number (orders + login)", S.wa) +
+    row("Phone number (orders + login)", fmtWa(S.wa) || S.wa) +
     row("What you sell", W(S).label + ", " + named.length + " " + (named.length === 1 ? W(S).item : W(S).item + "s")) +
     (shownPrice() ? row("Payment", shownPrice() + ", one time") : "");
   $("pubPayText").textContent = shownPrice() ? `I understand this is a one-time payment of ${shownPrice()}` : "I understand this is a one-time payment";
@@ -3020,7 +3068,7 @@ $("pubGo").onclick = async () => {
     renderEditor("Details saved.");
     setTimeout(openPayment, 260);
   } catch(e){ $("pubErr").textContent = friendly(e, "Couldn't save your store right now. Check your internet and try again."); }
-  btn.disabled = false; btn.textContent = "Continue to payment";
+  btn.disabled = false; btn.textContent = "Go to payment";
 };
 
 function legacyEditor(msg){
@@ -3164,6 +3212,11 @@ function onField(e){
 $("bwrap").addEventListener("input", onField);
 $("bwrap").addEventListener("change", onField);
 
+// the payment sheet sits outside the editor, so its Copy button has its own handler
+$("payBody").addEventListener("click", async e => {
+  const b = e.target.closest('[data-act="copyduit"]'); if (!b) return;
+  const ok = await copyText(String(SITE.duitnow || "")); b.innerHTML = ico(ok ? "check" : "copy", 16) + (ok ? "Copied" : "Copy");
+});
 $("builder").addEventListener("click", async e => {
   const b = e.target.closest("[data-act]");
   if (!b) return;
@@ -3435,7 +3488,7 @@ async function showStore(data, isPreview, refresh){
   $("stWrap").style.paddingTop = cover ? "0" : "56px";
   $("stCard").style.marginTop = cover ? "" : "52px";   // no cover: the browse button sits top-right, so the logo only needs a little room
   if (isPreview) hidePwaBar("stPwaBar"); else showPwaBar("stPwaBar");
-  setHtml($("stLogo"), safeImg(D.logo) ? `<img src="${esc(safeImg(D.logo))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`);
+  setHtml($("stLogo"), safeImg(D.logo) ? `<img src="${esc(sized(safeImg(D.logo), 320))}" alt="">` : `<span style="width:100%;height:100%;display:grid;place-items:center;background:var(--accent)">${initial(D.name)}</span>`);
   $("stName").textContent = D.name;
   $("stTag").textContent = D.tagline; $("stTag").hidden = !D.tagline;
   // town + state (the seller's own preview uses what they've set in the editor)
@@ -3559,6 +3612,13 @@ $("repGo").onclick = async () => {
   btn.disabled = false; btn.textContent = "Send report";
 };
 
+// Google Drive photos come in any size: small boxes ask for a small copy (about 3 KB instead of 55 KB)
+function sized(u, w){
+  u = String(u || "");
+  if (/^https:\/\/lh3\.googleusercontent\.com\/d\/[\w-]+(=w\d+)?$/.test(u)) return u.replace(/=w\d+$/, "") + "=w" + w;
+  if (/^https:\/\/drive\.google\.com\/thumbnail\?/.test(u)) return /[?&]sz=w\d+/.test(u) ? u.replace(/([?&])sz=w\d+/, "$1sz=w" + w) : u + "&sz=w" + w;
+  return u;
+}
 function productRow(i){
   const p = D.items[i], img = safeImg(p.img), n = inCart(i), bare = !img && D.layout === "list";   // Minimal draws its own "+"
   return `<button class="prow${p.out ? " out" : ""}${bare ? " nophoto" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
@@ -3568,7 +3628,7 @@ function productRow(i){
       <div class="pmeta"><span class="pprice">${priceLabel(p)}${p.o.length === 1 && p.o[0].l ? ` · ${esc(p.o[0].l)}` : ""}</span>
         ${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
     </div>
-    ${bare ? (p.out ? "" : `<span class="addb solo" aria-hidden="true">+</span>`) : `<div class="pimg">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<div class="ph">${initial(p.n)}</div>`}
+    ${bare ? (p.out ? "" : `<span class="addb solo" aria-hidden="true">+</span>`) : `<div class="pimg">${img ? `<img src="${esc(sized(img, D.layout === "grid" ? 480 : 240))}" alt="" loading="lazy" decoding="async">` : `<div class="ph">${initial(p.n)}</div>`}
       ${p.out ? "" : `<span class="addb" aria-hidden="true">+</span>`}</div>`}
   </button>`;
 }
@@ -3643,7 +3703,8 @@ $("viewTabs").addEventListener("click", e => {
   const b = e.target.closest("[data-view]"); if (!b || b.dataset.view === MVIEW) return;
   MVIEW = b.dataset.view; MSEC = "all"; renderMenu(); menuToTop();
 });
-$("stQ").addEventListener("input", () => { MQ = $("stQ").value; renderMenu(); });
+let MQ_T = 0;
+$("stQ").addEventListener("input", () => { clearTimeout(MQ_T); MQ_T = setTimeout(() => { MQ = $("stQ").value; renderMenu(); }, 150); });   // redraw once typing pauses, not on every letter
 $("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur(); });
 const pSig = p => JSON.stringify([p.n, p.o]);
 function openProduct(i){
@@ -3733,15 +3794,20 @@ $("dateCal").addEventListener("click", e => {
 });
 ["note","cName","date"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
-  let msg = "";
+  let msg = "", bad = null;
   setDateMin();
+  ["cName","date"].forEach(id => $(id).removeAttribute("aria-invalid"));
   if (D.closed) msg = "This store is closed right now.";
   else if (!items().length) msg = "Add something to your cart first.";
-  else if (!$("cName").value.trim()) msg = "Add your name so the shop knows who the order is for.";
-  else if (W(D).dateNeeded && !$("date").value) msg = "Pick a date first.";
-  else if ($("date").value && $("date").value < $("date").min) msg = "Pick today or a later date.";
-  else if (dayOff(D.off, $("date").value)) msg = "The shop isn't taking orders on that day. Please pick another date.";
-  if (msg){ e.preventDefault(); $("err").textContent = msg; return; }
+  else if (!$("cName").value.trim()){ msg = "Add your name so the shop knows who the order is for."; bad = "cName"; }
+  else if (W(D).dateNeeded && !$("date").value){ msg = "Pick a date first."; bad = "date"; }
+  else if ($("date").value && $("date").value < $("date").min){ msg = "Pick today or a later date."; bad = "date"; }
+  else if (dayOff(D.off, $("date").value)){ msg = "The shop isn't taking orders on that day. Please pick another date."; bad = "date"; }
+  if (msg){
+    e.preventDefault(); $("err").textContent = msg;
+    if (bad){ const f = $(bad); f.setAttribute("aria-invalid", "true"); f.setAttribute("aria-describedby", "err"); try { f.focus({ preventScroll: true }); f.scrollIntoView({ block: "center", behavior: reduceMotion() ? "auto" : "smooth" }); } catch(_) {} }   // take them to the field that needs fixing
+    return;
+  }
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   if ($("backBtn").hidden) track("order");
   ORDER_SENT = true;   // the cart stays until they come back and say the order went through
@@ -3836,7 +3902,7 @@ async function adminStores(g, head, wire){
   const row = x => `
     <section class="card admrow" data-find="${esc((x.name + " " + x.id + " " + x.wa).toLowerCase())}">
       <div class="between"><b>${esc(x.name || x.id)}</b>${tag(x)}</div>
-      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · <a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a> · ${x.items} item${x.items === 1 ? "" : "s"}${x.closed ? " · closed" : ""}</p>
+      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · ${x.wa ? `<a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>` : "no number"} · ${x.items} item${x.items === 1 ? "" : "s"}${x.closed ? " · closed" : ""}</p>
       <p class="hint" style="margin:2px 0 0">Created ${when(x.created)}${x.paidAt ? ` · Paid ${when(x.paidAt)}` : ""}</p>
       <div class="acts">
         ${x.status === "live" ? `<a class="btn small" href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">View</a>` : ""}
@@ -3922,7 +3988,7 @@ async function adminReview(g, head, wire){
     const flag = x.flag ? `<p class="hint" style="margin:6px 0 0"><b>Bot found:</b> ${esc(x.flag)}</p>` : "";
     return `<section class="card admrow">
       <div class="between"><b>${esc(x.name || x.id)}</b>${x.status === "review" ? `<span class="tag2 claim">Hidden until you approve</span>` : x.status === "live" ? `<span class="tag2 paid">Live</span>` : `<span class="tag2">${esc(x.status)}</span>`}</div>
-      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · <a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a></p>
+      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · ${x.wa ? `<a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>` : "no number"}</p>
       ${flag}${rep}
       <div class="acts">
         ${x.status === "live" ? `<a class="btn small" href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">View</a>` : ""}
@@ -4078,7 +4144,7 @@ async function loadAlertsCard(){
     ${tick("review", "Paid stores waiting for my review")}
     ${tick("report", "Stores reported by customers")}
     ${tick("summary", "Morning summary, only when something needs me")}
-    <p class="err" id="alErr"></p>
+    <p class="err" id="alErr" role="alert"></p>
     <div class="row2" style="margin-top:12px">
       <div><button class="btn full" id="alTest">Send test alert</button></div>
       <div><button class="btn solid full" id="alSave">Save alerts</button></div>
@@ -4208,7 +4274,7 @@ function legalDoc(which){
       <li>Payment receipts may be kept for our records, as required for accounting.</li>
     </ul>
     <h2>6. Your rights</h2>
-    <p>You can view and correct your store information anytime in your editor, and delete your account yourself. You can also ask us what information we hold about you, or ask us to correct or delete it.</p>
+    <p>You can view and correct your store information anytime in the app (Store and Account), and delete your account yourself under Account, then Profile. You can also ask us what information we hold about you, or ask us to correct or delete it.</p>
     <h2>7. Contact</h2>
     <p>For privacy questions, contact us on ${legalContact()}.</p>`;
   if (which === "refund") return `
@@ -4428,8 +4494,10 @@ function mxDraw(force){
     ? `<b>Couldn't load stores</b><p>${esc(friendly(MX.err, "Check your internet and try again."))}</p><button type="button" class="btn solid" id="mxRetry">Try again</button>`
     : EX.aff && !EX.stores.some(s => s.aff)
     ? `<b>No Affiliate Shops yet</b><p>Sellers who share Shopee, TikTok Shop and other shop links appear here.</p><button type="button" class="btn solid" id="mxClear">Back to all stores</button>`
+    : EX.fav && !EX.favs.size
+    ? `<b>No saved stores yet</b><p>Tap the heart on a store to keep it here.</p><button type="button" class="btn solid" id="mxClear">Browse stores</button>`
     : have
-    ? `<b>No stores match</b><p>Try another category or clear your filters.</p><button type="button" class="btn solid" id="mxClear">Clear filters</button>`
+    ? `<b>No stores match</b><p>${EX.q ? "Nothing matches your search. Try other words, or clear it." : "Try another category or clear your filters."}</p><button type="button" class="btn solid" id="mxClear">${EX.q ? "Clear search" : "Clear filters"}</button>`
     : `<b>No stores listed yet</b><p>Link Kedai App stores appear here when sellers list them.</p>${signupOpen() ? `<a class="btn solid" href="${esc(home())}signup">Are you a seller? Open a store</a>` : ""}`;
   if ($("mxSheet").classList.contains("open")) mxRenderSheet();
 }
@@ -4619,7 +4687,17 @@ async function renderExplore(){
   freshNear.catch(() => {});   // a failure is handled below; never an unhandled error
   const pStores = Array.isArray(savedNear) ? Promise.resolve(savedNear) : freshNear.catch(e => { loadErr = e; return []; });
   try { await mxLoadMap(); }
-  catch(e){ if (rtok === ROUTE_TOK && $("mxMap")){ $("mxMap").innerHTML = `<div class="mxerr"><p class="err">${esc(e.message)}</p><button type="button" class="btn solid" id="mxLibRetry">Try again</button></div>`; $("mxLibRetry").onclick = () => renderExplore(); } return; }
+  catch(e){
+    if (rtok === ROUTE_TOK && $("mxMap")){
+      $("mxMap").innerHTML = `<div class="mxerr"><p class="err">${esc(e.message)}</p><button type="button" class="btn solid" id="mxLibRetry">Try again</button><div class="mxerrlist" id="mxErrList"></div></div>`;
+      $("mxLibRetry").onclick = () => renderExplore();
+      // no map, but the stores still load: list them, so Browse is never a dead end
+      pStores.then(list => { const box = $("mxErrList"); if (!box || rtok !== ROUTE_TOK) return;
+        const st = list.filter(x => x && x.id).sort((a, b) => (a.closed - b.closed) || String(a.name).localeCompare(String(b.name)));
+        box.innerHTML = st.length ? `<p class="hint">Stores you can open now:</p>` + st.map(x => `<a class="mxerrrow" href="${esc(storeLink(x.id))}"><b>${esc(x.name)}</b><span>${esc(x.aff ? "Online shop links" : mxMeta(x))}</span></a>`).join("") : ""; });
+    }
+    return;
+  }
   if (!$("mxMap") || rtok !== ROUTE_TOK || MX) return;   // the person already left this page, or it opened again meanwhile
 
   const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: view ? view.center : me ? [me.lng, me.lat] : [108.3, 4.2], zoom: view ? view.zoom : me ? 11 : 5, minZoom: 4, maxZoom: 17,
@@ -4759,7 +4837,7 @@ function renderAbout(){
       <ul>
         <li>Hosting by ${ext("https://pages.github.com", "GitHub Pages")}, and our server on ${ext("https://workers.cloudflare.com", "Cloudflare Workers")}.</li>
         <li>Store photos kept in Google Drive, and code emails sent with Google Apps Script.</li>
-        <li>The fonts Figtree, Sora and Sacramento, from ${ext("https://fonts.google.com", "Google Fonts")} under the SIL Open Font License.</li>
+        <li>The fonts Figtree and Sora, from ${ext("https://fonts.google.com", "Google Fonts")} under the SIL Open Font License.</li>
         <li>Orders open in WhatsApp. WhatsApp, Shopee, TikTok Shop and other brands named in stores belong to their owners. ${A} isn't part of them.</li>
       </ul>
       <p>Thank you to everyone who helped make ${A} what it is.</p>
@@ -4797,7 +4875,7 @@ function renderHome(){
         <label>Phone number or email<input type="text" id="lWa" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="e.g. 012-345 6789"></label>
         <label>6-digit PIN<span class="pinwrap"><input type="password" id="lPin" inputmode="numeric" maxlength="6" autocomplete="current-password"><button type="button" class="pineye" data-eye="lPin" aria-label="Show PIN" aria-pressed="false">${EYE_OPEN}</button></span></label>
         <label class="check keepme"><input type="checkbox" id="lKeep"><span>Keep me logged in on this phone</span></label>
-        <p class="err" id="lErr"></p>
+        <p class="err" id="lErr" role="alert"></p>
         <button class="btn solid full" id="lGo">Seller log in</button>
         <span class="authlink">Forgot your PIN? <button type="button" class="linkbtn" id="lForgot">Reset it</button></span>
       </div>
@@ -4812,7 +4890,7 @@ function renderHome(){
 }
 function showMessage(title, text){
   setAccent(COLORS[0]);
-  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><a class="btn solid" href="${esc(home())}">Go to ${esc(APP_NAME)}</a>`;
+  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><a class="btn solid" href="${esc(home())}?explore">Browse stores</a><a class="btn" style="margin-left:8px" href="${esc(home())}">Go to ${esc(APP_NAME)}</a>`;
   show("page");
 }
 // Installable Link Kedai App: register the offline helper on every page

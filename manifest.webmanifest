@@ -2,6 +2,7 @@
   "name": "Link Kedai App",
   "short_name": "Link Kedai",
   "description": "Find Link Kedai App home sellers near you and order on WhatsApp.",
+  "id": "./?explore",
   "start_url": "./?explore",
   "scope": "./",
   "display": "fullscreen",
