@@ -2260,6 +2260,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-bridges", at: "2026-10-18", title: "Bridges on Spot It!", body: "The Penang Bridge now crosses the channel on the Spot It! map at its real length, with its cable-stayed towers in the middle, and the Kuala Terengganu Drawbridge stands with its deck split open. Zoom in on Penang or Kuala Terengganu to see them." },
   { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the real shape of the Sepang International Circuit, raised like a model and lying right on the track, and KLIA with its control tower. Zoom in near Sepang to see them." },
   { id: "u-20261018-more-landmarks", at: "2026-10-18", title: "Every state on Spot It!", body: "Four more landmarks on the Spot It! map: Istana Jahar in Kota Bharu, the floating mosque in Kuala Perlis, the Minangkabau house in Seremban and the Chimney in Labuan. Now every state has one." },
   { id: "u-20261018-city-landmarks", at: "2026-10-18", title: "Every city's landmark on Spot It!", body: "Spot It! now shows a landmark in each big city, right where it really stands: KOMTAR in Penang, the Crystal Mosque in Kuala Terengganu, Mount Kinabalu, the Sarawak Assembly in Kuching, Christ Church in Melaka, Ipoh Railway Station and more. Zoom out to see them all across Malaysia." },
@@ -3005,7 +3006,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 91;
+const APP_VERSION = 92;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5380,6 +5381,31 @@ function kltSepangScale(sv, u){   // u: map units per screen pixel; keeps the ra
   sv.querySelector(".trkshadow").setAttribute("transform", `translate(${3 * u} ${5 * u})`);
   sv.querySelector(".trkside").setAttribute("transform", `translate(0 ${2.6 * u})`);
 }
+// Penang Bridge: the deck drawn at its true length across the channel (raised, with a shadow), plus the cable-stayed span standing up mid-channel
+const PENANG_DECK = "M0 0 96 17 482 75 723 92 981 56";
+function kltPenangDeck(){
+  const st = (w, c, extra) => `<path d="${PENANG_DECK}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"${extra || ""}/>`;
+  return `<svg viewBox="0 0 981 92" aria-hidden="true" style="overflow:visible"><g class="trkshadow">${st(5, "rgba(20,30,45,.2)")}</g><g class="trkside">${st(4, "#7F8C99")}</g>${st(4, "#C9D1D9")}${st(3, "#E9EDF1")}${st(.6, "#E2B23A", ` stroke-dasharray="3 3"`)}</svg>`;
+}
+function kltPenangSpan(){   // the cable-stayed main span: two H-shaped towers with fans of cables holding the deck
+  const fan = (cx, dir) => Array.from({ length: 6 }, (_, i) => `<path d="M${cx} ${22 + i * 2.4} L${cx + dir * (8 + i * 6.2)} 66" stroke="#9AA7B4" stroke-width=".55"/>`).join("") + Array.from({ length: 6 }, (_, i) => `<path d="M${cx} ${22 + i * 2.4} L${cx - dir * (6 + i * 4.4)} 66" stroke="#9AA7B4" stroke-width=".55"/>`).join("");
+  const tower = cx => kltBox(cx - 5, 16, 3, 66, "#F2F4F6", "#AEB8C2") + kltBox(cx + 2, 16, 3, 66, "#F2F4F6", "#AEB8C2") + kltBox(cx - 5, 30, 10, 2.2, "#E6EAEE", "#AEB8C2") + kltBox(cx - 5.4, 14.5, 10.8, 2, "#F7F9FA", "#B9C3CC");
+  return `<svg viewBox="0 0 130 90" aria-hidden="true">
+    <rect x="0" y="80" width="130" height="7" rx="3.5" fill="#9CC6E4" opacity=".7"/><path d="M10 84 q4 -2 8 0 t8 0 M80 84.5 q4 -2 8 0 t8 0" stroke="#FFFFFF" stroke-width=".8" fill="none" opacity=".8"/>
+    ${fan(40, 1)}${fan(90, -1)}${tower(40)}${tower(90)}
+    <rect x="0" y="65" width="130" height="3.2" fill="#E9EDF1"/><rect x="0" y="68.2" width="130" height="2" fill="#8E9AA6"/>
+    ${[10, 22, 108, 120].map(x => kltBox(x - 1.5, 70, 3, 11, "#E3E7EB", "#9AA6B2")).join("")}${[40, 90].map(x => kltBox(x - 5, 70, 10, 11, "#E3E7EB", "#9AA6B2")).join("")}</svg>`;
+}
+function kltDrawbridge(){   // Kuala Terengganu Drawbridge: four towers joined in pairs by skybridges, the deck split and raised in the middle
+  const tower = (cx, top, sc) => kltBox(cx - 4 * sc, top, 8 * sc, 84 - top, "#F4F1EA", "#C2BBAE") + `<rect x="${cx - 4.8 * sc}" y="${top - 1}" width="${9.6 * sc}" height="2" fill="#E9E3D7"/>` + `<polygon points="${cx - 4.6 * sc},${top} ${cx},${top - 9 * sc} ${cx},${top}" fill="#3F7FBF"/><polygon points="${cx},${top - 9 * sc} ${cx + 4.6 * sc},${top} ${cx},${top}" fill="#2A5D93"/>`
+    + Array.from({ length: 6 }, (_, i) => `<rect x="${cx - 2.6 * sc}" y="${top + 5 + i * 9}" width="${2 * sc}" height="${3 * sc}" fill="rgba(60,90,120,.45)"/><rect x="${cx + .6 * sc}" y="${top + 5 + i * 9}" width="${2 * sc}" height="${3 * sc}" fill="rgba(40,60,90,.5)"/>`).join("");
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="0" y="84" width="100" height="10" rx="5" fill="#9CC6E4" opacity=".75"/><path d="M8 89 q4 -2 8 0 t8 0 M66 90 q4 -2 8 0 t8 0" stroke="#FFFFFF" stroke-width=".8" fill="none" opacity=".8"/>
+    ${tower(31, 22, .8)}${tower(69, 22, .8)}<rect x="31" y="27" width="38" height="3.4" fill="#D9D3C6"/>
+    <polygon points="22,60 48,60 46,40" fill="#D7DDE3"/><polygon points="78,60 52,60 54,40" fill="#9AA6B2"/>
+    <rect x="0" y="60" width="22" height="3" fill="#E1E6EB"/><rect x="78" y="60" width="22" height="3" fill="#A9B4BF"/>
+    ${tower(22, 14, 1)}${tower(78, 14, 1)}<rect x="22" y="20" width="56" height="4" fill="#E9E3D7"/><rect x="22" y="24" width="56" height="1.4" fill="#B6AE9F"/></svg>`;
+}
 const kltTowerAs = p => () => kltKLTower().replaceAll("kltk", p);   // the observation-tower drawing, for Alor Setar and Kuantan
 // h: height compared with the KL twin towers (drawn bigger than true where needed, so each one is still easy to see).
 // from: the zoom where it first shows (towns close to KL wait until you zoom in, so the country view isn't crowded).
@@ -5405,7 +5431,10 @@ const KL_SKY = [
   { at: [101.92036, 2.718], h: .42, vb: [100, 82], svg: kltMinang, from: 6 },         // Minangkabau house, Seremban
   { at: [115.24862, 5.38117], h: .5, vb: [34, 150], svg: kltChimney, from: 0 },       // The Chimney, Labuan
   { at: [101.737803, 2.761088], geo: 1158, vb: [579, 498], svg: kltSepang, scaled: kltSepangScale, from: 9 },   // Sepang International Circuit, true size
-  { at: [101.70552, 2.75273], h: .5, vb: [110, 110], svg: kltKLIA, from: 9 }          // KLIA Terminal 1 and its control tower
+  { at: [101.70552, 2.75273], h: .5, vb: [110, 110], svg: kltKLIA, from: 9 },         // KLIA Terminal 1 and its control tower
+  { at: [100.355, 5.3549], geo: 7847, min: 0, max: 40000, vb: [981, 92], svg: kltPenangDeck, scaled: kltSepangScale, from: 9 },   // Penang Bridge deck, true length
+  { at: [100.348, 5.35376], h: .7, vb: [130, 90], svg: kltPenangSpan, from: 9 },     // Penang Bridge, the cable-stayed main span
+  { at: [103.14496, 5.33974], h: .62, vb: [100, 100], svg: kltDrawbridge, from: 11 }  // Kuala Terengganu Drawbridge
 ].sort((a, b) => b.at[1] - a.at[1]);   // north to south, so the one lower on the screen stands in front
 function kltAdd(map){
   MX.klt = KL_SKY.map(b => { const el = document.createElement("div"); el.className = "mxklt"; el.innerHTML = b.svg();
@@ -5419,7 +5448,7 @@ function kltScale(){
     const el = mk.getElement(), sv = el.firstElementChild, [vw, vh] = Array.isArray(b.vb) ? b.vb : [b.vb, 212];
     el.style.display = z < b.from ? "none" : "";
     if (b.geo){   // drawn at its true size: b.geo metres across
-      const mpp = 78271.517 * Math.cos(b.at[1] * Math.PI / 180) / Math.pow(2, z), w = Math.max(70, Math.min(1100, b.geo / mpp)), h = w * vh / vw;
+      const mpp = 78271.517 * Math.cos(b.at[1] * Math.PI / 180) / Math.pow(2, z), w = Math.max(b.min ?? 70, Math.min(b.max ?? 1100, b.geo / mpp)), h = w * vh / vw;
       sv.style.width = w + "px"; sv.style.height = h + "px"; mk.setOffset([0, h / 2]);   // centred on the spot
       if (b.scaled) b.scaled(sv, vw / w);
       return;
