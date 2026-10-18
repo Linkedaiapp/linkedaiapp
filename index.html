@@ -2260,6 +2260,8 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the real shape of the Sepang International Circuit, raised like a model and lying right on the track, and KLIA with its control tower. Zoom in near Sepang to see them." },
+  { id: "u-20261018-more-landmarks", at: "2026-10-18", title: "Every state on Spot It!", body: "Four more landmarks on the Spot It! map: Istana Jahar in Kota Bharu, the floating mosque in Kuala Perlis, the Minangkabau house in Seremban and the Chimney in Labuan. Now every state has one." },
   { id: "u-20261018-city-landmarks", at: "2026-10-18", title: "Every city's landmark on Spot It!", body: "Spot It! now shows a landmark in each big city, right where it really stands: KOMTAR in Penang, the Crystal Mosque in Kuala Terengganu, Mount Kinabalu, the Sarawak Assembly in Kuching, Christ Church in Melaka, Ipoh Railway Station and more. Zoom out to see them all across Malaysia." },
   { id: "u-20261018-kl-skyline", at: "2026-10-18", title: "KL's skyline on Spot It!", body: "KL's tallest landmarks now stand on the Spot It! map, each right where it really is: the twin towers at KLCC, KL Tower, The Exchange 106 at TRX and Merdeka 118. Zoom in on Kuala Lumpur to see them all." },
   { id: "u-20261018-train", at: "2026-10-18", title: "All aboard Spot It!", body: "A bullet train now runs through the Spot It! search bar now and then. Want your shop's name on its carriages? Message us to book a train banner." },
@@ -3003,7 +3005,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 88;
+const APP_VERSION = 91;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5313,6 +5315,71 @@ function kltEagle(){   // Eagle Square, Langkawi: the reddish-brown eagle with i
     <path d="M28 58 C26 48 30 40 36 38 C42 40 46 48 44 58 Z" fill="#9A5730"/><path d="M36 38 C42 40 46 48 44 58 H36 Z" fill="#6E3C1C"/>
     <path d="M38 40 C38 34 41 30 45 31 C48 32 48 36 45 38 Z" fill="#F4F0E6"/><path d="M47.5 33.5 L51 35 L47 36.5 Z" fill="#E2A92E"/><circle cx="45.2" cy="33.6" r=".7" fill="#2B2B2B"/></svg>`;
 }
+function kltJahar(){   // Istana Jahar, Kota Bharu: the two-storey wooden palace with steep, layered roofs
+  const planks = Array.from({ length: 8 }, (_, i) => `<rect x="14" y="${43 + i * 4}" width="62" height=".5" fill="rgba(60,35,15,.3)"/>`).join("");
+  return `<svg viewBox="0 0 90 80" aria-hidden="true">${kltGround(45, 74, 42)}
+    ${kltBox(14, 40, 62, 34, "#A87445", "#764C27")}${planks}<rect x="13" y="56" width="64" height="1.8" fill="#C79A6A"/>
+    ${[19, 26, 33, 57, 64, 71].map(x => `<rect x="${x - 1.6}" y="44" width="3.2" height="7" fill="#F1E3C6" opacity=".9"/>`).join("")}
+    ${[17, 30, 60, 73].map(x => `<rect x="${x - .9}" y="58" width="1.8" height="16" fill="#F4EDE0"/>`).join("")}
+    <polygon points="6,42 22,27 45,27 45,42" fill="#8E4A2E"/><polygon points="45,27 68,27 84,42 45,42" fill="#5E2E1B"/>
+    <polygon points="22,28 34,13 45,13 45,28" fill="#9C5535"/><polygon points="45,13 56,13 68,28 45,28" fill="#683420"/>
+    <rect x="33" y="12" width="24" height="1.6" fill="#B8754E"/>${[34, 56].map(x => `<path d="M${x} 12.5 l${x < 45 ? -2.5 : 2.5} -4" stroke="#B8754E" stroke-width="1.1" stroke-linecap="round"/>`).join("")}
+    ${kltBox(37, 50, 16, 24, "#B98250", "#865630")}<polygon points="35,51 45,44 55,51" fill="#7A3E26"/><rect x="42" y="62" width="6" height="12" fill="#4A2D16"/></svg>`;
+}
+function kltAlHussain(){   // Masjid Al-Hussain, Kuala Perlis: the "floating" mosque on stilts over the sea, a cup-shaped dome and a twin-peak minaret
+  return `<svg viewBox="0 0 90 98" aria-hidden="true">
+    <rect x="2" y="84" width="86" height="10" rx="5" fill="#9CC6E4" opacity=".75"/><path d="M8 89 q4 -2 8 0 t8 0 M50 90 q4 -2 8 0 t8 0" stroke="#FFFFFF" stroke-width=".8" fill="none" opacity=".8"/>
+    ${[24, 32, 40, 48, 56, 64, 72].map(x => `<rect x="${x - .6}" y="78" width="1.2" height="10" fill="#7C858F"/>`).join("")}
+    ${kltBox(18, 58, 52, 22, "#E2D8C8", "#AE9F8C")}<rect x="18" y="58" width="52" height="22" fill="url(#kltahP)" opacity=".5"/>
+    ${Array.from({ length: 6 }, (_, i) => `<path d="M${22 + i * 8} 78 v-10 a2.4 2.4 0 0 1 4.8 0 v10z" fill="rgba(70,90,110,.35)"/>`).join("")}
+    <polygon points="14,59 26,50 62,50 74,59" fill="#2F6FA8"/><polygon points="44,50 62,50 74,59 44,59" fill="#22547F"/>
+    ${kltOnion(44, 50, 22, 17, "#E8C35A", "#2F6FA8")}<rect x="32.6" y="48.6" width="22.8" height="1.8" fill="#E8C35A"/><path d="M44 33 V27" stroke="#C9A24A" stroke-width=".9"/>
+    ${kltBox(75, 30, 7, 50, "#E2D8C8", "#AE9F8C")}<rect x="74" y="44" width="9" height="1.5" fill="#F0E8DA"/><rect x="74" y="62" width="9" height="1.5" fill="#F0E8DA"/>
+    <polygon points="75,30 76.6,18 78.2,30" fill="#E8C35A"/><polygon points="78.8,30 80.4,18 82,30" fill="#2F6FA8"/>
+    <defs><pattern id="kltahP" width="3" height="3" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".6" fill="rgba(90,75,60,.35)"/></pattern></defs></svg>`;
+}
+function kltMinang(){   // Negeri Sembilan: the Minangkabau house with its curved buffalo-horn roofs (Taman Seni Budaya, Seremban)
+  return `<svg viewBox="0 0 100 82" aria-hidden="true"><defs><linearGradient id="kltmiR" x1="0" x2="1"><stop offset="0" stop-color="#6B5646"/><stop offset=".5" stop-color="#4A3B30"/><stop offset="1" stop-color="#2B221B"/></linearGradient></defs>${kltGround(50, 76, 44)}
+    ${[22, 34, 46, 58, 70, 78].map(x => `<rect x="${x - .9}" y="66" width="1.8" height="10" fill="#5A4030"/>`).join("")}
+    ${kltBox(18, 46, 64, 21, "#9A6A42", "#6A4628")}${Array.from({ length: 8 }, (_, i) => `<rect x="${21 + i * 7.6}" y="50" width="4" height="9" fill="#E9D3A6" opacity=".55"/>`).join("")}
+    <path d="M12 48 Q16 30 4 10 Q26 30 50 33 Q74 30 96 10 Q84 30 88 48 Z" fill="url(#kltmiR)"/>
+    <path d="M30 54 Q32 38 26 22 Q40 36 50 38 Q60 36 74 22 Q68 38 70 54 Z" fill="url(#kltmiR)"/>
+    <polygon points="34,54 50,39 66,54" fill="#C9A06A"/><polygon points="50,39 66,54 50,54" fill="#9C7646"/><path d="M38 52 L50 42 L62 52 M42 52 L50 45.5 L58 52" stroke="rgba(80,50,20,.45)" stroke-width=".6" fill="none"/>
+    <path d="M4 10 Q26 30 50 33 Q74 30 96 10" stroke="#8A715C" stroke-width=".8" fill="none"/><path d="M26 22 Q40 36 50 38 Q60 36 74 22" stroke="#8A715C" stroke-width=".8" fill="none"/></svg>`;
+}
+function kltChimney(){   // The Chimney, Labuan: the old square red-brick tower
+  const bricks = Array.from({ length: 40 }, (_, i) => `<rect x="9" y="${18 + i * 3.1}" width="16" height=".45" fill="rgba(60,20,10,.35)"/>`).join("");
+  return `<svg viewBox="0 0 34 150" aria-hidden="true"><defs><clipPath id="kltchC"><polygon points="9,144 11,17 23,17 25,144"/></clipPath></defs>${kltGround(17, 144, 15)}
+    ${kltPoly([[9, 144], [11, 17], [17, 17], [17, 144]], "#C0583C")}${kltPoly([[17, 144], [17, 17], [23, 17], [25, 144]], "#8C3A26")}
+    <g clip-path="url(#kltchC)">${bricks}</g>
+    ${kltBox(9.5, 12, 15, 5, "#D06A4C", "#97412B")}<rect x="8.6" y="11" width="16.8" height="1.6" fill="#E08A6E"/>
+    <path d="M14 144 v-12 a3 3 0 0 1 6 0 v12z" fill="#4A1E12"/></svg>`;
+}
+function kltKLIA(){   // KLIA: the torch-shaped control tower and the terminal under its rows of curved "umbrella" roofs, a plane taking off
+  let roof = ""; for (let i = 0; i < 7; i++){ const x = 6 + i * 11; roof += `<path d="M${x} 82 Q${x + 5.5} 74 ${x + 11} 82 Z" fill="${i < 4 ? "#F2F4F6" : "#C3CBD3"}"/>`; }
+  return `<svg viewBox="0 0 110 110" aria-hidden="true">${kltGround(55, 104, 52)}
+    ${kltBox(8, 82, 74, 22, "#9DB9D2", "#5F7F9E")}${Array.from({ length: 12 }, (_, i) => `<rect x="${10 + i * 6}" y="84" width=".6" height="20" fill="rgba(255,255,255,.5)"/>`).join("")}${roof}
+    <rect x="7" y="81" width="76" height="1.6" fill="#E3E8ED"/>
+    ${kltPoly([[89, 104], [91.5, 40], [94, 40], [94, 104]], "#EEF1F4")}${kltPoly([[94, 104], [94, 40], [96.5, 40], [99, 104]], "#A4B0BC")}
+    ${kltPoly([[86, 40], [84, 30], [94, 30], [94, 40]], "#EEF1F4")}${kltPoly([[94, 40], [94, 30], [104, 30], [102, 40]], "#A4B0BC")}
+    <rect x="84" y="31.5" width="20" height="4" fill="#2E4A66" opacity=".75"/>${kltBox(87, 25, 14, 5, "#EEF1F4", "#A4B0BC")}
+    <path d="M94 25 V13" stroke="#7D8FA3" stroke-width="1"/><circle class="kltlight" cx="94" cy="13" r="1.2"/>
+    <g transform="translate(26 40) rotate(-18)" fill="#5E7489"><path d="M0 3 L22 2 Q26 2.5 22 4 L0 4.5 Z"/><path d="M9 3 L5 -5 L8 -5 L14 3 Z"/><path d="M10 4 L6 11 L9 11 L15 4 Z"/><path d="M1 3 L-1 -1.5 L1.5 -1.5 L4 3 Z"/></g></svg>`;
+}
+// Sepang International Circuit: the real track layout (traced from OpenStreetMap), raised like a model with a side and a shadow,
+// at its true size on the map, so it lies right over the real circuit when you zoom in.
+const SEPANG_TRACK = "M68 367 485 292M500 276 502 269 501 259 490 238 484 231 475 227 469 225 462 226M68 367 82 370 100 368 103 369 105 374 108 374 180 355 353 323 378 316 401 307M491 169 494 177 499 208 499 224 490 229 420 255 392 262M444 300 477 304 552 302 559 306 563 317M496 189 494 209 492 214 487 217 462 226M462 226 375 254 321 261 117 277 94 280 46 290M301 140 305 152 318 170 330 179 352 186 372 185 386 180 399 171 414 155 420 151 435 144 453 144 462 146 479 155 491 169M26 49 32 40 33 33 31 14 26 0M392 262 26 291M26 259 42 264 48 262 53 256 53 248 50 239 41 228M85 92 165 66 221 44 262 25M262 25 268 23 273 23 279 28 280 34M280 34 285 62 301 140M491 169 575 266M575 266 579 272 579 279 562 320 556 325 551 326M551 326 451 333 327 348M327 348 324 349 319 354 319 360 323 364M323 364 361 389 367 398 369 405 371 429 368 450 357 478 348 491M348 491 343 496 337 498 331 498 321 495M185 406 143 427 129 429 110 429 98 427 86 422 75 416 62 404 55 388M55 388 54 382 57 374 64 368 68 367M478 256 392 262M485 292 491 290 498 282 500 276 499 270 497 265 490 258 478 256M41 228 30 209 27 196 27 174 30 149 38 130 50 114 67 101 85 92M321 495 217 408M217 408 204 403 191 404 185 406M64 286 46 290M64 288 19 292M19 292 13 291 5 287 1 278 0 270 5 261 14 256 23 257 42 264 48 262 51 260 53 256 53 248 50 239 41 228M64 405 58 396 55 388M55 388 55 378 60 371 64 369M41 228 30 209 27 196 27 174 30 149 38 130 44 121 50 114 64 103";
+function kltSepang(){
+  const st = (w, c, extra) => `<path d="${SEPANG_TRACK}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"${extra || ""}/>`;
+  return `<svg viewBox="0 0 579 498" aria-hidden="true" style="overflow:visible">
+    <g class="trkshadow">${st(6, "rgba(20,30,45,.2)")}</g>
+    <g class="trkside">${st(4.6, "#2B333B")}</g>
+    ${st(4.6, "#FFFFFF")}${st(4.6, "#D32F2F", ` stroke-dasharray="2.5 2.5"`)}${st(3.2, "#5A646E")}${st(.6, "rgba(255,255,255,.35)")}</svg>`;
+}
+function kltSepangScale(sv, u){   // u: map units per screen pixel; keeps the raised side and the shadow a few pixels deep at any zoom
+  sv.querySelector(".trkshadow").setAttribute("transform", `translate(${3 * u} ${5 * u})`);
+  sv.querySelector(".trkside").setAttribute("transform", `translate(0 ${2.6 * u})`);
+}
 const kltTowerAs = p => () => kltKLTower().replaceAll("kltk", p);   // the observation-tower drawing, for Alor Setar and Kuantan
 // h: height compared with the KL twin towers (drawn bigger than true where needed, so each one is still easy to see).
 // from: the zoom where it first shows (towns close to KL wait until you zoom in, so the country view isn't crowded).
@@ -5332,7 +5399,13 @@ const KL_SKY = [
   { at: [101.68868, 2.93608], h: .55, vb: [80, 150], svg: kltPutra, from: 10 },       // Putra Mosque, Putrajaya
   { at: [102.24915, 2.19454], h: .4, vb: [70, 92], svg: kltChristChurch, from: 0 },   // Christ Church, Melaka
   { at: [110.3479, 1.56182], h: .5, vb: [100, 90], svg: kltDUN, from: 0 },            // Sarawak State Assembly, Kuching
-  { at: [103.76105, 1.45789], h: .48, vb: [90, 110], svg: kltSultanIbrahim, from: 0 } // Sultan Ibrahim Building, Johor Bahru
+  { at: [103.76105, 1.45789], h: .48, vb: [90, 110], svg: kltSultanIbrahim, from: 0 },// Sultan Ibrahim Building, Johor Bahru
+  { at: [102.23712, 6.13153], h: .4, vb: [90, 80], svg: kltJahar, from: 0 },          // Istana Jahar, Kota Bharu
+  { at: [100.12691, 6.39733], h: .5, vb: [90, 98], svg: kltAlHussain, from: 6.5 },    // Masjid Al-Hussain, Kuala Perlis
+  { at: [101.92036, 2.718], h: .42, vb: [100, 82], svg: kltMinang, from: 6 },         // Minangkabau house, Seremban
+  { at: [115.24862, 5.38117], h: .5, vb: [34, 150], svg: kltChimney, from: 0 },       // The Chimney, Labuan
+  { at: [101.737803, 2.761088], geo: 1158, vb: [579, 498], svg: kltSepang, scaled: kltSepangScale, from: 9 },   // Sepang International Circuit, true size
+  { at: [101.70552, 2.75273], h: .5, vb: [110, 110], svg: kltKLIA, from: 9 }          // KLIA Terminal 1 and its control tower
 ].sort((a, b) => b.at[1] - a.at[1]);   // north to south, so the one lower on the screen stands in front
 function kltAdd(map){
   MX.klt = KL_SKY.map(b => { const el = document.createElement("div"); el.className = "mxklt"; el.innerHTML = b.svg();
@@ -5343,8 +5416,15 @@ function kltScale(){
   if (!MX || !MX.klt) return;
   const z = MX.map.getZoom(), H = Math.max(17, Math.min(61, 17 + (z - 5) * 4.7));   // a landmark at country view, a skyline in the city
   MX.klt.forEach(({ b, mk }) => {
-    const el = mk.getElement(), sv = el.firstElementChild, [vw, vh] = Array.isArray(b.vb) ? b.vb : [b.vb, 212], h = Math.max(24, H * b.h);
+    const el = mk.getElement(), sv = el.firstElementChild, [vw, vh] = Array.isArray(b.vb) ? b.vb : [b.vb, 212];
     el.style.display = z < b.from ? "none" : "";
+    if (b.geo){   // drawn at its true size: b.geo metres across
+      const mpp = 78271.517 * Math.cos(b.at[1] * Math.PI / 180) / Math.pow(2, z), w = Math.max(70, Math.min(1100, b.geo / mpp)), h = w * vh / vw;
+      sv.style.width = w + "px"; sv.style.height = h + "px"; mk.setOffset([0, h / 2]);   // centred on the spot
+      if (b.scaled) b.scaled(sv, vw / w);
+      return;
+    }
+    const h = Math.max(24, H * b.h);
     sv.style.height = h + "px"; sv.style.width = h * vw / vh + "px";
     mk.setOffset([0, h * 6 / vh]);   // the ground line, not the shadow, sits on the spot
   });
