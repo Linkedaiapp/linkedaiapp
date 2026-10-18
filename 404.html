@@ -1062,6 +1062,18 @@ a.prow{text-decoration:none;color:inherit}
 .plink .pill{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink)}
 /* footer: one calm block instead of five stacked lines */
 .stfoot{margin:22px 14px 0;text-align:center}
+.stnear{margin:0 0 12px;padding:14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);text-align:left}
+.stnear h2{font-size:17px;font-weight:800;margin:0 0 10px;letter-spacing:-.01em}
+.nearrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px}
+#nearOverlay .nearrow{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0 0}
+.nearst{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--ink);text-align:center;min-width:0;padding:4px 2px;border-radius:12px}
+.nearst:active{transform:scale(.96)}
+.nearst b{font-size:12.5px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;width:100%;overflow-wrap:anywhere}
+.nearst>span:last-child{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.nearlogo{position:relative;width:56px;height:56px;border-radius:50%;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;flex:none}
+.nearlogo.v{box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px #1D9BF0}
+.nearlogo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.stnear .btn{display:flex;align-items:center;justify-content:center;gap:6px}
 .stfoot .safenote{margin:0 0 14px;text-align:left}
 .stfoot .stcta{margin:0 0 6px;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);justify-content:center;text-align:center;column-gap:12px;row-gap:10px}
 .stfoot .stcta span{font-weight:600;color:var(--ink)}
@@ -1213,6 +1225,18 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     <label>More details (optional)<input type="text" id="repNote" maxlength="140" placeholder="e.g. They sell vape in the second item"></label>
     <p class="err" id="repErr" role="alert"></p>
     <button class="btn solid full" type="button" id="repGo" style="margin-top:6px">Send report</button>
+  </div>
+</div>
+
+<!-- ============ AFTER AN ORDER: MORE STORES ON SPOT IT! ============ -->
+<div class="overlay" id="nearOverlay" role="dialog" aria-modal="true" aria-labelledby="nearTitle">
+  <div class="sheet">
+    <button class="xmini" data-close="nearOverlay" aria-label="Close">×</button>
+    <h2 id="nearTitle" style="font-size:22px;font-weight:800;margin:0 44px 4px 0">Thanks for your order!</h2>
+    <p class="hint" style="margin:0">Your cart is cleared. Looking for more? Discover other home sellers near you on Spot It!</p>
+    <div id="nearSheetList"></div>
+    <a class="btn solid full" id="nearGo" href="#" style="margin-top:14px;padding:15px">Open Spot It!</a>
+    <button type="button" class="btn full" data-close="nearOverlay" style="margin-top:8px">Not now</button>
   </div>
 </div>
 
@@ -1382,6 +1406,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
     </div>
     <main id="menu" style="margin-top:4px"></main>
     <footer class="stfoot">
+    <section class="stnear" id="stNear" hidden aria-labelledby="stNearTitle"></section>
     <div class="stcta" id="stCta" hidden>
       <span>Made with <a id="brandLink" href="#" style="color:inherit">Link Kedai App</a></span>
       <a class="stcta-btn" id="stCtaBtn" href="#">Get your own store</a>
@@ -2163,6 +2188,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-more-stores", at: "2026-10-18", title: "Customers discover more stores", body: "At the end of every store page, customers now see a few other Link Kedai App stores near them, with a button to Spot It! After a customer's order goes through, we also suggest nearby stores once. Your store shows up on other sellers' pages too when you're listed on Spot It! (turn it on under Spot It! listing)." },
   { id: "u-20261018-ask-pictures", at: "2026-10-18", title: "Answers now come with pictures", body: "When you ask your assistant a question, most answers now show a picture of the screen with a red circle and arrow on exactly where to tap. Tap the picture to see it bigger." },
   { id: "u-20261018-share", at: "2026-10-18", title: "Customers can share your store", body: "Your store page now has a Share button at the top right. Customers tap it to send your store to friends on WhatsApp, Telegram, Facebook and more, so word about your shop spreads further." },
   { id: "u-20261018-link-list", at: "2026-10-18", title: "Shop links are now a tidy list", body: "On your store, shop links now always show as a simple list: a small photo, the name, the price and the shop. Customers can scroll through lots of links quickly. Your store style (List, Photo grid or Minimal) still applies to your own items." },
@@ -3744,7 +3770,8 @@ async function showStore(data, isPreview, refresh){
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   $("stSafeLink").href = home() + "safe";
   $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
-  $("stShare").classList.toggle("solo", !!isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
+  $("stShare").classList.toggle("solo", !!isPreview);
+  if (!refresh) loadNear(isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
   const verified = !isPreview && STORE_VERIFIED;   // blue ring + tick on the logo, like verified accounts elsewhere
   $("stVerified").hidden = !verified; $("stLogoWrap").classList.toggle("verified", verified);
   $("stNew").hidden = isPreview || !STORE_TRIAL;
@@ -3877,7 +3904,7 @@ function productRow(i){
 function linkRow(j){   // shop links are always a compact list, whatever the store style: sellers often add dozens
   const l = D.links[j], info = linkInfo(l.u), img = safeImg(l.img), name = tidyName(l.n);
   return `<a class="prow plink lrow" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="${esc(name || info.brand)}${l.p > 0 ? ", " + esc(money(l.p)) : ""}, opens ${esc(info.brand)} in a new tab">
-    <span class="lthumb" aria-hidden="true">${esc(initial(name || info.brand))}${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>
+    <span class="lthumb" aria-hidden="true">${initial(name || info.brand)}${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>
     <span class="ptext"><h3>${esc(name || "View on " + info.brand)}</h3>
       <span class="pmeta">${l.p > 0 ? `<span class="pprice">${esc(money(l.p))}</span>` : ""}<span class="lbrand">${esc(info.brand)}</span></span></span>
     <span class="lgo" aria-hidden="true">${ico("ext", 18, 2)}</span>
@@ -4068,11 +4095,60 @@ $("send").addEventListener("click", e => {
   if ($("backBtn").hidden) track("order");
   ORDER_SENT = true;   // the cart stays until they come back and say the order went through
 });
+// ---------- More stores on Spot It!: a card at the end of every store page, and once after an order ----------
+// Other live stores, nearest first: same town, then same state, then by distance. Never the store itself, closed stores or link-only shops.
+let NEAR_LIST = null, NEAR_TOK = 0, NEAR_OBS = null;
+function nearPick(list, n){
+  const me = STORE_PLACE || {}, has = me.lat != null && me.lng != null;
+  return (list || []).filter(x => x && x.id && x.id !== STORE_ID && !x.closed && !x.aff)
+    .map(x => ({ x, t: me.city && x.city === me.city && x.state === me.state ? 0 : me.state && x.state === me.state ? 1 : 2,
+      d: has && x.lat != null && x.lng != null ? kmBetween(me.lat, me.lng, x.lat, x.lng) : 1e9 }))
+    .sort((a, b) => a.t - b.t || a.d - b.d || (b.x.v - a.x.v) || String(a.x.name).localeCompare(String(b.x.name)))
+    .slice(0, n).map(o => o.x);
+}
+function nearCards(picks){
+  return `<div class="nearrow">${picks.map(x => { const logo = safeImg(x.logo);
+    return `<a class="nearst" href="${esc(storeLink(x.id))}"><span class="nearlogo${x.v ? " v" : ""}" style="background:${esc(/^#[0-9a-f]{3,8}$/i.test(x.color || "") ? x.color : "#18395C")}">${initial(x.name || x.id)}${logo ? `<img src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span><b>${esc(x.name || x.id)}</b><span>${esc(x.city || x.state || "")}</span></a>`; }).join("")}</div>`;
+}
+function renderNear(){
+  const box = $("stNear"); if (!box) return;
+  const picks = nearPick(NEAR_LIST, 4), me = STORE_PLACE || {};
+  if (!picks.length){ box.hidden = true; box.innerHTML = ""; return; }
+  const close = me.state && picks.some(x => x.state === me.state);
+  box.innerHTML = `<h2 id="stNearTitle">${close ? "More stores near you" : "More stores on Spot It!"}</h2>${nearCards(picks)}<a class="btn full" href="${esc(home())}explore">${ico("pin",16)}See all on Spot It!</a>`;
+  box.hidden = false;
+}
+function nearFetch(){
+  const saved = keep.get("lk-near");
+  if (Array.isArray(saved) && !NEAR_LIST) NEAR_LIST = saved;
+  return apiGet({ action: "near" }).then(r => { const st = r.stores || []; keep.set("lk-near", st); NEAR_LIST = st; return st; });
+}
+// called each time a store opens: the list is only fetched once the customer scrolls near the end of the page
+function loadNear(isPreview){
+  const box = $("stNear"), tok = ++NEAR_TOK; box.hidden = true; box.innerHTML = "";
+  if (NEAR_OBS){ NEAR_OBS.disconnect(); NEAR_OBS = null; }
+  if (isPreview || !safeUrl(SITE.api)) return;
+  const start = () => { if (tok !== NEAR_TOK) return; if (NEAR_LIST) renderNear(); nearFetch().then(() => { if (tok === NEAR_TOK) renderNear(); }).catch(() => {}); };
+  if (!("IntersectionObserver" in window)) return start();
+  NEAR_OBS = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)){ NEAR_OBS.disconnect(); NEAR_OBS = null; start(); } }, { rootMargin: "600px 0px" });
+  NEAR_OBS.observe(document.querySelector(".stfoot"));
+}
+// after the customer says the order went through: once per store per day, and only if there are other stores to show
+async function nearAfterOrder(){
+  const k = `lk-nearask:${STORE_ID}:${new Date().toISOString().slice(0, 10)}`;
+  try { if (localStorage.getItem(k)) return; } catch(e) {}
+  if (!NEAR_LIST) try { await nearFetch(); } catch(e) { return; }
+  const picks = nearPick(NEAR_LIST, 3); if (!picks.length || $("store").hidden) return;
+  try { localStorage.setItem(k, "1"); } catch(e) {}
+  $("nearSheetList").innerHTML = nearCards(picks);
+  $("nearGo").href = home() + "explore";
+  openSheet("nearOverlay");
+}
 let ORDER_SENT = false;
 document.addEventListener("visibilitychange", async () => {
   if (document.hidden || !ORDER_SENT || $("store").hidden || !Object.keys(cart).length) return;
   ORDER_SENT = false;
-  if (await ask("Did your order go through on WhatsApp?", "Yes, clear my cart")){ cart = {}; saveCart(); renderMenu(); renderBar(); }
+  if (await ask("Did your order go through on WhatsApp?", "Yes, clear my cart")){ cart = {}; saveCart(); renderMenu(); renderBar(); if ($("backBtn").hidden) nearAfterOrder(); }
 });
 $("viewCart").onclick = () => openSheet("overlay");
 document.addEventListener("click", e => {
