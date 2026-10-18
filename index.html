@@ -2758,10 +2758,10 @@ function edStart(){
       </section>
       <button class="btn solid full" data-act="frnext">Next</button>`;
   }
-  return head("Your store is ready to see", "Preview it now. When you're happy, publish it to get your store link to share.") +
+  return head("Your store is ready to see", "Preview it now. When you're happy, go live free for 14 days and get your store link to share.") +
     `<section class="card fr-done">${ico("check", 26, 2.6)}<b>${esc(S.name || "Your store")}</b><span>${esc(storeLink(SESSION.id))}</span></section>
     <button class="btn solid full" data-act="preview">${ico("eye", 18)}Preview my store</button>
-    <button class="btn full" style="margin-top:10px" data-act="frpublish">Publish my store</button>
+    <button class="btn full" style="margin-top:10px" data-act="frpublish">Go live free</button>
     <button class="btn full" style="margin-top:10px" data-act="frhome">Add more ${esc(W(S).item)}s first</button>`;
 }
 // 60123456789 -> 012-345 6789 (other countries: +65 ...)
@@ -3304,7 +3304,7 @@ $("builder").addEventListener("click", async e => {
   }
   if (a === "frskip" || a === "frhome" || a === "frpublish"){
     markStartDone(); edTidy(); EDV = a === "frhome" ? "products" : "home"; renderEditor(); window.scrollTo(0, 0);
-    if (a === "frpublish") openPublishCheck();
+    if (a === "frpublish"){ const t = document.querySelector('#publishCard [data-act="trial"]'); if (t) t.click(); else openPublishCheck(); }   // the free trial when it's offered, otherwise pay
     return;
   }
   if (a === "go" || a === "back"){ const to = b.dataset.v, ti = b.dataset.i != null ? +b.dataset.i : null; leaveEdPage(to); EDOTHER = false; return a === "back" ? edBack(to, ti) : edGo(to, ti); }
