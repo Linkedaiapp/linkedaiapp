@@ -2190,6 +2190,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-help", at: "2026-10-18", title: "Help is all in one place", body: "Under Account, Help now opens your assistant. Ask anything there, and if you still need a hand, Chat with us on WhatsApp is at the bottom of the page." },
   { id: "u-20261018-ask-learns", at: "2026-10-18", title: "Your assistant keeps learning", body: "When your assistant can't answer a question, it's now passed to us (without your name, store or number) so we can teach it the answer. The more you ask, the smarter it gets." },
   { id: "u-20261018-ask-smarter", at: "2026-10-18", title: "Your assistant understands you better", body: "Your assistant now understands short forms and Manglish, like \"camne nak letak gmbr\" or \"kedai x keluar kat map\", and has new answers about opening hours, order alerts, discounts, stock limits, cancelled orders and putting your link in your Instagram bio." },
   { id: "u-20261018-map-pins", at: "2026-10-18", title: "New map pins with your logo", body: "On Spot It!, every store is now a navy map pin with your logo in its round head. The tip of the pin points at your area. The same pins show in More stores near you at the end of store pages. No logo yet? Add one under Shop details." },
@@ -2840,7 +2841,7 @@ const ASK_KB = [
   { id: "discount", q: "Can I give a discount or promo code?", k: "discount sale promotion", a: () => `There are no promo codes yet. You can lower the price on the item for a while, mention the promotion in its description or in the short line under your shop name, and give the discount when you reply on WhatsApp.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "stocklimit", q: "Can I limit how many can be ordered?", k: "quantity", a: () => `There's no stock count yet. When something runs out, open the item and tick <b>Sold out for now</b>. You can also write the limit in the item's description, like "Only 20 per day".`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "slow", q: "The app is slow or not working", k: "slow load error not working blank refresh", a: () => `Check your internet first, then close the app fully and open it again. Still stuck? WhatsApp us and tell us what you see.`, go: () => askWa() },
-  { id: "human", q: "How do I talk to a person?", k: "contact help talk human whatsapp call admin", a: () => `Tap below to chat with us on WhatsApp. You'll also find <b>Help</b> under Account.`, go: () => askWa() }
+  { id: "human", q: "How do I talk to a person?", k: "contact help talk human whatsapp call admin", a: () => `Tap below to chat with us on WhatsApp. It's also at the bottom of this page, under <b>Still need help?</b>. Open this page any time from <b>Help</b> on Account.`, go: () => askWa() }
 ];
 // Example pictures (help/<id>.webp): the app screen with a red circle and arrow on what to tap
 const ASK_SHOTS = new Set("additem affiliate chpin currency daysoff delacct delitem delivery email forgot human insights link linkname login look map name news openclose orders phone photo pin preview price publish removed reorder sections sizes soldout spotit status trial verified".split(" "));
@@ -2895,7 +2896,7 @@ function askSend(){
 function askAnswer(id){ const e = ASK_KB.find(x => x.id === id); if (e) askPush(e.q, askReply(e)); }
 function edAsk(){
   if (ASKID !== SESSION.id){ ASKLOG = []; ASKID = SESSION.id; }
-  return `${edTop("Ask your assistant", ASKBACK)}
+  return `${edTop("Help", ASKBACK)}
   <article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>Hi! I'm your ${esc(APP_NAME)} assistant. Ask me anything about your store, in English or Malay, and I'll answer right away.</p></div></article>
   <div id="askLog" aria-live="polite">${ASKLOG.map(askMsgHtml).join("")}</div>
   <section class="card askbar"><label for="askIn" class="sr">Your question</label>
@@ -2906,15 +2907,14 @@ function edAsk(){
   <details class="card lk-group askall"><summary>All questions (${ASK_KB.length})</summary>
     ${ASK_KB.map(e => `<button type="button" class="lk-row" data-act="askq" data-v="${e.id}"><span class="tt"><b>${esc(e.q)}</b></span><span class="chev">${ico("chevron",18)}</span></button>`).join("")}
   </details>
-  <p class="hint" style="margin:4px 4px 0">Can't find it? ${askTo() ? `<a href="https://wa.me/${askTo()}?text=${encodeURIComponent(`Hi ${APP_NAME}, I need help with my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Chat with a person on WhatsApp</a>.` : "Message us any time."}</p>`;
+  ${askTo() ? `<h2 class="edsub">Still need help?</h2><section class="card lk-group"><a class="lk-row askhuman" href="https://wa.me/${askTo()}?text=${encodeURIComponent(`Hi ${APP_NAME}, I need help with my store ${SESSION.id}.`)}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Chat with us on WhatsApp</b><span>A real person replies</span></span><span class="chev">${ico("chevron",18)}</span></a></section>` : ""}`;
 }
 function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
     <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Phone, email and PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
-    <button class="lk-row" data-act="go" data-v="ask"><span class="tile asktile"><img src="bot.jpg" alt=""></span><span class="tt"><b>Ask your assistant</b><span>Questions about the app, answered right away</span></span><span class="chev">${ico("chevron",18)}</span></button>
-    ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with us on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
+    <button class="lk-row" data-act="go" data-v="ask"><span class="tile asktile"><img src="bot.jpg" alt=""></span><span class="tt"><b>Help</b><span>Your assistant, or WhatsApp us</span></span><span class="chev">${ico("chevron",18)}</span></button>
     ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How we work and protect you</span></span><span class="chev">${ico("chevron",18)}</span></a>
     <button class="lk-row" data-act="logout"><span class="tile">${ico("logout")}</span><span class="tt"><b>Log out</b><span>${SESSION && SESSION.tok ? "This phone stays logged in" : "You can log in again anytime"}</span></span></button>
