@@ -60,8 +60,8 @@
       ]
     },
     {
-      "name": "Browse stores",
-      "short_name": "Browse",
+      "name": "Spot It!",
+      "short_name": "Spot It!",
       "description": "Find sellers near you on the map",
       "url": "./?explore",
       "icons": [
