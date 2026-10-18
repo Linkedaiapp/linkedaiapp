@@ -3002,7 +3002,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 86;
+const APP_VERSION = 87;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5237,7 +5237,7 @@ function kltAdd(map){
 }
 function kltScale(){
   if (!MX || !MX.klt) return;
-  const z = MX.map.getZoom(), H = Math.max(20, Math.min(72, 20 + (z - 5) * 5.5));   // a landmark at country view, a skyline in the city
+  const z = MX.map.getZoom(), H = Math.max(17, Math.min(61, 17 + (z - 5) * 4.7));   // a landmark at country view, a skyline in the city
   MX.klt.forEach(({ b, mk }) => {
     const el = mk.getElement(), sv = el.firstElementChild, h = H * b.h;
     el.style.display = z < b.from ? "none" : "";
