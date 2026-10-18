@@ -2190,7 +2190,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261018-map-pins", at: "2026-10-18", title: "New map pins with your logo", body: "On Spot It!, every store is now a map pin in your brand colour, with your logo in its round head. The tip of the pin points at your area. The same pins show in More stores near you at the end of store pages. No logo yet? Add one under Shop details." },
+  { id: "u-20261018-map-pins", at: "2026-10-18", title: "New map pins with your logo", body: "On Spot It!, every store is now a navy map pin with your logo in its round head. The tip of the pin points at your area. The same pins show in More stores near you at the end of store pages. No logo yet? Add one under Shop details." },
   { id: "u-20261018-more-stores", at: "2026-10-18", title: "Customers discover more stores", body: "At the end of every store page, customers now see a few other Link Kedai App stores near them, with a button to Spot It! After a customer's order goes through, we also suggest nearby stores once. Your store shows up on other sellers' pages too when you're listed on Spot It! (turn it on under Spot It! listing)." },
   { id: "u-20261018-ask-pictures", at: "2026-10-18", title: "Answers now come with pictures", body: "When you ask your assistant a question, most answers now show a picture of the screen with a red circle and arrow on exactly where to tap. Tap the picture to see it bigger." },
   { id: "u-20261018-share", at: "2026-10-18", title: "Customers can share your store", body: "Your store page now has a Share button at the top right. Customers tap it to send your store to friends on WhatsApp, Telegram, Facebook and more, so word about your shop spreads further." },
@@ -4111,7 +4111,7 @@ function nearPick(list, n){
 }
 function nearCards(picks){
   return `<div class="nearrow">${picks.map(x => { const logo = safeImg(x.logo);
-    return `<a class="nearst" href="${esc(storeLink(x.id))}"><span class="nearpin" style="--c:${esc(/^#[0-9a-f]{3,8}$/i.test(x.color || "") ? x.color : "#18395C")}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot">${initial(x.name || x.id)}${logo ? `<img class="mxlg" src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>${x.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}</span><b>${esc(x.name || x.id)}</b><span>${esc(x.city || x.state || "")}</span></a>`; }).join("")}</div>`;
+    return `<a class="nearst" href="${esc(storeLink(x.id))}"><span class="nearpin" style="--c:${PIN_COL}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot">${initial(x.name || x.id)}${logo ? `<img class="mxlg" src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>${x.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}</span><b>${esc(x.name || x.id)}</b><span>${esc(x.city || x.state || "")}</span></a>`; }).join("")}</div>`;
 }
 function renderNear(){
   const box = $("stNear"); if (!box) return;
@@ -4700,6 +4700,7 @@ const mxHash = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.ch
 const mxHasCoords = st => st.lat != null && st.lng != null && st.lat !== "" && st.lng !== "" && isFinite(+st.lat) && isFinite(+st.lng) && !(+st.lat === 0 && +st.lng === 0);
 const mxPlace = st => [st.city || st.area, st.state].filter(Boolean).join(", ");
 const mxCol = st => /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
+const PIN_COL = "#18395C";   // every map pin wears the app's own navy, so the map looks like one app (the logo inside shows whose store it is)
 function mxArea(st){
   if (st.aff) return null;   // Affiliate Shops sell online through Shopee, TikTok Shop and others: never a pin
   if (st.pub && mxHasCoords(st)) return { lat: +st.lat, lng: +st.lng, r: 0, exact: true };   // a shop that chose to show its door
@@ -4816,7 +4817,7 @@ function mxDraw(force){
         el.addEventListener("click", go); el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } });
         MX.mk.push(mxMarker(el, c.ll)); return;
       }
-      const st = c.items[0], col = mxCol(st), sel = st.id === MX.sel;
+      const st = c.items[0], col = PIN_COL, sel = st.id === MX.sel;
       const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
       if (!st._a.exact) feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
       const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
