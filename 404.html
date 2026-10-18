@@ -914,7 +914,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxsearch{font-weight:500}
 .mxsearch{position:relative;overflow:hidden}
 .mxklt{pointer-events:none;z-index:0}
-.mxklt svg{display:block;filter:drop-shadow(0 2px 3px rgba(20,30,45,.25))}
+.mxklt svg{display:block;filter:drop-shadow(0 0 .6px rgba(24,57,92,.75)) drop-shadow(0 2px 3px rgba(20,30,45,.28))}   /* a thin outline keeps the silver ones clear on a light map */
 .mxklt .kltlight{fill:#E53935}
 .mxtrain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:0}
 .mxsearch > svg,.mxsearch > input,.mxsearch > .mxclr{position:relative;z-index:1}
@@ -2260,6 +2260,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-city-landmarks", at: "2026-10-18", title: "Every city's landmark on Spot It!", body: "Spot It! now shows a landmark in each big city, right where it really stands: KOMTAR in Penang, the Crystal Mosque in Kuala Terengganu, Mount Kinabalu, the Sarawak Assembly in Kuching, Christ Church in Melaka, Ipoh Railway Station and more. Zoom out to see them all across Malaysia." },
   { id: "u-20261018-kl-skyline", at: "2026-10-18", title: "KL's skyline on Spot It!", body: "KL's tallest landmarks now stand on the Spot It! map, each right where it really is: the twin towers at KLCC, KL Tower, The Exchange 106 at TRX and Merdeka 118. Zoom in on Kuala Lumpur to see them all." },
   { id: "u-20261018-train", at: "2026-10-18", title: "All aboard Spot It!", body: "A bullet train now runs through the Spot It! search bar now and then. Want your shop's name on its carriages? Message us to book a train banner." },
   { id: "u-20261018-sky", at: "2026-10-18", title: "A plane over Spot It!", body: "Now and then, a little plane flies across the Spot It! map towing a banner. Want your shop on it? Message us to book the plane banner." },
@@ -3002,7 +3003,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 87;
+const APP_VERSION = 88;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5223,13 +5224,116 @@ function kltMerdeka(){   // Merdeka 118: triangular glass facets (songket patter
     ${kltPoly([[29.1, 41.5], [30, 2.5], [30, 41.5]], "#D9E2EA")}${kltPoly([[30, 41.5], [30, 2.5], [30.9, 41.5]], "#7D8FA3")}
     <circle class="kltlight" cx="30" cy="2.6" r="1.2"/></svg>`;
 }
-// north to south, so a building lower on the screen stands in front. h: true height compared with the twin towers.
+// Landmarks of the other cities. Same style: lit from the left, shaded on the right, a soft shadow on the ground.
+const kltBox = (x, y, w, h, l, d) => `<rect x="${x}" y="${y}" width="${w / 2}" height="${h}" fill="${l}"/><rect x="${x + w / 2}" y="${y}" width="${w / 2}" height="${h}" fill="${d}"/>`;
+const kltGround = (cx, cy, rx) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${Math.max(2.5, rx * .12)}" fill="rgba(20,30,45,.22)"/>`;
+const kltOnion = (cx, y, w, h, l, d) => `<path d="M${cx - w / 2} ${y} C${cx - w / 2} ${y - h * .55} ${cx - w * .12} ${y - h * .7} ${cx} ${y - h} V${y}Z" fill="${l}"/><path d="M${cx} ${y - h} C${cx + w * .12} ${y - h * .7} ${cx + w / 2} ${y - h * .55} ${cx + w / 2} ${y}Z" fill="${d}"/>`;
+const kltDome = (cx, y, w, h, l, d) => `<path d="M${cx - w / 2} ${y} A${w / 2} ${h} 0 0 1 ${cx} ${y - h} V${y}Z" fill="${l}"/><path d="M${cx} ${y - h} A${w / 2} ${h} 0 0 1 ${cx + w / 2} ${y}Z" fill="${d}"/>`;
+const kltMinaret = (cx, top, base, w, cap) => kltBox(cx - w / 2, top + 6, w, base - top - 6, "#F4F1EA", "#C9C3B6") + `<rect x="${cx - w / 2 - .8}" y="${top + 6 + (base - top) * .3}" width="${w + 1.6}" height="1.4" fill="#E8E2D6"/><rect x="${cx - w / 2 - .8}" y="${top + 6 + (base - top) * .6}" width="${w + 1.6}" height="1.4" fill="#E8E2D6"/>` + kltOnion(cx, top + 6.5, w + 1.6, 6, cap[0], cap[1]) + `<path d="M${cx} ${top + .5} V${top - 2.5}" stroke="#B89A3E" stroke-width=".8"/>`;
+function kltKomtar(){   // KOMTAR, George Town: the many-sided tower with window bands, and the geodesic dome at its foot
+  const bands = Array.from({ length: 26 }, (_, i) => `<rect x="13" y="${24 + i * 4.6}" width="16" height="1.5" fill="rgba(24,57,92,.32)"/>`).join("");
+  return `<svg viewBox="0 0 48 150" aria-hidden="true"><defs>${kltG("kltko", ["#C9D1D9", "#F4F6F8", "#D8DEE4"], ["#9CA8B5", "#6C7A89"])}</defs>${kltGround(24, 144, 22)}
+    ${kltBox(13, 20, 16, 124, "url(#kltkoL)", "url(#kltkoD)")}${bands}${kltBox(11.5, 15, 19, 5, "#EEF2F6", "#9DAAB7")}
+    <path d="M21 15 V3" stroke="#7D8FA3" stroke-width="1.1"/><circle class="kltlight" cx="21" cy="3" r="1.2"/>
+    ${kltDome(37, 144, 18, 10, "#EDEFF2", "#A9B3BE")}<path d="M29 140 L37 134 L45 140 M31.5 137 H42.5 M37 134 V144 M33 140 L37 144 L41 140" stroke="rgba(24,57,92,.3)" stroke-width=".5" fill="none"/></svg>`;
+}
+function kltSultanIbrahim(){   // Sultan Ibrahim Building, Johor Bahru: a long sand-coloured block with a square tower in the middle
+  const arches = Array.from({ length: 10 }, (_, i) => `<path d="M${13 + i * 6.6} 102 v-8 a2 2 0 0 1 4 0 v8z" fill="rgba(90,65,30,.35)"/>`).join("");
+  return `<svg viewBox="0 0 90 110" aria-hidden="true">${kltGround(45, 104, 42)}
+    ${kltBox(8, 80, 74, 24, "#EFE4C9", "#BCA77C")}<rect x="7" y="78.5" width="76" height="2.2" fill="#F7F0DE"/>${arches}
+    ${kltBox(36, 26, 18, 54, "#F2E8CF", "#BCA77C")}<rect x="35" y="25" width="20" height="2" fill="#F7F0DE"/>
+    ${[38.5, 45, 51.5].map(x => `<path d="M${x - 1.6} 70 v-9 a1.6 1.6 0 0 1 3.2 0 v9z" fill="rgba(90,65,30,.38)"/><path d="M${x - 1.6} 50 v-9 a1.6 1.6 0 0 1 3.2 0 v9z" fill="rgba(90,65,30,.38)"/>`).join("")}
+    ${kltBox(39, 16, 12, 9, "#F2E8CF", "#BCA77C")}${kltOnion(45, 16, 10, 8, "#E9DDBE", "#A99467")}
+    ${[36, 54].map(x => kltOnion(x, 25, 4, 5, "#E9DDBE", "#A99467")).join("")}<path d="M45 8 V1.5" stroke="#8A7A5A" stroke-width=".8"/></svg>`;
+}
+function kltChristChurch(){   // Christ Church, Melaka: the red Dutch church with its gable and little belfry
+  return `<svg viewBox="0 0 70 92" aria-hidden="true">${kltGround(35, 86, 32)}
+    <polygon points="44,52 60,46 66,52 66,86 44,86" fill="#8A2A22"/><polygon points="44,52 31,30 46,24 60,46" fill="#5E1C17"/>
+    ${kltBox(20, 50, 26, 36, "#C0453A", "#9A3128")}<polygon points="18,51 33,27 48,51" fill="#B23D33"/><polygon points="33,27 48,51 33,51" fill="#962E26"/>
+    <rect x="17" y="49.5" width="32" height="2" fill="#D86A5E"/>
+    ${kltBox(30.5, 17, 5, 10, "#C0453A", "#962E26")}<polygon points="29.5,17.5 33,12 36.5,17.5" fill="#5E1C17"/><path d="M33 12 V6 M31 8 H35" stroke="#F4F1EA" stroke-width=".9"/>
+    <path d="M29 86 v-11 a4 4 0 0 1 8 0 v11z" fill="#F4F1EA"/><path d="M30.5 86 v-10 a2.5 2.5 0 0 1 5 0 v10z" fill="#5E1C17"/>
+    ${[24, 42].map(x => `<path d="M${x - 1.5} 72 v-8 a1.5 1.5 0 0 1 3 0 v8z" fill="#F4F1EA"/>`).join("")}<circle cx="33" cy="40" r="3" fill="#F4F1EA"/><circle cx="33" cy="40" r="1.8" fill="#5E1C17"/>
+    ${[50, 56, 62].map(x => `<rect x="${x - 1}" y="62" width="2" height="7" rx="1" fill="#F4F1EA" opacity=".85"/>`).join("")}</svg>`;
+}
+function kltIpohStation(){   // Ipoh Railway Station: the long white Moorish front with arches, a big dome in the middle and small ones on the corners
+  const arches = Array.from({ length: 15 }, (_, i) => `<path d="M${9 + i * 7} 74 v-11 a2.6 2.6 0 0 1 5.2 0 v11z" fill="rgba(70,80,95,.32)"/>`).join("");
+  return `<svg viewBox="0 0 120 80" aria-hidden="true">${kltGround(60, 74, 57)}
+    ${kltBox(5, 54, 110, 20, "#F6F4EE", "#CFC9BC")}<rect x="4" y="52.5" width="112" height="2.2" fill="#FFFFFF"/>${arches}
+    ${kltBox(46, 40, 28, 14, "#F6F4EE", "#CFC9BC")}<rect x="45" y="38.5" width="30" height="2" fill="#FFFFFF"/>
+    ${kltOnion(60, 39, 20, 18, "#FBFAF6", "#C9C2B2")}<path d="M60 21 V16" stroke="#9A8A62" stroke-width=".8"/>
+    ${[9, 111, 46, 74].map(x => kltBox(x - 3, 44, 6, 9, "#F6F4EE", "#CFC9BC") + kltOnion(x, 44, 7, 7, "#FBFAF6", "#C9C2B2")).join("")}</svg>`;
+}
+function kltPutra(){   // Putra Mosque, Putrajaya: the rose-pink dome and the tall tiered minaret
+  return `<svg viewBox="0 0 80 150" aria-hidden="true">${kltGround(40, 144, 37)}
+    ${kltBox(8, 112, 54, 32, "#EBCFC4", "#BA9183")}<rect x="7" y="110.5" width="56" height="2.2" fill="#F5E3DB"/>
+    ${Array.from({ length: 7 }, (_, i) => `<path d="M${12 + i * 7} 144 v-14 a2.4 2.4 0 0 1 4.8 0 v14z" fill="rgba(100,55,45,.3)"/>`).join("")}
+    ${kltBox(20, 104, 30, 7, "#EBCFC4", "#BA9183")}${kltOnion(35, 104, 34, 26, "#E7A2A0", "#B5615F")}<path d="M35 78 V71 M33.4 73 H36.6" stroke="#C9A24A" stroke-width=".9"/>
+    ${[[12, 114], [58, 114]].map(([x, y]) => kltOnion(x, y, 6, 6, "#E7A2A0", "#B5615F")).join("")}
+    ${kltBox(64, 92, 9, 52, "#EBCFC4", "#BA9183")}${kltBox(65, 58, 7, 34, "#EBCFC4", "#BA9183")}${kltBox(66, 32, 5, 26, "#EBCFC4", "#BA9183")}
+    <rect x="63" y="91" width="11" height="2" fill="#F5E3DB"/><rect x="64" y="57" width="9" height="2" fill="#F5E3DB"/><rect x="65" y="31" width="7" height="2" fill="#F5E3DB"/>
+    ${kltOnion(68.5, 31, 6, 9, "#E7A2A0", "#B5615F")}<path d="M68.5 22 V15" stroke="#C9A24A" stroke-width=".8"/></svg>`;
+}
+function kltBlueMosque(){   // Sultan Salahuddin Abdul Aziz Shah Mosque, Shah Alam: the great blue dome and four tall minarets
+  const lines = Array.from({ length: 7 }, (_, i) => { const x = 33 + i * 6.3; return `<path d="M${x} 104 Q${55 + (x - 55) * .35} 70 55 64" stroke="rgba(255,255,255,.45)" stroke-width=".7" fill="none"/>`; }).join("");
+  return `<svg viewBox="0 0 110 140" aria-hidden="true">${kltGround(55, 134, 52)}
+    ${kltMinaret(25, 30, 128, 4, ["#4A86C8", "#2A5D97"])}${kltMinaret(85, 30, 128, 4, ["#4A86C8", "#2A5D97"])}
+    ${kltBox(26, 104, 58, 30, "#F4F1EA", "#C9C3B6")}<rect x="25" y="102.5" width="60" height="2.2" fill="#FFFFFF"/>
+    ${Array.from({ length: 8 }, (_, i) => `<path d="M${29.5 + i * 7} 134 v-14 a2.4 2.4 0 0 1 4.8 0 v14z" fill="rgba(60,80,110,.28)"/>`).join("")}
+    ${kltDome(55, 104, 50, 40, "#4F8ED2", "#245A95")}${lines}<path d="M55 64 V56" stroke="#C9A24A" stroke-width="1"/><circle cx="55" cy="55" r="1.3" fill="#C9A24A"/>
+    ${kltMinaret(9, 10, 134, 4.4, ["#4A86C8", "#2A5D97"])}${kltMinaret(101, 10, 134, 4.4, ["#4A86C8", "#2A5D97"])}</svg>`;
+}
+function kltCrystal(){   // Crystal Mosque, Kuala Terengganu: steel and glass, a glass dome and slim minarets at the corners
+  return `<svg viewBox="0 0 90 112" aria-hidden="true"><defs><pattern id="kltcrG" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0 H4 M0 0 V4" stroke="rgba(255,255,255,.55)" stroke-width=".45"/></pattern></defs>${kltGround(45, 106, 42)}
+    ${kltMinaret(26, 34, 100, 3.4, ["#BFD6E8", "#7896B0"])}${kltMinaret(64, 34, 100, 3.4, ["#BFD6E8", "#7896B0"])}
+    ${kltBox(22, 72, 46, 34, "#A9C6DD", "#6A8BA8")}<rect x="22" y="72" width="46" height="34" fill="url(#kltcrG)"/><rect x="21" y="70.5" width="48" height="2" fill="#E4EEF6"/>
+    ${kltOnion(45, 72, 30, 30, "#B9D3E7", "#6F90AD")}<path d="M45 42 V35" stroke="#C9A24A" stroke-width=".9"/>
+    ${kltMinaret(12, 16, 106, 3.8, ["#BFD6E8", "#7896B0"])}${kltMinaret(78, 16, 106, 3.8, ["#BFD6E8", "#7896B0"])}</svg>`;
+}
+function kltKinabalu(){   // Mount Kinabalu, Sabah: green slopes and the jagged granite summit
+  return `<svg viewBox="0 0 150 80" aria-hidden="true"><defs><linearGradient id="kltkiG" x1="0" x2="1"><stop offset="0" stop-color="#6FA36B"/><stop offset=".55" stop-color="#4F8450"/><stop offset="1" stop-color="#2F5A35"/></linearGradient>
+    <linearGradient id="kltkiR" x1="0" x2="1"><stop offset="0" stop-color="#C9CED3"/><stop offset=".5" stop-color="#9AA2AA"/><stop offset="1" stop-color="#5E666F"/></linearGradient></defs>${kltGround(75, 75, 72)}
+    <polygon points="2,75 26,58 44,46 56,38 66,33 86,34 100,40 116,52 134,62 148,75" fill="url(#kltkiG)"/>
+    <polygon points="50,42 58,30 62,33 66,20 70,26 75,14 79,22 84,12 88,21 92,17 96,28 104,40 92,36 80,37 66,36" fill="url(#kltkiR)"/>
+    <path d="M84 12 L80 24 M75 14 L73 25 M66 20 L65 30" stroke="rgba(255,255,255,.5)" stroke-width=".8"/>
+    <path d="M20 66 Q50 60 80 64 T130 64" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+}
+function kltDUN(){   // Sarawak State Legislative Assembly, Kuching: the tall golden roof folded like an umbrella, over a white hall
+  const n = 10; let roof = "";
+  for (let i = 0; i < n; i++){ const x0 = 8 + i * 84 / n, x1 = 8 + (i + 1) * 84 / n, mid = (x0 + x1) / 2;
+    roof += `<polygon points="50,12 ${x0},60 ${mid},${i % 2 ? 57 : 63} " fill="${i < n / 2 ? "#F0C24A" : "#C99520"}"/><polygon points="50,12 ${mid},${i % 2 ? 57 : 63} ${x1},60" fill="${i < n / 2 ? "#D9A62C" : "#A87A16"}"/>`; }
+  return `<svg viewBox="0 0 100 90" aria-hidden="true">${kltGround(50, 84, 46)}
+    ${kltBox(16, 60, 68, 24, "#F6F4EE", "#CFC9BC")}${Array.from({ length: 9 }, (_, i) => `<rect x="${19 + i * 7.4}" y="64" width="2.2" height="20" fill="${i < 5 ? "#FFFFFF" : "#DDD7CA"}"/>`).join("")}
+    ${roof}<path d="M50 12 V4" stroke="#B8902A" stroke-width="1"/><circle cx="50" cy="4" r="1.2" fill="#E8B93A"/></svg>`;
+}
+function kltEagle(){   // Eagle Square, Langkawi: the reddish-brown eagle with its wings raised, on a stepped stand
+  return `<svg viewBox="0 0 72 82" aria-hidden="true">${kltGround(36, 76, 26)}
+    ${kltBox(22, 64, 28, 12, "#D5D9DE", "#8D97A2")}${kltBox(26, 58, 20, 6, "#E3E6EA", "#9DA6B0")}
+    <polygon points="34,44 4,8 10,24 6,22 14,36 10,35 22,46" fill="#A9643A"/><polygon points="38,44 68,6 62,23 66,21 58,35 62,34 50,46" fill="#7A4424"/>
+    <path d="M28 58 C26 48 30 40 36 38 C42 40 46 48 44 58 Z" fill="#9A5730"/><path d="M36 38 C42 40 46 48 44 58 H36 Z" fill="#6E3C1C"/>
+    <path d="M38 40 C38 34 41 30 45 31 C48 32 48 36 45 38 Z" fill="#F4F0E6"/><path d="M47.5 33.5 L51 35 L47 36.5 Z" fill="#E2A92E"/><circle cx="45.2" cy="33.6" r=".7" fill="#2B2B2B"/></svg>`;
+}
+const kltTowerAs = p => () => kltKLTower().replaceAll("kltk", p);   // the observation-tower drawing, for Alor Setar and Kuantan
+// h: height compared with the KL twin towers (drawn bigger than true where needed, so each one is still easy to see).
+// from: the zoom where it first shows (towns close to KL wait until you zoom in, so the country view isn't crowded).
 const KL_SKY = [
   { at: [101.71167, 3.15806], h: 1, vb: 100, svg: kltPetronas, from: 0 },     // Petronas Twin Towers, 452 m
   { at: [101.70306, 3.15278], h: .93, vb: 40, svg: kltKLTower, from: 11 },     // KL Tower, 421 m
   { at: [101.71861, 3.14222], h: .98, vb: 50, svg: kltExchange, from: 11 },    // The Exchange 106, 445 m
-  { at: [101.70028, 3.14139], h: 1.5, vb: 60, svg: kltMerdeka, from: 11 }      // Merdeka 118, 679 m
-];
+  { at: [101.70028, 3.14139], h: 1.5, vb: 60, svg: kltMerdeka, from: 11 },     // Merdeka 118, 679 m
+  { at: [99.85196, 6.30835], h: .45, vb: [72, 82], svg: kltEagle, from: 7 },          // Eagle Square, Langkawi
+  { at: [100.36754, 6.12451], h: .72, vb: 40, svg: kltTowerAs("klas"), from: 0 },     // Menara Alor Setar
+  { at: [116.5587, 6.07507], h: .6, vb: [150, 80], svg: kltKinabalu, from: 0 },       // Mount Kinabalu
+  { at: [100.32981, 5.41458], h: .7, vb: [48, 150], svg: kltKomtar, from: 0 },        // KOMTAR, George Town
+  { at: [103.12068, 5.32211], h: .5, vb: [90, 112], svg: kltCrystal, from: 0 },       // Crystal Mosque, Kuala Terengganu
+  { at: [101.07357, 4.59704], h: .38, vb: [120, 80], svg: kltIpohStation, from: 0 },  // Ipoh Railway Station
+  { at: [103.32749, 3.80397], h: .72, vb: 40, svg: kltTowerAs("klku"), from: 0 },     // Menara Kuantan 188
+  { at: [101.52113, 3.07872], h: .55, vb: [110, 140], svg: kltBlueMosque, from: 10 }, // Blue Mosque, Shah Alam
+  { at: [101.68868, 2.93608], h: .55, vb: [80, 150], svg: kltPutra, from: 10 },       // Putra Mosque, Putrajaya
+  { at: [102.24915, 2.19454], h: .4, vb: [70, 92], svg: kltChristChurch, from: 0 },   // Christ Church, Melaka
+  { at: [110.3479, 1.56182], h: .5, vb: [100, 90], svg: kltDUN, from: 0 },            // Sarawak State Assembly, Kuching
+  { at: [103.76105, 1.45789], h: .48, vb: [90, 110], svg: kltSultanIbrahim, from: 0 } // Sultan Ibrahim Building, Johor Bahru
+].sort((a, b) => b.at[1] - a.at[1]);   // north to south, so the one lower on the screen stands in front
 function kltAdd(map){
   MX.klt = KL_SKY.map(b => { const el = document.createElement("div"); el.className = "mxklt"; el.innerHTML = b.svg();
     return { b, mk: new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(b.at).addTo(map) }; });
@@ -5239,10 +5343,10 @@ function kltScale(){
   if (!MX || !MX.klt) return;
   const z = MX.map.getZoom(), H = Math.max(17, Math.min(61, 17 + (z - 5) * 4.7));   // a landmark at country view, a skyline in the city
   MX.klt.forEach(({ b, mk }) => {
-    const el = mk.getElement(), sv = el.firstElementChild, h = H * b.h;
+    const el = mk.getElement(), sv = el.firstElementChild, [vw, vh] = Array.isArray(b.vb) ? b.vb : [b.vb, 212], h = Math.max(24, H * b.h);
     el.style.display = z < b.from ? "none" : "";
-    sv.style.height = h + "px"; sv.style.width = h * b.vb / 212 + "px";
-    mk.setOffset([0, h * 6 / 212]);   // the ground line, not the shadow, sits on the spot
+    sv.style.height = h + "px"; sv.style.width = h * vw / vh + "px";
+    mk.setOffset([0, h * 6 / vh]);   // the ground line, not the shadow, sits on the spot
   });
 }
 function skyScale(){ const z = MX && MX.map ? MX.map.getZoom() : 10, k = Math.max(.5, Math.min(1, .5 + (z - 5) * .1)); document.querySelectorAll(".skyscale").forEach(x => x.style.transform = `scale(${k.toFixed(3)})`); }
