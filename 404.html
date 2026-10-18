@@ -1018,7 +1018,7 @@ a.prow{text-decoration:none;color:inherit}
 .warow b{font-size:16px}
 .tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:var(--verify-ink)}
 /* browse-stores button in the top-right corner, clear of the logo */
-.stmore{left:auto;right:12px}
+.stmore{left:auto;right:12px}.stmore.stshare{right:64px}.stmore.stshare.solo{right:12px}
 .stname{font-size:clamp(22px,6vw,28px);margin:8px 0 2px}
 /* Menu / Shop links switch and section chips stay at the top while scrolling */
 .stnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg)}
@@ -1354,6 +1354,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
   <button class="btn small back" id="backBtn" hidden>Back to editor</button>
   <div class="st" id="stWrap">
     <a class="stmore" id="stMore" href="#" aria-label="Find more stores on Spot It!" title="Spot It!"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
+    <button type="button" class="stmore stshare" id="stShare" aria-label="Share this store" title="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg></button>
     <div class="cover" id="stCover" hidden></div>
     <section class="shopcard" id="stCard">
       <div class="st-logowrap" id="stLogoWrap">
@@ -2161,6 +2162,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-share", at: "2026-10-18", title: "Customers can share your store", body: "Your store page now has a Share button at the top right. Customers tap it to send your store to friends on WhatsApp, Telegram, Facebook and more, so word about your shop spreads further." },
   { id: "u-20261018-link-list", at: "2026-10-18", title: "Shop links are now a tidy list", body: "On your store, shop links now always show as a simple list: a small photo, the name, the price and the shop. Customers can scroll through lots of links quickly. Your store style (List, Photo grid or Minimal) still applies to your own items." },
   { id: "u-20261018-ask", at: "2026-10-18", title: "Ask your assistant anything", body: "Got a question about the app? Tap Got a question? on your Store page (or Ask your assistant under Account) and type it in English or Malay, like \"how do I add a photo?\" or \"macam mana nak tutup kedai?\". Your assistant answers right away, with a button that takes you straight there." },
   { id: "u-20261018-bot-face", at: "2026-10-18", title: "Say hi to your assistant", body: "Your assistant, who posts your store status, tips and app news, now has a face. You'll see her on the What's new card and in News." },
@@ -3738,6 +3740,7 @@ async function showStore(data, isPreview, refresh){
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   $("stSafeLink").href = home() + "safe";
   $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
+  $("stShare").classList.toggle("solo", !!isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
   const verified = !isPreview && STORE_VERIFIED;   // blue ring + tick on the logo, like verified accounts elsewhere
   $("stVerified").hidden = !verified; $("stLogoWrap").classList.toggle("verified", verified);
   $("stNew").hidden = isPreview || !STORE_TRIAL;
@@ -3945,6 +3948,16 @@ $("viewTabs").addEventListener("click", e => {
 let MQ_T = 0;
 $("stQ").addEventListener("input", () => { clearTimeout(MQ_T); MQ_T = setTimeout(() => { MQ = $("stQ").value; renderMenu(); }, 150); });   // redraw once typing pauses, not on every letter
 $("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur(); });
+// Share this store: the phone's own share menu (WhatsApp, Telegram, Facebook...), or copy the link where there isn't one
+$("stShare").addEventListener("click", async () => {
+  const url = storeLink(STORE_ID || (SESSION && SESSION.id) || ""), name = (D && D.name) || "this store";
+  if (navigator.share){
+    try { await navigator.share({ title: name, text: `Order from ${name} here:`, url }); return; }
+    catch(e){ if (e && e.name === "AbortError") return; }
+  }
+  if (await copyText(url)){ notify(`Link copied: ${url}. Paste it in WhatsApp or anywhere to share ${name}.`); }
+  else window.open("https://wa.me/?text=" + encodeURIComponent(`Order from ${name} here: ${url}`), "_blank", "noopener");
+});
 const pSig = p => JSON.stringify([p.n, p.o]);
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
