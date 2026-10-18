@@ -2260,7 +2260,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the Sepang International Circuit and KLIA with its control tower. Zoom in near Sepang to see them." },
+  { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the real shape of the Sepang International Circuit, raised like a model and lying right on the track, and KLIA with its control tower. Zoom in near Sepang to see them." },
   { id: "u-20261018-more-landmarks", at: "2026-10-18", title: "Every state on Spot It!", body: "Four more landmarks on the Spot It! map: Istana Jahar in Kota Bharu, the floating mosque in Kuala Perlis, the Minangkabau house in Seremban and the Chimney in Labuan. Now every state has one." },
   { id: "u-20261018-city-landmarks", at: "2026-10-18", title: "Every city's landmark on Spot It!", body: "Spot It! now shows a landmark in each big city, right where it really stands: KOMTAR in Penang, the Crystal Mosque in Kuala Terengganu, Mount Kinabalu, the Sarawak Assembly in Kuching, Christ Church in Melaka, Ipoh Railway Station and more. Zoom out to see them all across Malaysia." },
   { id: "u-20261018-kl-skyline", at: "2026-10-18", title: "KL's skyline on Spot It!", body: "KL's tallest landmarks now stand on the Spot It! map, each right where it really is: the twin towers at KLCC, KL Tower, The Exchange 106 at TRX and Merdeka 118. Zoom in on Kuala Lumpur to see them all." },
@@ -3005,7 +3005,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 90;
+const APP_VERSION = 91;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5366,15 +5366,19 @@ function kltKLIA(){   // KLIA: the torch-shaped control tower and the terminal u
     <path d="M94 25 V13" stroke="#7D8FA3" stroke-width="1"/><circle class="kltlight" cx="94" cy="13" r="1.2"/>
     <g transform="translate(26 40) rotate(-18)" fill="#5E7489"><path d="M0 3 L22 2 Q26 2.5 22 4 L0 4.5 Z"/><path d="M9 3 L5 -5 L8 -5 L14 3 Z"/><path d="M10 4 L6 11 L9 11 L15 4 Z"/><path d="M1 3 L-1 -1.5 L1.5 -1.5 L4 3 Z"/></g></svg>`;
 }
-function kltSepang(){   // Sepang International Circuit: the grandstand under its leaf-shaped canopies, the track with red-and-white kerbs and a race car
-  let leaves = ""; for (let i = 0; i < 6; i++){ const x = 10 + i * 17; leaves += `<path d="M${x} 30 Q${x + 9} 16 ${x + 18} 26 Q${x + 9} 24 ${x} 30 Z" fill="${i < 3 ? "#F4F6F8" : "#C9D1D9"}"/><path d="M${x + 9} 24 V40" stroke="#8A97A4" stroke-width=".8"/>`; }
-  const kerb = Array.from({ length: 24 }, (_, i) => `<rect x="${4 + i * 5}" y="58" width="5" height="2.2" fill="${i % 2 ? "#FFFFFF" : "#D32F2F"}"/>`).join("");
-  return `<svg viewBox="0 0 120 72" aria-hidden="true">${kltGround(60, 66, 58)}
-    <polygon points="8,52 20,32 112,32 112,52" fill="#B9C3CD"/><polygon points="66,32 112,32 112,52 66,52" fill="#8996A4"/>
-    ${Array.from({ length: 5 }, (_, i) => `<path d="M${16 - i * 2.2} ${36 + i * 3.4} H112" stroke="${["#1E88E5", "#E53935", "#FDD835", "#1E88E5", "#E53935"][i]}" stroke-width="1.3" opacity=".75"/>`).join("")}
-    ${leaves}<rect x="4" y="52" width="114" height="6" fill="#55606B"/><rect x="4" y="60" width="114" height="6" fill="#46505A"/>${kerb}
-    <path d="M10 55 H112" stroke="#FFFFFF" stroke-width=".5" stroke-dasharray="4 3" opacity=".8"/>
-    <g transform="translate(70 61.5)"><path d="M0 2 L4 0 L14 0 L18 1.5 L22 2 L22 3.4 L0 3.4 Z" fill="#D32F2F"/><circle cx="4" cy="3.6" r="1.6" fill="#1F1F1F"/><circle cx="17" cy="3.6" r="1.6" fill="#1F1F1F"/><rect x="-1" y="-.6" width="3" height="2.6" fill="#1F1F1F"/></g></svg>`;
+// Sepang International Circuit: the real track layout (traced from OpenStreetMap), raised like a model with a side and a shadow,
+// at its true size on the map, so it lies right over the real circuit when you zoom in.
+const SEPANG_TRACK = "M68 367 485 292M500 276 502 269 501 259 490 238 484 231 475 227 469 225 462 226M68 367 82 370 100 368 103 369 105 374 108 374 180 355 353 323 378 316 401 307M491 169 494 177 499 208 499 224 490 229 420 255 392 262M444 300 477 304 552 302 559 306 563 317M496 189 494 209 492 214 487 217 462 226M462 226 375 254 321 261 117 277 94 280 46 290M301 140 305 152 318 170 330 179 352 186 372 185 386 180 399 171 414 155 420 151 435 144 453 144 462 146 479 155 491 169M26 49 32 40 33 33 31 14 26 0M392 262 26 291M26 259 42 264 48 262 53 256 53 248 50 239 41 228M85 92 165 66 221 44 262 25M262 25 268 23 273 23 279 28 280 34M280 34 285 62 301 140M491 169 575 266M575 266 579 272 579 279 562 320 556 325 551 326M551 326 451 333 327 348M327 348 324 349 319 354 319 360 323 364M323 364 361 389 367 398 369 405 371 429 368 450 357 478 348 491M348 491 343 496 337 498 331 498 321 495M185 406 143 427 129 429 110 429 98 427 86 422 75 416 62 404 55 388M55 388 54 382 57 374 64 368 68 367M478 256 392 262M485 292 491 290 498 282 500 276 499 270 497 265 490 258 478 256M41 228 30 209 27 196 27 174 30 149 38 130 50 114 67 101 85 92M321 495 217 408M217 408 204 403 191 404 185 406M64 286 46 290M64 288 19 292M19 292 13 291 5 287 1 278 0 270 5 261 14 256 23 257 42 264 48 262 51 260 53 256 53 248 50 239 41 228M64 405 58 396 55 388M55 388 55 378 60 371 64 369M41 228 30 209 27 196 27 174 30 149 38 130 44 121 50 114 64 103";
+function kltSepang(){
+  const st = (w, c, extra) => `<path d="${SEPANG_TRACK}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"${extra || ""}/>`;
+  return `<svg viewBox="0 0 579 498" aria-hidden="true" style="overflow:visible">
+    <g class="trkshadow">${st(6, "rgba(20,30,45,.2)")}</g>
+    <g class="trkside">${st(4.6, "#2B333B")}</g>
+    ${st(4.6, "#FFFFFF")}${st(4.6, "#D32F2F", ` stroke-dasharray="2.5 2.5"`)}${st(3.2, "#5A646E")}${st(.6, "rgba(255,255,255,.35)")}</svg>`;
+}
+function kltSepangScale(sv, u){   // u: map units per screen pixel; keeps the raised side and the shadow a few pixels deep at any zoom
+  sv.querySelector(".trkshadow").setAttribute("transform", `translate(${3 * u} ${5 * u})`);
+  sv.querySelector(".trkside").setAttribute("transform", `translate(0 ${2.6 * u})`);
 }
 const kltTowerAs = p => () => kltKLTower().replaceAll("kltk", p);   // the observation-tower drawing, for Alor Setar and Kuantan
 // h: height compared with the KL twin towers (drawn bigger than true where needed, so each one is still easy to see).
@@ -5400,7 +5404,7 @@ const KL_SKY = [
   { at: [100.12691, 6.39733], h: .5, vb: [90, 98], svg: kltAlHussain, from: 6.5 },    // Masjid Al-Hussain, Kuala Perlis
   { at: [101.92036, 2.718], h: .42, vb: [100, 82], svg: kltMinang, from: 6 },         // Minangkabau house, Seremban
   { at: [115.24862, 5.38117], h: .5, vb: [34, 150], svg: kltChimney, from: 0 },       // The Chimney, Labuan
-  { at: [101.73692, 2.75997], h: .4, vb: [120, 72], svg: kltSepang, from: 9 },        // Sepang International Circuit
+  { at: [101.737803, 2.761088], geo: 1158, vb: [579, 498], svg: kltSepang, scaled: kltSepangScale, from: 9 },   // Sepang International Circuit, true size
   { at: [101.70552, 2.75273], h: .5, vb: [110, 110], svg: kltKLIA, from: 9 }          // KLIA Terminal 1 and its control tower
 ].sort((a, b) => b.at[1] - a.at[1]);   // north to south, so the one lower on the screen stands in front
 function kltAdd(map){
@@ -5412,8 +5416,15 @@ function kltScale(){
   if (!MX || !MX.klt) return;
   const z = MX.map.getZoom(), H = Math.max(17, Math.min(61, 17 + (z - 5) * 4.7));   // a landmark at country view, a skyline in the city
   MX.klt.forEach(({ b, mk }) => {
-    const el = mk.getElement(), sv = el.firstElementChild, [vw, vh] = Array.isArray(b.vb) ? b.vb : [b.vb, 212], h = Math.max(24, H * b.h);
+    const el = mk.getElement(), sv = el.firstElementChild, [vw, vh] = Array.isArray(b.vb) ? b.vb : [b.vb, 212];
     el.style.display = z < b.from ? "none" : "";
+    if (b.geo){   // drawn at its true size: b.geo metres across
+      const mpp = 78271.517 * Math.cos(b.at[1] * Math.PI / 180) / Math.pow(2, z), w = Math.max(70, Math.min(1100, b.geo / mpp)), h = w * vh / vw;
+      sv.style.width = w + "px"; sv.style.height = h + "px"; mk.setOffset([0, h / 2]);   // centred on the spot
+      if (b.scaled) b.scaled(sv, vw / w);
+      return;
+    }
+    const h = Math.max(24, H * b.h);
     sv.style.height = h + "px"; sv.style.width = h * vw / vh + "px";
     mk.setOffset([0, h * 6 / vh]);   // the ground line, not the shadow, sits on the spot
   });
