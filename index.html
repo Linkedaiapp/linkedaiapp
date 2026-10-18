@@ -756,8 +756,16 @@ html,body{overflow-x:hidden}
 .closedov p{margin:0;opacity:.9;font-size:16px}
 .closedov .shopn{font-weight:700;opacity:.8;margin-bottom:6px;font-size:14px}
 .back{z-index:11!important}
-.adwrap{position:relative;margin:14px 14px 0}
-#menu .adwrap{margin:14px 14px 18px}
+/* The banner sits behind the store card, the same width: it slides down from under it, and tucks back up */
+.shopcard{z-index:2}
+.adwrap{position:relative;z-index:1;margin:-26px 14px 0;max-height:0;overflow:hidden;transition:max-height .9s cubic-bezier(.2,.7,.2,1)}
+.adwrap .adin{padding-top:34px;transform:translateY(-100%);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.adwrap.out{max-height:460px}
+.adwrap.out .adin{transform:none}
+.adbox{position:relative}
+.adtab{display:flex;align-items:center;gap:5px;margin:25px auto 0;position:relative;z-index:1;padding:4px 14px 6px;border:1px solid var(--line);border-top:0;border-radius:0 0 14px 14px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer}
+.adtab[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.adwrap,.adwrap .adin{transition:none}}
 .adban{display:block;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);background:var(--surface)}
 .adban img{width:100%;aspect-ratio:3/1;object-fit:cover}
 .adban.swapping{animation:none !important;background:var(--surface) !important}
@@ -767,7 +775,7 @@ html,body{overflow-x:hidden}
 .addots button::before{content:"";width:7px;height:7px;border-radius:999px;background:var(--muted);opacity:.5;transition:width .3s ease,opacity .3s ease}
 .addots button[aria-current="true"]::before{width:18px;background:var(--ink);opacity:1}
 .adtag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;pointer-events:none}
-.adx{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.adx{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;line-height:1;cursor:pointer;display:grid;place-items:center}
 .brandbar{display:flex;justify-content:center;padding:10px 14px 0}
 .brandbar a{font-weight:800;font-size:13px;letter-spacing:.02em;color:var(--muted);text-decoration:none}
 
@@ -1546,13 +1554,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <div class="svbio" id="stBio" hidden></div>
       <div class="stvisit" id="stVisit" hidden></div>
     </section>
-    <div class="pwabar" id="stPwaBar" hidden></div>
+    <!-- The Sponsored banner lives behind the store card: it slides down out from under it, and tucks back up when hidden -->
     <div class="adwrap" id="adWrap" hidden>
-      <a class="adban" id="adBan" target="_blank" rel="noopener sponsored"><img id="adImg" alt="Sponsored"></a>
-      <span class="adtag">Sponsored</span>
-      <button class="adx" id="adX" type="button" aria-label="Hide ads">×</button>
-      <div class="addots" id="adDots"></div>
+      <div class="adin">
+        <div class="adbox">
+          <a class="adban" id="adBan" target="_blank" rel="noopener sponsored"><img id="adImg" alt="Sponsored"></a>
+          <span class="adtag">Sponsored</span>
+          <button class="adx" id="adX" type="button" aria-label="Hide the ad behind the store card"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
+        </div>
+        <div class="addots" id="adDots"></div>
+      </div>
     </div>
+    <button class="adtab" id="adTab" type="button" hidden aria-label="Show the ad"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>Sponsored</button>
+    <div class="pwabar" id="stPwaBar" hidden></div>
     <div class="search stsearch" id="stSearch" hidden><input type="search" id="stQ" placeholder="Search" aria-label="Search this store" autocomplete="off" enterkeyhint="search"></div>
     <div class="stnav" id="stNav">
       <div class="seg viewtabs" id="viewTabs" hidden></div>
@@ -2493,6 +2507,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-ad-tuck", at: "2026-10-18", title: "A tidier Sponsored banner", body: "On store pages, the Sponsored banner now slides down from behind your shop card, the same width as it. Customers can tap the arrow to tuck it away, and your menu moves straight up under your shop card." },
   { id: "u-20261018-service-booking", at: "2026-10-18", title: "A booking page for services", body: "Selling services, like aircond service, Coway or insurance? Your store is now a booking page: a list of your services and one big Book now button where customers pick a date, a time and their address. In Shop details, add About you and Areas you cover: customers see them at the top with a pin, and people searching those areas on Spot It! find you too. No fixed price? Leave it empty and customers see Get a quote. Make the big button your own, like Book a shoot, Check availability or Rent now, in Shop details under Book button. Agents with brochures (insurance, takaful, property): pick Page style Agent, add your brochure pages and a PDF to each plan, and customers book a consultation." },
   { id: "u-20261018-digital-stores", at: "2026-10-18", title: "Sell digital products", body: "You can now sell e-books, templates, presets and online classes. In Shop details, under What do you sell?, pick Digital. Each product gets a book-shaped cover, sample pages, a What you get list and a Best value badge for bundles. Choose how buyers get it: on WhatsApp, a private download link you send after payment, or your own checkout page. Customers find you under Digital on Spot It!." },
   { id: "u-20261018-bridges", at: "2026-10-18", title: "Bridges on Spot It!", body: "The Penang Bridge now crosses the channel on the Spot It! map at its real length, with its cable-stayed towers in the middle, and the Kuala Terengganu Drawbridge stands with its deck split open. Zoom in on Penang or Kuala Terengganu to see them." },
@@ -3302,7 +3317,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 105;
+const APP_VERSION = 106;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4330,13 +4345,22 @@ function showAd(){
     && (!a.until || now <= new Date(a.until + "T23:59:59").getTime())
     && !(a.advertiserWa && normWa(a.advertiserWa) === normWa(D.wa))
     && !(a.advertiserId && a.advertiserId === STORE_ID)).slice(0, 5);
-  $("adWrap").hidden = hidden || !ADS.length;
-  if ($("adWrap").hidden) return;
+  $("adWrap").hidden = !ADS.length; $("adTab").hidden = true;
+  $("adWrap").classList.remove("out"); clearTimeout(adOutT);
+  if (!ADS.length) return;
   ADS.forEach(a => { const im = new Image(); im.src = safeUrl(a.img); });     // load them all early, so switching is instant
   adI = Math.floor(Math.random() * ADS.length);                             // fair start for every advertiser
   $("adDots").innerHTML = ADS.length > 1 ? ADS.map((a, k) => `<button type="button" data-ad="${k}" aria-label="Ad ${k + 1}"></button>`).join("") : "";
   paintAd();
-  startAds();
+  if (hidden) $("adTab").hidden = false;   // tucked away earlier in this visit: just the little tab to bring it back
+  else { adOutT = setTimeout(adReveal, 1200); startAds(); }
+}
+// Slide the banner down from behind the store card (and count it as seen only now)
+let adOutT = 0;
+function adReveal(){
+  if ($("adWrap").hidden) return;
+  $("adWrap").classList.add("out"); $("adTab").hidden = true;
+  const a = ADS[adI]; if (a && $("backBtn").hidden && !$("store").hidden) track("adview", safeUrl(a.img));
 }
 function startAds(){
   clearInterval(adTimer);
@@ -4347,13 +4371,13 @@ function paintAd(){
   img.onload = () => ban.classList.remove("swapping");
   img.onerror = () => {                                   // a broken banner is skipped
     ADS.splice(adI, 1);
-    if (!ADS.length){ $("adWrap").hidden = true; clearInterval(adTimer); return; }
+    if (!ADS.length){ $("adWrap").hidden = true; $("adTab").hidden = true; clearInterval(adTimer); return; }
     adI = adI % ADS.length;
     $("adDots").innerHTML = ADS.length > 1 ? ADS.map((x, k) => `<button type="button" data-ad="${k}" aria-label="Ad ${k + 1}"></button>`).join("") : "";
     paintAd(); startAds();
   };
   const url = safeUrl(a.img);
-  if ($("backBtn").hidden && !$("store").hidden) track("adview", url);
+  if ($("backBtn").hidden && !$("store").hidden && $("adWrap").classList.contains("out")) track("adview", url);   // only while it shows
   if (img.getAttribute("src") === url && img.complete && img.naturalWidth){ img.classList.add("loaded"); ban.classList.remove("swapping"); }
   else img.src = url;
   const link = safeUrl(a.link || "");
@@ -4371,7 +4395,9 @@ function goAd(n){
 }
 $("adBan").addEventListener("click", () => { const a = ADS[adI]; if (a && $("backBtn").hidden) track("adclick", safeUrl(a.img)); });
 $("adDots").addEventListener("click", e => { const b = e.target.closest("[data-ad]"); if (!b) return; goAd(+b.dataset.ad); startAds(); });
-$("adX").onclick = () => { try { sessionStorage.setItem("lk-adx", "1"); } catch(e) {} clearInterval(adTimer); $("adWrap").hidden = true; };
+// The arrow tucks the banner back behind the store card; the little tab under the card brings it back
+$("adX").onclick = () => { try { sessionStorage.setItem("lk-adx", "1"); } catch(e) {} clearInterval(adTimer); clearTimeout(adOutT); $("adWrap").classList.remove("out"); setTimeout(() => { if (!$("adWrap").classList.contains("out") && !$("adWrap").hidden) $("adTab").hidden = false; }, reduceMotion() ? 0 : 900); };
+$("adTab").onclick = () => { try { sessionStorage.removeItem("lk-adx"); } catch(e) {} adReveal(); startAds(); };
 
 $("stVerified").onclick = () => notify(`Verified by ${APP_NAME}. This store's payment was confirmed and it passed our safety check for prohibited items.`);
 $("stReport").onclick = () => {
@@ -4453,8 +4479,8 @@ function groupBy(idx, secOf){
 }
 // The Sponsored banner sits after the first menu section, so customers see food before ads.
 // The menu is redrawn often, so the banner is lifted back to its home spot first and never thrown away with it.
-function adHome(){ const ad = $("adWrap"); if (ad && $("menu").contains(ad)) $("stSearch").before(ad); }
-function adPlace(){ const ad = $("adWrap"), first = $("menu").querySelector(".group"); if (ad && first) first.after(ad); }
+function adHome(){}   // the banner now lives under the store card, so it never moves
+function adPlace(){}
 function renderMenu(){
   adHome();
   const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
