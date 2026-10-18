@@ -913,6 +913,9 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxsearch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:46px;border-radius:var(--r-md);padding:0 6px 0 14px;color:var(--muted);margin:0}
 .mxsearch{font-weight:500}
 .mxsearch{position:relative;overflow:hidden}
+.mxklt{pointer-events:none;z-index:0}
+.mxklt svg{display:block;filter:drop-shadow(0 2px 3px rgba(20,30,45,.25))}
+.mxklt .kltlight{fill:#E53935}
 .mxtrain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:0}
 .mxsearch > svg,.mxsearch > input,.mxsearch > .mxclr{position:relative;z-index:1}
 /* the search bar is a pane of glass and the train runs behind it: a light frost, a tint and two reflection streaks on top */
@@ -2257,6 +2260,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-kl-skyline", at: "2026-10-18", title: "KL's skyline on Spot It!", body: "KL's tallest landmarks now stand on the Spot It! map, each right where it really is: the twin towers at KLCC, KL Tower, The Exchange 106 at TRX and Merdeka 118. Zoom in on Kuala Lumpur to see them all." },
   { id: "u-20261018-train", at: "2026-10-18", title: "All aboard Spot It!", body: "A bullet train now runs through the Spot It! search bar now and then. Want your shop's name on its carriages? Message us to book a train banner." },
   { id: "u-20261018-sky", at: "2026-10-18", title: "A plane over Spot It!", body: "Now and then, a little plane flies across the Spot It! map towing a banner. Want your shop on it? Message us to book the plane banner." },
   { id: "u-20261018-settings", at: "2026-10-18", title: "New: Settings", body: "Under Account, open Settings to pick Light or Dark (or Auto, to match your phone), make text Large, write your own share message (it goes with your link whenever you or your customers tap Share), log out other phones, and check for app updates." },
@@ -2998,7 +3002,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 82;
+const APP_VERSION = 87;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5148,6 +5152,99 @@ function skyLoop(now){
   SKY.raf = SKY.flights.length ? requestAnimationFrame(skyLoop) : 0;
 }
 // planes look smaller as the map zooms out, like things really on the map: full size at street and town level, about half over the whole country
+// KL's skyline stands on the Spot It! map, each building at its real spot: the twin towers (KLCC), KL Tower,
+// The Exchange 106 (TRX) and Merdeka 118. Drawn upright with lit and shaded sides so they look 3D, heights true to each other.
+// They sit under every store pin and never catch a tap. Taller as you zoom in. From far away only the twin towers show.
+function kltPetronas(){
+  const tiers = [[198, 70, 28], [70, 57, 24], [57, 46, 19.5], [46, 37, 15], [37, 29.5, 10.5], [29.5, 23, 7]];
+  const tower = cx => tiers.map(([y0, y1, w]) => `<rect x="${cx - w / 2}" y="${y1}" width="${w / 2}" height="${y0 - y1}" fill="url(#kltL)"/><rect x="${cx}" y="${y1}" width="${w / 2}" height="${y0 - y1}" fill="url(#kltD)"/><rect x="${cx - w / 2}" y="${y1}" width="${w}" height="${y0 - y1}" fill="url(#kltF)"/><rect x="${cx - w / 2 - .8}" y="${y1 - 1.1}" width="${w + 1.6}" height="2.2" rx="1.1" fill="#EEF3F8"/><rect x="${cx}" y="${y1 - 1.1}" width="${w / 2 + .8}" height="2.2" rx="1.1" fill="#B9C6D3"/>`).join("")
+    + `<path d="M${cx - 3.2} 23 L${cx} 9 L${cx} 23Z" fill="#E3EAF1"/><path d="M${cx} 9 L${cx + 3.2} 23 L${cx} 23Z" fill="#8597AA"/><path d="M${cx} 10 V1" stroke="#7D8FA3" stroke-width="1.3" stroke-linecap="round"/><circle class="kltlight" cx="${cx}" cy="1.4" r="1.3"/>`;
+  return `<svg viewBox="0 0 100 212" aria-hidden="true"><defs>
+    <linearGradient id="kltL" x1="0" x2="1"><stop offset="0" stop-color="#C7D2DD"/><stop offset=".55" stop-color="#F6F9FB"/><stop offset="1" stop-color="#DCE4EC"/></linearGradient>
+    <linearGradient id="kltD" x1="0" x2="1"><stop offset="0" stop-color="#9DADBD"/><stop offset="1" stop-color="#5F7287"/></linearGradient>
+    <pattern id="kltF" width="6" height="3.2" patternUnits="userSpaceOnUse"><rect y="2.5" width="6" height=".7" fill="rgba(24,57,92,.2)"/></pattern></defs>
+    <ellipse cx="50" cy="206" rx="49" ry="5.5" fill="rgba(20,30,45,.22)"/>
+    <rect x="3" y="196" width="47" height="10" fill="#D5DEE7"/><rect x="50" y="196" width="47" height="10" fill="#8496A9"/><rect x="3" y="195" width="94" height="2" rx="1" fill="#EEF3F8"/>
+    ${tower(27)}${tower(73)}
+    <path d="M50 128 L40.6 152 M50 128 L59.4 152" stroke="#7D8FA3" stroke-width="1.6"/>
+    <rect x="40.6" y="123" width="18.8" height="5.2" fill="#E3EAF1"/><rect x="40.6" y="126.4" width="18.8" height="1.8" fill="#8597AA"/>
+    <rect x="13" y="198" width="74" height="1.2" fill="rgba(24,57,92,.25)"/></svg>`;
+}
+const kltG = (p, lit, dark) => `<linearGradient id="${p}L" x1="0" x2="1"><stop offset="0" stop-color="${lit[0]}"/><stop offset=".55" stop-color="${lit[1]}"/><stop offset="1" stop-color="${lit[2]}"/></linearGradient><linearGradient id="${p}D" x1="0" x2="1"><stop offset="0" stop-color="${dark[0]}"/><stop offset="1" stop-color="${dark[1]}"/></linearGradient>`;
+const kltPoly = (pts, fill) => `<polygon points="${pts.map(q => q.join(",")).join(" ")}" fill="${fill}"/>`;
+function kltKLTower(){   // Menara Kuala Lumpur: a slim shaft, the round pod near the top, then the antenna
+  return `<svg viewBox="0 0 40 212" aria-hidden="true"><defs>${kltG("kltk", ["#D3D9DF", "#F7F8FA", "#E2E7EC"], ["#A7B2BE", "#6E7D8D"])}</defs>
+    <ellipse cx="20" cy="206" rx="17" ry="3.5" fill="rgba(20,30,45,.22)"/>
+    <rect x="9" y="196" width="11" height="10" fill="#D5DEE7"/><rect x="20" y="196" width="11" height="10" fill="#8496A9"/>
+    ${kltPoly([[16, 198], [18.2, 64], [20, 64], [20, 198]], "url(#kltkL)")}${kltPoly([[20, 198], [20, 64], [21.8, 64], [24, 198]], "url(#kltkD)")}
+    ${kltPoly([[18.2, 64], [7, 54], [20, 54], [20, 64]], "url(#kltkL)")}${kltPoly([[20, 64], [20, 54], [33, 54], [21.8, 64]], "url(#kltkD)")}
+    <rect x="6" y="45.5" width="14" height="8.5" fill="url(#kltkL)"/><rect x="20" y="45.5" width="14" height="8.5" fill="url(#kltkD)"/>
+    <rect x="6" y="48.2" width="28" height="3.2" fill="rgba(24,57,92,.5)"/>
+    <rect x="8" y="42" width="12" height="3.5" fill="#EEF3F8"/><rect x="20" y="42" width="12" height="3.5" fill="#9DADBD"/>
+    <path d="M9 42 Q12 34.5 20 33.5 V42Z" fill="url(#kltkL)"/><path d="M20 33.5 Q28 34.5 31 42 H20Z" fill="url(#kltkD)"/>
+    <rect x="18.4" y="22" width="1.6" height="12" fill="#E3EAF1"/><rect x="20" y="22" width="1.6" height="12" fill="#8597AA"/>
+    <path d="M20 23 V2.5" stroke="#7D8FA3" stroke-width="1.2" stroke-linecap="round"/><rect x="18.7" y="13" width="2.6" height="1.6" fill="#9DADBD"/>
+    <circle class="kltlight" cx="20" cy="2.4" r="1.4"/></svg>`;
+}
+function kltExchange(){   // The Exchange 106 (TRX): a blue glass tower that narrows all the way up, notched corners, and a 12-storey clear glass crown folded in diamonds
+  const body = [[12, 199], [15, 31], [35, 31], [38, 199]];
+  return `<svg viewBox="0 0 50 212" aria-hidden="true"><defs>${kltG("klte", ["#5E8DBA", "#A9C8E4", "#7BA3C9"], ["#3D6690", "#25466A"])}
+    <pattern id="klteF" width="6" height="3" patternUnits="userSpaceOnUse"><rect y="2.4" width="6" height=".55" fill="rgba(10,30,55,.22)"/></pattern>
+    <pattern id="klteK" width="5" height="6" patternUnits="userSpaceOnUse"><path d="M0 0 L5 6 M5 0 L0 6" stroke="rgba(60,85,110,.35)" stroke-width=".45"/></pattern>
+    <clipPath id="klteC"><polygon points="${body.map(q => q.join(",")).join(" ")}"/></clipPath><clipPath id="klteR"><polygon points="15,31 25,3.5 35,31"/></clipPath></defs>
+    <ellipse cx="25" cy="206" rx="22" ry="4" fill="rgba(20,30,45,.22)"/>
+    <rect x="5" y="197" width="20" height="9" fill="#D5DEE7"/><rect x="25" y="197" width="20" height="9" fill="#8496A9"/><rect x="5" y="196" width="40" height="2" rx="1" fill="#EEF3F8"/>
+    ${kltPoly([[12, 199], [15, 31], [25, 31], [25, 199]], "url(#klteL)")}${kltPoly([[25, 199], [25, 31], [35, 31], [38, 199]], "url(#klteD)")}
+    <g clip-path="url(#klteC)"><rect x="0" y="31" width="50" height="170" fill="url(#klteF)"/>
+      ${kltPoly([[12, 199], [15, 31], [16.6, 31], [14, 199]], "rgba(10,30,55,.35)")}${kltPoly([[36, 199], [33.4, 31], [35, 31], [38, 199]], "rgba(10,30,55,.4)")}</g>
+    <rect x="14.6" y="30" width="20.8" height="1.6" fill="#DCE6EF"/>
+    ${kltPoly([[15, 31], [25, 3.5], [25, 31]], "#EEF4F9")}${kltPoly([[25, 31], [25, 3.5], [35, 31]], "#AFC0D0")}
+    ${kltPoly([[15, 31], [20, 17], [25, 31]], "rgba(255,255,255,.6)")}${kltPoly([[25, 31], [30, 17], [35, 31]], "rgba(70,95,120,.25)")}
+    <g clip-path="url(#klteR)"><rect x="10" y="3" width="30" height="29" fill="url(#klteK)"/></g>
+    <path d="M25 4 V1.5" stroke="#7D8FA3" stroke-width=".9"/><circle class="kltlight" cx="25" cy="1.6" r="1.1"/></svg>`;
+}
+function kltMerdeka(){   // Merdeka 118: triangular glass facets (songket pattern) narrowing all the way up into a long, thin spire
+  const N = 9, y0 = 199, y1 = 50, wb = 12.5, wt = 4;   // half widths at the bottom and the top of the body
+  const at = t => [y0 + (y1 - y0) * t, wb + (wt - wb) * Math.pow(t, 1.15)];
+  let f = "";
+  for (let i = 0; i < N; i++){
+    const [ya, ha] = at(i / N), [yb, hb] = at((i + 1) / N), ym = (ya + yb) / 2, hm = (ha + hb) / 2;
+    // left face (lit): a facet leaning out, one leaning in. Right face (shade): the mirror image.
+    f += kltPoly([[30 - ha, ya], [30 - hm * .35, ym], [30 - hb, yb]], i % 2 ? "#E7EEF5" : "#CBD8E4") + kltPoly([[30 - ha, ya], [30, ya], [30 - hm * .35, ym]], i % 2 ? "#D3DEE9" : "#F2F6FA")
+      + kltPoly([[30 - hb, yb], [30 - hm * .35, ym], [30, yb]], i % 2 ? "#BCCBDA" : "#DCE5EE") + kltPoly([[30, ya], [30, yb], [30 - hm * .35, ym]], i % 2 ? "#E0E8F0" : "#C3D1DF")
+      + kltPoly([[30 + ha, ya], [30 + hm * .35, ym], [30 + hb, yb]], i % 2 ? "#6E849B" : "#8DA1B5") + kltPoly([[30 + ha, ya], [30, ya], [30 + hm * .35, ym]], i % 2 ? "#7F94A9" : "#5F758C")
+      + kltPoly([[30 + hb, yb], [30 + hm * .35, ym], [30, yb]], i % 2 ? "#91A5B8" : "#71879E") + kltPoly([[30, ya], [30, yb], [30 + hm * .35, ym]], i % 2 ? "#5A7088" : "#7A8FA4");
+  }
+  return `<svg viewBox="0 0 60 212" aria-hidden="true">
+    <ellipse cx="30" cy="206" rx="22" ry="4" fill="rgba(20,30,45,.22)"/>
+    <rect x="9" y="197" width="21" height="9" fill="#D5DEE7"/><rect x="30" y="197" width="21" height="9" fill="#8496A9"/><rect x="9" y="196" width="42" height="2" rx="1" fill="#EEF3F8"/>
+    ${f}
+    ${kltPoly([[26, 50.5], [29.2, 41], [30, 41], [30, 50.5]], "#E3EAF1")}${kltPoly([[30, 50.5], [30, 41], [30.8, 41], [34, 50.5]], "#7D90A4")}
+    ${kltPoly([[29.1, 41.5], [30, 2.5], [30, 41.5]], "#D9E2EA")}${kltPoly([[30, 41.5], [30, 2.5], [30.9, 41.5]], "#7D8FA3")}
+    <circle class="kltlight" cx="30" cy="2.6" r="1.2"/></svg>`;
+}
+// north to south, so a building lower on the screen stands in front. h: true height compared with the twin towers.
+const KL_SKY = [
+  { at: [101.71167, 3.15806], h: 1, vb: 100, svg: kltPetronas, from: 0 },     // Petronas Twin Towers, 452 m
+  { at: [101.70306, 3.15278], h: .93, vb: 40, svg: kltKLTower, from: 11 },     // KL Tower, 421 m
+  { at: [101.71861, 3.14222], h: .98, vb: 50, svg: kltExchange, from: 11 },    // The Exchange 106, 445 m
+  { at: [101.70028, 3.14139], h: 1.5, vb: 60, svg: kltMerdeka, from: 11 }      // Merdeka 118, 679 m
+];
+function kltAdd(map){
+  MX.klt = KL_SKY.map(b => { const el = document.createElement("div"); el.className = "mxklt"; el.innerHTML = b.svg();
+    return { b, mk: new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(b.at).addTo(map) }; });
+  kltScale();
+}
+function kltScale(){
+  if (!MX || !MX.klt) return;
+  const z = MX.map.getZoom(), H = Math.max(17, Math.min(61, 17 + (z - 5) * 4.7));   // a landmark at country view, a skyline in the city
+  MX.klt.forEach(({ b, mk }) => {
+    const el = mk.getElement(), sv = el.firstElementChild, h = H * b.h;
+    el.style.display = z < b.from ? "none" : "";
+    sv.style.height = h + "px"; sv.style.width = h * b.vb / 212 + "px";
+    mk.setOffset([0, h * 6 / 212]);   // the ground line, not the shadow, sits on the spot
+  });
+}
 function skyScale(){ const z = MX && MX.map ? MX.map.getZoom() : 10, k = Math.max(.5, Math.min(1, .5 + (z - 5) * .1)); document.querySelectorAll(".skyscale").forEach(x => x.style.transform = `scale(${k.toFixed(3)})`); }
 function skyOnScreen(f){ const el = MX && MX.map && MX.map.getContainer(); if (!el) return false; const p = MX.map.project(f.mk.getLngLat()), m = 60; return p.x > -m && p.y > -m && p.x < el.clientWidth + m && p.y < el.clientHeight + m; }
 // all planes and trails leave the map
@@ -5526,6 +5623,7 @@ async function renderExplore(){
   map.on("movestart", e => { if (e.originalEvent && MX && MX.map === map) MX.moved = true; });   // the person moved the map themselves
   MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
   document.addEventListener("keydown", MX.key);
+  kltAdd(map);   // first, so every store pin sits on top of it
   if (me) mxShowMe();
   map.on("load", () => {
     if (MX && MX.map === map){
@@ -5538,7 +5636,7 @@ async function renderExplore(){
   });
   map.on("moveend", () => { mxDraw(); exRemember(); });
   map.on("dragstart", () => { SKY.drag = true; }); map.on("dragend", () => { SKY.drag = false; });
-  map.on("zoom", skyScale);
+  map.on("zoom", () => { skyScale(); kltScale(); });
   trainStart();
   skyStart();
   map.on("click", e => {
