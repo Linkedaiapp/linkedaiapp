@@ -1865,7 +1865,7 @@ function svBtn(d){
   const def = isAgent(d) ? BK_PICKS[1] : cat === "homestay" ? BK_PICKS[2] : BK_PICKS[0];
   return { t: String(own.t || "").trim() || def[0], s: String(own.s || "").trim() || def[1] };
 }
-// Built-in demo stores (no account, nothing is sent): /demo-aircond and /demo-insurance. Names starting with demo- are kept for these.
+// Built-in demo stores (no account, nothing is sent): /demo-aircond, /demo-insurance and /demo-digital. Names starting with demo- are kept for these.
 var STORE_DEMO = false;
 const DEMO_IMG = n => "https://linkedaiapp.github.io/linkedaiapp/demo/" + n;
 const DEMOS = {
@@ -1882,7 +1882,13 @@ const DEMOS = {
     items: [
       { n: "Medical Card Gold", d: "Hospital and surgery cover", br: [DEMO_IMG("med-1.webp"), DEMO_IMG("med-2.webp"), DEMO_IMG("med-3.webp")], cov: "Room up to RM250 a day\nNo lifetime limit\nCashless at 70+ panel hospitals\nCovers you until age 100", o: [{ l: "", p: 0 }] },
       { n: "Family Takaful", d: "Protection for the whole family, Shariah-compliant", br: [DEMO_IMG("takaful-1.webp")], cov: "Death and disability\n36 critical illnesses\nEducation fund for your children", o: [{ l: "Basic", p: 0 }, { l: "Plus", p: 0 }] },
-      { n: "Free Policy Review", d: "Show me your current policy and I'll check it for you", o: [{ l: "", p: 0 }] }] } }
+      { n: "Free Policy Review", d: "Show me your current policy and I'll check it for you", o: [{ l: "", p: 0 }] }] } },
+  "demo-digital": { place: { city: "", state: "Selangor" }, data: { name: "Ina Templates", tagline: "Canva templates, e-books and presets for small businesses", kind: "digital", cat: "other", color: "#7C3AED", wa: "60100000000", logo: DEMO_IMG("digital-logo.webp"),
+    items: [
+      { n: "Ebook Resepi Kuih Raya", d: "25 recipes with photos, step by step", img: DEMO_IMG("dg-ebook.webp"), smp: [DEMO_IMG("dg-ebook-s1.webp"), DEMO_IMG("dg-ebook-s2.webp")], fmt: "PDF · 42 pages", get: "25 kuih raya recipes\nShopping list for each recipe\nPricing guide if you sell them", how: "link", eta: "within 1 hour", sec: "E-books", o: [{ l: "", p: 15 }] },
+      { n: "Raya Canva Mega Bundle", d: "Posters, posts and stories for your Raya sale", img: DEMO_IMG("dg-canva.webp"), smp: [DEMO_IMG("dg-canva-s1.webp"), DEMO_IMG("dg-canva-s2.webp")], fmt: "Canva · 120 designs", get: "120 editable Canva designs\nFont and colour guide\nVideo: how to edit on your phone\nFree updates next Raya", how: "link", best: true, sec: "Templates", o: [{ l: "Personal", p: 39 }, { l: "Commercial licence", p: 69 }] },
+      { n: "Golden Hour Lightroom Presets", d: "Warm, glowing photos in one tap", img: DEMO_IMG("dg-presets.webp"), fmt: "12 presets · mobile + desktop", get: "12 presets (DNG and XMP)\nInstall guide", how: "ext", ext: "https://payhip.com", sec: "Presets", o: [{ l: "", p: 25 }] },
+      { n: "Instagram Post Templates", d: "Clean posts for any small business", img: DEMO_IMG("dg-insta.webp"), fmt: "Canva · 30 designs", get: "30 post designs\n10 story designs", sec: "Templates", o: [{ l: "", p: 19 }] }] } }
 };
 const svAreas = d => String((d && d.areas) || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean).slice(0, 12);
 // Sold online, so never a pin on the map: link-only shops (Affiliate Shops) and digital stores
@@ -3235,7 +3241,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 97;
+const APP_VERSION = 98;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4511,6 +4517,7 @@ $("pAdd").onclick = () => {
   const p = D.items[pSel.i];
   if (!p || p.out || D.closed || pSig(p) !== pSel.sig || !p.o[pSel.j]) return dismissSheet("pOverlay");
   if (isService(D)){ svChoose(pSel.i, pSel.j); dismissSheet("pOverlay"); renderMenu(); return setTimeout(openBooking, 250); }
+  if (isDigital(D) && p.how === "ext" && safeUrl(p.ext) && STORE_DEMO){ dismissSheet("pOverlay"); return setTimeout(() => notify(`This is a demo store, so nothing opens.\n\nIn a real store, this button takes the buyer to the seller's own ${dgSite(p.ext)} page to pay and download.`), 250); }
   if (isDigital(D) && p.how === "ext" && safeUrl(p.ext)){   // the seller's own checkout page: buy there
     if ($("backBtn").hidden) track("order");
     window.open(p.ext, "_blank", "noopener"); return dismissSheet("pOverlay");
