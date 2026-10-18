@@ -1865,7 +1865,7 @@ function svBtn(d){
   const def = isAgent(d) ? BK_PICKS[1] : cat === "homestay" ? BK_PICKS[2] : BK_PICKS[0];
   return { t: String(own.t || "").trim() || def[0], s: String(own.s || "").trim() || def[1] };
 }
-// Built-in demo stores (no account, nothing is sent): /demo-aircond, /demo-insurance and /demo-digital. Names starting with demo- are kept for these.
+// Built-in demo stores (no account, nothing is sent): /demo-food, /demo-aircond, /demo-insurance and /demo-digital. Names starting with demo- are kept for these.
 var STORE_DEMO = false;
 const DEMO_IMG = n => "https://linkedaiapp.github.io/linkedaiapp/demo/" + n;
 const DEMOS = {
@@ -1883,6 +1883,15 @@ const DEMOS = {
       { n: "Medical Card Gold", d: "Hospital and surgery cover", br: [DEMO_IMG("med-1.webp"), DEMO_IMG("med-2.webp"), DEMO_IMG("med-3.webp")], cov: "Room up to RM250 a day\nNo lifetime limit\nCashless at 70+ panel hospitals\nCovers you until age 100", o: [{ l: "", p: 0 }] },
       { n: "Family Takaful", d: "Protection for the whole family, Shariah-compliant", br: [DEMO_IMG("takaful-1.webp")], cov: "Death and disability\n36 critical illnesses\nEducation fund for your children", o: [{ l: "Basic", p: 0 }, { l: "Plus", p: 0 }] },
       { n: "Free Policy Review", d: "Show me your current policy and I'll check it for you", o: [{ l: "", p: 0 }] }] } },
+  "demo-food": { place: { city: "Shah Alam", state: "Selangor" }, data: { name: "Dapur Kak Yah", tagline: "Homemade nasi lemak, kek & kuih. Order a day ahead", kind: "food", cat: "food", color: "#C2410C", layout: "grid", wa: "60100000000", logo: DEMO_IMG("food-logo.webp"),
+    off: { days: [1] },
+    items: [
+      { n: "Nasi Lemak Ayam Berempah", d: "Fragrant rice, spicy fried chicken, sambal, egg, cucumber and peanuts", img: DEMO_IMG("food-nasilemak.webp"), sec: "Meals", o: [{ l: "Regular", p: 9 }, { l: "Extra sambal + egg", p: 11 }] },
+      { n: "Mee Goreng Mamak", d: "Yellow noodles, tofu, egg and greens, with lime", img: DEMO_IMG("food-meegoreng.webp"), sec: "Meals", o: [{ l: "", p: 8 }] },
+      { n: "Karipap Pusing", d: "Spiral curry puffs, potato and chicken filling. 10 pieces", img: DEMO_IMG("food-karipap.webp"), sec: "Kuih", o: [{ l: "", p: 12 }] },
+      { n: "Kuih Lapis & Seri Muka", d: "Mixed box of 12, fresh every morning", img: DEMO_IMG("food-kuih.webp"), sec: "Kuih", o: [{ l: "", p: 15 }] },
+      { n: "Kek Batik Premium", d: "Rich chocolate with Marie biscuits, serves 8 to 10", img: DEMO_IMG("food-kekbatik.webp"), sec: "Cakes", o: [{ l: "500 g", p: 25 }, { l: "1 kg", p: 45 }] },
+      { n: "Teh Tarik Ais", d: "Pulled milk tea, less sweet on request", img: DEMO_IMG("food-tehtarik.webp"), sec: "Drinks", o: [{ l: "", p: 4 }] }] } },
   "demo-digital": { place: { city: "", state: "Selangor" }, data: { name: "Ina Templates", tagline: "Canva templates, e-books and presets for small businesses", kind: "digital", cat: "other", color: "#7C3AED", wa: "60100000000", logo: DEMO_IMG("digital-logo.webp"),
     items: [
       { n: "Ebook Resepi Kuih Raya", d: "25 recipes with photos, step by step", img: DEMO_IMG("dg-ebook.webp"), smp: [DEMO_IMG("dg-ebook-s1.webp"), DEMO_IMG("dg-ebook-s2.webp")], fmt: "PDF · 42 pages", get: "25 kuih raya recipes\nShopping list for each recipe\nPricing guide if you sell them", how: "link", eta: "within 1 hour", sec: "E-books", o: [{ l: "", p: 15 }] },
@@ -3241,7 +3250,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 98;
+const APP_VERSION = 99;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
