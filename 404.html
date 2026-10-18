@@ -26,6 +26,8 @@
 <script>(function(){ try { var base = new URL(document.querySelector('meta[property="og:url"]').content).pathname, p = location.pathname;
   if (p.length > base.length && p.indexOf(base) === 0 && /\/$/.test(p)) history.replaceState(null, "", p.replace(/\/+$/, "") + location.search + location.hash); } catch(e){} })();</script>
 <link rel="manifest" href="manifest.webmanifest">
+<!-- the admin dashboard installs as its own app ("LK Admin"), which opens straight to the dashboard -->
+<script>(function(){ try { var q = location.search.slice(1).split("&")[0].toLowerCase(), p = location.pathname.replace(/\/+$/, ""); if (q === "admin" || /\/admin$/i.test(p)) { document.querySelector('link[rel="manifest"]').href = "admin.webmanifest"; var t = document.createElement("meta"); t.name = "apple-mobile-web-app-title"; t.content = "LK Admin"; document.head.appendChild(t); } } catch(e){} })();</script>
 <meta property="og:image" content="https://linkedaiapp.github.io/linkedaiapp/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -2947,7 +2949,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 73;
+const APP_VERSION = 74;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4702,6 +4704,11 @@ function adminSettings(g, head, wire, cfg){
   const signup = cfg.signup !== undefined ? cfg.signup !== false : SITE.signup !== false;
   g.innerHTML = head + `
     <section class="card" id="codesCard">${loaderHtml("Loading free codes...")}</section>
+    ${isStandalone() ? "" : `<section class="card" id="admInstallCard">
+      <h2>Put this dashboard on your phone</h2>
+      <p class="hint">${isIos() ? "In Safari, tap the <b>Share</b> button, then <b>Add to Home Screen</b>. It's called LK Admin." : (INSTALL_EVT ? "Tap <b>Install</b> below. " : "In Chrome, tap the <b>⋮</b> menu, then <b>Add to home screen</b> (or <b>Install app</b>). ") + "It's called LK Admin."} It opens straight to this dashboard. You type your admin key each time you open it, so it stays safe if someone else uses your phone.</p>
+      ${INSTALL_EVT ? `<button class="btn solid" id="admInstall" style="margin-top:10px">Install</button>` : ""}
+    </section>`}
     <section class="card">
       <h2>Your WhatsApp</h2>
       <label>Your phone number<input type="tel" id="stWaOwner" value="${esc(v("ownerWa"))}" placeholder="e.g. 012-345 6789"></label>
@@ -4731,6 +4738,7 @@ function adminSettings(g, head, wire, cfg){
     <section class="card guard" id="alertsCard" style="margin-top:22px">${loaderHtml("Loading alerts...")}</section>`;
   wire();
   loadAlertsCard(); loadCodesCard();
+  if ($("admInstall")) $("admInstall").onclick = async () => { const e = INSTALL_EVT; if (!e) return; INSTALL_EVT = null; e.prompt(); try { const r = await e.userChoice; if (r && r.outcome === "accepted") { const c = $("admInstallCard"); if (c) c.remove(); } } catch(err) {} };
   const prev = (inp, box) => $(inp).oninput = () => { const u = safeUrl($(inp).value.trim()); $(box).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
   prev("stQr", "qrPrev"); prev("stPpQr", "ppPrev");
   $("stSave").onclick = () => {
