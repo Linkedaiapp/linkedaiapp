@@ -915,7 +915,6 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxsearch{position:relative;overflow:hidden}
 .mxtrain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:0}
 .mxsearch > svg,.mxsearch > input,.mxsearch > .mxclr{position:relative;z-index:1}
-.mxsearch:has(.tset.ad) > input{pointer-events:none}   /* taps reach the train through the glass; a tap beside it still opens search (the bar is a label) */
 /* the search bar is a pane of glass and the train runs behind it: a light frost, a tint and two reflection streaks on top */
 .mxtrain::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;-webkit-backdrop-filter:blur(.7px);backdrop-filter:blur(.7px);
   background:linear-gradient(104deg,transparent 22%,rgba(255,255,255,.42) 27%,rgba(255,255,255,.1) 31%,transparent 34%,transparent 58%,rgba(255,255,255,.26) 61%,transparent 64%),
@@ -923,7 +922,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 :root[data-theme="dark"] .mxtrain::after{background:linear-gradient(104deg,transparent 22%,rgba(255,255,255,.2) 27%,rgba(255,255,255,.05) 31%,transparent 34%,transparent 58%,rgba(255,255,255,.12) 61%,transparent 64%),linear-gradient(rgba(40,34,36,.34),rgba(40,34,36,.16) 55%,rgba(40,34,36,.3));box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mxtrain::after{background:linear-gradient(104deg,transparent 22%,rgba(255,255,255,.2) 27%,rgba(255,255,255,.05) 31%,transparent 34%,transparent 58%,rgba(255,255,255,.12) 61%,transparent 64%),linear-gradient(rgba(40,34,36,.34),rgba(40,34,36,.16) 55%,rgba(40,34,36,.3));box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}}
 .tset{position:absolute;left:0;display:flex;align-items:flex-end;height:40px;transform-origin:0 100%;will-change:transform}
-.tset.mini{bottom:1px;opacity:.9}.tset.ad{top:3px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tset.mini{bottom:1px;opacity:.9}.tset.ad{top:3px}
 .mxtrain{--train:#18395C;--train-ink:#fff}
 :root[data-theme="dark"] .mxtrain{--train:#fff;--train-ink:#18395C}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mxtrain{--train:#fff;--train-ink:#18395C}}
@@ -2999,7 +2998,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 81;
+const APP_VERSION = 82;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4604,7 +4603,7 @@ function adminSaveConfig(cfg, patch, doneMsg){
 // Plane banners (fly over the Spot It! map) and train banners (ride through its search bar): up to 5 of each take turns
 const AD_KINDS = {
   sky: { title: "Plane banners on Spot It!", hint: "Up to 5 banners take turns. One plane flies about every minute, each time from a different direction.", noun: "Plane", go: "Fly this banner", live: "flying", past: "flew past", save: "Save plane banners", stats: "skystats" },
-  train: { title: "Train banners on Spot It!", hint: "Up to 5 banners take turns. A bullet train carries the words through the Spot It! search bar about every 20 seconds.", noun: "Train", go: "Run this banner", live: "running", past: "rode past", save: "Save train banners", stats: "trainstats" }
+  train: { title: "Train banners on Spot It!", hint: "Up to 5 banners take turns. A bullet train carries the words through the Spot It! search bar about every 20 seconds. It shows the words only and can't be tapped.", noun: "Train", go: "Run this banner", live: "running", past: "rode past", save: "Save train banners", stats: "trainstats" }
 };
 function adBannerCard(cfg, kind){
   const K = AD_KINDS[kind], L = (Array.isArray(cfg[kind]) ? cfg[kind] : cfg[kind] ? [cfg[kind]] : []).slice(0, 5); while (L.length < 5) L.push({});
@@ -4616,8 +4615,8 @@ function adBannerCard(cfg, kind){
       <label class="check"><input type="checkbox" id="${kind}On${k}" ${x.on ? "checked" : ""}><span>${K.go}</span></label>
       <label>Banner words (up to 40)<input type="text" id="${kind}Text${k}" maxlength="40" value="${esc(x.text || "")}" placeholder="e.g. Kak Yah Kuih · Raya promo!"></label>
       <label>Small logo link (optional)<input type="url" id="${kind}Logo${k}" value="${esc(x.logo || "")}" placeholder="https://i.ibb.co/.../logo.png"></label>
-      <label>Advertiser's WhatsApp (tapping opens their store)<input type="tel" id="${kind}Wa${k}" value="${esc(x.advertiserWa || "")}" placeholder="e.g. 012-345 6789"></label>
-      <label>Or open this link instead<input type="url" id="${kind}Link${k}" value="${esc(x.link || "")}" placeholder="https://..."></label>
+      <label${kind === "train" ? " hidden" : ""}>Advertiser's WhatsApp (tapping opens their store)<input type="tel" id="${kind}Wa${k}" value="${esc(x.advertiserWa || "")}" placeholder="e.g. 012-345 6789"></label>
+      <label${kind === "train" ? " hidden" : ""}>Or open this link instead<input type="url" id="${kind}Link${k}" value="${esc(x.link || "")}" placeholder="https://..."></label>
       <label>Show until (optional)<input type="date" id="${kind}Until${k}" value="${esc(x.until || "")}"></label>
       <p class="hint" data-${kind}stat="${esc(x.text || "")}"></p>
     </details>`).join("")}
@@ -4644,7 +4643,7 @@ function adBannerWire(cfg, kind){
   };
   apiPost({ action: "admin", key: ADMIN, op: K.stats }).then(r => (r.banners || []).forEach(b => {
     const st = (b.stats || []).slice(-7), v = st.reduce((a, x) => a + x.v, 0), o = st.reduce((a, x) => a + x.o, 0);
-    document.querySelectorAll(`[data-${kind}stat]`).forEach(el => { if (el.dataset[kind + "stat"] === b.text) el.textContent = `Last 7 days: ${K.past} ${v} time${v === 1 ? "" : "s"}, tapped ${o} time${o === 1 ? "" : "s"}.`; });
+    document.querySelectorAll(`[data-${kind}stat]`).forEach(el => { if (el.dataset[kind + "stat"] === b.text) el.textContent = `Last 7 days: ${K.past} ${v} time${v === 1 ? "" : "s"}${kind === "train" ? "" : `, tapped ${o} time${o === 1 ? "" : "s"}`}.`; });
   })).catch(() => {});
 }
 function adminAds(g, head, wire, cfg){
@@ -5182,7 +5181,7 @@ function skyStill(ad){
   el.querySelector(".mxx").onclick = () => { el.remove(); SKY.el = null; try { sessionStorage.setItem("lk-skyx", "1"); } catch(e) {} };
 }
 // ---------- A bullet train runs through the Spot It! search bar now and then ----------
-// With train ads booked, a full-size train carries the ad words along its carriages (tap it for the ad); up to 5 take turns.
+// With train ads booked, a full-size train carries the ad words along its carriages; up to 5 take turns.
 // Without, a small train just runs along the bottom of the bar for fun. Never while a search is typed, never for reduce-motion.
 let TRAIN = { t: 0, anim: null, i: null };
 function trainAds(){ const x = SITE.train; return (Array.isArray(x) ? x : []).filter(a => a && a.text).slice(0, 5); }
@@ -5193,19 +5192,27 @@ function trainRun(){
   if (document.hidden || SKY.open || (q && (document.activeElement === q || q.value))) { TRAIN.t = setTimeout(trainRun, 8000); return; }   // not while someone is searching
   const ads = trainAds(); if (TRAIN.i == null) TRAIN.i = Math.floor(Math.random() * Math.max(1, ads.length));
   const ad = ads.length ? ads[TRAIN.i % ads.length] : null;
-  box.innerHTML = `<span class="tset${ad ? " ad" : " mini"}"${ad ? ` role="button" tabindex="0" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."` : ""}><span class="tnose"></span><span class="tcars">${ad ? `<span class="ttext">${safeImg(ad.logo) ? `<img src="${esc(safeImg(ad.logo))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}${esc(ad.text)}</span>` : ""}<span class="twheels"></span></span></span>`;
+  box.innerHTML = `<span class="tset${ad ? " ad" : " mini"}"><span class="tnose"></span><span class="tcars">${ad ? `<span class="ttext">${safeImg(ad.logo) ? `<img src="${esc(safeImg(ad.logo))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}${esc(ad.text)}</span>` : ""}<span class="twheels"></span></span></span>`;
   const set = box.firstChild, cars = set.querySelector(".tcars"), txt = set.querySelector(".ttext");
   cars.style.width = (ad ? Math.ceil((txt.offsetWidth + 46) / 110) * 110 : 330) + "px";   // whole carriages, enough for the words
   const k = ad ? 1 : .34, w = box.clientWidth, len = (set.offsetWidth) * k;
   if (ad && q){ q.dataset.ph = q.placeholder; q.placeholder = ""; }   // the train takes the whole bar while it passes
   const tf = x => `translateX(${x}px) scale(${k})`;
-  TRAIN.anim = set.animate([{ transform: tf(w + 8) }, { transform: tf(-len - 8) }], { duration: Math.max(ad ? 7000 : 5500, (w + len) * (ad ? 17 : 22)), easing: "linear", fill: "forwards" });
   if (ad){
+    // A bullet train: rushes in, glides slowly while the words are read, then rushes off. Soft easing, no sudden stops.
+    const tw = txt.offsetWidth, at = 56;                                         // where the words start inside the train
+    let a = (w - tw) / 2 - at + 10, b = a;                                       // short words: glide past the middle
+    if (tw > w - 70){ a = 40 - at; b = w - 12 - at - tw; }                       // long words: glide until the end shows
+    a += 26; b -= 26;
+    const glide = Math.max(1500, (a - b) * 14), dur = 950 + glide + 850;
+    TRAIN.anim = set.animate([
+      { transform: tf(w + 8), offset: 0, easing: "cubic-bezier(.22,.8,.36,1)" },
+      { transform: tf(a), offset: 950 / dur, easing: "linear" },
+      { transform: tf(b), offset: (950 + glide) / dur, easing: "cubic-bezier(.64,0,.78,.2)" },
+      { transform: tf(-len - 8), offset: 1 }], { duration: dur, fill: "forwards" });
     skyHit("trainview", ad); TRAIN.i++;
-    const open = () => { if (TRAIN.anim) TRAIN.anim.pause(); skyOpen(ad, "train", () => { if (TRAIN.anim) TRAIN.anim.play(); }); };
-    set.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); open(); });
-    set.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); open(); } });
-  }
+  } else TRAIN.anim = set.animate([{ transform: tf(w + 8) }, { transform: tf(-len - 8) }], { duration: 2800, easing: "cubic-bezier(.45,.05,.55,.95)", fill: "forwards" });
+  if (q) q.addEventListener("focus", () => { if (TRAIN.anim) TRAIN.anim.playbackRate = 4; }, { once: true });   // tapping search: the train hurries off
   TRAIN.anim.onfinish = () => { TRAIN.anim = null; box.innerHTML = ""; if (q && q.dataset.ph){ q.placeholder = q.dataset.ph; delete q.dataset.ph; } TRAIN.t = setTimeout(trainRun, ad ? 14000 + Math.random() * 6000 : 16000 + Math.random() * 8000); };
 }
 function mxDestroy(){
