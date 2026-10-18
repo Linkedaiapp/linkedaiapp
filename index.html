@@ -262,6 +262,12 @@ textarea{min-height:72px;resize:vertical}
 .bulic svg{width:19px;height:19px}
 .botav{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}   /* the News bot's picture */
 .bulhead .botav{width:56px;height:56px}
+.askbot .bulbody p{color:var(--ink)}.askbot .bulcta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.askme{margin:0 0 10px auto;max-width:85%;width:fit-content;padding:10px 14px;border-radius:18px 18px 4px 18px;background:var(--soft);border:1px solid var(--line);color:var(--ink);font-size:14px;line-height:1.4;overflow-wrap:anywhere;scroll-margin-top:72px}
+.askmore{margin-top:12px}.askmore .sechips{margin-top:6px}
+.askrow{display:flex;gap:8px;align-items:stretch}.askrow input{flex:1;min-width:0;margin:0}.askrow .btn{flex:none}
+.askall summary{padding:14px 16px;font-weight:700;cursor:pointer}
+.asktile{overflow:hidden;padding:0}.asktile img{width:100%;height:100%;object-fit:cover;background:#fff}
 .bulbody{flex:1;min-width:0}
 .bulmeta{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .bulshout .bulbody .hint{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
@@ -2148,6 +2154,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-ask", at: "2026-10-18", title: "Ask your assistant anything", body: "Got a question about the app? Tap Got a question? on your Store page (or Ask your assistant under Account) and type it in English or Malay, like \"how do I add a photo?\" or \"macam mana nak tutup kedai?\". Your assistant answers right away, with a button that takes you straight there." },
   { id: "u-20261018-bot-face", at: "2026-10-18", title: "Say hi to your assistant", body: "Your assistant, who posts your store status, tips and app news, now has a face. You'll see her on the What's new card and in News." },
   { id: "u-20261018-free-trial", at: "2026-10-18", title: "Go live free for 14 days", body: "New stores can now go live free for 14 days: tap Go live free on your Store page, share your link and take orders. Pay once any time to keep your store live for good. If a trial ends unpaid, the store goes offline (not deleted) and comes back as soon as you pay." },
   { id: "u-20261018-spot-it", at: "2026-10-18", title: "Meet Spot It!", body: "The store map is now called Spot It! Open it any time with the new pin button next to the store-front button at the top of your Store page, to see your shop the way customers find it. Your listing settings are under Spot It! listing." },
@@ -2245,7 +2252,7 @@ function bulletinItems(){
   // Link Kedai App updates
   const since = b.created ? new Date(b.created).toISOString().slice(0, 10) : "";   // a new seller starts with a clean slate, not every update from before they joined
   APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
-  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm your Link Kedai App assistant. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights.</p>");
+  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm your Link Kedai App assistant. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights. Got a question? Tap Got a question? on your Store page and ask me.</p>");
   const gone = bulGone();   // posts the seller removed; insights and must-act status posts always stay
   return out.filter(x => x.ins || x.keep || !gone.has(x.id));
 }
@@ -2294,7 +2301,7 @@ function openBulletin(){
 // ================= Seller: store home + section pages =================
 let EDV = "home", EDI = 0;
 let NEWSBACK = "home";
-function edGo(v, i){ if (v === "news" && EDV !== "news") NEWSBACK = EDV === "account" ? "account" : "home"; if (v !== EDV && !$("builder").hidden) inpagePush({ ed: v, i: i == null ? null : i }); EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0);
+function edGo(v, i){ if (v === "news" && EDV !== "news") NEWSBACK = EDV === "account" ? "account" : EDV === "ask" ? NEWSBACK : "home"; if (v === "ask" && EDV !== "ask") ASKBACK = EDV === "account" || EDV === "news" ? EDV : "home"; if (v !== EDV && !$("builder").hidden) inpagePush({ ed: v, i: i == null ? null : i }); EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0);
   const h = document.querySelector("#builder .lk-bar h1"); if (h){ h.tabIndex = -1; try { h.focus({ preventScroll: true }); } catch(e) {} } }
 // A seller with shop links but nothing of their own to sell: listed under Affiliate Shops, never as a map pin
 function affOnly(d){ return !(d.items || []).some(it => String(it.n || "").trim()) && (d.links || []).some(l => safeUrl(l.u)); }
@@ -2373,6 +2380,7 @@ function edHome(msg){
     ${edRow("listing","pin","Spot It! listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
   </section>
+  ${SESSION.admin ? "" : `<section class="card lk-group"><button class="lk-row" data-act="go" data-v="ask"><span class="tile asktile"><img src="bot.jpg" alt=""></span><span class="tt"><b>Got a question?</b><span>Ask your assistant, in English or Malay</span></span><span class="chev">${ico("chevron",18)}</span></button></section>`}
 `;
 }
 function edDetails(){
@@ -2686,14 +2694,141 @@ function edNews(){
   setTimeout(() => { markSeen(items); updateBell(); }, 0);
   const canClear = items.some(x => !x.keep);
   return `${edTop("News", NEWSBACK, canClear ? `<button class="btn small" data-act="bulclear">Clear all</button>` : "")}
-  <p class="hint" style="margin:-4px 2px 14px;display:flex;gap:10px;align-items:center"><img class="botav" src="bot.jpg" alt="Your assistant"><span>From your Link Kedai App assistant: your store status, tips and what's new. Tap × to remove a post you've read.</span></p>
+  <p class="hint" style="margin:-4px 2px 14px;display:flex;gap:10px;align-items:center"><img class="botav" src="bot.jpg" alt="Your assistant"><span>From your Link Kedai App assistant: your store status, tips and what's new. Tap × to remove a post you've read. Got a question? <button type="button" class="linkbtn" data-act="go" data-v="ask">Ask me</button></span></p>
   ${items.length ? bulCards(items, seen, true) : `<section class="card"><p class="hint" style="margin:0">You're all caught up. New tips and updates will show here.</p></section>`}`;
+}
+// ---------- Ask your assistant: questions about the app, answered on the phone itself (no AI service, no cost, works offline) ----------
+// Each answer has keywords (English and Malay). The question is matched to the answer whose keywords it hits most.
+// Add an entry here whenever a new feature comes out, so the assistant can explain it.
+const ASK_SYN = { gambar: "photo", foto: "photo", pic: "photo", picture: "photo", image: "photo", img: "photo", harga: "price", rm: "price", tukar: "change", ubah: "change", edit: "change", tambah: "add", letak: "add", masukkan: "add", buang: "delete", padam: "delete", hapus: "delete", remove: "delete", buka: "open", tutup: "close", closed: "close", bayar: "pay", bayaran: "pay", payment: "pay", paid: "pay", duit: "pay", kedai: "store", shop: "store", pautan: "link", lupa: "forgot", forget: "forgot", nombor: "number", no: "number", telefon: "phone", hp: "phone", fon: "phone", barang: "item", produk: "item", product: "item", menu: "item", makanan: "item", iklan: "ad", advert: "ad", advertise: "ad", peta: "map", lokasi: "location", alamat: "address", cuti: "off", holiday: "off", percuma: "free", trial: "free", pesanan: "order", tempahan: "order", oder: "order", pelanggan: "customer", customers: "customer", buyer: "customer", pembeli: "customer", warna: "colour", color: "colour", akaun: "account", keluar: "logout", masuk: "login", log: "login", signin: "login", kongsi: "share", salin: "copy", habis: "end", balik: "back", stok: "soldout", stock: "soldout", saiz: "size", perisa: "flavour", flavor: "flavour", bahagian: "section", kategori: "category", kat: "category", berapa: "cost", mahal: "cost", kos: "cost", yuran: "cost", fee: "cost", bulanan: "monthly", pulangan: "refund", refund: "refund", pulang: "refund", sah: "verified", tick: "verified", tanda: "verified", biru: "verified", laporan: "report", lapor: "report", pasang: "install", muat: "install", download: "install", gelap: "dark", emel: "email", mail: "email", pin: "pin", kata: "pin", password: "pin", laluan: "pin", padamkan: "delete", hantar: "send", terima: "receive", dapat: "receive", lihat: "see", tengok: "see", view: "see", jualan: "sales", pelawat: "visit", visitor: "visit", visitors: "visit", views: "visit", statistik: "insights", stats: "insights", analytics: "insights", berita: "news", notification: "news", notifikasi: "news", loceng: "news", tolong: "help", bantuan: "help", hubungi: "contact", admin: "contact", support: "contact", nama: "name", logo: "logo", sampul: "cover", banner: "cover", susun: "order_items", urutan: "order_items", atas: "top", reorder: "order_items", rearrange: "order_items", sort: "order_items", position: "order_items", affiliate: "affiliate", afiliat: "affiliate", shopee: "affiliate", tiktok: "affiliate", lazada: "affiliate", hilang: "missing", tak: "not", tidak: "not", cant: "not", cannot: "not", boleh: "can", macam: "how", mana: "where", bila: "when", kenapa: "why", apa: "what", hidup: "live", aktif: "live", online: "live", publish: "live", terbit: "live", siar: "live", offline: "offline", penghantaran: "delivery", hantaran: "delivery", pos: "delivery", postage: "delivery", shipping: "delivery", ambil: "pickup", tarikh: "date", hari: "day", days: "day", kawasan: "area", negeri: "state", bandar: "city", jual: "sell", selling: "sell", gaya: "style", layout: "style", theme: "style", tema: "style", mata: "currency", wang: "currency", dua: "two", second: "two", another: "two", lain: "two", kod: "code", qr: "qr", duitnow: "pay", tng: "pay", resit: "receipt", url: "link", website: "link", rokok: "vape", cigarette: "vape", arak: "alcohol", dadah: "drug", senjata: "weapon", cantik: "nice", lawa: "nice", beautiful: "nice", lambat: "slow", lembab: "slow", loading: "load", rosak: "error", stuck: "error", hang: "error", promosi: "ad", promote: "ad" };
+const ASK_STOP = new Set("a an the i my me to of in on for is it do does how can what where why when and or with your you this that be am are was will would should could please pls tolong saya aku nak hendak mahu ke di ini itu dengan untuk yang dan atau la lah ke ka kah ya ok okay".split(" "));
+function askWords(t){
+  return String(t || "").toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean)
+    .map(w => ASK_SYN[w] || (w.length > 4 && w.endsWith("s") && !w.endsWith("ss") ? ASK_SYN[w.slice(0, -1)] || w.slice(0, -1) : w))
+    .filter(w => !ASK_STOP.has(w));
+}
+const askTo = () => String((BUL && BUL.ownerWa) || SITE.ownerWa || "").replace(/\D/g, "");
+const askWa = (text, label) => { const to = askTo(); return to ? `<a class="btn small wa" href="https://wa.me/${to}?text=${encodeURIComponent(text || `Hi ${APP_NAME}, I need help with my store ${SESSION ? SESSION.id : ""}.`)}" target="_blank" rel="noopener">${ico("chat",16)}${esc(label || "WhatsApp us")}</a>` : ""; };
+const askGo = (v, label) => `<button class="btn small" data-act="go" data-v="${v}">${esc(label)}</button>`;
+const askPriceTxt = () => shownPrice() ? `a one-time <b>${esc(shownPrice())}</b>` : "a one-time fee";
+function askStatusHtml(){
+  const b = BUL || {}, live = STATUS === "live";
+  if (live && b.trial){ const left = Math.max(0, Math.ceil((Number(b.trialEnd) - Date.now()) / 864e5)); return `Your store is <b>live on a free trial</b>, with <b>${left} day${left === 1 ? "" : "s"}</b> left. Pay ${askPriceTxt()} before it ends and it stays live for good.`; }
+  if (live) return `Your store is <b>live</b>. Customers can open your link and order${S.closed ? ", but it's set to <b>Closed</b> right now, so they can't send orders. Switch it to Open under Store status" : ""}.`;
+  if (STATUS === "review") return "We have your payment and are checking your store. It goes live once approved, usually within 24 hours.";
+  if (STATUS === "offline") return "Your store is <b>offline</b> right now" + (Number(b.trialEnd) > 0 && !b.paid ? ", because your free trial ended. Pay once to bring it back, just as you left it." : ". This usually means a payment couldn't be found. WhatsApp us and we'll sort it out.");
+  return "Your store <b>isn't live yet</b>. Add what you sell, then tap <b>Go live free</b> (or Publish) on your Store page. " + esc(unpaidLeft());
+}
+const ASK_KB = [
+  { id: "additem", q: "How do I add an item?", k: "add item new list upload post first", a: () => `Go to the <b>${esc(W(S).list)}</b> tab and tap <b>+ Add</b>. Type the name and price, and add a photo if you like. Your changes save by themselves in a few seconds, or tap <b>Save</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "photo", q: "How do I add or change a photo?", k: "photo upload picture", a: () => `Open the item under <b>${esc(W(S).list)}</b> and tap <b>Upload photo</b>, then pick a picture from your phone. Tap <b>Change photo</b> to swap it, or <b>Remove</b> to take it off. Your logo and cover photo are under <b>Shop details</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "price", q: "How do I change a price?", k: "price change item set", a: () => `Open the item under <b>${esc(W(S).list)}</b> and type the new price. It saves by itself. Customers see it straight away.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "sizes", q: "How do I add sizes or flavours?", k: "size flavour option variant small large version choose type", a: () => `Open the item and tap <b>Add sizes or flavours</b>. Give each one a name and a price, like Small RM5 and Large RM8. Customers pick one when they order.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "soldout", q: "How do I mark an item sold out?", k: "soldout item finish out available unavailable", a: () => `Open the item and tick <b>Sold out for now</b>. Customers still see it, but can't order it. Untick it when it's back.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "delitem", q: "How do I delete an item?", k: "delete item", a: () => `Open the item under <b>${esc(W(S).list)}</b> and tap <b>Delete</b> at the top right. To hide it for a while instead, tick <b>Sold out for now</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "reorder", q: "How do I change the order of my items?", k: "order_items move up down item top first", a: () => `Open an item and use the up and down arrows next to <b>Position in your list</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "sections", q: "How do I group items into sections?", k: "section group category heading drink dessert", a: () => `Open an item and tap a <b>Section</b> chip, like Drinks or Desserts, or tap <b>+ New</b> to type your own. Items in the same section show together on your store.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "orders", q: "How do I receive orders?", k: "order receive customer get come whatsapp where see send", a: () => `Customers pick items on your store and tap <b>Send order on WhatsApp</b>. A chat opens to your phone number (<b>${esc(fmtWa(S.wa) || "the one on your Profile")}</b>) with the order already written in: items, total, their name, date and note. You reply to them on WhatsApp as usual.` },
+  { id: "custpay", q: "How do customers pay me?", k: "customer pay me receive money bank transfer cash", a: () => `Customers pay you directly, the way you agree on WhatsApp: bank transfer, DuitNow, cash and so on. ${esc(APP_NAME)} takes <b>no commission</b> on your sales.` },
+  { id: "delivery", q: "How do I set delivery or pickup?", k: "delivery pickup fee area courier", a: () => `You agree delivery or pickup with each customer on WhatsApp. Customers can write it in their order note, for example "Pickup Saturday 3pm". You can mention your delivery areas in the short line under your shop name in <b>Shop details</b>.`, go: () => askGo("details", "Open Shop details") },
+  { id: "openclose", q: "How do I open or close my store?", k: "open close store status break rest stop today", a: () => `Go to <b>Store status</b> on your Store page and tap <b>Open</b> or <b>Closed</b>. You can add a message, like "Closed for Hari Raya. Back on 5 April". While closed, customers can't send orders. On Android, press and hold the app icon to open or close your shop in one tap.`, go: () => askGo("status", "Open Store status") },
+  { id: "daysoff", q: "How do I mark days I'm not taking orders?", k: "off day date calendar weekend holiday rest not", a: () => `Under <b>Store status</b>, pick a day of the week that's always off, or tap dates on the calendar. Customers can't choose those dates when they order.`, go: () => askGo("status", "Open Store status") },
+  { id: "link", q: "Where is my store link?", k: "link store url share copy where address website", a: () => STATUS === "live" ? `Your store link is <b>${esc(storeLink(SESSION.id))}</b>. On your Store page, tap <b>Copy</b> or <b>Share</b> under Your store link. Put it in your WhatsApp status, bio and groups.` : `You get your store link once your store is live. Tap <b>Go live free</b> (or Publish) on your Store page.`, go: () => askGo("home", "Open my Store page") },
+  { id: "linkname", q: "Can I change my store link name?", k: "rename linkname", a: () => `Your link name stays the same, so links you've already shared keep working. You can change your shop name any time in Shop details. If you really need a new link name, WhatsApp us.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to change the link name of my store ${SESSION ? SESSION.id : ""}.`) },
+  { id: "cost", q: "How much does it cost?", k: "cost price app pay monthly much subscription commission charge", a: () => `${esc(APP_NAME)} costs ${askPriceTxt()} to publish your store. No monthly fees, and no commission on your sales. New stores can go live <b>free for 14 days</b> first.` },
+  { id: "trial", q: "How does the free trial work?", k: "free 14 day end expire after", a: () => `New stores can go live <b>free for 14 days</b>: tap <b>Go live free</b> on your Store page, share your link and take orders. Pay ${askPriceTxt()} any time to keep it live for good. If the trial ends unpaid, your store goes offline (not deleted) and comes back as soon as you pay.<br><br>${askStatusHtml()}`, go: () => askGo("home", "Open my Store page") },
+  { id: "publish", q: "How do I pay and publish my store?", k: "pay live how qr receipt bank upload", a: () => `On your Store page, tap <b>Publish my store</b> (or <b>Keep my store live</b> on a trial). Pay with DuitNow in your bank app or Touch 'n Go${hasPaypal() ? " (PayPal if you're outside Malaysia)" : ""}, take a screenshot of the receipt, then tap <b>I've paid: upload receipt and publish</b>. Most stores go live straight away; a few get a quick safety check (up to 24 hours).`, go: () => askGo("home", "Open my Store page") },
+  { id: "status", q: "Is my store live?", k: "live status not why offline working see customer review approve wait long hour", a: () => askStatusHtml(), go: () => askGo("home", "Open my Store page") },
+  { id: "removed", q: "Will my store be deleted if I don't pay?", k: "delete not pay removed 10 day unpaid lose", a: () => `A store that's never paid for is removed 10 days after sign-up, so link names and phone numbers don't get stuck. A store on a finished free trial goes offline first and is only removed if it stays unpaid. ${esc(unpaidLeft()) || "Your store is safe."}` },
+  { id: "refund", q: "Can I get a refund?", k: "refund back cancel", a: () => `You can get a refund if your store couldn't be published because of a problem on our side, or wasn't approved, and you ask within 7 days of paying, or if you were charged twice. Once your store is live, the fee isn't refundable. <a href="${esc(home())}refund" target="_blank" rel="noopener">Read the Refund Policy</a>.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to ask about a refund for my store ${SESSION ? SESSION.id : ""}.`) },
+  { id: "verified", q: "How do I get the Verified tick?", k: "verified badge blue trust", a: () => `The blue <b>Verified</b> tick shows on your logo once your payment is confirmed and your store passes ${esc(APP_NAME)} Guard, our safety check. It helps customers trust your link.${BUL && BUL.verified ? " Your store is already verified." : ""}` },
+  { id: "look", q: "How do I change my logo, colour or style?", k: "logo cover colour style look design nice list grid minimal", a: () => `Open <b>Shop details</b> and scroll to <b>Look</b>. There you can upload your logo and a cover photo, pick a brand colour, and choose a store style: List, Photo grid or Minimal.`, go: () => askGo("details", "Open Shop details") },
+  { id: "name", q: "How do I change my shop name?", k: "name shop change tagline line description", a: () => `Open <b>Shop details</b> and type a new <b>Shop name</b>. You can also add a short line under your name. Your store link stays the same.`, go: () => askGo("details", "Open Shop details") },
+  { id: "currency", q: "How do I change the currency or what I sell?", k: "currency kind service food dollar sgd", a: () => `Open <b>Shop details</b>. Under <b>What do you sell?</b> pick food, products or services, and choose your <b>Currency</b> below it.`, go: () => askGo("details", "Open Shop details") },
+  { id: "preview", q: "How do I see my store like a customer?", k: "see preview front", a: () => `Tap the shop icon at the top of your Store page (next to the bell). It opens your store front exactly as customers see it. Your own visits never count in Insights.`, go: () => `<button class="btn small" data-act="preview">${ico("store",16)}See my store</button>` },
+  { id: "spotit", q: "How do I get listed on Spot It!?", k: "map spot list location state city area category find nearby near", a: () => `Open <b>Spot It! listing</b> on your Store page and tick <b>List my store on Spot It!</b>. Pick your state, town and category. Customers using ${esc(APP_NAME)} can then find you on the map.`, go: () => askGo("listing", "Open Spot It! listing") },
+  { id: "pin", q: "How do I show my shop's exact location?", k: "exact location address pin direction waze google shop visit", a: () => `In <b>Spot It! listing</b>, tick <b>I have a shop customers can visit</b>, then drag the pin onto your shop (or tap <b>Use my current location</b>). Customers can get directions on Google Maps or Waze. Leave it off to keep your exact spot private.`, go: () => askGo("listing", "Open Spot It! listing") },
+  { id: "map", q: "How do I open the Spot It! map?", k: "map spot browse other", a: () => `Tap the pin button at the top of your Store page, next to the shop icon.`, go: () => `<a class="btn small" href="${esc(home())}?explore">${ico("pin",16)}Open Spot It!</a>` },
+  { id: "affiliate", q: "How do I add Shopee or TikTok links?", k: "affiliate paste", a: () => `Go to the <b>Links</b> tab, tap <b>+ Add</b> and paste the link. We fill in the photo and name for you. Shopee and TikTok sometimes hide them; then tap <b>Edit photo, name & price</b> and add them yourself.`, go: () => askGo("links", "Open Links") },
+  { id: "insights", q: "How many people visited my store?", k: "insights visit sales number how many count week", a: () => `Open the <b>Insights</b> tab. It shows store visits and order taps each day, and this week next to last week. Your own visits don't count.`, go: () => askGo("insights", "Open Insights") },
+  { id: "news", q: "Where do I see news and updates?", k: "news update new bell red tip", a: () => `Tap the bell at the top of your Store page. A red number means something new. You can also find News under Account.`, go: () => askGo("news", "Open News") },
+  { id: "phone", q: "How do I change my phone number?", k: "change phone number whatsapp", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>Phone number</b>. Orders go to the new number, and your store link stays the same.`, go: () => askGo("profile", "Open Profile") },
+  { id: "chpin", q: "How do I change my PIN?", k: "change pin new", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>PIN</b>.`, go: () => askGo("profile", "Open Profile") },
+  { id: "forgot", q: "I forgot my PIN", k: "forgot pin reset login", a: () => `On the log-in page, tap <b>Forgot PIN</b>. If you've added an email, we send you a code to set a new PIN. No email added? WhatsApp us and we'll help.${ME_EMAIL ? "" : " Tip: add your email on Profile now, so you can reset it yourself next time."}`, go: () => ME_EMAIL ? "" : askGo("profile", "Add my email") },
+  { id: "email", q: "How do I add my email?", k: "email add change", a: () => `Open <b>Profile</b> (tap your store name on Account) and tap the pencil next to <b>Email</b>. You can then log in with it, and reset your PIN yourself if you forget it.`, go: () => askGo("profile", "Open Profile") },
+  { id: "login", q: "How do I stay logged in or log out?", k: "login logout stay keep sign", a: () => `When you log in, tick <b>Keep me logged in on this phone</b> and you won't need your PIN on that phone for 90 days. To log out, go to <b>Account</b> and tap <b>Log out</b>.`, go: () => askGo("account", "Open Account") },
+  { id: "delacct", q: "How do I delete my account?", k: "delete account permanently quit forever", a: () => `Open <b>Profile</b> and scroll to <b>Danger zone</b>. Deleting removes your store, items and photos for good, and your link stops working. It can't be undone, and the fee isn't refunded once you've gone live. To take a break instead, just set your store to Closed.`, go: () => askGo("profile", "Open Profile") },
+  { id: "install", q: "How do I put the app on my home screen?", k: "install home screen icon", a: () => /iphone|ipad|ipod/i.test(navigator.userAgent) ? `In Safari, tap the <b>Share</b> button, then <b>Add to Home Screen</b>.` : `In Chrome, tap the <b>⋮</b> menu, then <b>Add to home screen</b> (or <b>Install app</b>).` },
+  { id: "dark", q: "How do I turn on dark mode?", k: "dark mode night black theme", a: () => `${esc(APP_NAME)} follows your phone: it goes dark when your phone is in dark mode, and light when it isn't. Change it in your phone's display settings.` },
+  { id: "ads", q: "How do I advertise on other stores?", k: "ad banner promote promotion", a: () => `Your banner can show on every ${esc(APP_NAME)} store, rotating with up to 4 others, and you get weekly ad insights in News.${BUL && BUL.adPrice ? ` Price: <b>${esc(BUL.adPrice)}</b>.` : ""} WhatsApp us to book.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to book an ad for ${(S && S.name) || (SESSION ? SESSION.id : "")}.`, "Book an ad") },
+  { id: "rules", q: "What can't I sell?", k: "can not sell allowed ban banned prohibited rule vape alcohol drug weapon report guard safe", a: () => `You can't sell drugs, vape or cigarettes, alcohol, adult content or services, weapons, or scam and fake products. ${esc(APP_NAME)} Guard checks every store, and customers can report stores. Stores that break the rules are removed.`, go: () => `<a class="btn small" href="${esc(home())}terms" target="_blank" rel="noopener">Read the Terms</a>` },
+  { id: "two", q: "Can I have two stores?", k: "two store more multiple", a: () => `Yes. Each store uses its own phone number, so sign up again with a different phone number for your second store.` },
+  { id: "slow", q: "The app is slow or not working", k: "slow load error not working blank refresh", a: () => `Check your internet first, then close the app fully and open it again. Still stuck? WhatsApp us and tell us what you see.`, go: () => askWa() },
+  { id: "human", q: "How do I talk to a person?", k: "contact help talk person human whatsapp call", a: () => `Tap below to chat with us on WhatsApp. You'll also find <b>Help</b> under Account.`, go: () => askWa() }
+];
+const ASK_POPULAR = ["additem", "orders", "trial", "link", "openclose", "spotit"];
+const ASK_SMALL = [
+  [/^(hi|hai|hello|helo|hey|assalamualaikum|salam|morning|selamat\b.*)$/, () => `Hi! Ask me anything about your store, like "how do I add a photo?" or "macam mana nak tutup kedai?".`],
+  [/^(thanks?|thank you|thx|tq|terima kasih|tqvm|ok thanks?|okay)$/, () => `You're welcome! Ask me anything else any time.`]
+];
+function askFind(text){
+  const raw = String(text || "").toLowerCase().replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ").trim();
+  for (const [re, f] of ASK_SMALL) if (re.test(raw)) return { small: f() };
+  const ws = new Set(askWords(text)); if (!ws.size) return { none: true };
+  const scored = ASK_KB.map(e => {
+    const kw = e.kw || (e.kw = new Set(askWords(e.k)));
+    const qw = e.qw || (e.qw = new Set(askWords(e.q)));
+    let s = 0; ws.forEach(w => { if (kw.has(w)) s += 1; else if (qw.has(w)) s += .6; });
+    return { e, s: s / Math.sqrt(kw.size + 2) };   // a short, focused answer wins over a long one that happens to share a word
+  }).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+  if (!scored.length || scored[0].s < .3) return { none: true };
+  return { e: scored[0].e, more: scored.slice(1, 3).filter(x => x.s >= scored[0].s * .75).map(x => x.e) };
+}
+
+let ASKLOG = [], ASKID = "", ASKBACK = "home";
+function askMsgHtml(m){
+  if (m.me) return `<div class="askme"><span class="sr">You asked: </span>${esc(m.me)}</div>`;
+  return `<article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>${m.bot}</p>${m.cta ? `<div class="bulcta">${m.cta}</div>` : ""}${m.more && m.more.length ? `<div class="askmore"><span class="bulmeta">Or did you mean</span><div class="sechips">${m.more.map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div></div>` : ""}</div></article>`;
+}
+function askReply(e){ return { bot: e.a(), cta: e.go ? e.go() : "" }; }
+function askPush(me, reply){
+  ASKLOG.push({ me }, reply); ASKLOG = ASKLOG.slice(-40);
+  const log = $("askLog"); if (!log) return;
+  log.insertAdjacentHTML("beforeend", askMsgHtml({ me }) + askMsgHtml(reply));
+  const q = log.querySelectorAll(".askme"), last = q[q.length - 1];
+  if (last) last.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+function askSend(){
+  const inp = $("askIn"); if (!inp) return;
+  const text = inp.value.trim().slice(0, 200); if (!text) return inp.focus();
+  inp.value = ""; inp.blur();
+  const r = askFind(text);
+  askPush(text, r.small ? { bot: r.small } : r.none
+    ? { bot: "Sorry, I don't know that one yet. Try other words, pick a question below, or ask us on WhatsApp and a person will help.", cta: askWa(`Hi ${APP_NAME}, I have a question about my store ${SESSION ? SESSION.id : ""}: ${text}`, "Ask us on WhatsApp") }
+    : { ...askReply(r.e), more: r.more });
+}
+function askAnswer(id){ const e = ASK_KB.find(x => x.id === id); if (e) askPush(e.q, askReply(e)); }
+function edAsk(){
+  if (ASKID !== SESSION.id){ ASKLOG = []; ASKID = SESSION.id; }
+  return `${edTop("Ask your assistant", ASKBACK)}
+  <article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>Hi! I'm your ${esc(APP_NAME)} assistant. Ask me anything about your store, in English or Malay, and I'll answer right away.</p></div></article>
+  <div id="askLog" aria-live="polite">${ASKLOG.map(askMsgHtml).join("")}</div>
+  <section class="card askbar"><label for="askIn" class="sr">Your question</label>
+    <div class="askrow"><input type="text" id="askIn" maxlength="200" enterkeyhint="send" autocomplete="off" placeholder="e.g. How do I add a photo?"><button type="button" class="btn solid" data-act="asksend">Ask</button></div>
+  </section>
+  <h2 class="edsub">Popular questions</h2>
+  <div class="sechips" style="margin:0 2px 14px">${ASK_POPULAR.map(id => ASK_KB.find(e => e.id === id)).map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div>
+  <details class="card lk-group askall"><summary>All questions (${ASK_KB.length})</summary>
+    ${ASK_KB.map(e => `<button type="button" class="lk-row" data-act="askq" data-v="${e.id}"><span class="tt"><b>${esc(e.q)}</b></span><span class="chev">${ico("chevron",18)}</span></button>`).join("")}
+  </details>
+  <p class="hint" style="margin:4px 4px 0">Can't find it? ${askTo() ? `<a href="https://wa.me/${askTo()}?text=${encodeURIComponent(`Hi ${APP_NAME}, I need help with my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Chat with a person on WhatsApp</a>.` : "Message us any time."}</p>`;
 }
 function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
     <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Phone, email and PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
+    <button class="lk-row" data-act="go" data-v="ask"><span class="tile asktile"><img src="bot.jpg" alt=""></span><span class="tt"><b>Ask your assistant</b><span>Questions about the app, answered right away</span></span><span class="chev">${ico("chevron",18)}</span></button>
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with us on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
     ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How we work and protect you</span></span><span class="chev">${ico("chevron",18)}</span></a>
@@ -2727,10 +2862,10 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
-  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan");   // nothing to save or preview on News or Profile
+  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
@@ -3280,6 +3415,7 @@ function onField(e){
   touch();
 }
 $("bwrap").addEventListener("input", onField);
+$("bwrap").addEventListener("keydown", e => { if (e.target.id === "askIn" && e.key === "Enter"){ e.preventDefault(); askSend(); } });
 // prices read like money once you leave the box: 8.5 becomes 8.50
 $("bwrap").addEventListener("focusout", e => { const t = e.target; if (t.matches && t.matches('input[data-f="p"]') && t.value !== "" && isFinite(+t.value)) t.value = (+t.value).toFixed(2); });
 $("bwrap").addEventListener("change", onField);
@@ -3310,6 +3446,8 @@ $("builder").addEventListener("click", async e => {
     if (a === "frpublish"){ const t = document.querySelector('#publishCard [data-act="trial"]'); if (t) t.click(); else openPublishCheck(); }   // the free trial when it's offered, otherwise pay
     return;
   }
+  if (a === "asksend"){ askSend(); return; }
+  if (a === "askq"){ askAnswer(b.dataset.v); return; }
   if (a === "go" || a === "back"){ const to = b.dataset.v, ti = b.dataset.i != null ? +b.dataset.i : null; leaveEdPage(to); EDOTHER = false; return a === "back" ? edBack(to, ti) : edGo(to, ti); }
   if (a === "secpick"){ S.items[i].sec = S.items[i].sec === b.dataset.v ? "" : b.dataset.v; redraw(); return; }
   if (a === "secnew"){ const inp = b.closest(".seccard").querySelector(".secnew"); inp.hidden = false; inp.focus(); return; }
