@@ -854,6 +854,8 @@ body.exploring #gwrap{padding:0;max-width:none}
 #mxMap .maplibregl-ctrl-attrib a{color:inherit}
 #mxMap .maplibregl-ctrl-attrib-button{background-color:transparent}
 .mxerr{position:fixed;left:16px;right:16px;top:30%;bottom:16px;z-index:5;text-align:center;display:grid;gap:12px;justify-items:center;align-content:start;overflow-y:auto}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #mxMap .maplibregl-canvas,:root:not([data-theme="light"]) #pinMap .maplibregl-canvas{filter:invert(.88) hue-rotate(180deg) brightness(1.05) contrast(.92)}}
+:root[data-theme="dark"] #mxMap .maplibregl-canvas,:root[data-theme="dark"] #pinMap .maplibregl-canvas{filter:invert(.88) hue-rotate(180deg) brightness(1.05) contrast(.92)}
 .mxerrlist{width:100%;display:grid;gap:8px;text-align:left}
 .mxerrrow{display:block;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none}.mxerrrow span{display:block;font-size:13px;color:var(--muted)}
 .mxg{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
@@ -2141,7 +2143,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261018-malaysia-map", at: "2026-10-18", title: "Browse shows Malaysia only", body: "The Browse map now stays on Malaysia: Peninsular Malaysia, Sabah and Sarawak, with nothing from other countries. Customers find your store faster, without wandering off the map." },
+  { id: "u-20261018-malaysia-map", at: "2026-10-18", title: "Browse shows Malaysia", body: "The Browse map now opens on Malaysia and stays there, with a bold line around Peninsular Malaysia, Sabah and Sarawak. In dark mode the map is brighter and easier to read." },
   { id: "u-20261018-council", at: "2026-10-18", title: "Sharper look, easier start", body: "Dark mode is clearer: main buttons and the option you picked now stand out. Insights shows the number on each day's bar. A new store starts with Add your first item, and if something is missing when you publish, the app takes you straight to it. On store pages, customers now see your first menu section before any ad." },
   { id: "u-20261018-unpaid", at: "2026-10-18", title: "Publish within 10 days", body: "Stores that aren't published (paid for) within 10 days of signing up are now removed, so link names and phone numbers don't get stuck. If your store isn't live yet, the Publish card on your Store page shows how many days you have left. Stores already waiting today get the full 10 days from now." },
   { id: "u-20261017-polish", at: "2026-10-17", title: "A faster, clearer app", body: "We gave the whole app a check-up. It opens faster on slow internet, and store photos load much quicker for your customers. Dark mode is easier to read, with clear badges and buttons. Prices now always show two decimals, like RM13.00. If your store isn't live yet, Publish my store is now at the top of your Store page. Nothing you need to do." },
@@ -4396,7 +4398,8 @@ Object.assign(ICONS, {
 });
 const MX_LIB = "https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.2.0/maplibre-gl";   // MapLibre GL JS
 const MX_SRI = { js: "sha512-N+AdcGOQwI9qITrl5JwZAvR9657sL+TTNfY6cTjvwft1qhaI3Vfk61Fy+3TPInthrJJ9pT0ZLmT1VUnQlJIO8w==", css: "sha512-ThCFU5nYVz8ubpOnjGHNGrTjZimTQ63X6t4een1DAWfKP8t39iSw2x3WlUr8EkePjBj48HeNkrAg9t9GRu+s2w==" };   // cdnjs hashes: update both if MX_LIB changes
-const MX_STYLE = dark => "https://tiles.openfreemap.org/styles/" + (dark ? "dark" : "positron");   // free OpenFreeMap tiles, no API key
+// free OpenFreeMap tiles, no API key. One light map for both themes: in dark mode the page turns it into a readable dark grey (see .maplibregl-canvas below)
+const MX_STYLE = () => "https://tiles.openfreemap.org/styles/positron";
 const TICK_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 12.5 3.6 3.6 7.4-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 // a store logo with the Verified ring and tick when the store is verified (the same look as on the store page)
 const vLogo = (st, inner, cls) => `<span class="vlogo${st.v ? " verified" : ""}"><span class="mxlogo ${cls || ""}" style="background:${mxCol(st)}">${inner}</span>${st.v ? `<span class="vtick" role="img" aria-label="Verified">${TICK_SVG}</span>` : ""}</span>`;
@@ -4434,15 +4437,18 @@ function exList(){
 }
 
 // ----- MapLibre (loaded only when this page opens) -----
-// Browse shows Malaysia only: the map can't leave Malaysia, and every other country is covered in the page colour.
-// The cover (malaysia-mask.json) reaches a little past the coast, so no seaside shop is ever under it.
+// Browse opens on Malaysia and stays there. Malaysia's land borders (Thailand, Brunei, Kalimantan) are drawn bold,
+// straight from the map's own border data, so the bold line sits exactly on the map's border line at every zoom.
 const MY_BOUNDS = [[98.6, -0.4], [120.4, 8.4]];
 function mxMaskMalaysia(map){
-  getJson("malaysia-mask.json").then(g => {
-    if (!g || !g.type || !MX || MX.map !== map || map.getLayer("mymask")) return;
-    map.addSource("mymask", { type: "geojson", data: { type: "Feature", properties: {}, geometry: g } });
-    map.addLayer({ id: "mymask", type: "fill", source: "mymask", paint: { "fill-color": mxDark() ? "#141112" : "#F7F5F3", "fill-antialias": false } }, map.getLayer("mxfill") ? "mxfill" : undefined);
-  }).catch(() => {});   // without it the map still works, just with the neighbours showing
+  const st = map.getStyle(), src = Object.keys(st.sources || {}).find(k => st.sources[k].type === "vector");
+  if (!src || map.getLayer("myborder")) return;
+  const firstLabel = ((st.layers || []).find(l => l.type === "symbol") || {}).id;
+  const ours = ["all", ["==", ["get", "admin_level"], 2], ["!=", ["get", "maritime"], 1],
+    ["any", ["==", ["get", "adm0_l"], "MYS"], ["==", ["get", "adm0_r"], "MYS"]]];
+  const base = { type: "line", source: src, "source-layer": "boundary", filter: ours, layout: { "line-join": "round", "line-cap": "round" } };
+  map.addLayer(Object.assign({ id: "myborder-glow", paint: { "line-color": "#18395C", "line-opacity": .2, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 6, 12, 14] } }, base), firstLabel);
+  map.addLayer(Object.assign({ id: "myborder", paint: { "line-color": "#18395C", "line-width": ["interpolate", ["linear"], ["zoom"], 4, 2, 12, 4] } }, base), firstLabel);
 }
 function mxLoadMap(){
   if (window.maplibregl) return Promise.resolve();
