@@ -268,10 +268,16 @@ textarea{min-height:72px;resize:vertical}
 .skyhit{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:grid;place-items:center}
 .skyjetwrap{display:block;width:32px;height:32px}.skyjet{width:32px;height:32px;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .skyrope{position:absolute;left:0;top:0;width:46px;height:0;border-top:1.5px dashed #9AA3AD;transform-origin:0 0;pointer-events:none}
-.skybanner{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;max-width:180px;padding:5px 10px 5px 6px;border-radius:6px;background:#FFF8E1;color:#1C1917;font-size:12.5px;font-weight:800;line-height:1.15;border:1.5px solid #E7B416;box-shadow:0 3px 8px rgba(0,0,0,.25);transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy)));cursor:pointer;white-space:nowrap;animation:skyFlap 1.3s ease-in-out infinite}
-.skyflight.held .skybanner{animation-play-state:paused}
+.skybanner{position:absolute;left:0;top:0;max-width:180px;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy)));cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
+.skyflag{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:5px;color:#1C1917;font-size:12.5px;font-weight:800;line-height:1.15;white-space:nowrap;border:1.5px solid #E7B416;
+  background:repeating-linear-gradient(100deg,rgba(255,255,255,0) 0 18px,rgba(160,110,0,.10) 26px,rgba(255,255,255,.35) 34px,rgba(255,255,255,0) 42px) 0 0/84px 100%,#FFF8E1;
+  transform-origin:var(--ox,100%) 50%;animation:skyWave .9s ease-in-out infinite,skyRipple .7s linear infinite}
+.skyflag span{overflow:hidden;text-overflow:ellipsis}
+.skyflight.held .skyflag{animation-play-state:paused}
+@keyframes skyWave{0%,100%{transform:perspective(160px) rotateY(0) skewY(0) scaleY(1)}25%{transform:perspective(160px) rotateY(9deg) skewY(2.5deg) scaleY(.95)}50%{transform:perspective(160px) rotateY(0) skewY(0) scaleY(1)}75%{transform:perspective(160px) rotateY(-9deg) skewY(-2.5deg) scaleY(.95)}}
+@keyframes skyRipple{to{background-position:var(--rip,84px) 0,0 0}}
 .skybanner span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skybanner img{width:22px;height:22px;border-radius:5px;object-fit:cover;flex:none;background:#fff}
-@keyframes skyFlap{0%,100%{rotate:0deg}50%{rotate:-2deg}}
+
 .skycard{position:fixed;left:12px;right:12px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:9;padding:14px 14px 16px;border-radius:var(--r-card,20px);color:var(--ink)}
 .skycard .mxx{position:absolute;top:10px;right:10px}
 .skytag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
@@ -5000,8 +5006,13 @@ function skyFly(){
   SKY.n++;
   // pick a route across the screen through the clearest sky: between the filters and the bottom buttons, away from the pins
   const box = mapEl.getBoundingClientRect(), W = box.width;
-  const top = (document.querySelector(".mxtop") || mapEl).getBoundingClientRect().bottom - box.top + 40, bottom = ($("mxPill") ? $("mxPill").getBoundingClientRect().top - box.top : box.height - 160) - 40;
+  const top0 = (document.querySelector(".mxtop") || mapEl).getBoundingClientRect().bottom - box.top + 40, bottom0 = ($("mxPill") ? $("mxPill").getBoundingClientRect().top - box.top : box.height - 160) - 40;
   const pins = [...document.querySelectorAll(".mxmk,.mxcl,.mxme")].map(p => { const r = p.getBoundingClientRect(); return { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2 }; });
+  // a message card over the map ("No stores listed yet"): fly below it, or above it if there's no room
+  let top = top0, bottom = bottom0;
+  const em = $("mxEmpty");
+  if (em && !em.hidden && em.offsetHeight){ const r = em.getBoundingClientRect(), et = r.top - box.top - 30, eb = r.bottom - box.top + 30;
+    if (bottom - eb >= 60) top = Math.max(top, eb); else if (et - top >= 60) bottom = Math.min(bottom, et); else { SKY.n--; SKY.t = setTimeout(skyFly, 15000); return; } }
   const rtl = SKY.n % 2 === 0;
   let best = null;
   for (let i = 0; i < 12; i++){
@@ -5015,13 +5026,15 @@ function skyFly(){
   const logo = safeImg(ad.logo), el = document.createElement("div");
   el.className = "skyflight";
   el.innerHTML = `<i class="skyrope" style="transform:rotate(${(deg + 180).toFixed(1)}deg)"></i>
-    <span class="skybanner">${logo ? `<img src="${esc(logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(ad.text)}</span></span>
+    <span class="skybanner"><span class="skyflag">${logo ? `<img src="${esc(logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(ad.text)}</span></span></span>
     <button type="button" class="skyhit" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."><span class="skyjetwrap" style="transform:rotate(${deg.toFixed(1)}deg)">${SKY_PLANE}</span></button>`;
   const mk = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(from).addTo(map);
   // the banner hangs behind the plane on its tow line, the right distance away whichever way it flies
   const bn = el.querySelector(".skybanner"), rad = deg * Math.PI / 180, cx = Math.cos(rad), cy = Math.sin(rad);
   const half = Math.abs(cx) * bn.offsetWidth / 2 + Math.abs(cy) * bn.offsetHeight / 2, gap = 14 + 32 + half;   // plane half + tow line + banner half
   bn.style.setProperty("--dx", (-cx * gap).toFixed(1) + "px"); bn.style.setProperty("--dy", (-cy * gap).toFixed(1) + "px");
+  bn.style.setProperty("--ox", cx >= 0 ? "100%" : "0%");   // the flag waves out from the end tied to the plane
+  bn.style.setProperty("--rip", cx >= 0 ? "-84px" : "84px");   // and its ripples run away from the plane
   SKY.el = el; SKY.mk = mk;
   // the dashed trail it leaves behind
   const trail = { type: "Feature", geometry: { type: "LineString", coordinates: [[from.lng, from.lat], [from.lng, from.lat]] } };
