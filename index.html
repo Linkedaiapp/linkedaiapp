@@ -4447,7 +4447,6 @@ function mxMaskMalaysia(map){
   const ours = ["all", ["==", ["get", "admin_level"], 2], ["!=", ["get", "maritime"], 1],
     ["any", ["==", ["get", "adm0_l"], "MYS"], ["==", ["get", "adm0_r"], "MYS"]]];
   const base = { type: "line", source: src, "source-layer": "boundary", filter: ours, layout: { "line-join": "round", "line-cap": "round" } };
-  map.addLayer(Object.assign({ id: "myborder-glow", paint: { "line-color": "#18395C", "line-opacity": .2, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 6, 12, 14] } }, base), firstLabel);
   map.addLayer(Object.assign({ id: "myborder", paint: { "line-color": "#18395C", "line-width": ["interpolate", ["linear"], ["zoom"], 4, 2, 12, 4] } }, base), firstLabel);
 }
 function mxLoadMap(){
