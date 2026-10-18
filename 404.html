@@ -1865,7 +1865,7 @@ function svBtn(d){
   const def = isAgent(d) ? BK_PICKS[1] : cat === "homestay" ? BK_PICKS[2] : BK_PICKS[0];
   return { t: String(own.t || "").trim() || def[0], s: String(own.s || "").trim() || def[1] };
 }
-// Built-in demo stores (no account, nothing is sent): /demo-food, /demo-aircond, /demo-insurance and /demo-digital. Names starting with demo- are kept for these.
+// Built-in demo stores (no account, nothing is sent): /demo-food, /demo-products, /demo-aircond, /demo-insurance and /demo-digital. Names starting with demo- are kept for these.
 var STORE_DEMO = false;
 const DEMO_IMG = n => "https://linkedaiapp.github.io/linkedaiapp/demo/" + n;
 const DEMOS = {
@@ -1892,6 +1892,14 @@ const DEMOS = {
       { n: "Kuih Lapis & Seri Muka", d: "Mixed box of 12, fresh every morning", img: DEMO_IMG("food-kuih.webp"), sec: "Kuih", o: [{ l: "", p: 15 }] },
       { n: "Kek Batik Premium", d: "Rich chocolate with Marie biscuits, serves 8 to 10", img: DEMO_IMG("food-kekbatik.webp"), sec: "Cakes", o: [{ l: "500 g", p: 25 }, { l: "1 kg", p: 45 }] },
       { n: "Teh Tarik Ais", d: "Pulled milk tea, less sweet on request", img: DEMO_IMG("food-tehtarik.webp"), sec: "Drinks", o: [{ l: "", p: 4 }] }] } },
+  "demo-products": { place: { city: "Kuala Lumpur", state: "Kuala Lumpur" }, data: { name: "Aurora Boutique", tagline: "Modest fashion, delivery across Malaysia", kind: "products", cat: "fashion", color: "#BE185D", layout: "grid", wa: "60100000000", logo: DEMO_IMG("pr-logo.webp"),
+    items: [
+      { n: "Baju Kurung Moden Raya", d: "Soft cotton silk, pockets, sizes XS to 3XL", img: DEMO_IMG("pr-kurung.webp"), sec: "New arrivals", o: [{ l: "S, Dusty Pink", p: 129 }, { l: "M, Dusty Pink", p: 129 }, { l: "L, Dusty Pink", p: 129 }, { l: "XL, Dusty Pink", p: 139 }] },
+      { n: "Abaya Classic Black", d: "Flowy crepe, front buttons, easy to iron", img: DEMO_IMG("pr-abaya.webp"), sec: "New arrivals", o: [{ l: "Size 52", p: 159 }, { l: "Size 54", p: 159 }, { l: "Size 56", p: 169 }] },
+      { n: "Tudung Bawal Satin", d: "45 inch, doesn't slip, 8 colours", img: DEMO_IMG("pr-tudung.webp"), sec: "Tudung", o: [{ l: "Sky Blue", p: 25 }, { l: "Dusty Pink", p: 25 }, { l: "Black", p: 25 }] },
+      { n: "Satin Blouse", d: "Silky, loose cut, sizes S to XL", img: DEMO_IMG("pr-blouse.webp"), sec: "Tops", out: true, o: [{ l: "", p: 59 }] },
+      { n: "Canvas Tote Bag", d: "Big enough for a laptop, inside zip pocket", img: DEMO_IMG("pr-tote.webp"), sec: "Accessories", o: [{ l: "", p: 45 }] },
+      { n: "Aurora Perfume Mist", d: "Light floral, 50 ml, alcohol-free", img: DEMO_IMG("pr-perfume.webp"), sec: "Accessories", o: [{ l: "", p: 35 }] }] } },
   "demo-digital": { place: { city: "", state: "Selangor" }, data: { name: "Ina Templates", tagline: "Canva templates, e-books and presets for small businesses", kind: "digital", cat: "other", color: "#7C3AED", wa: "60100000000", logo: DEMO_IMG("digital-logo.webp"),
     items: [
       { n: "Ebook Resepi Kuih Raya", d: "25 recipes with photos, step by step", img: DEMO_IMG("dg-ebook.webp"), smp: [DEMO_IMG("dg-ebook-s1.webp"), DEMO_IMG("dg-ebook-s2.webp")], fmt: "PDF · 42 pages", get: "25 kuih raya recipes\nShopping list for each recipe\nPricing guide if you sell them", how: "link", eta: "within 1 hour", sec: "E-books", o: [{ l: "", p: 15 }] },
@@ -3250,7 +3258,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 99;
+const APP_VERSION = 100;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
