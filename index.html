@@ -916,14 +916,14 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxtrain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:2}
 .tset{position:absolute;left:0;display:flex;align-items:flex-end;height:40px;transform-origin:0 100%;will-change:transform}
 .tset.mini{bottom:1px;opacity:.9}.tset.ad{top:3px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.tnose{display:block;width:41.3px;height:40px;flex:none}
+.mxtrain{--train:#18395C;--train-ink:#fff}
+:root[data-theme="dark"] .mxtrain{--train:#fff;--train-ink:#18395C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mxtrain{--train:#fff;--train-ink:#18395C}}
+.tnose{display:block;width:41.3px;height:40px;flex:none;background:var(--train);-webkit-mask:url(train-nose.svg) center/100% 100% no-repeat;mask:url(train-nose.svg) center/100% 100% no-repeat}
 .tcars{position:relative;display:block;height:40px;flex:none;margin-left:-1px;border-radius:0 10px 3px 0;
-  background:repeating-linear-gradient(90deg,transparent 0 8px,#37474F 8px 9px,#BAE2FD 9px 19px,#37474F 19px 20px,transparent 20px 24px) 0 3px/100% 5px no-repeat,
-    repeating-linear-gradient(90deg,transparent 0 107px,#37474F 107px 110px) 0 0/100% 9px no-repeat,
-    repeating-linear-gradient(90deg,transparent 0 107px,#37474F 107px 110px) 0 21.6px/100% 11px no-repeat,
-    linear-gradient(#E0E0E0 0 21.6px,#82AEC0 21.6px 25.1px,#0277BD 25.1px 32.5px,#455A64 32.5px 37.7px,transparent 37.7px)}
-.twheels{position:absolute;left:4px;right:6px;top:31px;height:9px;background:radial-gradient(circle,#607D8B 0 2.4px,#455A64 2.6px 4.2px,transparent 4.4px) 0 0/27.5px 9px repeat-x}
-.ttext{position:absolute;left:16px;top:9.2px;display:flex;align-items:center;gap:4px;font-size:11.5px;line-height:12px;font-weight:800;color:#0D3B66;white-space:nowrap;letter-spacing:.01em}.ttext img{width:12px;height:12px;border-radius:3px;object-fit:cover}
+  background:repeating-linear-gradient(90deg,var(--train) 0 107px,transparent 107px 110px) 0 0/100% 37.7px no-repeat}
+.twheels{position:absolute;left:4px;right:6px;top:31px;height:9px;background:radial-gradient(circle,var(--train) 0 4.2px,transparent 4.4px) 0 0/27.5px 9px repeat-x}
+.ttext{position:absolute;left:16px;top:12.5px;display:flex;align-items:center;gap:4px;font-size:11.5px;line-height:12px;font-weight:800;color:var(--train-ink);white-space:nowrap;letter-spacing:.01em}.ttext img{width:12px;height:12px;border-radius:3px;object-fit:cover}
 .mxsearch input[type=search],.mxsearch input[type=search]:focus{flex:1;width:auto;min-width:0;margin:0;min-height:0;height:100%;padding:0;border:0;border-radius:0;background:none;box-shadow:none;outline:none;font:inherit;font-size:16px;font-weight:500;color:var(--ink)}
 .mxsearch input::placeholder{color:var(--muted)}
 .mxsearch input::-webkit-search-cancel-button{display:none}
@@ -2991,7 +2991,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 79;
+const APP_VERSION = 80;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5185,7 +5185,7 @@ function trainRun(){
   if (document.hidden || SKY.open || (q && (document.activeElement === q || q.value))) { TRAIN.t = setTimeout(trainRun, 8000); return; }   // not while someone is searching
   const ads = trainAds(); if (TRAIN.i == null) TRAIN.i = Math.floor(Math.random() * Math.max(1, ads.length));
   const ad = ads.length ? ads[TRAIN.i % ads.length] : null;
-  box.innerHTML = `<span class="tset${ad ? " ad" : " mini"}"${ad ? ` role="button" tabindex="0" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."` : ""}><img class="tnose" src="train-nose.svg" alt=""><span class="tcars">${ad ? `<span class="ttext">${safeImg(ad.logo) ? `<img src="${esc(safeImg(ad.logo))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}${esc(ad.text)}</span>` : ""}<span class="twheels"></span></span></span>`;
+  box.innerHTML = `<span class="tset${ad ? " ad" : " mini"}"${ad ? ` role="button" tabindex="0" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."` : ""}><span class="tnose"></span><span class="tcars">${ad ? `<span class="ttext">${safeImg(ad.logo) ? `<img src="${esc(safeImg(ad.logo))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}${esc(ad.text)}</span>` : ""}<span class="twheels"></span></span></span>`;
   const set = box.firstChild, cars = set.querySelector(".tcars"), txt = set.querySelector(".ttext");
   cars.style.width = (ad ? Math.ceil((txt.offsetWidth + 46) / 110) * 110 : 330) + "px";   // whole carriages, enough for the words
   const k = ad ? 1 : .34, w = box.clientWidth, len = (set.offsetWidth) * k;
