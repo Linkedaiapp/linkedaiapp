@@ -262,6 +262,9 @@ textarea{min-height:72px;resize:vertical}
 .bulic svg{width:19px;height:19px}
 .botav{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}   /* the News bot's picture */
 .bulhead .botav{width:56px;height:56px}
+.codelist .lk-row{flex-wrap:wrap;row-gap:8px}.codelist .tt{flex:1 1 180px}.codebtns{display:flex;gap:6px;flex-wrap:wrap}.codetxt{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em}
+.codeline.off .codetxt{text-decoration:line-through;opacity:.6}
+.codenew{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--soft);border:1px dashed var(--line2)}.codenew span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}.codenew b{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:24px;letter-spacing:.08em;margin:2px 0 8px}.codenew .lbtns{display:flex;gap:8px;flex-wrap:wrap}
 .sharesample{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14px;overflow-wrap:anywhere;color:var(--ink)}.sharesample span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
 html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left alone, so dragging a pin lands exactly where the finger is */
 .askbot .bulbody p{color:var(--ink)}.askbot .bulcta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -2149,6 +2152,8 @@ function renderStart(msg, mode){
       <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="hint">You'll log in with your phone number and this PIN.</p>
       <p class="hint">Building is free, and your store can go live free for 14 days. Then pay once to keep it. Go live within 10 days of signing up, or the unused store is removed.</p>
+      <label>Free code (optional)<input type="text" id="cCode" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="12" placeholder="e.g. LK-7KQ4MX"></label>
+      <p class="hint">Got a free code from us? Type it here and your store is free, with nothing to pay.</p>
       <div class="rules">
         <b>Not allowed on ${esc(APP_NAME)}</b>
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
@@ -2185,11 +2190,12 @@ function renderStart(msg, mode){
     $("cGo").disabled = true; $("cGo").textContent = "Signing up...";
     try {
       const data = normalize({ name, wa });
-      await apiPost({ action: "create", id, pin, data });
-      dropKeptLogin(); ME_EMAIL = ""; BUL = null;
+      const code = $("cCode").value.trim();
+      const made = await apiPost({ action: "create", id, pin, data, ...(code ? { code } : {}) });
+      dropKeptLogin(); ME_EMAIL = ""; BUL = made && made.free ? { free: true, paid: true, expiresAt: 0 } : null;
       SESSION = { id, pin }; saveSession(); S = data; STATUS = "pending"; DIRTY = false; rememberEdNow();
       history.replaceState(null, "", home() + "build");
-      openEditor("Store created. Choose what you sell, add your items and photos, then tap Save.");
+      openEditor(made && made.free ? "Store created, free with your code. Choose what you sell and add your items, then go live." : "Store created. Choose what you sell, add your items and photos, then tap Save.");
     } catch(e){ $("cErr").textContent = friendly(e, "Couldn't sign you up right now. Check your internet and try again."); $("cGo").disabled = false; $("cGo").textContent = "Sign up"; }
   };
 }
@@ -2201,6 +2207,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-free-codes", at: "2026-10-18", title: "Free codes", body: "Got a free code from Link Kedai App? New sellers can type it in the Free code box when they sign up, and their store is free with nothing to pay." },
   { id: "u-20261018-settings", at: "2026-10-18", title: "New: Settings", body: "Under Account, open Settings to pick Light or Dark (or Auto, to match your phone), make text Large, write your own share message (it goes with your link whenever you or your customers tap Share), log out other phones, and check for app updates." },
   { id: "u-20261018-help", at: "2026-10-18", title: "Help is all in one place", body: "Under Account, Help now opens your assistant. Ask anything there, and if you still need a hand, Chat with us on WhatsApp is at the bottom of the page." },
   { id: "u-20261018-ask-learns", at: "2026-10-18", title: "Your assistant keeps learning", body: "When your assistant can't answer a question, it's now passed to us (without your name, store or number) so we can teach it the answer. The more you ask, the smarter it gets." },
@@ -2502,7 +2509,7 @@ function offCardHtml(){
 function edPlan(){
   return `${edTop("Plan & payment", "home")}
   ${publishCardHtml() || `<section class="card"><div class="between"><h2 style="margin:0">Link Kedai App store</h2><span class="tag2 paid">${STATUS === "review" ? "Paid" : "Active"}</span></div>
-    <p class="hint">One-time payment, no monthly fees and no commission on your sales.</p>
+    <p class="hint">${BUL && BUL.free ? "Free with your code. No fees and no commission on your sales." : "One-time payment, no monthly fees and no commission on your sales."}</p>
     <p class="hint"><a href="${esc(home())}refund" target="_blank" rel="noopener">Refund Policy</a> · <a href="${esc(home())}terms" target="_blank" rel="noopener">Terms</a></p></section>`}`;
 }
 const LKST = new WeakMap();
@@ -2776,7 +2783,7 @@ const ASK_PHRASE = [[/\bsold ?out\b|\bout of stock\b|\bstok habis\b|\bhabis stok
   [/\b(change|tukar|ubah|edit) (the |my )?(store |kedai )?(link|url|pautan)( name)?\b|\b(link|url) name\b|\bnama (link|url|pautan)\b|\brename (my )?(link|url|store)\b/g, " linkname "],
   [/\b(order|susunan) of (my |the )?(items?|products?|menu)\b|\bsusunan\b/g, " reorder "], [/\b(tukar|ubah|change|edit|cancel|batal) (customer )?(order|pesanan)\b(?! of)/g, " cancel "], [/\blive ?kan\b|\bgo live\b|\bmake (my )?(store |kedai )?live\b/g, " publish "], [/\b(ada|got|is there( an?)?|have) (an? )?app\b|\bapp (ada|available)\b/g, " install "], [/\b(tak|x|tidak|dont|don't|cannot|can't) (ingat|remember)\b/g, " forgot "], [/\b(tutup|close|delete|padam|buang) (akaun|account)\b/g, " delete account permanently "],
   [/\b(dah|sudah|already|i have|i've|i) (bayar|transfer|paid|pay|transferred)\b/g, " receipt "], [/\b(find|cari|jumpa) (my |our )?(store|kedai|shop)\b|\bfind me\b/g, " spotit "],
-  [/\bsave (the )?app\b|\bapp (to|on) (my |the )?(phone|fon|hp)\b/g, " install "], [/\bhari raya\b|\bpublic holiday\b|\bcuti umum\b/g, " off "], [/\bsales report\b|\blaporan jualan\b|\bstore views?\b/g, " stat "], [/\boption(s)? for\b/g, " option "], [/\bberapa (harga|kos|kena bayar|ringgit)\b|\bhow much\b/g, " cost "], [/\bsale price\b|\bharga promosi\b/g, " discount "],
+  [/\bsave (the )?app\b|\bapp (to|on) (my |the )?(phone|fon|hp)\b/g, " install "], [/\bhari raya\b|\bpublic holiday\b|\bcuti umum\b/g, " off "], [/\b(free|kod|ada|my) ?code\b|\bkod percuma\b|\blk-?[a-z0-9]{6}\b/g, " freecode "], [/\bsales report\b|\blaporan jualan\b|\bstore views?\b/g, " stat "], [/\boption(s)? for\b/g, " option "], [/\bberapa (harga|kos|kena bayar|ringgit)\b|\bhow much\b/g, " cost "], [/\bsale price\b|\bharga promosi\b/g, " discount "],
   [/\bcover photo\b|\bgambar (sampul|cover)\b/g, " cover "], [/\bnotification bell\b|\bloceng\b/g, " bell "], [/\b(order|pesanan)( customer| pelanggan)? (masuk|pergi|sampai|pi)\b/g, " order receive "],
   [/\bstok habis\b|\bhabis stok\b/g, " soldout "], [/\bjam buka\b/g, " hours "]];
 const ASK_STOP = new Set("a an the i my me to of in on for is it do does how can what where why when and or with your you this that be am are was will would should could please pls tolong saya aku nak hendak mahu ke di ini itu dengan untuk yang dan atau la lah ke ka kah ya ok okay camne cane macamana mcmana mcm mcam nk nok sy sye utk dgn kat kt dkt pastu lepastu klu kalau kalo ape apa bagaimana cara caranya there any ada got just already dah sudah je jer ni tu tau kena perlu need want wanna like so very".split(" "));
@@ -2850,8 +2857,9 @@ const ASK_KB = [
   { id: "photofail", q: "My photo won't upload", k: "photo upload fail not appear", a: () => `Check your internet, then try again with a different photo. Very big photos or screenshots can be slow; a normal phone photo works best. If it still fails, close the app, open it again and retry. Still stuck? WhatsApp us.`, go: () => askWa() },
   { id: "save", q: "Do I need to tap Save?", k: "save", a: () => `Your changes save by themselves a few seconds after you stop typing. You'll see "Saving your changes..." and then it's done. You can also tap <b>Save</b> to save straight away.` },
   { id: "cancel", q: "A customer wants to cancel or change their order", k: "cancel change customer", a: () => `Orders are agreed between you and your customer on WhatsApp, so just reply to them in that chat to cancel or change it. Nothing needs to change in ${esc(APP_NAME)}.` },
-  { id: "discount", q: "Can I give a discount or promo code?", k: "discount sale promotion", a: () => `There are no promo codes yet. You can lower the price on the item for a while, mention the promotion in its description or in the short line under your shop name, and give the discount when you reply on WhatsApp.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "discount", q: "Can I give a discount or promo code?", k: "discount sale promotion code", a: () => `There are no promo codes yet. You can lower the price on the item for a while, mention the promotion in its description or in the short line under your shop name, and give the discount when you reply on WhatsApp.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "stocklimit", q: "Can I limit how many can be ordered?", k: "quantity", a: () => `There's no stock count yet. When something runs out, open the item and tick <b>Sold out for now</b>. You can also write the limit in the item's description, like "Only 20 per day".`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "freecode", q: "I have a free code", k: "code freecode put enter signup register", a: () => `A free code makes your store free, with nothing to pay. Type it in the <b>Free code</b> box when you sign up.${BUL && BUL.free ? " Your store already has one, so it's free." : " Already signed up without it? WhatsApp us with your code and we'll sort it out."}`, go: () => BUL && BUL.free ? "" : askWa(`Hi ${APP_NAME}, I have a free code for my store ${SESSION ? SESSION.id : ""}: `) },
   { id: "slow", q: "The app is slow or not working", k: "slow load error not working blank refresh", a: () => `Check your internet first, then close the app fully and open it again. Still stuck? WhatsApp us and tell us what you see.`, go: () => askWa() },
   { id: "human", q: "How do I talk to a person?", k: "contact help talk human whatsapp call admin", a: () => `Tap below to chat with us on WhatsApp. It's also at the bottom of this page, under <b>Still need help?</b>. Open this page any time from <b>Help</b> on Account.`, go: () => askWa() }
 ];
@@ -3281,6 +3289,11 @@ function publishCardHtml(){
     <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
     <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="additem">${ico("plus",18,2.2)}Add your first ${esc(W(S).item)}</button>
   </section>`;
+  if (b.free) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+    <h2>Your store is free</h2>
+    <p class="hint">You signed up with a free code, so there's nothing to pay, ever. When your store looks right, go live and share your link.</p>
+    <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="codelive">Go live</button>
+  </section>`;
   if (Number(b.trialEnd) > 0) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Your free trial has ended</h2>
     <p class="hint">Your store is offline for now. Pay once${price} to bring it back, just as you left it.</p>
@@ -3576,7 +3589,7 @@ $("builder").addEventListener("click", async e => {
   }
   if (a === "frskip" || a === "frhome" || a === "frpublish"){
     markStartDone(); edTidy(); EDV = a === "frhome" ? "products" : "home"; renderEditor(); window.scrollTo(0, 0);
-    if (a === "frpublish"){ const t = document.querySelector('#publishCard [data-act="trial"]'); if (t) t.click(); else openPublishCheck(); }   // the free trial when it's offered, otherwise pay
+    if (a === "frpublish"){ const t = document.querySelector('#publishCard [data-act="codelive"]') || document.querySelector('#publishCard [data-act="trial"]'); if (t) t.click(); else openPublishCheck(); }   // the free trial when it's offered, otherwise pay
     return;
   }
   if (a === "setlook"){ setLook(b.dataset.v); renderEditor(); return; }
@@ -3616,6 +3629,17 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
   else if (a === "rm-link"){ if (S.links[i]) S.links[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
+  else if (a === "codelive"){
+    b.disabled = true; const was = b.innerHTML; b.textContent = "Going live...";
+    try {
+      if (DIRTY || SAVING) await saveNow();
+      const r = await apiPost({ action: "codelive", id: SESSION.id, pin: SESSION.pin });
+      STATUS = r.status; rememberEdNow(); window.scrollTo(0, 0);
+      if (STATUS === "review"){ renderEditor("Almost live."); notify(`${APP_NAME} is quickly checking your store first, and it goes live once approved, usually within 24 hours.`); }
+      else { renderEditor("Your store is live!"); notify("Your store is live! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok."); }
+      loadBulletin();
+    } catch(err){ b.disabled = false; b.innerHTML = was; notify(friendly(err, "Couldn't go live right now. Check your internet and try again.")); }
+  }
   else if (a === "trial"){
     b.disabled = true; const was = b.innerHTML; b.textContent = "Going live...";
     try {
@@ -4366,7 +4390,7 @@ async function adminStores(g, head, wire){
   const row = x => `
     <section class="card admrow" data-find="${esc((x.name + " " + x.id + " " + x.wa).toLowerCase())}">
       <div class="between"><b>${esc(x.name || x.id)}</b>${tag(x)}</div>
-      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · ${x.wa ? `<a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>` : "no number"} · ${x.items} item${x.items === 1 ? "" : "s"}${x.closed ? " · closed" : ""}${x.trialEnd && !x.paidAt ? ` · <b>free trial until ${esc(new Date(x.trialEnd).toLocaleDateString("en-MY", { day: "numeric", month: "short" }))}</b>` : ""}</p>
+      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · ${x.wa ? `<a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>` : "no number"} · ${x.items} item${x.items === 1 ? "" : "s"}${x.closed ? " · closed" : ""}${x.freeCode ? ` · <b>free code ${esc(x.freeCode)}</b>` : x.trialEnd && !x.paidAt ? ` · <b>free trial until ${esc(new Date(x.trialEnd).toLocaleDateString("en-MY", { day: "numeric", month: "short" }))}</b>` : ""}</p>
       <p class="hint" style="margin:2px 0 0">Created ${when(x.created)}${x.paidAt ? ` · Paid ${when(x.paidAt)}` : ""}</p>
       <div class="acts">
         ${x.status === "live" ? `<a class="btn small" href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">View</a>` : ""}
@@ -4645,10 +4669,38 @@ async function loadAlertsCard(){
   };
 }
 
+// Free account codes: make one, send it to a seller, they type it at sign-up and never pay
+async function loadCodesCard(fresh){
+  const box = $("codesCard"); if (!box) return;
+  let list = [];
+  try { list = (await apiPost({ action: "admin", key: ADMIN, op: "codes" })).codes || []; }
+  catch(e){ box.innerHTML = `<h2>Free account codes</h2><p class="hint">${esc(friendly(e, "Couldn't load the codes. Check your internet."))}</p>`; return; }
+  if (!$("codesCard")) return;
+  const signupLink = home() + "signup";
+  const msgFor = code => `Your free ${APP_NAME} code: ${code}\nSign up at ${signupLink} and type the code in the Free code box. Your store is free, nothing to pay.`;
+  const row = x => `<div class="lk-row codeline${x.off ? " off" : ""}" style="cursor:default"><span class="tt"><b><span class="codetxt">${esc(x.code)}</span>${x.off ? ` <span class="tag2 claim">Off</span>` : x.used >= x.uses ? ` <span class="tag2 paid">Used</span>` : ""}</b>
+      <span>${esc(x.note || "No note")} · used ${x.used} of ${x.uses}${x.stores.length ? " · " + x.stores.map(id => `<a href="${esc(storeLink(id))}" target="_blank" rel="noopener">/${esc(id)}</a>`).join(", ") : ""}</span></span>
+      <span class="codebtns">${!x.off && x.used < x.uses ? `<button type="button" class="btn small" data-codecopy="${esc(x.code)}">${ico("copy",15)}Copy</button><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(msgFor(x.code))}" target="_blank" rel="noopener">${ico("share",15)}Send</a>` : ""}
+      <button type="button" class="btn small" data-codeoff="${esc(x.code)}" data-v="${x.off ? 0 : 1}">${x.off ? "Turn on" : "Turn off"}</button></span></div>`;
+  box.innerHTML = `<h2>Free account codes</h2>
+    <p class="hint">Give a seller a code and they sign up free, with nothing to pay. They type it in the Free code box when they sign up.</p>
+    <div class="row2" style="margin-top:8px"><div><label>Note (optional)<input type="text" id="codeNote" maxlength="80" placeholder="e.g. Kak Yah, bazaar"></label></div><div><label>How many sellers can use it<input type="number" id="codeUses" min="1" max="500" value="1" inputmode="numeric"></label></div></div>
+    <button class="btn solid full" id="codeMake" style="margin-top:12px">${ico("plus",16,2.2)}Make a code</button>
+    ${fresh ? `<div class="codenew" role="status"><span>New code</span><b>${esc(fresh)}</b><div class="lbtns"><button type="button" class="btn small" data-codecopy="${esc(fresh)}">${ico("copy",15)}Copy</button><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(msgFor(fresh))}" target="_blank" rel="noopener">${ico("share",15)}Send on WhatsApp</a></div></div>` : ""}
+    ${list.length ? `<div class="lk-group codelist" style="margin-top:14px">${list.map(row).join("")}</div>` : `<p class="hint" style="margin-top:12px">No codes yet.</p>`}`;
+  $("codeMake").onclick = async () => {
+    const btn = $("codeMake"); btn.disabled = true;
+    try { const r = await apiPost({ action: "admin", key: ADMIN, op: "codenew", note: $("codeNote").value.trim(), uses: Number($("codeUses").value) || 1 }); loadCodesCard(r.code); }
+    catch(e){ btn.disabled = false; $("admMsg").textContent = friendly(e, "Couldn't make a code. Try again."); }
+  };
+  box.querySelectorAll("[data-codecopy]").forEach(b => b.onclick = async () => { $("admMsg").textContent = (await copyText(msgFor(b.dataset.codecopy))) ? `Copied ${b.dataset.codecopy} with how to use it. Paste it to the seller.` : "Couldn't copy. Select the code and copy it yourself."; });
+  box.querySelectorAll("[data-codeoff]").forEach(b => b.onclick = async () => { try { await apiPost({ action: "admin", key: ADMIN, op: "codeoff", code: b.dataset.codeoff, off: b.dataset.v === "1" }); loadCodesCard(); } catch(e){ $("admMsg").textContent = friendly(e, "Couldn't change that code. Try again."); } });
+}
 function adminSettings(g, head, wire, cfg){
   const v = k => cfg[k] !== undefined ? cfg[k] : (SITE[k] || "");
   const signup = cfg.signup !== undefined ? cfg.signup !== false : SITE.signup !== false;
   g.innerHTML = head + `
+    <section class="card" id="codesCard">${loaderHtml("Loading free codes...")}</section>
     <section class="card">
       <h2>Your WhatsApp</h2>
       <label>Your phone number<input type="tel" id="stWaOwner" value="${esc(v("ownerWa"))}" placeholder="e.g. 012-345 6789"></label>
@@ -4677,7 +4729,7 @@ function adminSettings(g, head, wire, cfg){
     <button class="btn solid full" style="padding:15px" id="stSave">Save settings</button>
     <section class="card guard" id="alertsCard" style="margin-top:22px">${loaderHtml("Loading alerts...")}</section>`;
   wire();
-  loadAlertsCard();
+  loadAlertsCard(); loadCodesCard();
   const prev = (inp, box) => $(inp).oninput = () => { const u = safeUrl($(inp).value.trim()); $(box).innerHTML = u ? `<img src="${esc(u)}" alt="">` : ""; };
   prev("stQr", "qrPrev"); prev("stPpQr", "ppPrev");
   $("stSave").onclick = () => {
