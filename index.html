@@ -913,6 +913,11 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxsearch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:46px;border-radius:var(--r-md);padding:0 6px 0 14px;color:var(--muted);margin:0}
 .mxsearch{font-weight:500}
 .mxsearch{position:relative;overflow:hidden}
+.mxklt{pointer-events:none;z-index:0;--klt-h:80px}
+.mxklt svg{display:block;height:var(--klt-h);width:calc(var(--klt-h) * 100 / 212);filter:drop-shadow(0 2px 3px rgba(20,30,45,.25))}
+.mxklt .kltlight{fill:#E53935}
+:root[data-theme="dark"] .mxklt svg{filter:drop-shadow(0 0 5px rgba(255,214,140,.55)) drop-shadow(0 0 14px rgba(255,190,110,.3))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mxklt svg{filter:drop-shadow(0 0 5px rgba(255,214,140,.55)) drop-shadow(0 0 14px rgba(255,190,110,.3))}}
 .mxtrain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:0}
 .mxsearch > svg,.mxsearch > input,.mxsearch > .mxclr{position:relative;z-index:1}
 /* the search bar is a pane of glass and the train runs behind it: a light frost, a tint and two reflection streaks on top */
@@ -2257,6 +2262,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-twin-towers", at: "2026-10-18", title: "KL's twin towers on Spot It!", body: "The KL twin towers now stand on the Spot It! map, right where they are in KLCC. Zoom in on Kuala Lumpur to see them up close. At night, in dark mode, they light up." },
   { id: "u-20261018-train", at: "2026-10-18", title: "All aboard Spot It!", body: "A bullet train now runs through the Spot It! search bar now and then. Want your shop's name on its carriages? Message us to book a train banner." },
   { id: "u-20261018-sky", at: "2026-10-18", title: "A plane over Spot It!", body: "Now and then, a little plane flies across the Spot It! map towing a banner. Want your shop on it? Message us to book the plane banner." },
   { id: "u-20261018-settings", at: "2026-10-18", title: "New: Settings", body: "Under Account, open Settings to pick Light or Dark (or Auto, to match your phone), make text Large, write your own share message (it goes with your link whenever you or your customers tap Share), log out other phones, and check for app updates." },
@@ -2998,7 +3004,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 82;
+const APP_VERSION = 83;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5148,6 +5154,34 @@ function skyLoop(now){
   SKY.raf = SKY.flights.length ? requestAnimationFrame(skyLoop) : 0;
 }
 // planes look smaller as the map zooms out, like things really on the map: full size at street and town level, about half over the whole country
+// KL's twin towers stand on the Spot It! map at their real spot (KLCC), drawn upright with lit and shaded sides so they look 3D.
+// They sit under every store pin and never catch a tap. Taller as you zoom in; lit up at night in dark mode.
+const KLT_AT = [101.71167, 3.15806];
+function kltSvg(){
+  const tiers = [[198, 70, 28], [70, 57, 24], [57, 46, 19.5], [46, 37, 15], [37, 29.5, 10.5], [29.5, 23, 7]];
+  const tower = cx => tiers.map(([y0, y1, w]) => `<rect x="${cx - w / 2}" y="${y1}" width="${w / 2}" height="${y0 - y1}" fill="url(#kltL)"/><rect x="${cx}" y="${y1}" width="${w / 2}" height="${y0 - y1}" fill="url(#kltD)"/><rect x="${cx - w / 2}" y="${y1}" width="${w}" height="${y0 - y1}" fill="url(#kltF)"/><rect x="${cx - w / 2 - .8}" y="${y1 - 1.1}" width="${w + 1.6}" height="2.2" rx="1.1" fill="#EEF3F8"/><rect x="${cx}" y="${y1 - 1.1}" width="${w / 2 + .8}" height="2.2" rx="1.1" fill="#B9C6D3"/>`).join("")
+    + `<path d="M${cx - 3.2} 23 L${cx} 9 L${cx} 23Z" fill="#E3EAF1"/><path d="M${cx} 9 L${cx + 3.2} 23 L${cx} 23Z" fill="#8597AA"/><path d="M${cx} 10 V1" stroke="#7D8FA3" stroke-width="1.3" stroke-linecap="round"/><circle class="kltlight" cx="${cx}" cy="1.4" r="1.3"/>`;
+  return `<svg viewBox="0 0 100 212" aria-hidden="true"><defs>
+    <linearGradient id="kltL" x1="0" x2="1"><stop offset="0" stop-color="#C7D2DD"/><stop offset=".55" stop-color="#F6F9FB"/><stop offset="1" stop-color="#DCE4EC"/></linearGradient>
+    <linearGradient id="kltD" x1="0" x2="1"><stop offset="0" stop-color="#9DADBD"/><stop offset="1" stop-color="#5F7287"/></linearGradient>
+    <pattern id="kltF" width="6" height="3.2" patternUnits="userSpaceOnUse"><rect y="2.5" width="6" height=".7" fill="rgba(24,57,92,.2)"/></pattern></defs>
+    <ellipse cx="50" cy="206" rx="49" ry="5.5" fill="rgba(20,30,45,.22)"/>
+    <rect x="3" y="196" width="47" height="10" fill="#D5DEE7"/><rect x="50" y="196" width="47" height="10" fill="#8496A9"/><rect x="3" y="195" width="94" height="2" rx="1" fill="#EEF3F8"/>
+    ${tower(27)}${tower(73)}
+    <path d="M50 128 L40.6 152 M50 128 L59.4 152" stroke="#7D8FA3" stroke-width="1.6"/>
+    <rect x="40.6" y="123" width="18.8" height="5.2" fill="#E3EAF1"/><rect x="40.6" y="126.4" width="18.8" height="1.8" fill="#8597AA"/>
+    <rect x="13" y="198" width="74" height="1.2" fill="rgba(24,57,92,.25)"/></svg>`;
+}
+function kltAdd(map){
+  const el = document.createElement("div"); el.className = "mxklt"; el.innerHTML = kltSvg();
+  MX.klt = new maplibregl.Marker({ element: el, anchor: "bottom", offset: [0, 3] }).setLngLat(KLT_AT).addTo(map);
+  kltScale();
+}
+function kltScale(){
+  if (!MX || !MX.klt) return;
+  const z = MX.map.getZoom(), h = Math.round(Math.max(34, Math.min(150, 34 + (z - 5) * 11)));   // a landmark at country view, tall in the city
+  MX.klt.getElement().style.setProperty("--klt-h", h + "px");
+}
 function skyScale(){ const z = MX && MX.map ? MX.map.getZoom() : 10, k = Math.max(.5, Math.min(1, .5 + (z - 5) * .1)); document.querySelectorAll(".skyscale").forEach(x => x.style.transform = `scale(${k.toFixed(3)})`); }
 function skyOnScreen(f){ const el = MX && MX.map && MX.map.getContainer(); if (!el) return false; const p = MX.map.project(f.mk.getLngLat()), m = 60; return p.x > -m && p.y > -m && p.x < el.clientWidth + m && p.y < el.clientHeight + m; }
 // all planes and trails leave the map
@@ -5526,6 +5560,7 @@ async function renderExplore(){
   map.on("movestart", e => { if (e.originalEvent && MX && MX.map === map) MX.moved = true; });   // the person moved the map themselves
   MX.key = e => { if (e.key === "Escape"){ mxCloseSheet(); mxDeselect(); } };
   document.addEventListener("keydown", MX.key);
+  kltAdd(map);   // first, so every store pin sits on top of it
   if (me) mxShowMe();
   map.on("load", () => {
     if (MX && MX.map === map){
@@ -5538,7 +5573,7 @@ async function renderExplore(){
   });
   map.on("moveend", () => { mxDraw(); exRemember(); });
   map.on("dragstart", () => { SKY.drag = true; }); map.on("dragend", () => { SKY.drag = false; });
-  map.on("zoom", skyScale);
+  map.on("zoom", () => { skyScale(); kltScale(); });
   trainStart();
   skyStart();
   map.on("click", e => {
