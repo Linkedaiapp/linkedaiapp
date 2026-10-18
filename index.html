@@ -2978,7 +2978,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 76;
+const APP_VERSION = 77;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4647,7 +4647,10 @@ function adminAds(g, head, wire, cfg){
     let ads; try { ads = collect(); } catch(e){ return notify(e.message); }
     adminSaveConfig(cfg, { ad: ads }, `Ad ${k + 1} cleared.`);
   });
-  $("skySave").onclick = () => {
+  for (let k = 0; k < 5; k++){ const t = $("skyText" + k), on = $("skyOn" + k), was = t.value.trim(); t.addEventListener("input", () => { if (!was && t.value.trim()) on.checked = true; }); }   // a new banner is switched on as soon as it has words
+  $("skySave").onclick = async () => {
+    const off = []; for (let k = 0; k < 5; k++) if ($("skyText" + k).value.trim() && !$("skyOn" + k).checked) off.push(k);
+    if (off.length && await ask(`${off.map(k => "Plane " + (k + 1)).join(", ")} ${off.length === 1 ? "isn't" : "aren't"} switched on, so ${off.length === 1 ? "it won't" : "they won't"} fly. Fly ${off.length === 1 ? "it" : "them"} now?`, "Yes, fly")) off.forEach(k => { $("skyOn" + k).checked = true; });
     const sky = [];
     for (let k = 0; k < 5; k++){
       const x = { on: $("skyOn" + k).checked, text: $("skyText" + k).value.trim().slice(0, 40), logo: $("skyLogo" + k).value.trim(), link: $("skyLink" + k).value.trim(), until: $("skyUntil" + k).value, advertiserWa: normWa($("skyWa" + k).value) };
