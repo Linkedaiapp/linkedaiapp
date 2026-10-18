@@ -101,7 +101,7 @@ textarea{min-height:72px;resize:vertical}
 .bh p{margin:0 0 20px;color:var(--muted)}
 .card{padding:16px;margin-bottom:14px}
 .card h2{margin:0 0 2px}
-.linkcard .url{word-break:break-all;margin:6px 0 12px}
+.linkcard .url{overflow-wrap:anywhere;margin:6px 0 12px}
 .linkcard .row{display:flex;gap:8px;flex-wrap:wrap}
 .media-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
 .media-prev{width:72px;height:72px;border-radius:50%;border:1.5px dashed var(--line);display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:12px;text-align:center;flex:none}
@@ -163,10 +163,11 @@ textarea{min-height:72px;resize:vertical}
 .signupbox{display:block;margin-top:26px;padding:16px;text-align:center;
   font-size:15px;color:var(--muted);text-decoration:none}
 .signupbox b{color:var(--accent-ink)}
-.chatfab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;
+.chatfab{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:48px;height:48px;border-radius:50%;
   background:#25D366;color:#fff;display:grid;place-items:center;z-index:20;
   animation:riseIn .5s .3s cubic-bezier(.16,1,.3,1) both;transition:transform .15s ease}
 .chatfab:active{transform:scale(.94)}
+.helpchat{display:flex;align-items:center;justify-content:center;gap:8px}.helpchat svg{width:20px;height:20px;color:var(--wa);flex:none}
 .chatfab svg{width:28px;height:28px}
 /* ---------- Admin dashboard ---------- */
 .adminbar{border-color:var(--accent);background:var(--soft)}
@@ -184,7 +185,7 @@ textarea{min-height:72px;resize:vertical}
 .stplace{position:absolute;top:14px;right:16px;max-width:calc(100% - 140px);display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;
   background:var(--soft);color:var(--ink);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stplace svg{width:14px;height:14px;flex:none;color:var(--plum-ink)}
-.stmore{position:absolute;top:12px;left:12px;z-index:5;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink);
+.stmore{position:absolute;top:12px;left:12px;z-index:5;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#1C1917;
   background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.08);box-shadow:var(--sh-2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   -webkit-tap-highlight-color:transparent;transition:transform .15s ease}
 .stmore:active{transform:scale(.93)}
@@ -268,9 +269,10 @@ textarea{min-height:72px;resize:vertical}
 .bulnums div b{display:block;font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
 .bulnums div span{font-size:12px;color:var(--muted)}
 .bulbody .up,.lk-group .up{color:var(--ok);font-weight:700}.bulbody .down,.lk-group .down{color:var(--warn);font-weight:700}
-.bulbars{display:flex;align-items:flex-end;gap:6px;height:56px;margin:10px 0 2px}
+.bulbars{display:flex;align-items:flex-end;gap:6px;height:74px;margin:10px 0 2px}
+.bulbars .bv{font-size:11px;font-weight:700;color:var(--muted);line-height:1}
 .bulbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
-.bulbars i{display:block;width:100%;border-radius:var(--r-xs) var(--r-xs) var(--r-xs) var(--r-xs);background:var(--plum);min-height:3px}
+.bulbars i{display:block;width:100%;border-radius:var(--r-xs) var(--r-xs) var(--r-xs) var(--r-xs);background:var(--plum-ink);min-height:3px}
 .bulbars i.low{background:var(--line)}
 .bulbars span{font-size:11px;color:var(--muted);font-weight:700}
 .bulcta{margin-top:10px}
@@ -618,6 +620,7 @@ html,body{overflow-x:hidden}
 .closedov .shopn{font-weight:700;opacity:.8;margin-bottom:6px;font-size:14px}
 .back{z-index:11!important}
 .adwrap{position:relative;margin:14px 14px 0}
+#menu .adwrap{margin:0 0 18px}
 .adban{display:block;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);background:var(--surface)}
 .adban img{width:100%;aspect-ratio:3/1;object-fit:cover}
 .adban.swapping{animation:none !important;background:var(--surface) !important}
@@ -635,9 +638,9 @@ html,body{overflow-x:hidden}
    Link Kedai App design system v2: warm neutrals, navy + sky, liquid glass
    ===================================================================== */
 :root{--plum-ink:#18395C;--accent-ink:var(--accent);--bg:#F7F5F3;--surface:#FFFFFF;--ink:#1C1917;--muted:#6B6360;--line:#ECE6E1;--line2:#DDD6D1;--soft:#F4EFEB;--plum:#18395C;--gold:#8DB6E8;
-  --glass:rgba(255,255,255,.62);--glass-edge:#DDD6D1;--r-card:18px;--r-btn:14px;--r-field:12px;--focus:#18395C;--hi:rgba(255,255,255,.9);--gloss:rgba(255,255,255,.34);--field-edge:#9A918C;--verify-ink:#0B6BB0}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14);--ok-bg:#16301F;--ink-2:#D6CFCB;--warn:#E8A06A;--warn-bg:#3A2A17;--err-bg:#3A1F1D;--faint:#8A8180;--focus:#8DB6E8;--hi:rgba(255,255,255,.06);--gloss:transparent;--field-edge:#736A6C;--verify-ink:#7CC4FF}}
-:root[data-theme="dark"]{--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14);--ok-bg:#16301F;--ink-2:#D6CFCB;--warn:#E8A06A;--warn-bg:#3A2A17;--err-bg:#3A1F1D;--faint:#8A8180;--focus:#8DB6E8;--hi:rgba(255,255,255,.06);--gloss:transparent;--field-edge:#736A6C;--verify-ink:#7CC4FF}
+  --glass:rgba(255,255,255,.62);--glass-edge:#DDD6D1;--r-card:18px;--r-btn:14px;--r-field:12px;--focus:#18395C;--hi:rgba(255,255,255,.9);--gloss:rgba(255,255,255,.34);--field-edge:#9A918C;--seg-on:var(--surface);--verify-ink:#0B6BB0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--accent-ink:oklch(from var(--accent) .82 max(c,.08) h);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14);--ok-bg:#16301F;--ink-2:#D6CFCB;--warn:#E8A06A;--warn-bg:#3A2A17;--err-bg:#3A1F1D;--faint:#8A8180;--focus:#8DB6E8;--hi:rgba(255,255,255,.06);--gloss:transparent;--field-edge:#736A6C;--seg-on:#3A3334;--verify-ink:#7CC4FF}}
+:root[data-theme="dark"]{--plum-ink:#9CC1EE;--accent-ink:color-mix(in srgb,var(--accent) 35%,#fff);--accent-ink:oklch(from var(--accent) .82 max(c,.08) h);--bg:#141112;--surface:#1E1A1B;--ink:#F4F1EF;--muted:#A89F9B;--line:#2E2829;--line2:#3A3334;--soft:#2A2325;--glass:rgba(40,34,36,.62);--glass-edge:rgba(255,255,255,.14);--ok-bg:#16301F;--ink-2:#D6CFCB;--warn:#E8A06A;--warn-bg:#3A2A17;--err-bg:#3A1F1D;--faint:#8A8180;--focus:#8DB6E8;--hi:rgba(255,255,255,.06);--gloss:transparent;--field-edge:#736A6C;--seg-on:#3A3334;--verify-ink:#7CC4FF}
 body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 .card{border-radius:var(--r-card);border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh-1)}
 .card h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
@@ -649,7 +652,7 @@ body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
   box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 1px rgba(20,10,15,.05),0 4px 14px rgba(20,10,15,.08)}
 .btn::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--gloss),transparent 52%);pointer-events:none;z-index:-1}
 /* every coloured button is an outline, like Delete account: the glass fill, with the colour on the edge, the words and the icon */
-.btn.solid{color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent-ink) 30%,transparent)}
+.btn.solid{color:var(--accent-ink);border:1.5px solid color-mix(in srgb,var(--accent-ink) 55%,transparent)}   /* the main button: a stronger edge than the plain ones beside it */
 .btn.wa{color:var(--wa);border-color:color-mix(in srgb,var(--wa) 30%,transparent)}
 .btn.danger,.btn.dangerline,.btn.small.dangerline{color:var(--err);border-color:color-mix(in srgb,var(--err) 30%,transparent)}
 .btn.solid,.btn.wa,.btn.danger{background:var(--glass)}
@@ -670,7 +673,7 @@ label{font-weight:600;font-size:14px}
 /* ---- segmented control (iOS style) ---- */
 .seg{background:var(--soft);border-radius:var(--r-md);padding:4px;gap:4px;border:0}
 .seg button{border:0;border-radius:var(--r-sm);background:transparent;font-weight:600;color:var(--muted);min-height:40px}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--sh-1)}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--ink);box-shadow:var(--sh-1)}
 /* ---- badges ---- */
 .tag2{height:24px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:700;background:var(--soft);color:var(--ink-2);border:0}
 .tag2.paid{background:var(--ok-bg);color:var(--ok)}.tag2.claim{background:var(--warn-bg);color:var(--warn)}.tag2.unpaid{background:var(--err-bg);color:var(--err)}
@@ -702,7 +705,7 @@ label{font-weight:600;font-size:14px}
   background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
   box-shadow:inset 0 1px 0 var(--hi),0 12px 32px rgba(20,10,15,.16);display:flex;justify-content:space-around;align-items:center}
 .lk-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;font:inherit;font-size:12px;font-weight:600;color:var(--muted);padding:6px 8px;border-radius:var(--r-md);cursor:pointer;position:relative}
-.lk-tabs button[aria-current="page"]{color:var(--plum-ink);background:color-mix(in srgb,var(--plum) 9%,transparent)}
+.lk-tabs button[aria-current="page"]{color:var(--plum-ink);background:color-mix(in srgb,var(--plum-ink) 14%,transparent)}
 .lk-tabs button[aria-current="page"] .fillme path{fill:currentColor}
 .lk-tabs .dotn{position:absolute;top:0;right:8px;min-width:16px;height:16px;border-radius:999px;background:var(--alert);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 4px}
 #builder.tabbed .wrap{padding-bottom:110px}
@@ -724,11 +727,11 @@ label{font-weight:600;font-size:14px}
 .lk-row .thumb{width:48px;height:48px;border-radius:var(--r-sm);background:var(--soft);overflow:hidden;flex:none;display:grid;place-items:center;color:var(--faint)}
 .lk-row .thumb img{width:100%;height:100%;object-fit:cover}
 .lk-prog{height:8px;border-radius:999px;background:var(--soft);overflow:hidden;margin-top:10px}
-.lk-prog i{display:block;height:100%;border-radius:999px;background:var(--plum);}
+.lk-prog i{display:block;height:100%;border-radius:999px;background:var(--plum-ink);}
 .lk-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
 .lk-kpis b{display:block;font-size:24px;font-weight:800}
 .lk-kpis span{font-size:13px;color:var(--muted)}
-.lk-link{display:flex;align-items:center;gap:8px;font-weight:600;word-break:break-all}
+.lk-link{display:flex;align-items:center;gap:8px;font-weight:600;overflow-wrap:anywhere;min-width:0}
 .lk-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .lk-3 .btn{padding:0 8px;gap:6px}
 .lk-sec{animation:lkIn .35s cubic-bezier(.2,.8,.2,1) both}
@@ -946,7 +949,8 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxsh{flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 18px 10px}
 .mxsh h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em}
 .mxx{width:38px;height:38px;border-radius:var(--r-sm);border:0;background:var(--soft);display:grid;place-items:center;color:var(--ink);padding:0;cursor:pointer}
-.mxlist{flex:1;overflow-y:auto;padding:0 12px;-webkit-overflow-scrolling:touch}
+.mxscroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mxlist{padding:0 12px}
 .mxrow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 6px;text-decoration:none;color:inherit;border-radius:var(--r-md)}
 .mxrow{position:relative}.mxrow + .mxrow::before{content:"";position:absolute;left:6px;right:6px;top:0;height:1px;background:var(--line)}   /* a straight divider, not one that bends with the rounded corners */
 .mxrow:active{background:var(--soft)}
@@ -954,7 +958,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxnone{padding:30px 14px;text-align:center;color:var(--muted);font-size:14px}
 .mxh3{margin:18px 6px 2px;font-size:15px;font-weight:800}
 .mxnote{margin:0 6px 6px;font-size:13px;color:var(--muted)}
-.mxfoot{flex:none;padding:6px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);max-height:34%;overflow-y:auto}
+.mxfoot{padding:6px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);margin-top:8px}
 .mxtoast{position:fixed;z-index:40;left:50%;top:calc(126px + env(safe-area-inset-top,0px));transform:translate(-50%,-10px);max-width:calc(100% - 40px);padding:11px 16px;border-radius:var(--r-md);
   background:rgba(24,24,27,.94);color:#fff;font-size:14px;font-weight:600;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
 .mxtoast.show{opacity:1;transform:translate(-50%,0)}
@@ -1049,7 +1053,8 @@ a.prow{text-decoration:none;color:inherit}
 .linkhead h2{margin:0;font-size:17px}
 .linktags{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 #saveStatus:empty{min-height:0;margin:0}
-.opt input:nth-child(2){flex:0 0 92px;width:92px;min-width:0}
+.opt input:nth-child(2){flex:0 0 78px;width:78px;min-width:0;padding-left:10px;padding-right:8px}
+.opt input:first-child{min-width:0}   /* more room for the option name */
 .bulcard.unread{border-color:var(--line);box-shadow:0 4px 14px rgba(24,57,92,.06)}
 .lk-row .tag2{flex:none}
 .savepill{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:30;max-width:calc(100% - 32px);display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600;box-shadow:var(--sh-2);transition:transform .3s cubic-bezier(.2,.8,.2,1);pointer-events:none;text-align:left}
@@ -1090,7 +1095,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 .mxpill.off{visibility:hidden}
 .sr{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0);white-space:nowrap;border:0}   /* read out, not shown */
 .btn.small{height:42px}
-.x{width:40px;height:40px}
+.x,.xmini,.mxx{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:var(--glass);color:var(--ink);font-size:22px;line-height:1;padding:0;display:grid;place-items:center}   /* every close button looks the same */
+.bulbody h2,.bulbody h3{margin-right:40px}
 .sechip{height:36px}
 /* ---- first run: three short steps for a brand-new store ---- */
 #builder.starting .actions,#builder.noactions .actions{display:none}
@@ -1127,7 +1133,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 /* one chip look everywhere: store sections, editor sections, filters, towns */
 .tab,.sechip,.chips button,.excities button{flex:none;height:36px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--line2);
   background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-.tab[aria-current="true"],.sechip.on,.chips button[aria-pressed="true"],.excities button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface);box-shadow:none}
+.tab[aria-current="true"],.sechip.on,.chips button[aria-pressed="true"],.excities button[aria-pressed="true"]{background:var(--plum);border-color:var(--plum-ink);color:#fff;box-shadow:none}
 .sechip{height:32px;padding:0 12px;font-size:13px}
 .tag2.paid{background:var(--ok-bg);color:var(--ok)}.tag2.claim{background:var(--warn-bg);color:var(--warn)}.tag2.unpaid{background:var(--err-bg);color:var(--err)}
 </style>
@@ -2132,6 +2138,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-council", at: "2026-10-18", title: "Sharper look, easier start", body: "Dark mode is clearer: main buttons and the option you picked now stand out. Insights shows the number on each day's bar. A new store starts with Add your first item, and if something is missing when you publish, the app takes you straight to it. On store pages, customers now see your first menu section before any ad." },
   { id: "u-20261018-unpaid", at: "2026-10-18", title: "Publish within 10 days", body: "Stores that aren't published (paid for) within 10 days of signing up are now removed, so link names and phone numbers don't get stuck. If your store isn't live yet, the Publish card on your Store page shows how many days you have left. Stores already waiting today get the full 10 days from now." },
   { id: "u-20261017-polish", at: "2026-10-17", title: "A faster, clearer app", body: "We gave the whole app a check-up. It opens faster on slow internet, and store photos load much quicker for your customers. Dark mode is easier to read, with clear badges and buttons. Prices now always show two decimals, like RM13.00. If your store isn't live yet, Publish my store is now at the top of your Store page. Nothing you need to do." },
   { id: "u-20261017-profile2", at: "2026-10-17", title: "Phone number, email and PIN in one place", body: "Tap your store name at the top of Account to open Profile. Your phone number, email and PIN are all there: tap the pencil next to one to change it. We now say \"phone number\" everywhere instead of \"WhatsApp number\". Orders still come to that number on WhatsApp." },
@@ -2195,7 +2202,8 @@ function bulletinItems(){
     const max = Math.max(1, ...last.map(x => x.v));
     const best = last.reduce((a, x) => x.v > a.v ? x : a, last[0]);
     const dn = d => new Date(d + "T00:00:00").toLocaleDateString("en-MY", { weekday: "short" });
-    const bars = `<div class="bulbars">${last.map(x => `<div><i class="${x.v ? "" : "low"}" style="height:${Math.max(4, Math.round(x.v / max * 44))}px"></i><span>${dn(x.date).slice(0, 2)}</span></div>`).join("")}</div>`;
+    // each bar shows its number, and a screen reader hears the whole week
+    const bars = `<div class="bulbars" role="img" aria-label="${esc("Visits: " + last.map(x => dn(x.date) + " " + x.v).join(", "))}">${last.map(x => `<div><b class="bv">${x.v}</b><i class="${x.v ? "" : "low"}" style="height:${Math.max(4, Math.round(x.v / max * 40))}px"></i><span>${dn(x.date).slice(0, 2)}</span></div>`).join("")}</div>`;
     push("ins-" + wk, "chart", "Shop insights · last 7 days", v ? `${v} visit${v === 1 ? "" : "s"} this week` : "No visits yet this week",
       v ? `<div class="bulnums"><div><b>${v}</b><span>Store visits</span></div><div><b>${o}</b><span>Order taps</span></div><div><b>${Math.round(o / v * 100)}%</b><span>Ordered</span></div></div>
         ${bars}<p>${change === null ? "" : change >= 0 ? `<span class="up">Up ${change}%</span> on last week. ` : `<span class="down">Down ${Math.abs(change)}%</span> on last week. `}Your busiest day was <b>${dn(best.date)}</b>.</p>`
@@ -2216,7 +2224,7 @@ function bulletinItems(){
     to ? `<a class="btn small solid" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Link Kedai App, I'd like to book an ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Book an ad</a>` : "");
   // smart tips from the store itself
   const named = S.items.filter(it => it.n.trim()), noPhoto = named.filter(it => !safeImg(it.img)).length;
-  if (noPhoto && S.layout !== "minimal") push("tip-photos-" + noPhoto, "tip", "Tip", `${noPhoto} item${noPhoto === 1 ? " has" : "s have"} no photo`, "Stores with a photo on every item get more orders. Open each item under Products and tap Upload photo.");
+  if (noPhoto && S.layout !== "minimal") push("tip-photos-" + noPhoto, "tip", "Tip", `${noPhoto} item${noPhoto === 1 ? " has" : "s have"} no photo`, "Stores with a photo on every item get more orders. Open each item under " + W(S).list + " and tap Upload photo.");
   if (!safeImg(S.logo)) push("tip-logo", "tip", "Tip", "Add your logo", "A logo makes your store look professional and helps customers recognise you.");
   if (named.length === 1) push("tip-more", "tip", "Tip", "Add more items", "Stores with at least 5 items get more visits. Add your other products or services.");
   if (S.closed) push("tip-closed", "tip", "Tip", "Your store shows as Closed", "Customers can't order while your store is closed. Switch it to Open under Store status when you're ready.");
@@ -2290,7 +2298,7 @@ function edRow(v, icon, title, sub, done, i){
 }
 // The newest update the seller hasn't read yet, shown on their store home until they read or close it
 function shoutHtml(){
-  const seen = bulSeen(), fresh = newsItems().filter(x => /^u-/.test(x.id) && !seen.has(x.id));
+  const seen = bulSeen(), fresh = newsItems().filter(x => /^u-/.test(x.id) && !seen.has(x.id) && !(x.id === "u-20261018-unpaid" && STATUS !== "live"));
   if (!fresh.length) return "";
   const x = fresh[0], u = APP_UPDATES.find(u => u.id === x.id);
   return `<section class="card bulshout" id="bulShout"><div class="bulic">${IC.ad}</div>
@@ -2561,7 +2569,7 @@ function edProduct(i){
     ${it.o.map((o,j)=>`
       <div class="opt">
         <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}" aria-label="Option name">
-        <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p||""}" placeholder="${esc(W(S).ex.price)}" aria-label="Price">
+        <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p ? (+o.p).toFixed(2) : ""}" placeholder="${esc(W(S).ex.price)}" aria-label="Price">
         <button data-act="delopt" data-i="${i}" data-j="${j}" aria-label="Remove option">${ico("x",18)}</button>
       </div>`).join("")}
     <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add another</button>
@@ -2972,6 +2980,12 @@ function publishCardHtml(){
     <p class="hint">It was taken offline, usually because a payment couldn't be found. ${help} to sort it out.</p>
   </section>`;
   const qr = safeUrl(SITE.qr);
+  if (!S.items.some(it => it.n.trim()) && !(S.links || []).some(l => safeUrl(l.u))) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+    <h2>Start with your ${esc(W(S).list.toLowerCase())}</h2>
+    <p class="hint">Add what you sell, with prices and photos. When your store looks right, you publish it.</p>
+    <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
+    <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="additem">${ico("plus",18,2.2)}Add your first ${esc(W(S).item)}</button>
+  </section>`;
   return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Publish your store</h2>
     <p class="hint">When your store looks right, publish it. Pay once${shownPrice() ? `, <b>${esc(shownPrice())}</b>` : ""}, and most stores go live straight away. A few get a quick safety check first (up to 24 hours).</p>
@@ -3054,7 +3068,12 @@ $("payOverlay").addEventListener("change", e => { if (e.target.dataset.media ===
 
 function openPublishCheck(){
   const bad = !S.name.trim() ? "Add your shop name first." : (!S.wa || S.wa.length < 9) ? "Add your phone number first." : (!S.items.some(it => it.n.trim()) && !(S.links || []).some(l => safeUrl(l.u))) ? `Add at least one ${W(S).item} or link first.` : (S.links || []).some(l => l.u.trim() && !safeUrl(l.u.trim())) ? "One of your links must start with https://." : "";
-  if (bad) return notify(bad);
+  if (bad){
+    const go = /shop name|phone number/.test(bad) ? () => edGo("details") : /https/.test(bad) ? () => edGo("links") : /at least one/.test(bad) ? () => { S.items.push(blankItem()); touch(); edGo("product", S.items.length - 1); } : null;
+    if (!go) return notify(bad);
+    ask(bad, /at least one/.test(bad) ? `Add ${W(S).item}` : "Fix it now").then(y => { if (y) go(); });   // straight to the step that's missing
+    return;
+  }
   const named = S.items.filter(it => it.n.trim());
   const row = (k, v) => `<div class="cline"><div class="cn"><span>${esc(k)}</span><b>${esc(v)}</b></div></div>`;
   $("pubSummary").innerHTML =
@@ -3165,7 +3184,7 @@ function legacyEditor(msg){
         ${it.o.map((o,j)=>`
           <div class="opt">
             <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}">
-            <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p||""}" placeholder="${esc(W(S).ex.price)}">
+            <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p ? (+o.p).toFixed(2) : ""}" placeholder="${esc(W(S).ex.price)}">
             <button data-act="delopt" data-i="${i}" data-j="${j}" aria-label="Remove option">×</button>
           </div>`).join("")}
         <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">Add option</button>
@@ -3220,6 +3239,8 @@ function onField(e){
   touch();
 }
 $("bwrap").addEventListener("input", onField);
+// prices read like money once you leave the box: 8.5 becomes 8.50
+$("bwrap").addEventListener("focusout", e => { const t = e.target; if (t.matches && t.matches('input[data-f="p"]') && t.value !== "" && isFinite(+t.value)) t.value = (+t.value).toFixed(2); });
 $("bwrap").addEventListener("change", onField);
 
 // the payment sheet sits outside the editor, so its Copy button has its own handler
@@ -3661,7 +3682,12 @@ function groupBy(idx, secOf){
   idx.forEach(k => { const name = String(secOf(k) || "").trim(); let g = secs.find(x => x.name === name); if (!g){ g = { name, idx: [] }; secs.push(g); } g.idx.push(k); });
   return secs;
 }
+// The Sponsored banner sits after the first menu section, so customers see food before ads.
+// The menu is redrawn often, so the banner is lifted back to its home spot first and never thrown away with it.
+function adHome(){ const ad = $("adWrap"); if (ad && $("menu").contains(ad)) $("stSearch").before(ad); }
+function adPlace(){ const ad = $("adWrap"), first = $("menu").querySelector(".group"); if (ad && first) first.after(ad); }
 function renderMenu(){
+  adHome();
   const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
   const linkList = (D.links || []).map((l,j) => l.u ? j : -1).filter(j => j >= 0);
   const tabs = $("secTabs"), vt = $("viewTabs"), sb = $("stSearch");
@@ -3697,6 +3723,7 @@ function renderMenu(){
   tabs.innerHTML = showTabs ? `<button class="tab" type="button" data-sec="all" aria-current="${MSEC === "all"}">All</button>` + secs.map(g => `<button class="tab" type="button" data-sec="${esc(key(g))}" aria-current="${MSEC === key(g)}">${esc(g.name || "Other")}</button>`).join("") : "";
   const shown = MSEC === "all" ? secs : secs.filter(g => key(g) === MSEC);
   $("menu").innerHTML = shown.map((g, gi) => block(g.name, g.idx.map(isLinks ? linkRow : productRow).join(""), isLinks && gi === 0)).join("");
+  adPlace();
 }
 // After switching what's shown, bring the top of the list into view if the customer had scrolled past it
 function menuToTop(){
@@ -4682,8 +4709,8 @@ async function renderExplore(){
     <section class="mxsheet" id="mxSheet" aria-label="Stores in this area" aria-hidden="true">
       <div class="mxgrab"></div>
       <div class="mxsh"><h2 id="mxShTitle">In this area</h2><button type="button" class="mxx" id="mxShClose" aria-label="Close">${ico("x", 18, 2)}</button></div>
-      <div class="mxlist" id="mxList"></div>
-      <div class="mxfoot"><button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button>${legalLinks()}${copyrightLine()}</div>
+      <div class="mxscroll" id="mxScroll"><div class="mxlist" id="mxList"></div>
+      <div class="mxfoot"><button class="btn full exinstall" id="exInstall" hidden>Install the Link Kedai App</button>${legalLinks()}${copyrightLine()}</div></div>
     </section>
     <div class="mxtoast" id="mxToast" role="status"></div>`;
   document.body.classList.add("exploring");
@@ -4892,16 +4919,16 @@ function renderHome(){
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}signup">New seller? <b>Sign up</b></a>` : ""}
       <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Browse Link Kedai App stores</b></a>
+      ${to ? `<a class="signupbox helpchat" style="margin-top:10px" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener">${chat}Questions? <b>Chat with us on WhatsApp</b></a>` : ""}
       ${legalLinks()}
       ${copyrightLine()}
-    </div>
-    ${to ? `<a class="chatfab" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">${chat}</a>` : ""}`;
+    </div>`;   // help is a row like the others, so nothing floats over the cards
   show("page");
   wireLogin();
 }
 function showMessage(title, text){
   setAccent(COLORS[0]);
-  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><a class="btn solid" href="${esc(home())}?explore">Browse stores</a><a class="btn" style="margin-left:8px" href="${esc(home())}">Go to ${esc(APP_NAME)}</a>`;
+  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><div style="display:flex;flex-wrap:wrap;gap:8px"><a class="btn solid" href="${esc(home())}?explore">Browse stores</a><a class="btn" href="${esc(home())}">Go to ${esc(APP_NAME)}</a></div>`;
   show("page");
 }
 // Installable Link Kedai App: register the offline helper on every page
