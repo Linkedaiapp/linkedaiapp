@@ -715,6 +715,7 @@ label{font-weight:600;font-size:14px}
 #builder.tabbed:not(.dirty) .actions{display:none}
 .lk-bar{display:flex;align-items:center;gap:10px;min-height:56px;margin:0 0 6px}
 .lk-bar h1{flex:1;font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0}
+.lk-bar h1{min-width:0;overflow-wrap:anywhere}.lk-bar > .iconbtn,.lk-bar > .bellbtn,.lk-bar > .btn{flex:none}   /* a long store name wraps; the buttons always stay on screen */
 .edsub{font-size:15px;font-weight:700;color:var(--muted);margin:18px 4px 8px}
 .lk-group{padding:0;overflow:hidden}
 .lk-row{display:flex;align-items:center;gap:14px;padding:14px 16px;width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
@@ -1336,7 +1337,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 <div id="store" hidden>
   <button class="btn small back" id="backBtn" hidden>Back to editor</button>
   <div class="st" id="stWrap">
-    <a class="stmore" id="stMore" href="#" aria-label="Browse more Link Kedai App stores" title="Browse more stores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
+    <a class="stmore" id="stMore" href="#" aria-label="Find more stores on Spot It!" title="Spot It!"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
     <div class="cover" id="stCover" hidden></div>
     <section class="shopcard" id="stCard">
       <div class="st-logowrap" id="stLogoWrap">
@@ -1377,7 +1378,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <p class="shopn" id="closedShop"></p>
       <h2>Store closed</h2>
       <p id="closedMsg">We're not taking orders right now. Please check back later.</p>
-      <a class="btn" id="closedMore" href="./?explore" style="margin-top:18px">Browse other stores</a>
+      <a class="btn" id="closedMore" href="./?explore" style="margin-top:18px">Find other stores on Spot It!</a>
     </div>
   </div>
 
@@ -2143,7 +2144,8 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261018-malaysia-map", at: "2026-10-18", title: "Browse shows Malaysia", body: "The Browse map now opens on Malaysia and stays there, with a bold line around Peninsular Malaysia, Sabah and Sarawak. In dark mode the map is brighter and easier to read." },
+  { id: "u-20261018-spot-it", at: "2026-10-18", title: "Meet Spot It!", body: "The store map is now called Spot It! Open it any time with the new pin button next to the store-front button at the top of your Store page, to see your shop the way customers find it. Your listing settings are under Spot It! listing." },
+  { id: "u-20261018-malaysia-map", at: "2026-10-18", title: "Spot It! shows Malaysia", body: "The Spot It! map now opens on Malaysia and stays there, with a bold line around Peninsular Malaysia, Sabah and Sarawak. In dark mode the map is brighter and easier to read." },
   { id: "u-20261018-council", at: "2026-10-18", title: "Sharper look, easier start", body: "Dark mode is clearer: main buttons and the option you picked now stand out. Insights shows the number on each day's bar. A new store starts with Add your first item, and if something is missing when you publish, the app takes you straight to it. On store pages, customers now see your first menu section before any ad." },
   { id: "u-20261018-unpaid", at: "2026-10-18", title: "Publish within 10 days", body: "Stores that aren't published (paid for) within 10 days of signing up are now removed, so link names and phone numbers don't get stuck. If your store isn't live yet, the Publish card on your Store page shows how many days you have left. Stores already waiting today get the full 10 days from now." },
   { id: "u-20261017-polish", at: "2026-10-17", title: "A faster, clearer app", body: "We gave the whole app a check-up. It opens faster on slow internet, and store photos load much quicker for your customers. Dark mode is easier to read, with clear badges and buttons. Prices now always show two decimals, like RM13.00. If your store isn't live yet, Publish my store is now at the top of your Store page. Nothing you need to do." },
@@ -2153,21 +2155,21 @@ const APP_UPDATES = [
   { id: "u-20261017-profile", at: "2026-10-17", title: "Your Profile", body: "Tap your store name at the top of Account to see your Profile: your store link and how you log in. Delete account is now a small button at the bottom of Profile, so it can't be tapped by mistake." },
   { id: "u-20261017-front", at: "2026-10-17", title: "See your store as customers do", body: "Tap the shop icon next to the bell to open your store front, exactly as customers see it. Your own visits never count in Insights, only customers' do. Your logo, colour and store style are now under Shop details." },
   { id: "u-20261017-dark", at: "2026-10-17", title: "New: dark mode", body: "Link Kedai App now goes dark when your phone is in dark mode, and light when it isn't. Your store does the same for your customers." },
-  { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Browse stores has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
-  { id: "u-20261017-look", at: "2026-10-17", title: "Your logo on the map, and PIN dots", body: "Browse stores now shows each shop's own logo on its map pin. Your 6-digit PIN shows as six dots as you type, like a phone lock screen. Deleting your account now waits 5 seconds before the Delete button works, so it can't happen by accident." },
-  { id: "u-20261017-fixes", at: "2026-10-17", title: "Smoother editing and ordering", body: "The phone's Back button now steps back through your editor properly. Links pasted without https:// and short link names are saved. If your PIN was changed on another phone, we ask for it instead of failing to save. Customers can clear an optional date, and Browse search finds every word you type." },
+  { id: "u-20261017-about", at: "2026-10-17", title: "Full screen, and About us", body: "The installed app now opens full screen, and pages no longer zoom by accident (the map still zooms). Spot It! has a cleaner map: tap the small i for the map credits. See who made Link Kedai App under About us, at the bottom of each page." },
+  { id: "u-20261017-look", at: "2026-10-17", title: "Your logo on the map, and PIN dots", body: "Spot It! now shows each shop's own logo on its map pin. Your 6-digit PIN shows as six dots as you type, like a phone lock screen. Deleting your account now waits 5 seconds before the Delete button works, so it can't happen by accident." },
+  { id: "u-20261017-fixes", at: "2026-10-17", title: "Smoother editing and ordering", body: "The phone's Back button now steps back through your editor properly. Links pasted without https:// and short link names are saved. If your PIN was changed on another phone, we ask for it instead of failing to save. Customers can clear an optional date, and Spot It! search finds every word you type." },
   { id: "u-20261016-news", at: "2026-10-16", title: "Insights and News now have their own pages", body: "Your shop numbers are in the Insights tab. Tips, store status and what's new are in News, under Account below Help, or tap the bell. When you've read a post, tap × to remove it, or Clear all." },
   { id: "u-20261016-daysoff", at: "2026-10-16", title: "New: mark your days off", body: "Under Store status, tap the dates you aren't taking orders, or pick a day of the week that's always off. Customers can't choose those dates when they order." },
   { id: "u-20261016-faster", at: "2026-10-16", title: "Your store now opens faster", body: "Link Kedai App moved to a faster server. Your store page and your editor now load in a second or two, even when nobody has visited for a while." },
-  { id: "u-20261016-pin", at: "2026-10-16", title: "New: show customers where your shop is", body: "Have a real shop? In Browse listing, drag the pin to your door and turn on Show my exact location. Customers can get directions straight to you. If you leave it off, your exact spot stays private." },
+  { id: "u-20261016-pin", at: "2026-10-16", title: "New: show customers where your shop is", body: "Have a real shop? In Spot It! listing, drag the pin to your door and turn on Show my exact location. Customers can get directions straight to you. If you leave it off, your exact spot stays private." },
   { id: "u-20261015-keepme", at: "2026-10-15", title: "Stay logged in on your phone", body: "Tick Keep me logged in on this phone when you log in, and you won't need your PIN on that phone for 90 days. Log out anytime under Account." },
-  { id: "u-20261015-shortcuts", at: "2026-10-15", title: "New: open or close your shop in one tap", body: "Add Link Kedai App to your home screen. On Android, press and hold the icon to open or close your shop, or jump to My store, Browse or Affiliate Shops." },
+  { id: "u-20261015-shortcuts", at: "2026-10-15", title: "New: open or close your shop in one tap", body: "Add Link Kedai App to your home screen. On Android, press and hold the icon to open or close your shop, or jump to My store, Spot It! or Affiliate Shops." },
   { id: "u-20261015-email", at: "2026-10-15", title: "New: add your email", body: "Under Account, add your email. You can then log in with it, and if you forget your PIN you can reset it yourself with a code we email you." },
   { id: "u-20261015-account", at: "2026-10-15", title: "Change your phone number or PIN", body: "Under Account, you can now change the phone number your orders go to, and the PIN you log in with. Your store link stays the same." },
   { id: "u-20261015-verified", at: "2026-10-15", title: "A new Verified look", body: "Verified stores now show a blue ring and tick around their logo, everywhere in Link Kedai App." },
-  { id: "u-20261014-affiliate", at: "2026-10-14", title: "New: Affiliate Shops", body: "Sell with Shopee or other shop links? Paste your affiliate link and we fill in the photo and name for you. Stores with only shop links are listed under Affiliate Shops in Browse stores." },
+  { id: "u-20261014-affiliate", at: "2026-10-14", title: "New: Affiliate Shops", body: "Sell with Shopee or other shop links? Paste your affiliate link and we fill in the photo and name for you. Stores with only shop links are listed under Affiliate Shops on Spot It!." },
   { id: "u-20261014-bigstores", at: "2026-10-14", title: "Big stores are easier to shop", body: "Stores with lots of items now show filters and a search box, so customers find what they want faster. Pages also open instantly from a saved copy." },
-  { id: "u-20260925-browse", at: "2026-09-25", title: "New: get found in Browse stores", body: "Turn on List my store in Browse stores, then pick your state, area and category, so customers can find you in the Link Kedai App. You can also add your location for Nearest first. It stays private." },
+  { id: "u-20260925-browse", at: "2026-09-25", title: "New: get found on Spot It!", body: "Turn on List my store on Spot It!, then pick your state, area and category, so customers can find you in the Link Kedai App. You can also add your location for Nearest first. It stays private." },
   { id: "u-20260925-bulletin", at: "2026-09-25", title: "New: your Bulletin board", body: "Your weekly shop insights, tips and Link Kedai App news now appear here. Look for the red number on the bell." },
   { id: "u-20260925-verified", at: "2026-09-25", title: "New: Verified badge", body: "Stores with a confirmed payment that pass Link Kedai App Guard now show a blue Verified tick on their logo, so customers can trust your link." },
   { id: "u-20260924-guard", at: "2026-09-24", title: "Link Kedai App Guard keeps stores safe", body: "Every store is checked automatically for prohibited items, and customers can report stores. This keeps Link Kedai App trusted for honest sellers like you." },
@@ -2341,7 +2343,7 @@ function edHome(msg){
   const allDone = done === total, mark = v => allDone ? null : v;   // all set up: no progress bar or Done tags, just a clean menu
   const named = S.items.filter(it => it.n.trim()), out = named.filter(it => it.out).length;
   return `
-  ${edTop(S.name || "My store", "", `<button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
+  ${edTop(S.name || "My store", "", `<a class="bellbtn iconbtn" href="${esc(home())}?explore" aria-label="Open Spot It!, the map of stores" title="Spot It!">${ico("pin",21)}</a><button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
   ${SESSION.admin ? "" : publishCardHtml()}
   ${SESSION.admin ? "" : shoutHtml()}
@@ -2362,7 +2364,7 @@ function edHome(msg){
   <section class="card lk-group">
     ${edRow("details","store","Shop details", [S.name || "No name yet", S.wa ? "Phone added" : "No phone number yet", safeImg(S.logo) ? "Logo added" : "Logo, colour and style"].join(" · "), mark(st.details))}
     ${edRow("products","box", W(S).list, named.length ? `${named.length} ${named.length === 1 ? W(S).item : W(S).item + "s"}${out ? ` · ${out} sold out` : ""}` : "Nothing added yet", mark(st.products))}
-    ${edRow("listing","pin","Browse listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
+    ${edRow("listing","pin","Spot It! listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
   </section>
 `;
@@ -2591,14 +2593,14 @@ function edProduct(i){
       <span class="ctl"><button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button><button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button></span></div>
   </section>`;
 }
-function edListing(){ setTimeout(initPinMap, 0); return `${edTop("Browse listing", "home")}${edListingCard()}`; }
+function edListing(){ setTimeout(initPinMap, 0); return `${edTop("Spot It! listing", "home")}${edListingCard()}`; }
 function edListingCard(){
   const cities = CITIES[S.loc.state] || [];
   const other = S.loc.city && !cities.includes(S.loc.city), aff = affOnly(S);
   return `
   <section class="card" id="locCard">
-    <label class="check" style="margin-top:0"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}><span>List my store in Browse stores</span></label>
-    <p class="hint">${aff ? "You only share shop links, so customers find you under <b>Affiliate Shops</b> in Browse stores, not as a pin on the map. Just pick your state and category." : "Customers using the Link Kedai App can find you by state, city and category."}</p>
+    <label class="check" style="margin-top:0"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}><span>List my store on Spot It!</span></label>
+    <p class="hint">${aff ? "You only share shop links, so customers find you under <b>Affiliate Shops</b> on Spot It!, not as a pin on the map. Just pick your state and category." : "Customers using the Link Kedai App can find you by state, city and category."}</p>
     <div id="locBox" ${S.loc.on ? "" : "hidden"}>
       <label>State<select data-floc="state"><option value="">Choose your state</option>${STATES.map(st => `<option ${S.loc.state === st ? "selected" : ""}>${st}</option>`).join("")}</select></label>
       ${aff ? "" : `<label>City or town<select data-floc="city" ${S.loc.state ? "" : "disabled"}><option value="">${S.loc.state ? "Choose your city or town" : "Choose a state first"}</option>${cities.map(c => `<option ${S.loc.city === c ? "selected" : ""}>${c}</option>`).join("")}<option value="__other" ${other || EDOTHER ? "selected" : ""}>Other town</option></select></label>
@@ -2897,9 +2899,9 @@ function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.cla
 // ---------- Changes save by themselves a moment after the seller stops typing ----------
 let AUTOSAVE_T = 0, EDITV = 0, SAVING = null;
 function saveProblem(){
-  if (S.loc.on && !S.loc.state) return "Choose your state under Browse listing.";
-  if (S.loc.on && !S.loc.city && !affOnly(S)) return "Choose your city or town under Browse listing.";
-  if (S.loc.on && S.loc.pub && S.loc.lat == null && !affOnly(S)) return "Drag the pin onto your shop under Browse listing.";
+  if (S.loc.on && !S.loc.state) return "Choose your state under Spot It! listing.";
+  if (S.loc.on && !S.loc.city && !affOnly(S)) return "Choose your city or town under Spot It! listing.";
+  if (S.loc.on && S.loc.pub && S.loc.lat == null && !affOnly(S)) return "Drag the pin onto your shop under Spot It! listing.";
   if (!S.name.trim()) return "Add your shop name.";
   if (!S.wa || S.wa.length < 9) return "Add your phone number, so orders can reach you.";
   return "";
@@ -3406,8 +3408,8 @@ async function saveNow(){
   finally { SAVING = null; }
 }
 async function saveStore(){
-  if (S.loc.on && !S.loc.state) return notify("Choose your state under Browse listing, so customers can find you.");
-  if (S.loc.on && !S.loc.city && !affOnly(S)) return notify("Choose your city or town under Browse listing, so customers can find you.");
+  if (S.loc.on && !S.loc.state) return notify("Choose your state under Spot It! listing, so customers can find you.");
+  if (S.loc.on && !S.loc.city && !affOnly(S)) return notify("Choose your city or town under Spot It! listing, so customers can find you.");
   if (!S.name.trim()) return notify("Add your shop name first.");
   if (!S.wa || S.wa.length < 9) return notify("Add your phone number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
@@ -4296,14 +4298,14 @@ function legalDoc(which){
       <li><b>Email (optional):</b> if you add one, we use it only to let you log in and to send you codes, for example to reset your PIN. It is never shown on your store.</li>
       <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
       <li><b>Payment receipts:</b> the receipt screenshot you upload when you publish. Receipts are private and only seen by us.</li>
-      <li><b>Store listing (optional):</b> if you list your store in Browse stores, customers see your state, the area name you write and your category. If you also add your location for "Nearest first", it stays private: customers only see roughly how far away you are, never where. If you turn on "I have a shop customers can visit", customers see your exact shop location and the address you write, so they can get directions. You can turn it off any time.</li>
+      <li><b>Store listing (optional):</b> if you list your store on Spot It!, customers see your state, the area name you write and your category. If you also add your location for "Nearest first", it stays private: customers only see roughly how far away you are, never where. If you turn on "I have a shop customers can visit", customers see your exact shop location and the address you write, so they can get directions. You can turn it off any time.</li>
     </ul>
     <h2>2. Information from customers</h2>
     <ul>
       <li><b>Orders are not stored by ${A}.</b> Your order is written on your own phone and sent by you through WhatsApp directly to the seller.</li>
       <li><b>Your cart</b> is saved only on your own device so it isn't lost if you close the page.</li>
       <li><b>Reports</b> you send about a store are anonymous: we only receive the reason and any note you write.</li>
-      <li><b>Your location</b> in Browse stores is used only on your own phone to sort stores by distance. It is never sent to ${A} or to sellers.</li>
+      <li><b>Your location</b> on Spot It! is used only on your own phone to sort stores by distance. It is never sent to ${A} or to sellers.</li>
       <li><b>Visit counts:</b> we count store visits, order taps and ad views without any names or numbers, to show sellers simple insights.</li>
     </ul>
     <h2>3. How we use it</h2>
@@ -4556,7 +4558,7 @@ function mxDraw(force){
     : EX.aff && !EX.stores.some(s => s.aff)
     ? `<b>No Affiliate Shops yet</b><p>Sellers who share Shopee, TikTok Shop and other shop links appear here.</p><button type="button" class="btn solid" id="mxClear">Back to all stores</button>`
     : EX.fav && !EX.favs.size
-    ? `<b>No saved stores yet</b><p>Tap the heart on a store to keep it here.</p><button type="button" class="btn solid" id="mxClear">Browse stores</button>`
+    ? `<b>No saved stores yet</b><p>Tap the heart on a store to keep it here.</p><button type="button" class="btn solid" id="mxClear">Spot It!</button>`
     : have
     ? `<b>No stores match</b><p>${EX.q ? "Nothing matches your search. Try other words, or clear it." : "Try another category or clear your filters."}</p><button type="button" class="btn solid" id="mxClear">${EX.q ? "Clear search" : "Clear filters"}</button>`
     : `<b>No stores listed yet</b><p>Link Kedai App stores appear here when sellers list them.</p>${signupOpen() ? `<a class="btn solid" href="${esc(home())}signup">Are you a seller? Open a store</a>` : ""}`;
@@ -4704,7 +4706,7 @@ function exLocate(silent, fly){
 async function renderExplore(){
   mxDestroy();
   const rtok = ROUTE_TOK;
-  setAccent(COLORS[0]); document.title = APP_NAME + " · Browse stores";
+  setAccent(COLORS[0]); document.title = APP_NAME + " · Spot It!";
   let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
   if (me && !(me.at > Date.now() - 864e5)) me = null;   // a day old: the phone may be somewhere else now
   EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, aff: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
@@ -4727,7 +4729,7 @@ async function renderExplore(){
     <a class="mxinfo" href="${esc(home())}about#map" aria-label="Map credits and about us">i</a>
     <button type="button" class="mxpill mxg off" id="mxPill"><span>${esc("Finding stores...")}</span></button>
     <section class="mxcard" id="mxCard" aria-live="polite"></section>
-    <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("pin", 22)}<span>Browse</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart", 22)}</span><span>Saved</span></button></nav>
+    <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("pin", 22)}<span>Spot It!</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart", 22)}</span><span>Saved</span></button></nav>
     <div class="mxscrim" id="mxScrim"></div>
     <section class="mxsheet" id="mxSheet" aria-label="Stores in this area" aria-hidden="true">
       <div class="mxgrab"></div>
@@ -4880,7 +4882,7 @@ function renderAbout(){
     <div class="top"><span class="brand">${A}</span><a class="btn small" href="${esc(home())}">Home</a></div>
     <article class="legal about">
       <h1>About us</h1><p class="updated">The people and tools behind ${A}</p>
-      <p>${A} helps home sellers in Malaysia take orders on WhatsApp with one simple store link. No app to download, no commission. Customers find sellers near them in Browse stores.</p>
+      <p>${A} helps home sellers in Malaysia take orders on WhatsApp with one simple store link. No app to download, no commission. Customers find sellers near them on Spot It!.</p>
       <h2>The people who made it</h2>
       <ul>
         <li><b>The ${A} founder</b>: had the idea, runs the app, checks every new store and helps sellers on WhatsApp.</li>
@@ -4889,7 +4891,7 @@ function renderAbout(){
         <li><b>Our customers</b>: everyone who orders, saves a favourite store and reports anything that looks wrong.</li>
       </ul>
       <h2 id="map">Map credits</h2>
-      <p>The map in Browse stores is made possible by free and open projects:</p>
+      <p>The map on Spot It! is made possible by free and open projects:</p>
       <ul>
         <li>Map data © ${ext("https://www.openstreetmap.org/copyright", "OpenStreetMap contributors")}, available under the Open Database License.</li>
         <li>Map style and tiles by ${ext("https://openfreemap.org", "OpenFreeMap")} and ${ext("https://openmaptiles.org", "OpenMapTiles")}.</li>
@@ -4943,7 +4945,7 @@ function renderHome(){
         <span class="authlink">Forgot your PIN? <button type="button" class="linkbtn" id="lForgot">Reset it</button></span>
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}signup">New seller? <b>Sign up</b></a>` : ""}
-      <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Browse Link Kedai App stores</b></a>
+      <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Find stores on Spot It!</b></a>
       ${to ? `<a class="signupbox helpchat" style="margin-top:10px" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener">${chat}<span>Questions? <b>Chat on WhatsApp</b></span></a>` : ""}
       ${legalLinks()}
       ${copyrightLine()}
@@ -4953,7 +4955,7 @@ function renderHome(){
 }
 function showMessage(title, text){
   setAccent(COLORS[0]);
-  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><div style="display:flex;flex-wrap:wrap;gap:8px"><a class="btn solid" href="${esc(home())}?explore">Browse stores</a><a class="btn" href="${esc(home())}">Go to ${esc(APP_NAME)}</a></div>`;
+  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><div style="display:flex;flex-wrap:wrap;gap:8px"><a class="btn solid" href="${esc(home())}?explore">Spot It!</a><a class="btn" href="${esc(home())}">Go to ${esc(APP_NAME)}</a></div>`;
   show("page");
 }
 // Installable Link Kedai App: register the offline helper on every page
