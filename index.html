@@ -143,8 +143,8 @@ textarea{min-height:72px;resize:vertical}
   #splash{transition:opacity .3s ease,visibility .3s ease}
 }
 
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brandmark img,:root:not([data-theme="light"]) .bulhead img,:root:not([data-theme="light"]) .lkload img,:root:not([data-theme="light"]) .brand::before{filter:brightness(0) invert(1)}}
-:root[data-theme="dark"] .brandmark img,:root[data-theme="dark"] .bulhead img,:root[data-theme="dark"] .lkload img,:root[data-theme="dark"] .brand::before{filter:brightness(0) invert(1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brandmark img,:root:not([data-theme="light"]) .bulhead img:not(.botav),:root:not([data-theme="light"]) .lkload img,:root:not([data-theme="light"]) .brand::before{filter:brightness(0) invert(1)}}
+:root[data-theme="dark"] .brandmark img,:root[data-theme="dark"] .bulhead img:not(.botav),:root[data-theme="dark"] .lkload img,:root[data-theme="dark"] .brand::before{filter:brightness(0) invert(1)}
 /* ---------- Home: centred brand + login, like Instagram ---------- */
 .auth{max-width:380px;margin:0 auto;padding:8vh 4px 120px;text-align:center}
 .brandmark{display:flex;flex-direction:column;align-items:center;gap:14px}
@@ -260,6 +260,14 @@ textarea{min-height:72px;resize:vertical}
 .bulshout{display:flex;gap:12px;position:relative;border-color:var(--plum-ink)}.bulshout .bulbody{padding-right:34px}.bulshout p{margin:4px 0 10px}
 .bulic{width:36px;height:36px;border-radius:var(--r-sm);flex:none;display:grid;place-items:center;background:var(--soft);color:var(--plum-ink)}
 .bulic svg{width:19px;height:19px}
+.botav{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}   /* the News bot's picture */
+.bulhead .botav{width:56px;height:56px}
+.askbot .bulbody p{color:var(--ink)}.askbot .bulcta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.askme{margin:0 0 10px auto;max-width:85%;width:fit-content;padding:10px 14px;border-radius:18px 18px 4px 18px;background:var(--soft);border:1px solid var(--line);color:var(--ink);font-size:14px;line-height:1.4;overflow-wrap:anywhere;scroll-margin-top:72px}
+.askmore{margin-top:12px}.askmore .sechips{margin-top:6px}
+.askrow{display:flex;gap:8px;align-items:stretch}.askrow input{flex:1;min-width:0;margin:0}.askrow .btn{flex:none}
+.askall summary{padding:14px 16px;font-weight:700;cursor:pointer}
+.asktile{overflow:hidden;padding:0}.asktile img{width:100%;height:100%;object-fit:cover;background:#fff}
 .bulbody{flex:1;min-width:0}
 .bulmeta{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .bulshout .bulbody .hint{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
@@ -857,6 +865,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 .mxerr{position:fixed;left:16px;right:16px;top:30%;bottom:16px;z-index:5;text-align:center;display:grid;gap:12px;justify-items:center;align-content:start;overflow-y:auto}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #mxMap .maplibregl-canvas,:root:not([data-theme="light"]) #pinMap .maplibregl-canvas{filter:invert(.88) hue-rotate(180deg) brightness(1.05) contrast(.92)}}
 :root[data-theme="dark"] #mxMap .maplibregl-canvas,:root[data-theme="dark"] #pinMap .maplibregl-canvas{filter:invert(.88) hue-rotate(180deg) brightness(1.05) contrast(.92)}
+.stnew{display:inline-block;margin:4px 0 0;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--soft);color:var(--plum-ink)}
 .mxerrlist{width:100%;display:grid;gap:8px;text-align:left}
 .mxerrrow{display:block;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none}.mxerrrow span{display:block;font-size:13px;color:var(--muted)}
 .mxg{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
@@ -1009,7 +1018,7 @@ a.prow{text-decoration:none;color:inherit}
 .warow b{font-size:16px}
 .tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:var(--verify-ink)}
 /* browse-stores button in the top-right corner, clear of the logo */
-.stmore{left:auto;right:12px}
+.stmore{left:auto;right:12px}.stmore.stshare{right:64px}.stmore.stshare.solo{right:12px}
 .stname{font-size:clamp(22px,6vw,28px);margin:8px 0 2px}
 /* Menu / Shop links switch and section chips stay at the top while scrolling */
 .stnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg)}
@@ -1029,6 +1038,13 @@ a.prow{text-decoration:none;color:inherit}
 .pmeta{margin-top:6px}
 .addb{width:30px;height:30px;right:-5px;bottom:-5px}
 .plink h3{-webkit-line-clamp:2;line-clamp:2}
+.llist .lrow{align-items:center;padding:8px 12px;gap:12px;min-height:60px;text-decoration:none;color:inherit}
+.lthumb{position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;flex:none;background:var(--soft);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--muted)}
+.lthumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.llist .ptext{flex:1;min-width:0}.llist h3{font-size:15px;font-weight:600;line-height:1.3;margin:0;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.llist .pmeta{margin-top:2px;gap:6px}.llist .pprice{font-size:14px}
+.lbrand{font-size:12px;font-weight:600;color:var(--muted)}.llist .pprice+.lbrand::before{content:"· ";}
+.lgo{flex:none;color:var(--muted);display:grid;place-items:center;width:28px}
 .group{padding:0 14px 4px}
 .group h2{font-size:18px;margin:12px 2px 8px}
 /* items without a photo: no empty letter tile in the list, just the add button */
@@ -1203,7 +1219,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 <div class="overlay" id="bulOverlay" role="dialog" aria-modal="true" aria-labelledby="bulTitle">
   <div class="sheet">
     <button class="xmini" data-close="bulOverlay" aria-label="Close">×</button>
-    <div class="bulhead"><img src="logo.png" alt=""><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From the Link Kedai App bot</span></div></div>
+    <div class="bulhead"><img class="botav" src="bot.jpg" alt="Your assistant" loading="lazy"><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From your Link Kedai App assistant</span></div></div>
     <div id="bulList"></div>
   </div>
 </div>
@@ -1338,6 +1354,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
   <button class="btn small back" id="backBtn" hidden>Back to editor</button>
   <div class="st" id="stWrap">
     <a class="stmore" id="stMore" href="#" aria-label="Find more stores on Spot It!" title="Spot It!"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
+    <button type="button" class="stmore stshare" id="stShare" aria-label="Share this store" title="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg></button>
     <div class="cover" id="stCover" hidden></div>
     <section class="shopcard" id="stCard">
       <div class="st-logowrap" id="stLogoWrap">
@@ -1346,6 +1363,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       </div>
       <span class="stplace" id="stPlace" hidden></span>
       <h1 class="stname" id="stName"></h1>
+      <span class="stnew" id="stNew" hidden>New store</span>
       <p class="tag" id="stTag"></p>
       <div class="stvisit" id="stVisit" hidden></div>
     </section>
@@ -1710,7 +1728,7 @@ function normalize(d){
 function setAccent(c){ document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--soft", c + "1F"); }
 // Every picture fades in once it has loaded; broken ones stop shimmering too
 // ---------- Counting for shop and ad insights (anonymous, no personal data) ----------
-let STORE_ID = "", STORE_VERIFIED = false, STORE_PLACE = null;
+let STORE_ID = "", STORE_VERIFIED = false, STORE_PLACE = null, STORE_TRIAL = false;
 // Stores this phone has edited: opening them here (the storefront button, the Open link, or the link itself) isn't a customer visit
 function ownStores(){ try { return JSON.parse(localStorage.getItem("lk-own") || "[]"); } catch(e){ return []; } }
 function markOwn(id){ try { const a = ownStores().filter(x => x !== id); a.unshift(id); localStorage.setItem("lk-own", JSON.stringify(a.slice(0, 10))); } catch(e) {} }
@@ -2091,7 +2109,7 @@ function renderStart(msg, mode){
       <label>Choose a 6-digit PIN<span class="pinwrap"><input type="password" id="cPin" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <label>Type the PIN again<span class="pinwrap"><input type="password" id="cPin2" inputmode="numeric" maxlength="6" autocomplete="new-password"><button type="button" class="pineye" data-eye="cPin2" aria-label="Show PIN" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
       <p class="hint">You'll log in with your phone number and this PIN.</p>
-      <p class="hint">Building and previewing is free. Publish (pay) within 10 days of signing up, or your unpaid store is removed and the link name is free again.</p>
+      <p class="hint">Building is free, and your store can go live free for 14 days. Then pay once to keep it. Go live within 10 days of signing up, or the unused store is removed.</p>
       <div class="rules">
         <b>Not allowed on ${esc(APP_NAME)}</b>
         <p>Drugs, vape and cigarettes, alcohol, adult content or services, weapons, gambling, and fake or illegal goods.</p>
@@ -2144,6 +2162,11 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-share", at: "2026-10-18", title: "Customers can share your store", body: "Your store page now has a Share button at the top right. Customers tap it to send your store to friends on WhatsApp, Telegram, Facebook and more, so word about your shop spreads further." },
+  { id: "u-20261018-link-list", at: "2026-10-18", title: "Shop links are now a tidy list", body: "On your store, shop links now always show as a simple list: a small photo, the name, the price and the shop. Customers can scroll through lots of links quickly. Your store style (List, Photo grid or Minimal) still applies to your own items." },
+  { id: "u-20261018-ask", at: "2026-10-18", title: "Ask your assistant anything", body: "Got a question about the app? Tap Got a question? on your Store page (or Ask your assistant under Account) and type it in English or Malay, like \"how do I add a photo?\" or \"macam mana nak tutup kedai?\". Your assistant answers right away, with a button that takes you straight there." },
+  { id: "u-20261018-bot-face", at: "2026-10-18", title: "Say hi to your assistant", body: "Your assistant, who posts your store status, tips and app news, now has a face. You'll see her on the What's new card and in News." },
+  { id: "u-20261018-free-trial", at: "2026-10-18", title: "Go live free for 14 days", body: "New stores can now go live free for 14 days: tap Go live free on your Store page, share your link and take orders. Pay once any time to keep your store live for good. If a trial ends unpaid, the store goes offline (not deleted) and comes back as soon as you pay." },
   { id: "u-20261018-spot-it", at: "2026-10-18", title: "Meet Spot It!", body: "The store map is now called Spot It! Open it any time with the new pin button next to the store-front button at the top of your Store page, to see your shop the way customers find it. Your listing settings are under Spot It! listing." },
   { id: "u-20261018-malaysia-map", at: "2026-10-18", title: "Spot It! shows Malaysia", body: "The Spot It! map now opens on Malaysia and stays there, with a bold line around Peninsular Malaysia, Sabah and Sarawak. In dark mode the map is brighter and easier to read." },
   { id: "u-20261018-council", at: "2026-10-18", title: "Sharper look, easier start", body: "Dark mode is clearer: main buttons and the option you picked now stand out. Insights shows the number on each day's bar. A new store starts with Add your first item, and if something is missing when you publish, the app takes you straight to it. On store pages, customers now see your first menu section before any ad." },
@@ -2200,7 +2223,7 @@ function bulletinItems(){
   else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Link Kedai App Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
   else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a blue Verified tick on your store logo. It shows your payment was confirmed and your store passed our safety check.");
   else if (b.status === "live" && b.paid) push("st-paid-" + b.paidAt, "shield", "Store status", "Payment received", "Your store is live. Once your payment is confirmed, you'll get the Verified badge.");
-  else if (b.status === "pending") push("st-unpaid", "shield", "Store status", "Your store isn't live yet", "When your items look right, tap Publish my store on your Store page to go live." + (unpaidLeft() ? " " + unpaidLeft() : ""));
+  else if (b.status === "pending") push("st-unpaid", "shield", "Store status", Number(b.trialEnd) > 0 ? "Your free trial has ended" : "Your store isn't live yet", (Number(b.trialEnd) > 0 ? "Your store is offline. Pay once on your Store page to bring it back." : "When your items look right, tap Go live free on your Store page. It's free for 14 days.") + (unpaidLeft() ? " " + unpaidLeft() : ""));
   // shop insights, this week vs last week
   const st = Array.isArray(b.stats) ? b.stats : [];
   if (b.status === "live" && st.length >= 7){
@@ -2239,7 +2262,7 @@ function bulletinItems(){
   // Link Kedai App updates
   const since = b.created ? new Date(b.created).toISOString().slice(0, 10) : "";   // a new seller starts with a clean slate, not every update from before they joined
   APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
-  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm the Link Kedai App bot. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights.</p>");
+  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm your Link Kedai App assistant. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights. Got a question? Tap Got a question? on your Store page and ask me.</p>");
   const gone = bulGone();   // posts the seller removed; insights and must-act status posts always stay
   return out.filter(x => x.ins || x.keep || !gone.has(x.id));
 }
@@ -2251,7 +2274,7 @@ function markSeen(items){ const seen = bulSeen(); try { localStorage.setItem(bul
 function bulCards(items, seen, canx){
   return items.map(x => `
     <article class="bulcard ${seen.has(x.id) ? "" : "unread"} ${canx && !x.keep ? "canx" : ""}">${canx && !x.keep ? `<button class="xmini" data-act="bulx" data-v="${esc(x.id)}" aria-label="Remove this post">×</button>` : ""}
-      <div class="bulic">${IC[x.kind] || IC.news}</div>
+      ${x.kind === "news" ? `<img class="botav" src="bot.jpg" alt="Your assistant">` : `<div class="bulic">${IC[x.kind] || IC.news}</div>`}
       <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h2>${esc(x.title)}</h2>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
     </article>`).join("");
 }
@@ -2274,7 +2297,7 @@ async function loadBulletin(){
   BUL = b; updateBell();
   if (b && !SESSION.admin) try { if (b.verified) localStorage.setItem("lk-ver:" + id, "1"); else localStorage.removeItem("lk-ver:" + id); } catch(e) {}
   const tags = $("linkTags"); if (tags) tags.innerHTML = linkTags();
-  const left = $("pubLeft"); if (left) left.textContent = unpaidLeft();
+  const slot = $("pubSlot"); if (slot) slot.innerHTML = publishCardHtml();   // trial or not, now that the status is here
 }
 function openBulletin(){
   const items = bulletinItems(), seen = bulSeen();
@@ -2288,7 +2311,7 @@ function openBulletin(){
 // ================= Seller: store home + section pages =================
 let EDV = "home", EDI = 0;
 let NEWSBACK = "home";
-function edGo(v, i){ if (v === "news" && EDV !== "news") NEWSBACK = EDV === "account" ? "account" : "home"; if (v !== EDV && !$("builder").hidden) inpagePush({ ed: v, i: i == null ? null : i }); EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0);
+function edGo(v, i){ if (v === "news" && EDV !== "news") NEWSBACK = EDV === "account" ? "account" : EDV === "ask" ? NEWSBACK : "home"; if (v === "ask" && EDV !== "ask") ASKBACK = EDV === "account" || EDV === "news" ? EDV : "home"; if (v !== EDV && !$("builder").hidden) inpagePush({ ed: v, i: i == null ? null : i }); EDV = v; if (i != null) EDI = i; renderEditor(); window.scrollTo(0, 0);
   const h = document.querySelector("#builder .lk-bar h1"); if (h){ h.tabIndex = -1; try { h.focus({ preventScroll: true }); } catch(e) {} } }
 // A seller with shop links but nothing of their own to sell: listed under Affiliate Shops, never as a map pin
 function affOnly(d){ return !(d.items || []).some(it => String(it.n || "").trim()) && (d.links || []).some(l => safeUrl(l.u)); }
@@ -2310,7 +2333,7 @@ function shoutHtml(){
   const seen = bulSeen(), fresh = newsItems().filter(x => /^u-/.test(x.id) && !seen.has(x.id) && !(x.id === "u-20261018-unpaid" && STATUS !== "live"));
   if (!fresh.length) return "";
   const x = fresh[0], u = APP_UPDATES.find(u => u.id === x.id);
-  return `<section class="card bulshout" id="bulShout"><div class="bulic">${IC.ad}</div>
+  return `<section class="card bulshout" id="bulShout"><img class="botav" src="bot.jpg" alt="Your assistant">
     <div class="bulbody"><div class="bulmeta">${fresh.length > 1 ? `What's new · ${fresh.length} updates` : "What's new"}</div><h2 style="margin:2px 0 0">${esc(x.title)}</h2><p class="hint">${esc(u ? u.body : "")}</p>
     <button class="btn small solid" data-act="go" data-v="news">${fresh.length > 1 ? "See all updates" : "See news"}</button></div>
     <button class="xmini" data-act="shoutx" data-v="${esc(x.id)}" aria-label="Close">×</button></section>`;
@@ -2334,7 +2357,7 @@ function priceText(it){
 function wasVerified(){ try { return localStorage.getItem("lk-ver:" + SESSION.id) === "1"; } catch(e){ return false; } }
 function linkTags(){
   const v = BUL ? !!BUL.verified : wasVerified();
-  return STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${v ? `<span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
+  return STATUS === "live" ? `<span class="tag2 paid">${ico("check",14,2.4)}Live</span>${BUL && BUL.trial ? `<span class="tag2 claim">Free trial</span>` : v ? `<span class="tag2 verified">${ico("check",14,2.6)}Verified</span>` : ""}`
     : STATUS === "review" ? `<span class="tag2 claim">${ico("clock",14,2.2)}In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2">Not published</span>`;
 }
 function edHome(msg){
@@ -2345,7 +2368,7 @@ function edHome(msg){
   return `
   ${edTop(S.name || "My store", "", `<a class="bellbtn iconbtn" href="${esc(home())}?explore" aria-label="Open Spot It!, the map of stores" title="Spot It!">${ico("pin",21)}</a><button class="bellbtn iconbtn" data-act="preview" aria-label="See my store as customers see it" title="My store front">${ico("store",21)}</button><button class="bellbtn iconbtn" data-act="go" data-v="news" aria-label="News">${ico("bell",21)}<span class="bellcount" id="bellCount" hidden></span></button>`)}
   <div class="pwabar" id="sellerPwaBar" hidden></div>
-  ${SESSION.admin ? "" : publishCardHtml()}
+  ${SESSION.admin ? "" : `<div id="pubSlot">${publishCardHtml()}</div>`}
   ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
     <div class="linkhead"><h2>${live ? "Your store link" : "Your store"}</h2><div class="linktags" id="linkTags">${linkTags()}</div></div>
@@ -2367,6 +2390,7 @@ function edHome(msg){
     ${edRow("listing","pin","Spot It! listing", S.loc.on ? [S.loc.city, S.loc.state].filter(Boolean).join(", ") || "Choose your location" : "Not listed yet", mark(st.listing))}
     ${edRow("status","clock","Store status", S.closed ? "Closed" + (S.closedMsg ? " · " + S.closedMsg : "") : "Open, taking orders", null)}
   </section>
+  ${SESSION.admin ? "" : `<section class="card lk-group"><button class="lk-row" data-act="go" data-v="ask"><span class="tile asktile"><img src="bot.jpg" alt=""></span><span class="tt"><b>Got a question?</b><span>Ask your assistant, in English or Malay</span></span><span class="chev">${ico("chevron",18)}</span></button></section>`}
 `;
 }
 function edDetails(){
@@ -2400,6 +2424,7 @@ function edLook(){   // the logo, cover, colour and style cards, shown on Shop d
       <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
       <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
     </div>
+    ${(S.links || []).some(l => safeUrl(l.u)) ? `<p class="hint">Shop links always show as a simple list, so customers can scan lots of them quickly.</p>` : ""}
   </section>`;
 }
 function edStatus(){
@@ -2680,14 +2705,141 @@ function edNews(){
   setTimeout(() => { markSeen(items); updateBell(); }, 0);
   const canClear = items.some(x => !x.keep);
   return `${edTop("News", NEWSBACK, canClear ? `<button class="btn small" data-act="bulclear">Clear all</button>` : "")}
-  <p class="hint" style="margin:-4px 2px 14px">From the Link Kedai App bot: your store status, tips and what's new. Tap × to remove a post you've read.</p>
+  <p class="hint" style="margin:-4px 2px 14px;display:flex;gap:10px;align-items:center"><img class="botav" src="bot.jpg" alt="Your assistant"><span>From your Link Kedai App assistant: your store status, tips and what's new. Tap × to remove a post you've read. Got a question? <button type="button" class="linkbtn" data-act="go" data-v="ask">Ask me</button></span></p>
   ${items.length ? bulCards(items, seen, true) : `<section class="card"><p class="hint" style="margin:0">You're all caught up. New tips and updates will show here.</p></section>`}`;
+}
+// ---------- Ask your assistant: questions about the app, answered on the phone itself (no AI service, no cost, works offline) ----------
+// Each answer has keywords (English and Malay). The question is matched to the answer whose keywords it hits most.
+// Add an entry here whenever a new feature comes out, so the assistant can explain it.
+const ASK_SYN = { gambar: "photo", foto: "photo", pic: "photo", picture: "photo", image: "photo", img: "photo", harga: "price", rm: "price", tukar: "change", ubah: "change", edit: "change", tambah: "add", letak: "add", masukkan: "add", buang: "delete", padam: "delete", hapus: "delete", remove: "delete", buka: "open", tutup: "close", closed: "close", bayar: "pay", bayaran: "pay", payment: "pay", paid: "pay", duit: "pay", kedai: "store", shop: "store", pautan: "link", lupa: "forgot", forget: "forgot", nombor: "number", no: "number", telefon: "phone", hp: "phone", fon: "phone", barang: "item", produk: "item", product: "item", menu: "item", makanan: "item", iklan: "ad", advert: "ad", advertise: "ad", peta: "map", lokasi: "location", alamat: "address", cuti: "off", holiday: "off", percuma: "free", trial: "free", pesanan: "order", tempahan: "order", oder: "order", pelanggan: "customer", customers: "customer", buyer: "customer", pembeli: "customer", warna: "colour", color: "colour", akaun: "account", keluar: "logout", masuk: "login", log: "login", signin: "login", kongsi: "share", salin: "copy", habis: "end", balik: "back", stok: "soldout", stock: "soldout", saiz: "size", perisa: "flavour", flavor: "flavour", bahagian: "section", kategori: "category", kat: "category", berapa: "cost", mahal: "cost", kos: "cost", yuran: "cost", fee: "cost", bulanan: "monthly", pulangan: "refund", refund: "refund", pulang: "refund", sah: "verified", tick: "verified", tanda: "verified", biru: "verified", laporan: "report", lapor: "report", pasang: "install", muat: "install", download: "install", gelap: "dark", emel: "email", mail: "email", pin: "pin", kata: "pin", password: "pin", laluan: "pin", padamkan: "delete", hantar: "send", terima: "receive", dapat: "receive", lihat: "see", tengok: "see", view: "see", jualan: "sales", pelawat: "visit", visitor: "visit", visitors: "visit", views: "visit", statistik: "insights", stats: "insights", analytics: "insights", berita: "news", notification: "news", notifikasi: "news", loceng: "news", tolong: "help", bantuan: "help", hubungi: "contact", admin: "contact", support: "contact", nama: "name", logo: "logo", sampul: "cover", banner: "cover", susun: "order_items", urutan: "order_items", atas: "top", reorder: "order_items", rearrange: "order_items", sort: "order_items", position: "order_items", affiliate: "affiliate", afiliat: "affiliate", shopee: "affiliate", tiktok: "affiliate", lazada: "affiliate", hilang: "missing", tak: "not", tidak: "not", cant: "not", cannot: "not", boleh: "can", macam: "how", mana: "where", bila: "when", kenapa: "why", apa: "what", hidup: "live", aktif: "live", online: "live", publish: "live", terbit: "live", siar: "live", offline: "offline", penghantaran: "delivery", hantaran: "delivery", pos: "delivery", postage: "delivery", shipping: "delivery", ambil: "pickup", tarikh: "date", hari: "day", days: "day", kawasan: "area", negeri: "state", bandar: "city", jual: "sell", selling: "sell", gaya: "style", layout: "style", theme: "style", tema: "style", mata: "currency", wang: "currency", dua: "two", second: "two", another: "two", lain: "two", kod: "code", qr: "qr", duitnow: "pay", tng: "pay", resit: "receipt", url: "link", website: "link", rokok: "vape", cigarette: "vape", arak: "alcohol", dadah: "drug", senjata: "weapon", cantik: "nice", lawa: "nice", beautiful: "nice", lambat: "slow", lembab: "slow", loading: "load", rosak: "error", stuck: "error", hang: "error", promosi: "ad", promote: "ad" };
+const ASK_STOP = new Set("a an the i my me to of in on for is it do does how can what where why when and or with your you this that be am are was will would should could please pls tolong saya aku nak hendak mahu ke di ini itu dengan untuk yang dan atau la lah ke ka kah ya ok okay".split(" "));
+function askWords(t){
+  return String(t || "").toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean)
+    .map(w => ASK_SYN[w] || (w.length > 4 && w.endsWith("s") && !w.endsWith("ss") ? ASK_SYN[w.slice(0, -1)] || w.slice(0, -1) : w))
+    .filter(w => !ASK_STOP.has(w));
+}
+const askTo = () => String((BUL && BUL.ownerWa) || SITE.ownerWa || "").replace(/\D/g, "");
+const askWa = (text, label) => { const to = askTo(); return to ? `<a class="btn small wa" href="https://wa.me/${to}?text=${encodeURIComponent(text || `Hi ${APP_NAME}, I need help with my store ${SESSION ? SESSION.id : ""}.`)}" target="_blank" rel="noopener">${ico("chat",16)}${esc(label || "WhatsApp us")}</a>` : ""; };
+const askGo = (v, label) => `<button class="btn small" data-act="go" data-v="${v}">${esc(label)}</button>`;
+const askPriceTxt = () => shownPrice() ? `a one-time <b>${esc(shownPrice())}</b>` : "a one-time fee";
+function askStatusHtml(){
+  const b = BUL || {}, live = STATUS === "live";
+  if (live && b.trial){ const left = Math.max(0, Math.ceil((Number(b.trialEnd) - Date.now()) / 864e5)); return `Your store is <b>live on a free trial</b>, with <b>${left} day${left === 1 ? "" : "s"}</b> left. Pay ${askPriceTxt()} before it ends and it stays live for good.`; }
+  if (live) return `Your store is <b>live</b>. Customers can open your link and order${S.closed ? ", but it's set to <b>Closed</b> right now, so they can't send orders. Switch it to Open under Store status" : ""}.`;
+  if (STATUS === "review") return "We have your payment and are checking your store. It goes live once approved, usually within 24 hours.";
+  if (STATUS === "offline") return "Your store is <b>offline</b> right now" + (Number(b.trialEnd) > 0 && !b.paid ? ", because your free trial ended. Pay once to bring it back, just as you left it." : ". This usually means a payment couldn't be found. WhatsApp us and we'll sort it out.");
+  return "Your store <b>isn't live yet</b>. Add what you sell, then tap <b>Go live free</b> (or Publish) on your Store page. " + esc(unpaidLeft());
+}
+const ASK_KB = [
+  { id: "additem", q: "How do I add an item?", k: "add item new list upload post first", a: () => `Go to the <b>${esc(W(S).list)}</b> tab and tap <b>+ Add</b>. Type the name and price, and add a photo if you like. Your changes save by themselves in a few seconds, or tap <b>Save</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "photo", q: "How do I add or change a photo?", k: "photo upload picture", a: () => `Open the item under <b>${esc(W(S).list)}</b> and tap <b>Upload photo</b>, then pick a picture from your phone. Tap <b>Change photo</b> to swap it, or <b>Remove</b> to take it off. Your logo and cover photo are under <b>Shop details</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "price", q: "How do I change a price?", k: "price change item set", a: () => `Open the item under <b>${esc(W(S).list)}</b> and type the new price. It saves by itself. Customers see it straight away.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "sizes", q: "How do I add sizes or flavours?", k: "size flavour option variant small large version choose type", a: () => `Open the item and tap <b>Add sizes or flavours</b>. Give each one a name and a price, like Small RM5 and Large RM8. Customers pick one when they order.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "soldout", q: "How do I mark an item sold out?", k: "soldout item finish out available unavailable", a: () => `Open the item and tick <b>Sold out for now</b>. Customers still see it, but can't order it. Untick it when it's back.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "delitem", q: "How do I delete an item?", k: "delete item", a: () => `Open the item under <b>${esc(W(S).list)}</b> and tap <b>Delete</b> at the top right. To hide it for a while instead, tick <b>Sold out for now</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "reorder", q: "How do I change the order of my items?", k: "order_items move up down item top first", a: () => `Open an item and use the up and down arrows next to <b>Position in your list</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "sections", q: "How do I group items into sections?", k: "section group category heading drink dessert", a: () => `Open an item and tap a <b>Section</b> chip, like Drinks or Desserts, or tap <b>+ New</b> to type your own. Items in the same section show together on your store.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "orders", q: "How do I receive orders?", k: "order receive customer get come whatsapp where see send", a: () => `Customers pick items on your store and tap <b>Send order on WhatsApp</b>. A chat opens to your phone number (<b>${esc(fmtWa(S.wa) || "the one on your Profile")}</b>) with the order already written in: items, total, their name, date and note. You reply to them on WhatsApp as usual.` },
+  { id: "custpay", q: "How do customers pay me?", k: "customer pay me receive money bank transfer cash", a: () => `Customers pay you directly, the way you agree on WhatsApp: bank transfer, DuitNow, cash and so on. ${esc(APP_NAME)} takes <b>no commission</b> on your sales.` },
+  { id: "delivery", q: "How do I set delivery or pickup?", k: "delivery pickup fee area courier", a: () => `You agree delivery or pickup with each customer on WhatsApp. Customers can write it in their order note, for example "Pickup Saturday 3pm". You can mention your delivery areas in the short line under your shop name in <b>Shop details</b>.`, go: () => askGo("details", "Open Shop details") },
+  { id: "openclose", q: "How do I open or close my store?", k: "open close store status break rest stop today", a: () => `Go to <b>Store status</b> on your Store page and tap <b>Open</b> or <b>Closed</b>. You can add a message, like "Closed for Hari Raya. Back on 5 April". While closed, customers can't send orders. On Android, press and hold the app icon to open or close your shop in one tap.`, go: () => askGo("status", "Open Store status") },
+  { id: "daysoff", q: "How do I mark days I'm not taking orders?", k: "off day date calendar weekend holiday rest not", a: () => `Under <b>Store status</b>, pick a day of the week that's always off, or tap dates on the calendar. Customers can't choose those dates when they order.`, go: () => askGo("status", "Open Store status") },
+  { id: "link", q: "Where is my store link?", k: "link store url share copy where address website", a: () => STATUS === "live" ? `Your store link is <b>${esc(storeLink(SESSION.id))}</b>. On your Store page, tap <b>Copy</b> or <b>Share</b> under Your store link. Put it in your WhatsApp status, bio and groups.` : `You get your store link once your store is live. Tap <b>Go live free</b> (or Publish) on your Store page.`, go: () => askGo("home", "Open my Store page") },
+  { id: "linkname", q: "Can I change my store link name?", k: "rename linkname", a: () => `Your link name stays the same, so links you've already shared keep working. You can change your shop name any time in Shop details. If you really need a new link name, WhatsApp us.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to change the link name of my store ${SESSION ? SESSION.id : ""}.`) },
+  { id: "cost", q: "How much does it cost?", k: "cost price app pay monthly much subscription commission charge", a: () => `${esc(APP_NAME)} costs ${askPriceTxt()} to publish your store. No monthly fees, and no commission on your sales. New stores can go live <b>free for 14 days</b> first.` },
+  { id: "trial", q: "How does the free trial work?", k: "free 14 day end expire after", a: () => `New stores can go live <b>free for 14 days</b>: tap <b>Go live free</b> on your Store page, share your link and take orders. Pay ${askPriceTxt()} any time to keep it live for good. If the trial ends unpaid, your store goes offline (not deleted) and comes back as soon as you pay.<br><br>${askStatusHtml()}`, go: () => askGo("home", "Open my Store page") },
+  { id: "publish", q: "How do I pay and publish my store?", k: "pay live how qr receipt bank upload", a: () => `On your Store page, tap <b>Publish my store</b> (or <b>Keep my store live</b> on a trial). Pay with DuitNow in your bank app or Touch 'n Go${hasPaypal() ? " (PayPal if you're outside Malaysia)" : ""}, take a screenshot of the receipt, then tap <b>I've paid: upload receipt and publish</b>. Most stores go live straight away; a few get a quick safety check (up to 24 hours).`, go: () => askGo("home", "Open my Store page") },
+  { id: "status", q: "Is my store live?", k: "live status not why offline working see customer review approve wait long hour", a: () => askStatusHtml(), go: () => askGo("home", "Open my Store page") },
+  { id: "removed", q: "Will my store be deleted if I don't pay?", k: "delete not pay removed 10 day unpaid lose", a: () => `A store that's never paid for is removed 10 days after sign-up, so link names and phone numbers don't get stuck. A store on a finished free trial goes offline first and is only removed if it stays unpaid. ${esc(unpaidLeft()) || "Your store is safe."}` },
+  { id: "refund", q: "Can I get a refund?", k: "refund back cancel", a: () => `You can get a refund if your store couldn't be published because of a problem on our side, or wasn't approved, and you ask within 7 days of paying, or if you were charged twice. Once your store is live, the fee isn't refundable. <a href="${esc(home())}refund" target="_blank" rel="noopener">Read the Refund Policy</a>.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to ask about a refund for my store ${SESSION ? SESSION.id : ""}.`) },
+  { id: "verified", q: "How do I get the Verified tick?", k: "verified badge blue trust", a: () => `The blue <b>Verified</b> tick shows on your logo once your payment is confirmed and your store passes ${esc(APP_NAME)} Guard, our safety check. It helps customers trust your link.${BUL && BUL.verified ? " Your store is already verified." : ""}` },
+  { id: "look", q: "How do I change my logo, colour or style?", k: "logo cover colour style look design nice list grid minimal", a: () => `Open <b>Shop details</b> and scroll to <b>Look</b>. There you can upload your logo and a cover photo, pick a brand colour, and choose a store style: List, Photo grid or Minimal.`, go: () => askGo("details", "Open Shop details") },
+  { id: "name", q: "How do I change my shop name?", k: "name shop change tagline line description", a: () => `Open <b>Shop details</b> and type a new <b>Shop name</b>. You can also add a short line under your name. Your store link stays the same.`, go: () => askGo("details", "Open Shop details") },
+  { id: "currency", q: "How do I change the currency or what I sell?", k: "currency kind service food dollar sgd", a: () => `Open <b>Shop details</b>. Under <b>What do you sell?</b> pick food, products or services, and choose your <b>Currency</b> below it.`, go: () => askGo("details", "Open Shop details") },
+  { id: "preview", q: "How do I see my store like a customer?", k: "see preview front", a: () => `Tap the shop icon at the top of your Store page (next to the bell). It opens your store front exactly as customers see it. Your own visits never count in Insights.`, go: () => `<button class="btn small" data-act="preview">${ico("store",16)}See my store</button>` },
+  { id: "spotit", q: "How do I get listed on Spot It!?", k: "map spot list location state city area category find nearby near", a: () => `Open <b>Spot It! listing</b> on your Store page and tick <b>List my store on Spot It!</b>. Pick your state, town and category. Customers using ${esc(APP_NAME)} can then find you on the map.`, go: () => askGo("listing", "Open Spot It! listing") },
+  { id: "pin", q: "How do I show my shop's exact location?", k: "exact location address pin direction waze google shop visit", a: () => `In <b>Spot It! listing</b>, tick <b>I have a shop customers can visit</b>, then drag the pin onto your shop (or tap <b>Use my current location</b>). Customers can get directions on Google Maps or Waze. Leave it off to keep your exact spot private.`, go: () => askGo("listing", "Open Spot It! listing") },
+  { id: "map", q: "How do I open the Spot It! map?", k: "map spot browse other", a: () => `Tap the pin button at the top of your Store page, next to the shop icon.`, go: () => `<a class="btn small" href="${esc(home())}?explore">${ico("pin",16)}Open Spot It!</a>` },
+  { id: "affiliate", q: "How do I add Shopee or TikTok links?", k: "affiliate paste", a: () => `Go to the <b>Links</b> tab, tap <b>+ Add</b> and paste the link. We fill in the photo and name for you. Shopee and TikTok sometimes hide them; then tap <b>Edit photo, name & price</b> and add them yourself.`, go: () => askGo("links", "Open Links") },
+  { id: "insights", q: "How many people visited my store?", k: "insights visit sales number how many count week", a: () => `Open the <b>Insights</b> tab. It shows store visits and order taps each day, and this week next to last week. Your own visits don't count.`, go: () => askGo("insights", "Open Insights") },
+  { id: "news", q: "Where do I see news and updates?", k: "news update new bell red tip", a: () => `Tap the bell at the top of your Store page. A red number means something new. You can also find News under Account.`, go: () => askGo("news", "Open News") },
+  { id: "phone", q: "How do I change my phone number?", k: "change phone number whatsapp", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>Phone number</b>. Orders go to the new number, and your store link stays the same.`, go: () => askGo("profile", "Open Profile") },
+  { id: "chpin", q: "How do I change my PIN?", k: "change pin new", a: () => `Go to <b>Account</b>, tap your store name to open <b>Profile</b>, then tap the pencil next to <b>PIN</b>.`, go: () => askGo("profile", "Open Profile") },
+  { id: "forgot", q: "I forgot my PIN", k: "forgot pin reset login", a: () => `On the log-in page, tap <b>Forgot PIN</b>. If you've added an email, we send you a code to set a new PIN. No email added? WhatsApp us and we'll help.${ME_EMAIL ? "" : " Tip: add your email on Profile now, so you can reset it yourself next time."}`, go: () => ME_EMAIL ? "" : askGo("profile", "Add my email") },
+  { id: "email", q: "How do I add my email?", k: "email add change", a: () => `Open <b>Profile</b> (tap your store name on Account) and tap the pencil next to <b>Email</b>. You can then log in with it, and reset your PIN yourself if you forget it.`, go: () => askGo("profile", "Open Profile") },
+  { id: "login", q: "How do I stay logged in or log out?", k: "login logout stay keep sign", a: () => `When you log in, tick <b>Keep me logged in on this phone</b> and you won't need your PIN on that phone for 90 days. To log out, go to <b>Account</b> and tap <b>Log out</b>.`, go: () => askGo("account", "Open Account") },
+  { id: "delacct", q: "How do I delete my account?", k: "delete account permanently quit forever", a: () => `Open <b>Profile</b> and scroll to <b>Danger zone</b>. Deleting removes your store, items and photos for good, and your link stops working. It can't be undone, and the fee isn't refunded once you've gone live. To take a break instead, just set your store to Closed.`, go: () => askGo("profile", "Open Profile") },
+  { id: "install", q: "How do I put the app on my home screen?", k: "install home screen icon", a: () => /iphone|ipad|ipod/i.test(navigator.userAgent) ? `In Safari, tap the <b>Share</b> button, then <b>Add to Home Screen</b>.` : `In Chrome, tap the <b>⋮</b> menu, then <b>Add to home screen</b> (or <b>Install app</b>).` },
+  { id: "dark", q: "How do I turn on dark mode?", k: "dark mode night black theme", a: () => `${esc(APP_NAME)} follows your phone: it goes dark when your phone is in dark mode, and light when it isn't. Change it in your phone's display settings.` },
+  { id: "ads", q: "How do I advertise on other stores?", k: "ad banner promote promotion", a: () => `Your banner can show on every ${esc(APP_NAME)} store, rotating with up to 4 others, and you get weekly ad insights in News.${BUL && BUL.adPrice ? ` Price: <b>${esc(BUL.adPrice)}</b>.` : ""} WhatsApp us to book.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to book an ad for ${(S && S.name) || (SESSION ? SESSION.id : "")}.`, "Book an ad") },
+  { id: "rules", q: "What can't I sell?", k: "can not sell allowed ban banned prohibited rule vape alcohol drug weapon report guard safe", a: () => `You can't sell drugs, vape or cigarettes, alcohol, adult content or services, weapons, or scam and fake products. ${esc(APP_NAME)} Guard checks every store, and customers can report stores. Stores that break the rules are removed.`, go: () => `<a class="btn small" href="${esc(home())}terms" target="_blank" rel="noopener">Read the Terms</a>` },
+  { id: "two", q: "Can I have two stores?", k: "two store more multiple", a: () => `Yes. Each store uses its own phone number, so sign up again with a different phone number for your second store.` },
+  { id: "slow", q: "The app is slow or not working", k: "slow load error not working blank refresh", a: () => `Check your internet first, then close the app fully and open it again. Still stuck? WhatsApp us and tell us what you see.`, go: () => askWa() },
+  { id: "human", q: "How do I talk to a person?", k: "contact help talk person human whatsapp call", a: () => `Tap below to chat with us on WhatsApp. You'll also find <b>Help</b> under Account.`, go: () => askWa() }
+];
+const ASK_POPULAR = ["additem", "orders", "trial", "link", "openclose", "spotit"];
+const ASK_SMALL = [
+  [/^(hi|hai|hello|helo|hey|assalamualaikum|salam|morning|selamat\b.*)$/, () => `Hi! Ask me anything about your store, like "how do I add a photo?" or "macam mana nak tutup kedai?".`],
+  [/^(thanks?|thank you|thx|tq|terima kasih|tqvm|ok thanks?|okay)$/, () => `You're welcome! Ask me anything else any time.`]
+];
+function askFind(text){
+  const raw = String(text || "").toLowerCase().replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ").trim();
+  for (const [re, f] of ASK_SMALL) if (re.test(raw)) return { small: f() };
+  const ws = new Set(askWords(text)); if (!ws.size) return { none: true };
+  const scored = ASK_KB.map(e => {
+    const kw = e.kw || (e.kw = new Set(askWords(e.k)));
+    const qw = e.qw || (e.qw = new Set(askWords(e.q)));
+    let s = 0; ws.forEach(w => { if (kw.has(w)) s += 1; else if (qw.has(w)) s += .6; });
+    return { e, s: s / Math.sqrt(kw.size + 2) };   // a short, focused answer wins over a long one that happens to share a word
+  }).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+  if (!scored.length || scored[0].s < .3) return { none: true };
+  return { e: scored[0].e, more: scored.slice(1, 3).filter(x => x.s >= scored[0].s * .75).map(x => x.e) };
+}
+
+let ASKLOG = [], ASKID = "", ASKBACK = "home";
+function askMsgHtml(m){
+  if (m.me) return `<div class="askme"><span class="sr">You asked: </span>${esc(m.me)}</div>`;
+  return `<article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>${m.bot}</p>${m.cta ? `<div class="bulcta">${m.cta}</div>` : ""}${m.more && m.more.length ? `<div class="askmore"><span class="bulmeta">Or did you mean</span><div class="sechips">${m.more.map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div></div>` : ""}</div></article>`;
+}
+function askReply(e){ return { bot: e.a(), cta: e.go ? e.go() : "" }; }
+function askPush(me, reply){
+  ASKLOG.push({ me }, reply); ASKLOG = ASKLOG.slice(-40);
+  const log = $("askLog"); if (!log) return;
+  log.insertAdjacentHTML("beforeend", askMsgHtml({ me }) + askMsgHtml(reply));
+  const q = log.querySelectorAll(".askme"), last = q[q.length - 1];
+  if (last) last.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+function askSend(){
+  const inp = $("askIn"); if (!inp) return;
+  const text = inp.value.trim().slice(0, 200); if (!text) return inp.focus();
+  inp.value = ""; inp.blur();
+  const r = askFind(text);
+  askPush(text, r.small ? { bot: r.small } : r.none
+    ? { bot: "Sorry, I don't know that one yet. Try other words, pick a question below, or ask us on WhatsApp and a person will help.", cta: askWa(`Hi ${APP_NAME}, I have a question about my store ${SESSION ? SESSION.id : ""}: ${text}`, "Ask us on WhatsApp") }
+    : { ...askReply(r.e), more: r.more });
+}
+function askAnswer(id){ const e = ASK_KB.find(x => x.id === id); if (e) askPush(e.q, askReply(e)); }
+function edAsk(){
+  if (ASKID !== SESSION.id){ ASKLOG = []; ASKID = SESSION.id; }
+  return `${edTop("Ask your assistant", ASKBACK)}
+  <article class="bulcard askbot"><img class="botav" src="bot.jpg" alt="Your assistant"><div class="bulbody"><p>Hi! I'm your ${esc(APP_NAME)} assistant. Ask me anything about your store, in English or Malay, and I'll answer right away.</p></div></article>
+  <div id="askLog" aria-live="polite">${ASKLOG.map(askMsgHtml).join("")}</div>
+  <section class="card askbar"><label for="askIn" class="sr">Your question</label>
+    <div class="askrow"><input type="text" id="askIn" maxlength="200" enterkeyhint="send" autocomplete="off" placeholder="e.g. How do I add a photo?"><button type="button" class="btn solid" data-act="asksend">Ask</button></div>
+  </section>
+  <h2 class="edsub">Popular questions</h2>
+  <div class="sechips" style="margin:0 2px 14px">${ASK_POPULAR.map(id => ASK_KB.find(e => e.id === id)).map(e => `<button type="button" class="sechip" data-act="askq" data-v="${e.id}">${esc(e.q)}</button>`).join("")}</div>
+  <details class="card lk-group askall"><summary>All questions (${ASK_KB.length})</summary>
+    ${ASK_KB.map(e => `<button type="button" class="lk-row" data-act="askq" data-v="${e.id}"><span class="tt"><b>${esc(e.q)}</b></span><span class="chev">${ico("chevron",18)}</span></button>`).join("")}
+  </details>
+  <p class="hint" style="margin:4px 4px 0">Can't find it? ${askTo() ? `<a href="https://wa.me/${askTo()}?text=${encodeURIComponent(`Hi ${APP_NAME}, I need help with my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Chat with a person on WhatsApp</a>.` : "Message us any time."}</p>`;
 }
 function edAccount(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   return `${edTop("Account", "")}
   <section class="card lk-group">
     <button class="lk-row" data-act="go" data-v="profile"><span class="tile">${ico("user")}</span><span class="tt"><b>${esc(S.name || "My store")}</b><span>Phone, email and PIN</span></span><span class="chev">${ico("chevron",18)}</span></button>
+    <button class="lk-row" data-act="go" data-v="ask"><span class="tile asktile"><img src="bot.jpg" alt=""></span><span class="tt"><b>Ask your assistant</b><span>Questions about the app, answered right away</span></span><span class="chev">${ico("chevron",18)}</span></button>
     ${to ? `<a class="lk-row" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I need help with my store " + (SESSION ? SESSION.id : ""))}" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("chat")}</span><span class="tt"><b>Help</b><span>Chat with us on WhatsApp</span></span><span class="chev">${ico("chevron",18)}</span></a>` : ""}
     ${(() => { const n = unreadOf(newsItems()); return `<button class="lk-row" data-act="go" data-v="news"><span class="tile">${ico("bell")}</span><span class="tt"><b>News & updates</b><span>Store status, tips and what's new</span></span>${n ? `<span class="tag2 unpaid">${n > 9 ? "9+" : n} new</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`; })()}
     <a class="lk-row" href="${esc(home())}terms" target="_blank" rel="noopener" style="text-decoration:none"><span class="tile">${ico("shield")}</span><span class="tt"><b>Terms, privacy & refunds</b><span>How we work and protect you</span></span><span class="chev">${ico("chevron",18)}</span></a>
@@ -2721,10 +2873,10 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
-  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan");   // nothing to save or preview on News or Profile
+  bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
 }
@@ -2755,10 +2907,10 @@ function edStart(){
       </section>
       <button class="btn solid full" data-act="frnext">Next</button>`;
   }
-  return head("Your store is ready to see", "Preview it now. When you're happy, publish it to get your store link to share.") +
+  return head("Your store is ready to see", "Preview it now. When you're happy, go live free for 14 days and get your store link to share.") +
     `<section class="card fr-done">${ico("check", 26, 2.6)}<b>${esc(S.name || "Your store")}</b><span>${esc(storeLink(SESSION.id))}</span></section>
     <button class="btn solid full" data-act="preview">${ico("eye", 18)}Preview my store</button>
-    <button class="btn full" style="margin-top:10px" data-act="frpublish">Publish my store</button>
+    <button class="btn full" style="margin-top:10px" data-act="frpublish">Go live free</button>
     <button class="btn full" style="margin-top:10px" data-act="frhome">Add more ${esc(W(S).item)}s first</button>`;
 }
 // 60123456789 -> 012-345 6789 (other countries: +65 ...)
@@ -2980,13 +3132,23 @@ function tipHtml(){
 function unpaidLeft(){
   const exp = BUL && Number(BUL.expiresAt); if (!exp) return "";
   const days = Math.ceil((exp - Date.now()) / 864e5), when = new Date(exp).toLocaleDateString("en-MY", { day: "numeric", month: "short" });
-  return days <= 0 ? "Publish today, or your store will be removed tonight." : `Publish within ${days} day${days === 1 ? "" : "s"} (by ${when}), or your unpaid store is removed.`;
+  if (BUL && Number(BUL.trialEnd) > 0) return days <= 0 ? "Pay today, or your store will be removed tonight." : `Pay within ${days} day${days === 1 ? "" : "s"} (by ${when}), or your store is removed.`;
+  return days <= 0 ? "Go live today, or your store will be removed tonight." : `Go live within ${days} day${days === 1 ? "" : "s"} (by ${when}), or your unpaid store is removed.`;
 }
 function publishCardHtml(){
   if (STATUS === "review") return "";
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const help = to ? `<a href="https://wa.me/${to}?text=${encodeURIComponent(`Hi ${APP_NAME}, about my store ${SESSION.id}.`)}" target="_blank" rel="noopener">Message us on WhatsApp</a>` : "Contact us";
-  if (STATUS === "live") return "";
+  const b = BUL || {}, price = shownPrice() ? `, <b>${esc(shownPrice())}</b>,` : "";
+  if (STATUS === "live"){
+    if (!b.trial) return "";
+    const left = Math.max(0, Math.ceil((Number(b.trialEnd) - Date.now()) / 864e5));
+    return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+    <h2>Free trial: ${left} day${left === 1 ? "" : "s"} left</h2>
+    <p class="hint">Your store is live and taking orders. Pay once${price} before ${esc(new Date(Number(b.trialEnd)).toLocaleDateString("en-MY", { day: "numeric", month: "short" }))} and it stays live for good. No monthly fees.</p>
+    <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Keep my store live</button>
+  </section>`;
+  }
   if (STATUS === "offline") return `<section class="card" style="border-color:var(--err)">
     <h2>Your store is offline</h2>
     <p class="hint">It was taken offline, usually because a payment couldn't be found. ${help} to sort it out.</p>
@@ -2997,6 +3159,19 @@ function publishCardHtml(){
     <p class="hint">Add what you sell, with prices and photos. When your store looks right, you publish it.</p>
     <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
     <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="additem">${ico("plus",18,2.2)}Add your first ${esc(W(S).item)}</button>
+  </section>`;
+  if (Number(b.trialEnd) > 0) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+    <h2>Your free trial has ended</h2>
+    <p class="hint">Your store is offline for now. Pay once${price} to bring it back, just as you left it.</p>
+    <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
+    <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Bring my store back</button>
+  </section>`;
+  if (!b.paid) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+    <h2>Go live free for 14 days</h2>
+    <p class="hint">Share your link and take orders, free for 14 days. Then pay once${price} to keep it. No monthly fees, no commission.</p>
+    <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
+    <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="trial">Go live free</button>
+    <button class="btn small" style="margin-top:10px" data-act="publish">Or pay now</button>
   </section>`;
   return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Publish your store</h2>
@@ -3251,6 +3426,7 @@ function onField(e){
   touch();
 }
 $("bwrap").addEventListener("input", onField);
+$("bwrap").addEventListener("keydown", e => { if (e.target.id === "askIn" && e.key === "Enter"){ e.preventDefault(); askSend(); } });
 // prices read like money once you leave the box: 8.5 becomes 8.50
 $("bwrap").addEventListener("focusout", e => { const t = e.target; if (t.matches && t.matches('input[data-f="p"]') && t.value !== "" && isFinite(+t.value)) t.value = (+t.value).toFixed(2); });
 $("bwrap").addEventListener("change", onField);
@@ -3278,9 +3454,11 @@ $("builder").addEventListener("click", async e => {
   }
   if (a === "frskip" || a === "frhome" || a === "frpublish"){
     markStartDone(); edTidy(); EDV = a === "frhome" ? "products" : "home"; renderEditor(); window.scrollTo(0, 0);
-    if (a === "frpublish") openPublishCheck();
+    if (a === "frpublish"){ const t = document.querySelector('#publishCard [data-act="trial"]'); if (t) t.click(); else openPublishCheck(); }   // the free trial when it's offered, otherwise pay
     return;
   }
+  if (a === "asksend"){ askSend(); return; }
+  if (a === "askq"){ askAnswer(b.dataset.v); return; }
   if (a === "go" || a === "back"){ const to = b.dataset.v, ti = b.dataset.i != null ? +b.dataset.i : null; leaveEdPage(to); EDOTHER = false; return a === "back" ? edBack(to, ti) : edGo(to, ti); }
   if (a === "secpick"){ S.items[i].sec = S.items[i].sec === b.dataset.v ? "" : b.dataset.v; redraw(); return; }
   if (a === "secnew"){ const inp = b.closest(".seccard").querySelector(".secnew"); inp.hidden = false; inp.focus(); return; }
@@ -3307,6 +3485,18 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
   else if (a === "rm-link"){ if (S.links[i]) S.links[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
+  else if (a === "trial"){
+    b.disabled = true; const was = b.innerHTML; b.textContent = "Going live...";
+    try {
+      if (DIRTY || SAVING) await saveNow();
+      const r = await apiPost({ action: "trial", id: SESSION.id, pin: SESSION.pin });
+      STATUS = r.status; BUL = Object.assign(BUL || {}, { trial: true, trialEnd: Number(r.trialEnd) || 0, expiresAt: 0 }); rememberEdNow();
+      window.scrollTo(0, 0);
+      if (STATUS === "review"){ renderEditor("Your free trial has started."); notify(`Your free trial has started. ${APP_NAME} is quickly checking your store first, and it goes live once approved, usually within 24 hours.`); }
+      else { renderEditor("Your store is live!"); notify("Your store is live, free for 14 days! Your link is at the top: copy it and share it on WhatsApp, Instagram and TikTok."); }
+      loadBulletin();
+    } catch(err){ b.disabled = false; b.innerHTML = was; notify(friendly(err, "Couldn't start your free trial right now. Check your internet and try again.")); }
+  }
   else if (a === "backadmin"){
     if (UPN && !(await ask("A photo is still uploading. Leave anyway? It won't be added.", "Leave", true))) return;
     if (DIRTY) await autoSave();
@@ -3380,8 +3570,11 @@ async function publishWithReceipt(input){
     if (DIRTY || SAVING){ st.textContent = "Saving your store..."; await saveNow(); }
     st.textContent = "Publishing...";
     const c = await resizeImage(file, 1400, false);
+    const wasTrial = !!(BUL && BUL.trial && STATUS === "live");
     const r = await apiPost({ action: "selfpublish", id: SESSION.id, pin: SESSION.pin, type: "image/jpeg", photo: c.toDataURL("image/jpeg", 0.82).split(",")[1] });
     STATUS = r.status; rememberEdNow();
+    if (BUL) Object.assign(BUL, { trial: false, paid: true, expiresAt: 0 });
+    if (wasTrial && STATUS === "live"){ dismissSheet("payOverlay"); window.scrollTo(0, 0); renderEditor("Payment received. Your store stays live."); notify("Payment received, thank you! Your store stays live for good."); loadBulletin(); return; }
     dismissSheet("payOverlay");
     window.scrollTo(0, 0);
     if (STATUS === "review"){
@@ -3547,8 +3740,10 @@ async function showStore(data, isPreview, refresh){
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   $("stSafeLink").href = home() + "safe";
   $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
+  $("stShare").classList.toggle("solo", !!isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
   const verified = !isPreview && STORE_VERIFIED;   // blue ring + tick on the logo, like verified accounts elsewhere
   $("stVerified").hidden = !verified; $("stLogoWrap").classList.toggle("verified", verified);
+  $("stNew").hidden = isPreview || !STORE_TRIAL;
   if (!isPreview && !refresh) track("view");
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -3675,15 +3870,13 @@ function productRow(i){
       ${p.out ? "" : `<span class="addb" aria-hidden="true">+</span>`}</div>`}
   </button>`;
 }
-function linkRow(j){
+function linkRow(j){   // shop links are always a compact list, whatever the store style: sellers often add dozens
   const l = D.links[j], info = linkInfo(l.u), img = safeImg(l.img), name = tidyName(l.n);
-  return `<a class="prow plink" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="${esc(name || info.brand)}, opens ${esc(info.brand)} in a new tab">
-    <div class="ptext">
-      <h3>${esc(name || "View on " + info.brand)}</h3>
-      <div class="pmeta">${l.p > 0 ? `<span class="pprice">${esc(money(l.p))}</span>` : ""}<span class="pill">${esc(info.brand)}</span></div>
-    </div>
-    <div class="pimg"><div class="ph">${initial(name || info.brand)}</div>${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}
-      <span class="addb" aria-hidden="true">${ico("ext", 15, 2.4)}</span></div>
+  return `<a class="prow plink lrow" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="${esc(name || info.brand)}${l.p > 0 ? ", " + esc(money(l.p)) : ""}, opens ${esc(info.brand)} in a new tab">
+    <span class="lthumb" aria-hidden="true">${esc(initial(name || info.brand))}${img ? `<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>
+    <span class="ptext"><h3>${esc(name || "View on " + info.brand)}</h3>
+      <span class="pmeta">${l.p > 0 ? `<span class="pprice">${esc(money(l.p))}</span>` : ""}<span class="lbrand">${esc(info.brand)}</span></span></span>
+    <span class="lgo" aria-hidden="true">${ico("ext", 18, 2)}</span>
   </a>`;
 }
 // What the customer is looking at: the menu or the shop links, one section or all, and any search words
@@ -3713,7 +3906,7 @@ function renderMenu(){
   if (!total){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
   const gridCls = D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
   const affNote = `<p class="affnote">${ico("ext", 13, 2.2)}<span>Opens the shop's own page. The seller may earn a commission, at no extra cost to you.</span></p>`;
-  const block = (title, rows, note) => `<section class="group">${title ? `<h2>${esc(title)}</h2>` : ""}${note ? affNote : ""}<div class="plist${gridCls}">${rows}</div></section>`;
+  const block = (title, rows, note, links) => `<section class="group">${title ? `<h2>${esc(title)}</h2>` : ""}${note ? affNote : ""}<div class="plist${links ? " llist" : gridCls}">${rows}</div></section>`;
   const q = MQ.trim().toLowerCase();
   if (q){
     // searching looks through everything, menu and links together
@@ -3721,7 +3914,7 @@ function renderMenu(){
     const hitL = linkList.filter(j => { const l = D.links[j]; return matchWords([tidyName(l.n), l.sec, linkInfo(l.u).brand].join(" "), q); });
     tabs.hidden = true; tabs.innerHTML = "";
     $("menu").innerHTML = hitI.length || hitL.length
-      ? (hitI.length ? block(both ? W(D).list : "", hitI.map(productRow).join(""), false) : "") + (hitL.length ? block(both ? "Shop links" : "", hitL.map(linkRow).join(""), true) : "")
+      ? (hitI.length ? block(both ? W(D).list : "", hitI.map(productRow).join(""), false) : "") + (hitL.length ? block(both ? "Shop links" : "", hitL.map(linkRow).join(""), true, true) : "")
       : `<p class="empty">Nothing matches "${esc(MQ.trim())}". Try another word.</p>`;
     return;
   }
@@ -3734,7 +3927,7 @@ function renderMenu(){
   tabs.hidden = !showTabs;
   tabs.innerHTML = showTabs ? `<button class="tab" type="button" data-sec="all" aria-current="${MSEC === "all"}">All</button>` + secs.map(g => `<button class="tab" type="button" data-sec="${esc(key(g))}" aria-current="${MSEC === key(g)}">${esc(g.name || "Other")}</button>`).join("") : "";
   const shown = MSEC === "all" ? secs : secs.filter(g => key(g) === MSEC);
-  $("menu").innerHTML = shown.map((g, gi) => block(g.name, g.idx.map(isLinks ? linkRow : productRow).join(""), isLinks && gi === 0)).join("");
+  $("menu").innerHTML = shown.map((g, gi) => block(g.name, g.idx.map(isLinks ? linkRow : productRow).join(""), isLinks && gi === 0, isLinks)).join("");
   adPlace();
 }
 // After switching what's shown, bring the top of the list into view if the customer had scrolled past it
@@ -3755,6 +3948,16 @@ $("viewTabs").addEventListener("click", e => {
 let MQ_T = 0;
 $("stQ").addEventListener("input", () => { clearTimeout(MQ_T); MQ_T = setTimeout(() => { MQ = $("stQ").value; renderMenu(); }, 150); });   // redraw once typing pauses, not on every letter
 $("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur(); });
+// Share this store: the phone's own share menu (WhatsApp, Telegram, Facebook...), or copy the link where there isn't one
+$("stShare").addEventListener("click", async () => {
+  const url = storeLink(STORE_ID || (SESSION && SESSION.id) || ""), name = (D && D.name) || "this store";
+  if (navigator.share){
+    try { await navigator.share({ title: name, text: `Order from ${name} here:`, url }); return; }
+    catch(e){ if (e && e.name === "AbortError") return; }
+  }
+  if (await copyText(url)){ notify(`Link copied: ${url}. Paste it in WhatsApp or anywhere to share ${name}.`); }
+  else window.open("https://wa.me/?text=" + encodeURIComponent(`Order from ${name} here: ${url}`), "_blank", "noopener");
+});
 const pSig = p => JSON.stringify([p.n, p.o]);
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
@@ -3951,7 +4154,7 @@ async function adminStores(g, head, wire){
   const row = x => `
     <section class="card admrow" data-find="${esc((x.name + " " + x.id + " " + x.wa).toLowerCase())}">
       <div class="between"><b>${esc(x.name || x.id)}</b>${tag(x)}</div>
-      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · ${x.wa ? `<a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>` : "no number"} · ${x.items} item${x.items === 1 ? "" : "s"}${x.closed ? " · closed" : ""}</p>
+      <p class="hint" style="margin:6px 0 0">/${esc(x.id)} · ${x.wa ? `<a href="https://wa.me/${esc(x.wa)}" target="_blank" rel="noopener">${esc(x.wa)}</a>` : "no number"} · ${x.items} item${x.items === 1 ? "" : "s"}${x.closed ? " · closed" : ""}${x.trialEnd && !x.paidAt ? ` · <b>free trial until ${esc(new Date(x.trialEnd).toLocaleDateString("en-MY", { day: "numeric", month: "short" }))}</b>` : ""}</p>
       <p class="hint" style="margin:2px 0 0">Created ${when(x.created)}${x.paidAt ? ` · Paid ${when(x.paidAt)}` : ""}</p>
       <div class="acts">
         ${x.status === "live" ? `<a class="btn small" href="${esc(storeLink(x.id))}" target="_blank" rel="noopener">View</a>` : ""}
@@ -4120,7 +4323,7 @@ function adminAds(g, head, wire, cfg){
     <section class="card">
       <h2>Ad price for sellers</h2>
       <label>Shown on sellers' Bulletin board<input type="text" id="adPriceIn" value="${esc(cfg.adPrice || "")}" placeholder="e.g. RM30 per week"></label>
-      <p class="hint">The Link Kedai App bot shows this with a "Book an ad" button that opens WhatsApp to you. Leave empty to hide it.</p>
+      <p class="hint">Your assistant shows this with a "Book an ad" button that opens WhatsApp to you. Leave empty to hide it.</p>
     </section>
     ${list.map((a, k) => `
     <section class="card adslot">
@@ -4319,7 +4522,7 @@ function legalDoc(which){
     <p>Your information is stored using trusted providers: Google (store data, photos and receipts), GitHub (the website), WhatsApp/Meta (orders you send), and link preview services (Microlink and Jina Reader), which read the public shop pages of affiliate links you paste to fetch their photo and name. Payments are handled by your bank, DuitNow or PayPal. Each of these follows its own privacy policy.</p>
     <h2>5. How long we keep it</h2>
     <ul>
-      <li>Store information is kept while your store exists. An unpaid store is removed 10 days after sign-up. When you delete your account (Account, then your store name, then Danger zone), your store and photos are removed.</li>
+      <li>Store information is kept while your store exists. An unpaid store is removed 10 days after sign-up if it never goes live, or 30 days after its free trial ends. When you delete your account (Account, then your store name, then Danger zone), your store and photos are removed.</li>
       <li>Payment receipts may be kept for our records, as required for accounting.</li>
     </ul>
     <h2>6. Your rights</h2>
@@ -4359,7 +4562,7 @@ function legalDoc(which){
     <h2>3. Fees</h2>
     <ul>
       <li>Publishing a store costs a one-time fee of ${price}. There are no monthly fees and no commission on your sales.</li>
-      <li>A store that isn't published (paid for) within 10 days of signing up is removed, with its items and photos, so its link name and phone number can be used again.</li>
+      <li>Each store can go live free for 14 days, once. A store that isn't paid for by the end of its free trial goes offline, and is removed 30 days later if still unpaid. A store that never goes live is removed 10 days after sign-up. Removing a store deletes its items and photos, so its link name and phone number can be used again.</li>
       <li>Ad banners are sold separately.</li>
       <li>Refunds follow our <a href="${esc(home())}refund">Refund Policy</a>.</li>
     </ul>
@@ -5062,7 +5265,7 @@ async function route(){
   if (/^[a-z0-9-]{2,40}$/.test(q)){
     // A store seen before opens at once from this phone's copy; the newest version replaces it quietly
     const tok = ++ROUTE_TOK, saved = shopCopy(q), here = () => tok === ROUTE_TOK;
-    const open = r => { STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_PLACE = r.place || null; };
+    const open = r => { STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_TRIAL = !!r.trial; STORE_PLACE = r.place || null; };
     if (saved){ open(saved); showStore(saved.data, false); loadAd().then(() => { if (here() && STORE_ID === q) showAd(); }); }
     else { $("gwrap").innerHTML = storeSkeleton(); show("page"); }
     SPLASH.ready();
