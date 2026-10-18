@@ -389,7 +389,7 @@ textarea{min-height:72px;resize:vertical}
 .opt{display:flex;gap:8px;align-items:center;margin-top:8px}
 .opt input{margin-top:0}
 .opt input:first-child{flex:2}
-.opt button{flex:none;width:36px;height:36px;border-radius:var(--r-sm);border:1.5px solid var(--line);background:var(--surface);cursor:pointer}
+.opt button{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:var(--glass);color:var(--ink);display:grid;place-items:center;padding:0;cursor:pointer}   /* same circle as the close buttons */
 .actions{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
   padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
 .actions .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
@@ -614,13 +614,14 @@ html,body{overflow-x:hidden}
 .closedov{position:fixed;inset:0;z-index:9;background:rgba(10,10,12,.72);display:grid;place-items:center;padding:24px;text-align:center;color:#fff;
   -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
 .closedov .box{max-width:340px}
+.closedov .btn{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}   /* a solid button on the dark cover, not a blurry grey one */
 .closedov .ic{width:64px;height:64px;border-radius:50%;margin:0 auto 14px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:32px}
 .closedov h2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px}
 .closedov p{margin:0;opacity:.9;font-size:16px}
 .closedov .shopn{font-weight:700;opacity:.8;margin-bottom:6px;font-size:14px}
 .back{z-index:11!important}
 .adwrap{position:relative;margin:14px 14px 0}
-#menu .adwrap{margin:0 0 18px}
+#menu .adwrap{margin:14px 14px 18px}
 .adban{display:block;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);background:var(--surface)}
 .adban img{width:100%;aspect-ratio:3/1;object-fit:cover}
 .adban.swapping{animation:none !important;background:var(--surface) !important}
@@ -2340,7 +2341,7 @@ function edHome(msg){
   ${SESSION.admin ? "" : shoutHtml()}
   <section class="card linkcard">
     <div class="linkhead"><h2>${live ? "Your store link" : "Your store"}</h2><div class="linktags" id="linkTags">${linkTags()}</div></div>
-    ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link)}</span></p>
+    ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link).replace(/\//g, "/<wbr>")}</span></p>
       <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent("Order here: " + link)}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
     : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
     ${live ? "" : `<button class="btn small" style="margin-top:12px" data-act="preview">${ico("eye",16)}Preview my store</button>`}
@@ -2689,7 +2690,7 @@ function edProfile(){
   return `${edTop("Profile", "account")}
   <section class="card">
     <label style="margin-top:0">Store name</label><p style="margin:2px 0 0;font-weight:600">${esc(S.name || "Not set yet")}</p>
-    <label>Store link</label><p class="lk-link" style="margin:2px 0 0">${ico("link",16)}<span class="url">${esc(link)}</span></p>
+    <label>Store link</label><p class="lk-link" style="margin:2px 0 0">${ico("link",16)}<span class="url">${esc(link).replace(/\//g, "/<wbr>")}</span></p>
   </section>
   <section class="card lk-group">
     ${row("chwa", "phone", "Phone number", fmtWa(S.wa) || "Not added yet")}
@@ -3075,10 +3076,10 @@ function openPublishCheck(){
     return;
   }
   const named = S.items.filter(it => it.n.trim());
-  const row = (k, v) => `<div class="cline"><div class="cn"><span>${esc(k)}</span><b>${esc(v)}</b></div></div>`;
+  const row = (k, v, html) => `<div class="cline"><div class="cn"><span>${esc(k)}</span><b>${html ? v : esc(v)}</b></div></div>`;
   $("pubSummary").innerHTML =
     row("Shop name", S.name) +
-    row("Store link", storeLink(SESSION.id)) +
+    row("Store link", esc(storeLink(SESSION.id)).replace(/\//g, "/<wbr>"), true) +
     row("Phone number (orders + login)", fmtWa(S.wa) || S.wa) +
     row("What you sell", W(S).label + ", " + named.length + " " + (named.length === 1 ? W(S).item : W(S).item + "s")) +
     (shownPrice() ? row("Payment", shownPrice() + ", one time") : "");
@@ -4919,7 +4920,7 @@ function renderHome(){
       </div>
       ${signupOpen() ? `<a class="signupbox" href="${esc(home())}signup">New seller? <b>Sign up</b></a>` : ""}
       <a class="signupbox" style="margin-top:10px" href="${esc(home())}explore">Shopping? <b>Browse Link Kedai App stores</b></a>
-      ${to ? `<a class="signupbox helpchat" style="margin-top:10px" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener">${chat}Questions? <b>Chat with us on WhatsApp</b></a>` : ""}
+      ${to ? `<a class="signupbox helpchat" style="margin-top:10px" href="https://wa.me/${to}?text=${encodeURIComponent("Hi " + APP_NAME + ", I'd like to know more about opening a store.")}" target="_blank" rel="noopener">${chat}<span>Questions? <b>Chat with us on WhatsApp</b></span></a>` : ""}
       ${legalLinks()}
       ${copyrightLine()}
     </div>`;   // help is a row like the others, so nothing floats over the cards
