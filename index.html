@@ -1865,7 +1865,7 @@ function svBtn(d){
   const def = isAgent(d) ? BK_PICKS[1] : cat === "homestay" ? BK_PICKS[2] : BK_PICKS[0];
   return { t: String(own.t || "").trim() || def[0], s: String(own.s || "").trim() || def[1] };
 }
-// Built-in demo stores (no account, nothing is sent): /demo-food, /demo-products, /demo-aircond, /demo-insurance and /demo-digital. Names starting with demo- are kept for these.
+// Built-in demo stores (no account, nothing is sent): /demo-food, /demo-products, /demo-aircond, /demo-insurance, /demo-digital and /demo-affiliate. Names starting with demo- are kept for these.
 var STORE_DEMO = false;
 const DEMO_IMG = n => "https://linkedaiapp.github.io/linkedaiapp/demo/" + n;
 const DEMOS = {
@@ -1900,6 +1900,16 @@ const DEMOS = {
       { n: "Satin Blouse", d: "Silky, loose cut, sizes S to XL", img: DEMO_IMG("pr-blouse.webp"), sec: "Tops", out: true, o: [{ l: "", p: 59 }] },
       { n: "Canvas Tote Bag", d: "Big enough for a laptop, inside zip pocket", img: DEMO_IMG("pr-tote.webp"), sec: "Accessories", o: [{ l: "", p: 45 }] },
       { n: "Aurora Perfume Mist", d: "Light floral, 50 ml, alcohol-free", img: DEMO_IMG("pr-perfume.webp"), sec: "Accessories", o: [{ l: "", p: 35 }] }] } },
+  "demo-affiliate": { place: { city: "", state: "Johor" }, data: { name: "Mira's Best Finds", tagline: "Things I really use, at the best price I found", kind: "products", cat: "other", color: "#EA580C", wa: "60100000000", logo: DEMO_IMG("af-logo.webp"),
+    items: [], links: [
+      { u: "https://shopee.com.my/demo-lip-tint", n: "Lip Tint Velvet Matte, 6 shades", img: DEMO_IMG("af-liptint.webp"), p: 19.9, sec: "Beauty" },
+      { u: "https://www.tiktok.com/view/product/demo-serum", n: "Niacinamide Serum 30 ml", img: DEMO_IMG("af-serum.webp"), p: 32, sec: "Beauty" },
+      { u: "https://shopee.com.my/demo-air-fryer", n: "Air Fryer 6L, digital touch", img: DEMO_IMG("af-airfryer.webp"), p: 159, sec: "Home" },
+      { u: "https://www.lazada.com.my/products/demo-lamp.html", n: "Bedside Lamp, warm light", img: DEMO_IMG("af-lamp.webp"), p: 45, sec: "Home" },
+      { u: "https://www.tiktok.com/view/product/demo-bottle", n: "Kids Water Bottle 700 ml", img: DEMO_IMG("af-bottle.webp"), p: 22.5, sec: "Home" },
+      { u: "https://shopee.com.my/demo-earbuds", n: "Wireless Earbuds, 30 h battery", img: DEMO_IMG("af-earbuds.webp"), p: 69, sec: "Gadgets" },
+      { u: "https://www.lazada.com.my/products/demo-phone-stand.html", n: "Foldable Phone Stand", img: DEMO_IMG("af-phonestand.webp"), p: 12.9, sec: "Gadgets" },
+      { u: "https://shopee.com.my/demo-planner", n: "2027 Planner, A5", img: DEMO_IMG("af-planner.webp"), p: 25, sec: "Gadgets" }] } },
   "demo-digital": { place: { city: "", state: "Selangor" }, data: { name: "Ina Templates", tagline: "Canva templates, e-books and presets for small businesses", kind: "digital", cat: "other", color: "#7C3AED", wa: "60100000000", logo: DEMO_IMG("digital-logo.webp"),
     items: [
       { n: "Ebook Resepi Kuih Raya", d: "25 recipes with photos, step by step", img: DEMO_IMG("dg-ebook.webp"), smp: [DEMO_IMG("dg-ebook-s1.webp"), DEMO_IMG("dg-ebook-s2.webp")], fmt: "PDF · 42 pages", get: "25 kuih raya recipes\nShopping list for each recipe\nPricing guide if you sell them", how: "link", eta: "within 1 hour", sec: "E-books", o: [{ l: "", p: 15 }] },
@@ -3258,7 +3268,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 100;
+const APP_VERSION = 101;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4526,7 +4536,11 @@ function updateProduct(){
   if (isService(D)){ $("pAdd").textContent = isAgent(D) ? "Book a consultation" : "Book this service" + (o.p > 0 ? " · " + money(o.p) : ""); return; }
   $("pAdd").textContent = ext ? `Buy on ${dgSite(p.ext)} · ${money(o.p)}` : isDigital(D) ? (cart[pSel.i + "|" + pSel.j] ? "Already in your order" : W(D).add + " · " + money(o.p)) : W(D).add + " · " + money(o.p * pSel.q);
 }
-$("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openProduct(+b.dataset.p); });
+$("menu").addEventListener("click", e => {
+  const lk = STORE_DEMO && e.target.closest("a.plink");   // a demo store's shop links go nowhere
+  if (lk){ e.preventDefault(); return notify(`This is a demo store, so nothing opens.\n\nIn a real store, this opens the product on ${linkInfo(lk.href).brand}, where the customer buys it. The seller may earn a commission.`); }
+  const b = e.target.closest("[data-p]"); if (b) openProduct(+b.dataset.p);
+});
 $("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
 $("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
 $("pPlus").onclick = () => { pSel.q = Math.min(99, pSel.q + 1); updateProduct(); };
