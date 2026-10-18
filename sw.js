@@ -1,9 +1,9 @@
 // Link Kedai App helper: opens fast and shows a friendly page when offline.
 // Pages, the manifest and the icons are always fetched fresh first, so updates arrive straight away.
-const V = "linkedai-v58";
+const V = "linkedai-v59";
 // Only what the app needs to open offline (the splash logo and loader logo included). Big icons and shortcut pictures
 // are fetched when the phone asks for them, so a first visit doesn't download them all over a slow connection.
-const SHELL = ["./index.html", "./manifest.webmanifest", "./icon-192.png", "./favicon.png", "./logo.png", "./logo-white.png"];
+const SHELL = ["./index.html", "./manifest.webmanifest", "./icon-192.png", "./favicon.png", "./logo.png", "./logo-white.png", "./bot.jpg"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(V).then(c => Promise.all(SHELL.map(u => fetch(u, { cache: "reload" }).then(r => r.ok && c.put(u, r)).catch(() => {})))).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 // The newest page from the network, but never a long wait on a weak signal: after 1.5 seconds the saved copy opens instead
@@ -29,7 +29,7 @@ self.addEventListener("fetch", e => {
     e.waitUntil(net.catch(() => {}));
     return;
   }
-  if (/\.(png|webmanifest|json)$/.test(url.pathname)) {
+  if (/\.(png|jpg|webmanifest|json)$/.test(url.pathname)) {
     // network first so a changed name or icon shows up right away; cache only when offline
     // stored without the ?t= cache-buster, so there is one copy per file instead of a new one on every visit
     const key = url.origin + url.pathname;
