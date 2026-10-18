@@ -1062,18 +1062,18 @@ a.prow{text-decoration:none;color:inherit}
 .plink .pill{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink)}
 /* footer: one calm block instead of five stacked lines */
 .stfoot{margin:22px 14px 0;text-align:center}
-.stnear{margin:0 0 12px;padding:14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);text-align:left}
-.stnear h2{font-size:17px;font-weight:800;margin:0 0 10px;letter-spacing:-.01em}
-.nearrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.stnear{margin:0 0 10px;padding:10px 12px 8px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);text-align:left}
+.nearhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}.stnear h2{font-size:14px;font-weight:700;margin:0;color:var(--ink)}.nearhead a{font-size:13px;font-weight:700;color:var(--plum-ink);text-decoration:none;padding:4px 2px;flex:none}
+.nearrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0}
 #nearOverlay .nearrow{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0 0}
-.nearst{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--ink);text-align:center;min-width:0;padding:4px 2px;border-radius:12px}
+.nearst{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--ink);text-align:center;min-width:0;padding:4px 2px;border-radius:12px}
 .nearst:active{transform:scale(.96)}
-.nearst b{font-size:12.5px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;width:100%;overflow-wrap:anywhere}
-.nearst>span:last-child{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-.nearlogo{position:relative;width:56px;height:56px;border-radius:50%;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;flex:none}
+.nearst b{font-size:12px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.stnear .nearst>span:last-child{display:none}.nearst>span:last-child{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.nearlogo{position:relative;width:56px;height:56px;border-radius:50%;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;flex:none}.stnear .nearlogo{width:40px;height:40px;font-size:16px}
 .nearlogo.v{box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px #1D9BF0}
 .nearlogo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
-.stnear .btn{display:flex;align-items:center;justify-content:center;gap:6px}
+
 .stfoot .safenote{margin:0 0 14px;text-align:left}
 .stfoot .stcta{margin:0 0 6px;padding:12px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);justify-content:center;text-align:center;column-gap:12px;row-gap:10px}
 .stfoot .stcta span{font-weight:600;color:var(--ink)}
@@ -4115,7 +4115,7 @@ function renderNear(){
   const picks = nearPick(NEAR_LIST, 4), me = STORE_PLACE || {};
   if (!picks.length){ box.hidden = true; box.innerHTML = ""; return; }
   const close = me.state && picks.some(x => x.state === me.state);
-  box.innerHTML = `<h2 id="stNearTitle">${close ? "More stores near you" : "More stores on Spot It!"}</h2>${nearCards(picks)}<a class="btn full" href="${esc(home())}explore">${ico("pin",16)}See all on Spot It!</a>`;
+  box.innerHTML = `<div class="nearhead"><h2 id="stNearTitle">${close ? "More stores near you" : "More stores on Spot It!"}</h2><a href="${esc(home())}explore">See all<span class="sr"> on Spot It!</span></a></div>${nearCards(picks)}`;
   box.hidden = false;
 }
 function nearFetch(){
