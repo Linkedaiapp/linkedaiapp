@@ -1321,7 +1321,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 <!-- ============ OWN CONFIRM / MESSAGE BOX ============ -->
 <div class="overlay" id="askOverlay" role="alertdialog" aria-modal="true" aria-labelledby="askText" style="align-items:center;z-index:40">
   <div class="sheet" style="border-radius:20px;margin:16px;max-width:420px">
-    <p id="askText" style="font-size:17px;font-weight:600;margin:0 0 18px"></p>
+    <p id="askText" style="font-size:17px;font-weight:600;margin:0 0 18px;white-space:pre-line;max-height:60vh;overflow:auto"></p>
     <div class="row2">
       <div id="askNoWrap"><button class="btn full" id="askNo" type="button">Cancel</button></div>
       <div><button class="btn solid full" id="askYes" type="button">OK</button></div>
@@ -1865,6 +1865,25 @@ function svBtn(d){
   const def = isAgent(d) ? BK_PICKS[1] : cat === "homestay" ? BK_PICKS[2] : BK_PICKS[0];
   return { t: String(own.t || "").trim() || def[0], s: String(own.s || "").trim() || def[1] };
 }
+// Built-in demo stores (no account, nothing is sent): /demo-aircond and /demo-insurance. Names starting with demo- are kept for these.
+var STORE_DEMO = false;
+const DEMO_IMG = n => "https://linkedaiapp.github.io/linkedaiapp/demo/" + n;
+const DEMOS = {
+  "demo-aircond": { place: { city: "Shah Alam", state: "Selangor" }, data: { name: "Faiz Aircond Service", tagline: "Aircond cleaning, repair & install", kind: "services", cat: "services", color: "#0E7490", wa: "60100000000", logo: DEMO_IMG("aircond-logo.webp"),
+    bio: "Certified technician with 8 years' experience. Free gas check with every service, and a 30-day warranty on repairs.", areas: "Shah Alam, Klang, Petaling Jaya, Subang Jaya, Puchong, Cyberjaya",
+    items: [
+      { n: "Chemical Wash", d: "Deep clean that brings back cold air, for wall units", sec: "Cleaning", o: [{ l: "1.0 to 1.5 HP", p: 150 }, { l: "2.0 to 2.5 HP", p: 180 }] },
+      { n: "Normal Service", d: "Filter, coil and drain wash, about 45 minutes", sec: "Cleaning", o: [{ l: "", p: 80 }] },
+      { n: "Gas Top-up", d: "R32 or R410A, includes a leak check", sec: "Repair", o: [{ l: "", p: 120 }] },
+      { n: "Repair and Troubleshoot", d: "Not cold, leaking or noisy? We check and fix", sec: "Repair", o: [{ l: "", p: 0 }] },
+      { n: "Install New Unit", d: "Free site visit first, piping up to 10 feet", sec: "Install", o: [{ l: "", p: 0 }] }] } },
+  "demo-insurance": { place: { city: "Kuala Lumpur", state: "Kuala Lumpur" }, data: { name: "Aina Protect", tagline: "Medical card & takaful advisor", kind: "services", svStyle: "agent", cat: "services", color: "#B91C1C", wa: "60100000000", logo: DEMO_IMG("insurance-logo.webp"),
+    bio: "Licensed agent since 2016. I help families pick the right medical card and takaful. Free policy review, no obligation.", areas: "Kuala Lumpur, Selangor, Online (video call)",
+    items: [
+      { n: "Medical Card Gold", d: "Hospital and surgery cover", br: [DEMO_IMG("med-1.webp"), DEMO_IMG("med-2.webp"), DEMO_IMG("med-3.webp")], cov: "Room up to RM250 a day\nNo lifetime limit\nCashless at 70+ panel hospitals\nCovers you until age 100", o: [{ l: "", p: 0 }] },
+      { n: "Family Takaful", d: "Protection for the whole family, Shariah-compliant", br: [DEMO_IMG("takaful-1.webp")], cov: "Death and disability\n36 critical illnesses\nEducation fund for your children", o: [{ l: "Basic", p: 0 }, { l: "Plus", p: 0 }] },
+      { n: "Free Policy Review", d: "Show me your current policy and I'll check it for you", o: [{ l: "", p: 0 }] }] } }
+};
 const svAreas = d => String((d && d.areas) || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean).slice(0, 12);
 // Sold online, so never a pin on the map: link-only shops (Affiliate Shops) and digital stores
 const noPin = d => affOnly(d) || isDigital(d);
@@ -1965,6 +1984,7 @@ let STORE_ID = "", STORE_VERIFIED = false, STORE_PLACE = null, STORE_TRIAL = fal
 function ownStores(){ try { return JSON.parse(localStorage.getItem("lk-own") || "[]"); } catch(e){ return []; } }
 function markOwn(id){ try { const a = ownStores().filter(x => x !== id); a.unshift(id); localStorage.setItem("lk-own", JSON.stringify(a.slice(0, 10))); } catch(e) {} }
 function track(t, img){
+  if (STORE_DEMO) return;   // the built-in demo stores count nothing
   try {
     if (!safeUrl(SITE.api) || (!STORE_ID && !img)) return;
     if (STORE_ID && (ownStores().includes(STORE_ID) || (SESSION && SESSION.id === STORE_ID))) return;   // the seller's own phone: only customers count
@@ -2381,7 +2401,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your phone number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id) || /^demo-/.test(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
@@ -3215,7 +3235,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 96;
+const APP_VERSION = 97;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4185,7 +4205,8 @@ async function showStore(data, isPreview, refresh){
   if (!refresh) loadNear(isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
   const verified = !isPreview && STORE_VERIFIED;   // blue ring + tick on the logo, like verified accounts elsewhere
   $("stVerified").hidden = !verified; $("stLogoWrap").classList.toggle("verified", verified);
-  $("stNew").hidden = isPreview || !STORE_TRIAL;
+  $("stNew").textContent = STORE_DEMO && !isPreview ? "Demo store" : "New store";
+  $("stNew").hidden = isPreview || !(STORE_TRIAL || STORE_DEMO);
   if (!isPreview && !refresh) track("view");
   // "Want a store like this?" for customers (not in the seller's own preview)
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
@@ -4467,6 +4488,7 @@ function openProduct(i){
   const sv = isService(D);
   $("pDg").hidden = !dg && !sv; $("pQtyRow").hidden = dg || sv;
   $("pAsk").hidden = !sv;
+  $("pAsk").onclick = STORE_DEMO ? (ev => { ev.preventDefault(); notify(`This is a demo store, so nothing was sent.\n\nA real agent would get: "Hi ${D.name}, I'd like to know more about ${p.n}."`); }) : null;
   if (sv) $("pAsk").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(`Hi ${D.name}, I'd like to know more about ${p.n}.`);
   $("pOpts").setAttribute("aria-label", dg ? "Choose a version" : sv ? "Choose a package" : "Choose an option");
   $("pOpts").hidden = p.o.length < 2 && !p.o[0].l;
@@ -4597,6 +4619,7 @@ $("dateCal").addEventListener("click", e => {
 ["note","cName","date","cEmail","cAddr"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $(id).removeAttribute("aria-invalid"); $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
   let msg = "", bad = null;
+  if (STORE_DEMO && $("backBtn").hidden && items().length && $("cName").value.trim()){ e.preventDefault(); notify("This is a demo store, so nothing was sent.\n\nA real store would get this on WhatsApp:\n\n" + message()); return; }
   setDateMin();
   ["cName","date","cEmail"].forEach(id => $(id).removeAttribute("aria-invalid"));
   if (D.closed) msg = "This store is closed right now.";
@@ -6486,6 +6509,12 @@ async function route(){
     }
     return renderStart();
   }
+  if (DEMOS[q]){   // a built-in demo store
+    ++ROUTE_TOK; STORE_ID = q; STORE_DEMO = true; STORE_VERIFIED = true; STORE_TRIAL = false; STORE_PLACE = DEMOS[q].place;
+    showStore(normalize(JSON.parse(JSON.stringify(DEMOS[q].data))), false); SPLASH.ready(); loadAd().then(() => { if (STORE_ID === q) showAd(); });
+    return;
+  }
+  STORE_DEMO = false;
   if (/^[a-z0-9-]{2,40}$/.test(q)){
     // A store seen before opens at once from this phone's copy; the newest version replaces it quietly
     const tok = ++ROUTE_TOK, saved = shopCopy(q), here = () => tok === ROUTE_TOK;
