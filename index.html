@@ -264,6 +264,30 @@ textarea{min-height:72px;resize:vertical}
 .bulic svg{width:19px;height:19px}
 .botav{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}   /* the News bot's picture */
 .bulhead .botav{width:56px;height:56px}
+.skyslot{border-top:1px solid var(--line);padding:2px 0}.skyslot:first-of-type{margin-top:10px}.skyslot summary{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer}.skyslot summary b{flex:none}.skyslot summary span:not(.tag2){flex:1;min-width:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skyslot[open]{padding-bottom:12px}
+.skyflight{position:relative;width:0;height:0;z-index:4}
+.skyhit{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:grid;place-items:center}
+.skyjetwrap{display:block;width:32px;height:32px}.skyjet{width:32px;height:32px;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
+.skyrope{position:absolute;left:0;top:0;width:31px;height:0;border-top:1.5px dashed #9AA3AD;transform-origin:0 0;pointer-events:none}
+.skybanner{position:absolute;left:0;top:0;width:max-content;max-width:240px;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--rot,0deg));cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
+.skyflag{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:5px;background:#FFF8E1;color:#1C1917;font-size:12.5px;font-weight:800;line-height:1.15;white-space:nowrap;border:1.5px solid #E7B416}
+
+.skycloth{position:relative;display:block}
+.skyslice{position:absolute;top:0;height:100%;overflow:hidden;animation:skyCloth .85s ease-in-out infinite;will-change:transform}
+.skyslicein{position:absolute;top:0;display:block}
+.skyflight.held .skyslice{animation-play-state:paused}
+@keyframes skyCloth{0%,100%{transform:translateY(calc(var(--a) * -1))}50%{transform:translateY(var(--a))}}
+.skyslice::after{content:"";position:absolute;inset:0;background:#6B4E00;opacity:0;pointer-events:none;animation:skyShade .85s ease-in-out infinite;animation-delay:inherit}
+.skyflight.held .skyslice::after{animation-play-state:paused}
+@keyframes skyShade{0%,100%{opacity:0}50%{opacity:.08}}
+.skyflag>span{display:block;flex:none;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skyflag img{width:22px;height:22px;border-radius:5px;object-fit:cover;flex:none;background:#fff}
+
+.skycard{position:fixed;left:12px;right:12px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:9;padding:14px 14px 16px;border-radius:var(--r-card,20px);color:var(--ink)}
+.skycard .mxx{position:absolute;top:10px;right:10px}
+.skytag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.skyrow{display:flex;gap:10px;align-items:center;margin:8px 34px 12px 0}.skyrow img{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;background:#fff}.skyrow b{font-size:16px;line-height:1.3}
+.skystill{position:fixed;left:12px;right:12px;top:calc(140px + env(safe-area-inset-top,0px));z-index:6;display:flex;align-items:center;gap:6px;padding:6px 6px 6px 10px;border-radius:14px}
+.skystillgo{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:0;background:none;color:var(--ink);text-align:left;cursor:pointer;font:inherit}.skystillgo img{width:26px;height:26px;border-radius:6px;object-fit:cover;flex:none}.skystillgo b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .codehead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.codehead h2{margin:0}.codehead .hint{margin:0}
 .codemake{display:flex;gap:6px;margin-top:10px}.codemake input{margin:0;min-width:0}.codemake input[type=text]{flex:1}.codemake input[type=number]{width:58px;flex:none;text-align:center}.codemake .btn{flex:none}
 .codenew{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--soft)}.codenew b{flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.02em;white-space:nowrap}.codenew .btn{padding:6px 10px;font-size:13px}
@@ -1621,6 +1645,7 @@ function applyConfig(c){
     else if (k === "signup") SITE.signup = c.signup !== false;
     else if (c[k] !== undefined && c[k] !== null) SITE[k] = c[k];
   });
+  if (!("sky" in c)) SITE.sky = null;   // the plane ad was stopped
 }
 // Small saved copies on this phone, so pages open at once and refresh quietly in the background
 const keep = {
@@ -2213,6 +2238,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-sky", at: "2026-10-18", title: "A plane over Spot It!", body: "Now and then, a little plane flies across the Spot It! map towing a banner. Want your shop on it? Message us to book the plane banner." },
   { id: "u-20261018-settings", at: "2026-10-18", title: "New: Settings", body: "Under Account, open Settings to pick Light or Dark (or Auto, to match your phone), make text Large, write your own share message (it goes with your link whenever you or your customers tap Share), log out other phones, and check for app updates." },
   { id: "u-20261018-help", at: "2026-10-18", title: "Help is all in one place", body: "Under Account, Help now opens your assistant. Ask anything there, and if you still need a hand, Chat with us on WhatsApp is at the bottom of the page." },
   { id: "u-20261018-ask-learns", at: "2026-10-18", title: "Your assistant keeps learning", body: "When your assistant can't answer a question, it's now passed to us (without your name, store or number) so we can teach it the answer. The more you ask, the smarter it gets." },
@@ -2302,7 +2328,7 @@ function bulletinItems(){
   (b.ads || []).forEach((a, i) => {
     const last = (a.stats || []).slice(-7), views = sum(last, "v"), taps = sum(last, "o");
     const left = a.until ? Math.ceil((new Date(a.until + "T23:59:59") - Date.now()) / 864e5) : null;
-    push(`adins-${wk}-${i}`, "ad", "Ad insights · last 7 days", `Your ad was shown ${views} time${views === 1 ? "" : "s"}`,
+    push(`adins-${wk}-${i}`, "ad", "Ad insights · last 7 days", a.sky ? `Your plane banner flew past ${views} time${views === 1 ? "" : "s"}` : `Your ad was shown ${views} time${views === 1 ? "" : "s"}`,
       `<div class="bulnums"><div><b>${views}</b><span>Times shown</span></div><div><b>${taps}</b><span>Taps</span></div><div><b>${views ? (taps / views * 100).toFixed(1) : 0}%</b><span>Tap rate</span></div></div>
        <p>${left === null ? "Your ad has no end date." : left > 0 ? `Your ad runs for <b>${left} more day${left === 1 ? "" : "s"}</b>.` : "Your ad has ended."}</p>`,
       to && left !== null && left <= 3 ? `<a class="btn small" href="https://wa.me/${to}?text=${encodeURIComponent("Hi Link Kedai App, I'd like to extend my ad for " + (S.name || SESSION.id) + ".")}" target="_blank" rel="noopener">Extend my ad</a>` : "");
@@ -2952,7 +2978,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 74;
+const APP_VERSION = 76;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4562,6 +4588,22 @@ function adminAds(g, head, wire, cfg){
   const showing = list.filter(a => a.img && !(a.until && now > new Date(a.until + "T23:59:59").getTime())).length;
   g.innerHTML = head + `
     <p class="hint" style="margin:0 2px 12px">Up to 5 ads share the banner spot on every store and rotate every 5 seconds. Best size 1200 × 400. <b>${showing}</b> showing now.</p>
+    ${(() => { const L = (Array.isArray(cfg.sky) ? cfg.sky : cfg.sky ? [cfg.sky] : []).slice(0, 5); while (L.length < 5) L.push({});
+      const live = x => x.on && x.text && !(x.until && Date.now() > new Date(x.until + "T23:59:59").getTime());
+      return `<section class="card" id="skyCardAdm">
+      <div class="between"><h2>Plane banners on Spot It!</h2><span class="tag2 ${L.some(live) ? "paid" : ""}">${L.filter(live).length} flying</span></div>
+      <p class="hint" style="margin-top:4px">Up to 5 banners take turns. One plane flies about every minute, each time from a different direction.</p>
+      ${L.map((x, k) => `<details class="skyslot"${!L.some(y => y.text) && k === 0 ? " open" : ""}><summary><b>Plane ${k + 1}</b><span>${esc(x.text || "Empty")}</span>${live(x) ? `<span class="tag2 paid">Flying</span>` : x.text ? `<span class="tag2">Off</span>` : ""}</summary>
+        <label class="check"><input type="checkbox" id="skyOn${k}" ${x.on ? "checked" : ""}><span>Fly this banner</span></label>
+        <label>Banner words (up to 40)<input type="text" id="skyText${k}" maxlength="40" value="${esc(x.text || "")}" placeholder="e.g. Kak Yah Kuih · Raya promo!"></label>
+        <label>Small logo link (optional)<input type="url" id="skyLogo${k}" value="${esc(x.logo || "")}" placeholder="https://i.ibb.co/.../logo.png"></label>
+        <label>Advertiser's WhatsApp (tapping opens their store)<input type="tel" id="skyWa${k}" value="${esc(x.advertiserWa || "")}" placeholder="e.g. 012-345 6789"></label>
+        <label>Or open this link instead<input type="url" id="skyLink${k}" value="${esc(x.link || "")}" placeholder="https://..."></label>
+        <label>Show until (optional)<input type="date" id="skyUntil${k}" value="${esc(x.until || "")}"></label>
+        <p class="hint" data-skystat="${esc(x.text || "")}"></p>
+      </details>`).join("")}
+      <button class="btn solid full" id="skySave" style="margin-top:12px">Save plane banners</button>
+    </section>`; })()}
     <section class="card">
       <h2>Ad price for sellers</h2>
       <label>Shown on sellers' Bulletin board<input type="text" id="adPriceIn" value="${esc(cfg.adPrice || "")}" placeholder="e.g. RM30 per week"></label>
@@ -4605,6 +4647,23 @@ function adminAds(g, head, wire, cfg){
     let ads; try { ads = collect(); } catch(e){ return notify(e.message); }
     adminSaveConfig(cfg, { ad: ads }, `Ad ${k + 1} cleared.`);
   });
+  $("skySave").onclick = () => {
+    const sky = [];
+    for (let k = 0; k < 5; k++){
+      const x = { on: $("skyOn" + k).checked, text: $("skyText" + k).value.trim().slice(0, 40), logo: $("skyLogo" + k).value.trim(), link: $("skyLink" + k).value.trim(), until: $("skyUntil" + k).value, advertiserWa: normWa($("skyWa" + k).value) };
+      if (!x.text && !x.logo && !x.link && !x.advertiserWa) continue;
+      if (x.on && !x.text) return notify(`Plane ${k + 1}: add the banner words first.`);
+      if (x.logo && !safeUrl(x.logo)) return notify(`Plane ${k + 1}: the logo link must start with https://`);
+      if (x.link && !safeUrl(x.link)) return notify(`Plane ${k + 1}: the link must start with https://`);
+      sky.push(x);
+    }
+    const n = sky.filter(x => x.on).length;
+    adminSaveConfig(cfg, { sky }, n ? `${n} plane banner${n === 1 ? "" : "s"} saved. They start flying on Spot It! within a few minutes.` : "Plane banners saved. None are flying.");
+  };
+  apiPost({ action: "admin", key: ADMIN, op: "skystats" }).then(r => (r.banners || []).forEach(b => {
+    const st = (b.stats || []).slice(-7), v = st.reduce((a, x) => a + x.v, 0), o = st.reduce((a, x) => a + x.o, 0);
+    document.querySelectorAll("[data-skystat]").forEach(el => { if (el.dataset.skystat === b.text) el.textContent = `Last 7 days: flew past ${v} time${v === 1 ? "" : "s"}, tapped ${o} time${o === 1 ? "" : "s"}.`; });
+  })).catch(() => {});
   if ($("adStop")) $("adStop").onclick = async () => { if (await ask("Stop all ads on every store?", "Stop all", true)) adminSaveConfig(cfg, { ad: [] }, "All ads stopped."); };
 }
 
@@ -4937,7 +4996,142 @@ function mxLoadMap(){
   });
 }
 const mxDark = () => { const t = document.documentElement.getAttribute("data-theme"); return t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches); };
+// ---------- Sky banner: now and then a little plane tows an ad across the Spot It! map ----------
+// It flies through clear sky (away from the pins and buttons), never while someone is moving the map or reading a store,
+// pauses when tapped, and phones set to "reduce motion" get a still banner instead.
+let SKY = { t: 0, raf: 0, mk: null, el: null, n: 0, i: null, d: null, drag: false, open: false };
+const SKY_PLANE = '<svg class="skyjet" viewBox="0 0 48 48" aria-hidden="true"><path d="M44 24c0-1.6-1.6-2.6-3.4-2.6H29L19 6h-4.2l5.6 15.4H11L7.2 15H4l2.4 9L4 33h3.2l3.8-6.4h9.4L14.8 42H19l10-15.4h11.6c1.8 0 3.4-1 3.4-2.6z" fill="#fff" stroke="#18395C" stroke-width="2" stroke-linejoin="round"/><path d="M33 24h7" stroke="#8DB6E8" stroke-width="2.4" stroke-linecap="round"/></svg>';
+// up to 5 plane banners take turns; each flight comes from a different direction
+function skyAds(){ const x = SITE.sky; return (Array.isArray(x) ? x : x && x.text ? [x] : []).filter(a => a && a.text).slice(0, 5); }
+function skyAd(){ const l = skyAds(); if (!l.length) return null; if (SKY.i == null) SKY.i = Math.floor(Math.random() * l.length); return l[SKY.i % l.length]; }
+const SKY_DIRS = [0, 180, 30, 210, -30, 150, 52, 232, -52, 128];   // screen headings: east, west, and gentle and steep diagonals both ways (straight up or down would hide under the search bar and menu)
+function skyHref(x){ return x.advertiserId ? storeLink(x.advertiserId) : safeUrl(x.link) || ""; }
+function skyHit(t, ad){ try { if (!safeUrl(SITE.api)) return; fetch(SITE.api + (SITE.api.includes("?") ? "&" : "?") + "action=hit&t=" + t + "&b=" + encodeURIComponent((ad && ad.k) || ""), { keepalive: true }).catch(() => {}); } catch(e) {} }
+function skyStop(){ clearTimeout(SKY.t); if (SKY.mk) skyLand(); else if (SKY.el) SKY.el.remove(); const c = $("skyCard"); if (c) c.remove(); SKY = { t: 0, raf: 0, mk: null, el: null, n: 0, i: null, d: null, drag: false, open: false }; }
+function skyStart(){
+  skyStop(); const ad = skyAd(); if (!ad || !$("mxMap")) return;
+  if (reduceMotion()) return skyStill(ad);
+  SKY.t = setTimeout(skyFly, 6000);   // the map settles first
+}
+function skyAway(){}
+// A flight across the map, like a flight tracker: the plane is a map marker that moves between two real places on the map,
+// turned to face where it's going, with a dashed trail behind it and the banner on a tow line. Dragging or zooming the map
+// carries the plane along with it.
+function skyFly(){
+  const ad = skyAd(), mapEl = $("mxMap"); if (!ad || !mapEl || !MX || !MX.map) return;
+  const map = MX.map;
+  const busy = document.hidden || SKY.drag || SKY.open || MX.sel || ($("mxSheet") && $("mxSheet").classList.contains("open")) || !MX.ready;
+  if (busy) { SKY.t = setTimeout(skyFly, 5000); return; }
+  if (SKY.n >= 8) return;   // a few flights per visit to the map is plenty
+  SKY.n++;
+  // pick a route across the screen through the clearest sky: between the filters and the bottom buttons, away from the pins
+  const box = mapEl.getBoundingClientRect(), W = box.width;
+  const top0 = (document.querySelector(".mxtop") || mapEl).getBoundingClientRect().bottom - box.top + 40, bottom0 = ($("mxPill") ? $("mxPill").getBoundingClientRect().top - box.top : box.height - 160) - 40;
+  const pins = [...document.querySelectorAll(".mxmk,.mxcl,.mxme")].map(p => { const r = p.getBoundingClientRect(); return { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2 }; });
+  // a message card over the map ("No stores listed yet"): fly below it, or above it if there's no room
+  let top = top0, bottom = bottom0;
+  const em = $("mxEmpty");
+  if (em && !em.hidden && em.offsetHeight){ const r = em.getBoundingClientRect(), et = r.top - box.top - 30, eb = r.bottom - box.top + 30;
+    if (bottom - eb >= 60) top = Math.max(top, eb); else if (et - top >= 60) bottom = Math.min(bottom, et); else { SKY.n--; SKY.t = setTimeout(skyFly, 15000); return; } }
+  if (SKY.d == null) SKY.d = Math.floor(Math.random() * SKY_DIRS.length);
+  const heading = SKY_DIRS[(SKY.d + SKY.n - 1) % SKY_DIRS.length] + (Math.random() - .5) * 16, hr = heading * Math.PI / 180, ux = Math.cos(hr), uy = Math.sin(hr);
+  // the line it flies along passes through the clearest spot in the open sky, away from the pins
+  const H = box.height; let best = null;
+  for (let i = 0; i < 24; i++){
+    const px = W * (.18 + Math.random() * .64), py = top + Math.random() * Math.max(1, bottom - top);
+    const hits = pins.filter(pt => Math.abs((pt.x - px) * uy - (pt.y - py) * ux) < 55).length;   // pins close to the line
+    if (!best || hits < best.hits) best = { px, py, hits };
+  }
+  // where that line enters and leaves the map (a little outside the edges, so the plane flies in and out)
+  const m = 90, ts = [];
+  if (Math.abs(ux) > 1e-6) ts.push((-m - best.px) / ux, (W + m - best.px) / ux);
+  if (Math.abs(uy) > 1e-6) ts.push((-m - best.py) / uy, (H + m - best.py) / uy);
+  const tIn = Math.max(...ts.filter(t => t < 0)), tOut = Math.min(...ts.filter(t => t > 0));
+  const A = [best.px + ux * tIn, best.py + uy * tIn], B = [best.px + ux * tOut, best.py + uy * tOut];
+  const from = map.unproject(A), to = map.unproject(B);
+  const deg = Math.atan2(B[1] - A[1], B[0] - A[0]) * 180 / Math.PI;   // the map never rotates, so the screen heading is the map heading
+  const logo = safeImg(ad.logo), el = document.createElement("div");
+  el.className = "skyflight";
+  el.innerHTML = `<i class="skyrope" style="transform:rotate(${(deg + 180).toFixed(1)}deg) translateX(13px)"></i>
+    <span class="skybanner"><span class="skyflag">${logo ? `<img src="${esc(logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(ad.text)}</span></span></span>
+    <button type="button" class="skyhit" aria-label="Sponsored: ${esc(ad.text)}. Tap to see more."><span class="skyjetwrap" style="transform:rotate(${deg.toFixed(1)}deg)">${SKY_PLANE}</span></button>`;
+  const mk = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(from).addTo(map);
+  // the banner hangs behind the plane on its tow line, the right distance away whichever way it flies
+  const bn = el.querySelector(".skybanner"), rad = deg * Math.PI / 180, cx = Math.cos(rad), cy = Math.sin(rad);
+  // the banner lies along the flight line, straight behind the tail; it's turned the readable way round when flying leftwards
+  const gap = 13 + 30 + bn.offsetWidth / 2;   // plane half (to the tail) + tow line + banner half
+  bn.style.setProperty("--dx", (-cx * gap).toFixed(1) + "px"); bn.style.setProperty("--dy", (-cy * gap).toFixed(1) + "px");
+  bn.style.setProperty("--rot", (cx >= 0 ? deg : deg + 180).toFixed(1) + "deg");
+  skyCloth(bn, cx >= 0);   // the banner flutters like cloth, waves running from the plane end to the loose end
+  SKY.el = el; SKY.mk = mk;
+  // the dashed trail it leaves behind
+  const trail = { type: "Feature", geometry: { type: "LineString", coordinates: [[from.lng, from.lat], [from.lng, from.lat]] } };
+  try {
+    if (!map.getSource("skytrail")){ map.addSource("skytrail", { type: "geojson", data: trail }); map.addLayer({ id: "skytrail", type: "line", source: "skytrail", paint: { "line-color": mxDark() ? "#3A5F8F" : "#8DB6E8", "line-width": 2, "line-opacity": .85, "line-dasharray": [2, 2] } }); }   // the dark map is drawn inverted, so a deeper blue shows up light
+    else map.getSource("skytrail").setData(trail);
+  } catch(e) {}
+  const dur = Math.max(10000, Math.hypot(B[0] - A[0], B[1] - A[1]) * 22);
+  let done = 0, last = performance.now();
+  const step = now => {
+    if (SKY.mk !== mk) return;
+    if (!SKY.open && !document.hidden) done += now - last;   // paused while the card is open
+    last = now;
+    const t = Math.min(1, done / dur), lng = from.lng + (to.lng - from.lng) * t, lat = from.lat + (to.lat - from.lat) * t;
+    mk.setLngLat([lng, lat]);
+    trail.geometry.coordinates[1] = [lng, lat];
+    try { const src = map.getSource("skytrail"); if (src) src.setData(trail); } catch(e) {}
+    if (t < 1) { SKY.raf = requestAnimationFrame(step); return; }
+    skyLand(); clearTimeout(SKY.t); SKY.t = setTimeout(skyFly, 45000 + Math.random() * 15000);
+  };
+  SKY.raf = requestAnimationFrame(step);
+  skyHit("skyview", ad); SKY.i++;   // the next flight carries the next banner
+  el.querySelector(".skyhit").addEventListener("click", e => { e.stopPropagation(); skyOpen(ad); });
+  el.querySelector(".skybanner").addEventListener("click", e => { e.stopPropagation(); skyOpen(ad); });
+}
+// Flag flutter: the banner is cut into thin strips that rise and fall a moment after each other, so a wave runs along it.
+// The end tied to the tow line barely moves; the loose end flaps the most, and each fold catches the light.
+function skyCloth(bn, poleRight){
+  const flag = bn.querySelector(".skyflag"); if (!flag) return;
+  const W = flag.offsetWidth, H = flag.offsetHeight, N = Math.max(18, Math.round(W / 6)), html = flag.outerHTML, T = .85;
+  const cloth = document.createElement("span"); cloth.className = "skycloth"; cloth.style.width = W + "px"; cloth.style.height = H + "px";
+  let out = "";
+  for (let i = 0; i < N; i++){
+    const d = i / (N - 1), far = poleRight ? 1 - d : d;   // 0 at the tow line, 1 at the loose end
+    out += `<span class="skyslice" style="left:${(i * W / N).toFixed(2)}px;width:${(W / N + .7).toFixed(2)}px;--a:${(.4 + far * 3.8).toFixed(2)}px;animation-delay:${(-(1 - far) * T * 1.6).toFixed(3)}s"><span class="skyslicein" style="left:${(-i * W / N).toFixed(2)}px;width:${W}px">${html}</span></span>`;
+  }
+  cloth.innerHTML = out; flag.replaceWith(cloth);
+}
+// the flight is over: the plane and its trail leave the map
+function skyLand(){
+  cancelAnimationFrame(SKY.raf); if (SKY.mk) try { SKY.mk.remove(); } catch(e) {} SKY.mk = null; SKY.el = null;
+  try { const m = MX && MX.map; if (m && m.getSource("skytrail")) m.getSource("skytrail").setData({ type: "FeatureCollection", features: [] }); } catch(e) {}
+}
+function skyOpen(ad){
+  SKY.open = true; if (SKY.el) SKY.el.classList.add("held");
+  skyHit("skytap", ad);
+  const href = skyHref(ad), logo = safeImg(ad.logo), card = document.createElement("section");
+  card.className = "skycard mxg"; card.id = "skyCard"; card.setAttribute("role", "dialog"); card.setAttribute("aria-label", "Sponsored");
+  card.innerHTML = `<button type="button" class="mxx" id="skyX" aria-label="Close">${ico("x", 18, 2)}</button>
+    <span class="skytag">Sponsored</span>
+    <div class="skyrow">${logo ? `<img src="${esc(logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<b>${esc(ad.text)}</b></div>
+    ${href ? `<a class="btn solid full" href="${esc(href)}" ${ad.advertiserId ? "" : `target="_blank" rel="noopener sponsored"`}>${ad.advertiserId ? "See their store" : "Find out more"}</a>` : ""}`;
+  $("mxMap").parentNode.appendChild(card);
+  const pill = $("mxPill"); if (pill) card.style.bottom = Math.max(96, innerHeight - pill.getBoundingClientRect().top + 10) + "px";   // above the "stores in view" button
+  const close = () => { card.remove(); SKY.open = false; if (SKY.el) SKY.el.classList.remove("held"); };
+  $("skyX").onclick = close; $("skyX").focus();
+}
+// phones that ask for less motion: a still banner under the filters, once per visit, easy to close
+function skyStill(ad){
+  try { if (sessionStorage.getItem("lk-skyx")) return; } catch(e) {}
+  const map = $("mxMap"); if (!map) return;
+  const el = document.createElement("div"); el.className = "skystill mxg"; SKY.el = el;
+  el.innerHTML = `<button type="button" class="skystillgo"><span class="skytag">Sponsored</span>${safeImg(ad.logo) ? `<img src="${esc(safeImg(ad.logo))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<b>${esc(ad.text)}</b></button><button type="button" class="mxx" aria-label="Hide this ad">${ico("x", 16, 2)}</button>`;
+  map.parentNode.appendChild(el); skyHit("skyview", ad);
+  el.querySelector(".skystillgo").onclick = () => skyOpen(ad);
+  el.querySelector(".mxx").onclick = () => { el.remove(); SKY.el = null; try { sessionStorage.setItem("lk-skyx", "1"); } catch(e) {} };
+}
 function mxDestroy(){
+  skyStop();
   if (!MX) return;
   clearTimeout(MX.qt); clearTimeout(MX.tt); document.removeEventListener("keydown", MX.key);
   try { MX.map.remove(); } catch(e) {}
@@ -5258,6 +5452,8 @@ async function renderExplore(){
     }
   });
   map.on("moveend", () => { mxDraw(); exRemember(); });
+  map.on("dragstart", () => { SKY.drag = true; }); map.on("dragend", () => { SKY.drag = false; });
+  skyStart();
   map.on("click", e => {
     const t = e.originalEvent && e.originalEvent.target;
     if (t && t.closest && t.closest(".mxmk,.mxcl")) return;   // a pin was tapped, not the map
