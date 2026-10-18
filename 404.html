@@ -1206,7 +1206,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 <div class="overlay" id="bulOverlay" role="dialog" aria-modal="true" aria-labelledby="bulTitle">
   <div class="sheet">
     <button class="xmini" data-close="bulOverlay" aria-label="Close">×</button>
-    <div class="bulhead"><img class="botav" src="bot.jpg" alt="" loading="lazy"><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From the Link Kedai App bot</span></div></div>
+    <div class="bulhead"><img class="botav" src="bot.jpg" alt="Your assistant" loading="lazy"><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From your Link Kedai App assistant</span></div></div>
     <div id="bulList"></div>
   </div>
 </div>
@@ -2148,7 +2148,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
-  { id: "u-20261018-bot-face", at: "2026-10-18", title: "Say hi to your News bot", body: "The bot that posts your store status, tips and app news now has a face. You'll see her on the What's new card and in News." },
+  { id: "u-20261018-bot-face", at: "2026-10-18", title: "Say hi to your assistant", body: "Your assistant, who posts your store status, tips and app news, now has a face. You'll see her on the What's new card and in News." },
   { id: "u-20261018-free-trial", at: "2026-10-18", title: "Go live free for 14 days", body: "New stores can now go live free for 14 days: tap Go live free on your Store page, share your link and take orders. Pay once any time to keep your store live for good. If a trial ends unpaid, the store goes offline (not deleted) and comes back as soon as you pay." },
   { id: "u-20261018-spot-it", at: "2026-10-18", title: "Meet Spot It!", body: "The store map is now called Spot It! Open it any time with the new pin button next to the store-front button at the top of your Store page, to see your shop the way customers find it. Your listing settings are under Spot It! listing." },
   { id: "u-20261018-malaysia-map", at: "2026-10-18", title: "Spot It! shows Malaysia", body: "The Spot It! map now opens on Malaysia and stays there, with a bold line around Peninsular Malaysia, Sabah and Sarawak. In dark mode the map is brighter and easier to read." },
@@ -2245,7 +2245,7 @@ function bulletinItems(){
   // Link Kedai App updates
   const since = b.created ? new Date(b.created).toISOString().slice(0, 10) : "";   // a new seller starts with a clean slate, not every update from before they joined
   APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
-  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm the Link Kedai App bot. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights.</p>");
+  if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm your Link Kedai App assistant. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights.</p>");
   const gone = bulGone();   // posts the seller removed; insights and must-act status posts always stay
   return out.filter(x => x.ins || x.keep || !gone.has(x.id));
 }
@@ -2257,7 +2257,7 @@ function markSeen(items){ const seen = bulSeen(); try { localStorage.setItem(bul
 function bulCards(items, seen, canx){
   return items.map(x => `
     <article class="bulcard ${seen.has(x.id) ? "" : "unread"} ${canx && !x.keep ? "canx" : ""}">${canx && !x.keep ? `<button class="xmini" data-act="bulx" data-v="${esc(x.id)}" aria-label="Remove this post">×</button>` : ""}
-      ${x.kind === "news" ? `<img class="botav" src="bot.jpg" alt="">` : `<div class="bulic">${IC[x.kind] || IC.news}</div>`}
+      ${x.kind === "news" ? `<img class="botav" src="bot.jpg" alt="Your assistant">` : `<div class="bulic">${IC[x.kind] || IC.news}</div>`}
       <div class="bulbody"><div class="bulmeta">${esc(x.label)}</div><h2>${esc(x.title)}</h2>${/^\s*</.test(x.body) ? x.body : `<p>${x.body}</p>`}${x.cta ? `<div class="bulcta">${x.cta}</div>` : ""}</div>
     </article>`).join("");
 }
@@ -2316,7 +2316,7 @@ function shoutHtml(){
   const seen = bulSeen(), fresh = newsItems().filter(x => /^u-/.test(x.id) && !seen.has(x.id) && !(x.id === "u-20261018-unpaid" && STATUS !== "live"));
   if (!fresh.length) return "";
   const x = fresh[0], u = APP_UPDATES.find(u => u.id === x.id);
-  return `<section class="card bulshout" id="bulShout"><img class="botav" src="bot.jpg" alt="">
+  return `<section class="card bulshout" id="bulShout"><img class="botav" src="bot.jpg" alt="Your assistant">
     <div class="bulbody"><div class="bulmeta">${fresh.length > 1 ? `What's new · ${fresh.length} updates` : "What's new"}</div><h2 style="margin:2px 0 0">${esc(x.title)}</h2><p class="hint">${esc(u ? u.body : "")}</p>
     <button class="btn small solid" data-act="go" data-v="news">${fresh.length > 1 ? "See all updates" : "See news"}</button></div>
     <button class="xmini" data-act="shoutx" data-v="${esc(x.id)}" aria-label="Close">×</button></section>`;
@@ -2686,7 +2686,7 @@ function edNews(){
   setTimeout(() => { markSeen(items); updateBell(); }, 0);
   const canClear = items.some(x => !x.keep);
   return `${edTop("News", NEWSBACK, canClear ? `<button class="btn small" data-act="bulclear">Clear all</button>` : "")}
-  <p class="hint" style="margin:-4px 2px 14px;display:flex;gap:10px;align-items:center"><img class="botav" src="bot.jpg" alt=""><span>From the Link Kedai App bot: your store status, tips and what's new. Tap × to remove a post you've read.</span></p>
+  <p class="hint" style="margin:-4px 2px 14px;display:flex;gap:10px;align-items:center"><img class="botav" src="bot.jpg" alt="Your assistant"><span>From your Link Kedai App assistant: your store status, tips and what's new. Tap × to remove a post you've read.</span></p>
   ${items.length ? bulCards(items, seen, true) : `<section class="card"><p class="hint" style="margin:0">You're all caught up. New tips and updates will show here.</p></section>`}`;
 }
 function edAccount(){
@@ -4165,7 +4165,7 @@ function adminAds(g, head, wire, cfg){
     <section class="card">
       <h2>Ad price for sellers</h2>
       <label>Shown on sellers' Bulletin board<input type="text" id="adPriceIn" value="${esc(cfg.adPrice || "")}" placeholder="e.g. RM30 per week"></label>
-      <p class="hint">The Link Kedai App bot shows this with a "Book an ad" button that opens WhatsApp to you. Leave empty to hide it.</p>
+      <p class="hint">Your assistant shows this with a "Book an ad" button that opens WhatsApp to you. Leave empty to hide it.</p>
     </section>
     ${list.map((a, k) => `
     <section class="card adslot">
