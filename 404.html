@@ -176,7 +176,7 @@ textarea{min-height:72px;resize:vertical}
 .stat b{letter-spacing:-.02em}
 .stat span{font-weight:600}
 .stat.hot b{color:var(--warn)}
-.admtabs{margin:0 0 14px}
+.admtabs{margin:0 0 14px}.admtabs button{min-width:0;padding-left:4px;padding-right:4px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .admrow .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .admrow .btn.small{padding:8px 11px}
 .btn.small.dangerline{border-color:var(--err);color:var(--err)}
@@ -2190,6 +2190,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-ask-learns", at: "2026-10-18", title: "Your assistant keeps learning", body: "When your assistant can't answer a question, it's now passed to us (without your name, store or number) so we can teach it the answer. The more you ask, the smarter it gets." },
   { id: "u-20261018-ask-smarter", at: "2026-10-18", title: "Your assistant understands you better", body: "Your assistant now understands short forms and Manglish, like \"camne nak letak gmbr\" or \"kedai x keluar kat map\", and has new answers about opening hours, order alerts, discounts, stock limits, cancelled orders and putting your link in your Instagram bio." },
   { id: "u-20261018-map-pins", at: "2026-10-18", title: "New map pins with your logo", body: "On Spot It!, every store is now a navy map pin with your logo in its round head. The tip of the pin points at your area. The same pins show in More stores near you at the end of store pages. No logo yet? Add one under Shop details." },
   { id: "u-20261018-more-stores", at: "2026-10-18", title: "Customers discover more stores", body: "At the end of every store page, customers now see a few other Link Kedai App stores near them, with a button to Spot It! After a customer's order goes through, we also suggest nearby stores once. Your store shows up on other sellers' pages too when you're listed on Spot It! (turn it on under Spot It! listing)." },
@@ -2886,6 +2887,7 @@ function askSend(){
   const text = inp.value.trim().slice(0, 200); if (!text) return inp.focus();
   inp.value = ""; inp.blur();
   const r = askFind(text);
+  if (r.none && SESSION && !SESSION.admin) apiPost({ action: "askmiss", q: text }).catch(() => {});   // so the assistant can be taught this one (no name or store is sent)
   askPush(text, r.small ? { bot: r.small } : r.none
     ? { bot: "Sorry, I don't know that one yet. Try other words, pick a question below, or ask us on WhatsApp and a person will help.", cta: askWa(`Hi ${APP_NAME}, I have a question about my store ${SESSION ? SESSION.id : ""}: ${text}`, "Ask us on WhatsApp") }
     : { ...askReply(r.e), more: r.more });
@@ -4238,6 +4240,7 @@ async function renderAdmin(msg){
       <button data-admtab="review" aria-pressed="${ADMTAB === "review"}">Review</button>
       <button data-admtab="ads" aria-pressed="${ADMTAB === "ads"}">Ads</button>
       <button data-admtab="settings" aria-pressed="${ADMTAB === "settings"}">Settings</button>
+      <button data-admtab="asks" aria-pressed="${ADMTAB === "asks"}">Q&amp;A</button>
     </div>
     <p class="status" id="admMsg" role="status">${esc(msg || "")}</p>`;
   const wire = () => {
@@ -4246,6 +4249,7 @@ async function renderAdmin(msg){
   };
   if (ADMTAB === "stores") return adminStores(g, head, wire);
   if (ADMTAB === "review") return adminReview(g, head, wire);
+  if (ADMTAB === "asks") return adminAsks(g, head, wire);
   g.innerHTML = head + loaderHtml("Loading settings..."); wire();
   let cfg;
   try { cfg = (await apiPost({ action: "admin", key: ADMIN, op: "getconfig" })).config || {}; }
@@ -4253,6 +4257,33 @@ async function renderAdmin(msg){
   if (ADMTAB === "ads") adminAds(g, head, wire, cfg); else adminSettings(g, head, wire, cfg);
 }
 
+// Questions sellers asked their assistant that it couldn't answer: send the list to Claude to teach it, then clear what's done
+async function adminAsks(g, head, wire){
+  g.innerHTML = head + loaderHtml("Loading questions..."); wire();
+  let list;
+  try { list = (await apiPost({ action: "admin", key: ADMIN, op: "asks" })).asks || []; }
+  catch(e){ if (adminKeyErr(e)){ adminLock(); return renderAdmin(e.message); } return adminOffline(g, head, wire, e); }
+  const when = t => t ? new Date(t).toLocaleDateString("en-MY", { day: "numeric", month: "short" }) : "";
+  g.innerHTML = head + `<section class="card">
+    <h2>Questions your assistant couldn't answer</h2>
+    <p class="hint">Sellers asked these and got "I don't know that one yet". No names, stores or phone numbers are kept. Copy the list and send it to Claude to teach your assistant, then clear what's done.</p>
+    ${list.length ? `<div class="row2" style="margin-top:12px"><div><button class="btn solid full" id="askCopy">${ico("copy",16)}Copy all</button></div><div><button class="btn full dangerline" id="askClear">Clear all</button></div></div>` : ""}
+  </section>
+  ${list.length ? `<section class="card lk-group">${list.map(x => `<div class="lk-row" style="cursor:default"><span class="tt"><b style="white-space:normal;overflow-wrap:anywhere">${esc(x.text)}</b><span>Asked ${x.n} time${x.n === 1 ? "" : "s"} · last ${esc(when(x.last))}</span></span><button type="button" class="iconbtn" data-askdel="${esc(x.q)}" aria-label="Remove this question" style="flex:none">${ico("x",18)}</button></div>`).join("")}</section>`
+    : `<section class="card"><p class="hint" style="margin:0">Nothing yet. Questions your assistant can't answer will show here.</p></section>`}`;
+  wire();
+  const cp = $("askCopy"); if (cp) cp.onclick = async () => {
+    const text = "Questions my Link Kedai App assistant couldn't answer:\n" + list.map(x => `- ${x.text} (asked ${x.n}x)`).join("\n");
+    $("admMsg").textContent = (await copyText(text)) ? `Copied ${list.length} question${list.length === 1 ? "" : "s"}. Paste them to Claude.` : "Couldn't copy. Select the questions and copy them yourself.";
+  };
+  const cl = $("askClear"); if (cl) cl.onclick = async () => {
+    if (!(await ask(`Remove all ${list.length} questions?`, "Clear all", true))) return;
+    try { await apiPost({ action: "admin", key: ADMIN, op: "askclear" }); renderAdmin("Cleared."); } catch(e){ $("admMsg").textContent = friendly(e, "Couldn't clear. Try again."); }
+  };
+  g.querySelectorAll("[data-askdel]").forEach(b => b.onclick = async () => {
+    try { await apiPost({ action: "admin", key: ADMIN, op: "askdel", q: b.dataset.askdel }); b.closest(".lk-row").remove(); } catch(e){ $("admMsg").textContent = friendly(e, "Couldn't remove. Try again."); }
+  });
+}
 let ADMLIST = null;
 function adminOffline(g, head, wire, e){
   g.innerHTML = head + `<section class="card"><h2>Couldn't load</h2><p class="hint">${esc(friendly(e, "Check your internet and try again."))}</p><button class="btn solid" id="admRetry">Try again</button></section>`;
@@ -4604,7 +4635,7 @@ function adminSettings(g, head, wire, cfg){
    HOME + ROUTER
    ============================================================ */
 // ---------- Terms, Privacy and Refund pages (yoursite/?terms, ?privacy, ?refund) ----------
-const LEGAL_UPDATED = "15 October 2026";
+const LEGAL_UPDATED = "18 October 2026";
 const copyrightLine = () => `<span class="copyright">© ${Math.max(2026, new Date().getFullYear()) === 2026 ? "2026" : "2026–" + new Date().getFullYear()} ${esc(APP_NAME)}. All rights reserved.</span>`;
 const legalLinks = () => `<span class="legallinks"><a href="${esc(home())}about">About us</a>·<a href="${esc(home())}terms">Terms</a>·<a href="${esc(home())}privacy">Privacy</a>·<a href="${esc(home())}refund">Refunds</a></span>`;
 function legalContact(){
@@ -4623,6 +4654,7 @@ function legalDoc(which){
       <li><b>Email (optional):</b> if you add one, we use it only to let you log in and to send you codes, for example to reset your PIN. It is never shown on your store.</li>
       <li><b>Store content:</b> your items, prices, descriptions, logo, cover and item photos.</li>
       <li><b>Payment receipts:</b> the receipt screenshot you upload when you publish. Receipts are private and only seen by us.</li>
+      <li><b>Questions to your assistant:</b> answered on your own phone. If your assistant can't answer one, the question's words are sent to us so we can teach it, without your name, store or phone number, and with any phone numbers or emails you typed blanked out.</li>
       <li><b>Store listing (optional):</b> if you list your store on Spot It!, customers see your state, the area name you write and your category. If you also add your location for "Nearest first", it stays private: customers only see roughly how far away you are, never where. If you turn on "I have a shop customers can visit", customers see your exact shop location and the address you write, so they can get directions. You can turn it off any time.</li>
     </ul>
     <h2>2. Information from customers</h2>
