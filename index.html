@@ -500,6 +500,39 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .plist.minimal .pmeta{margin-top:4px}
 .plist.minimal .prow::after{content:"+";flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:18px;font-weight:600;color:var(--ink)}
 .plist.minimal .prow.out::after,.plist.minimal .plink::after{content:none}
+/* Digital stores: book-shaped covers in a grid, what it is, price and a Get it button */
+.plist.dggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;background:none;border:0;border-radius:0;overflow:visible}
+.plist.dggrid .prow.dgrow{flex-direction:column;gap:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.dgcover{position:relative;width:100%;aspect-ratio:3/4;background:var(--soft)}
+.dgcover img,.dgcover .ph{width:100%;height:100%;object-fit:cover;display:block;border-radius:0}
+.dgcover .ph{display:grid;place-items:center;font-size:40px}
+.dgbest{position:absolute;left:8px;top:8px;background:#E8B93A;color:#3A2A00;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.dgrow .ptext{padding:10px 12px 12px;width:100%;box-sizing:border-box}
+.dgrow h3{font-size:15px;line-height:1.25;margin:0}
+.dgchip{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:700;color:var(--muted);background:var(--soft);padding:2px 9px;border-radius:999px}
+.dgrow .pmeta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:8px;flex-wrap:wrap}
+.dgget{font-size:12.5px;font-weight:800;color:#fff;background:var(--accent);padding:5px 12px;border-radius:999px}
+.prow.out.dgrow .dgcover{opacity:.5}
+.pbig.dgpics{aspect-ratio:auto}
+.dgstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding:14px 14px 16px;scrollbar-width:none}
+.dgstrip::-webkit-scrollbar{display:none}
+.pbig .dgstrip img{flex:none;width:70%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:var(--r-sm);scroll-snap-align:center;box-shadow:0 4px 14px rgba(20,10,15,.18)}
+.dgcount{position:absolute;right:14px;bottom:24px;font-size:11.5px;font-weight:700;background:rgba(0,0,0,.55);color:#fff;padding:3px 9px;border-radius:999px;pointer-events:none}
+.dginfo{margin:8px 0 6px}
+.dginfo h3{font-size:15px;margin:14px 0 8px}
+.dgget-list{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+.dgget-list li{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;line-height:1.35}
+.dgget-list svg{color:#15803D;flex:none;margin-top:2px}
+.dghowbox{display:flex;gap:10px;margin-top:14px;padding:12px 14px;border-radius:var(--r-md);background:var(--soft);font-size:14px;line-height:1.45}
+.dghowbox b{display:block;margin-bottom:2px}
+.dghowbox svg{flex:none;margin-top:1px}
+.dgsmp{display:flex;gap:8px;flex-wrap:wrap;position:relative}
+.dgsmpi{position:relative;width:64px;height:85px;border-radius:8px;overflow:hidden;background:var(--soft)}
+.dgsmpi img{width:100%;height:100%;object-fit:cover;display:block}
+.dgsmpi button{position:absolute;right:3px;top:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.62);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
+.dgsmpadd{position:relative;width:64px;height:85px;border:1.5px dashed var(--line2);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;margin:0;overflow:hidden}
+.dgsmpadd input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.seg.dghow button{font-size:13px;line-height:1.2}
 .empty{color:var(--muted);text-align:center;padding:40px 16px}
 .foot{text-align:center;color:var(--muted);font-size:13px;margin:32px 16px 0}
 .foot a{color:inherit}
@@ -1497,8 +1530,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <div class="pbody">
         <h2 id="pTitle"></h2>
         <p class="pdesc" id="pDesc"></p>
+        <div class="dginfo" id="pDg" hidden></div>
         <div class="opts" id="pOpts" role="radiogroup" aria-label="Choose an option"></div>
-        <div class="qtyrow"><b>Quantity</b>
+        <div class="qtyrow" id="pQtyRow"><b>Quantity</b>
           <div class="step"><button id="pMinus" aria-label="Less">−</button><span class="q" id="pQty">1</span><button id="pPlus" aria-label="More">+</button></div>
         </div>
         <button class="btn solid full" id="pAdd" style="padding:15px">Add to cart</button>
@@ -1512,10 +1546,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
       <div class="lines" id="lines"></div>
       <label for="cName">Your name</label>
       <input type="text" id="cName" autocomplete="name">
+      <div id="cEmailWrap" hidden><label for="cEmail">Email (optional, to get it by email too)</label><input type="email" id="cEmail" autocomplete="email" inputmode="email"></div>
+      <div id="dateWrap">
       <label for="dateBtn" id="dateLabel">Date you want it</label>
       <input type="hidden" id="date">
       <button type="button" class="datebtn empty" id="dateBtn" aria-expanded="false"><span id="dateTxt">Pick a date</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
       <div class="cal" id="dateCal" hidden></div>
+      </div>
       <label for="note">Note to the shop (optional)</label>
       <textarea id="note" placeholder="e.g. Pickup Saturday 3pm"></textarea>
       <p class="err" id="err" role="alert"></p>
@@ -1757,8 +1794,22 @@ const KINDS = {
   products: { label: "Products", list: "Products", item: "product",   add: "Add to cart", date: "Delivery or pickup date (optional)", dateNeeded: false, empty: "This store hasn't added products yet.",
               ex: { shop: "e.g. Aurora Boutique", tag: "e.g. Modest fashion, delivery across Malaysia", name: "e.g. Satin Blouse", desc: "e.g. Soft satin, 4 colours, sizes S to XL", opt: "e.g. Size M, Dusty Pink", price: "e.g. 59", note: "e.g. Please deliver to my office address" } },
   services: { label: "Services", list: "Services", item: "service",   add: "Book",        date: "Preferred date",                 dateNeeded: true,  empty: "This store hasn't added services yet.",
-              ex: { shop: "e.g. Glow Beauty Studio", tag: "e.g. Hair, nails & bridal makeup by appointment", name: "e.g. Keratin Hair Treatment", desc: "e.g. About 90 minutes, includes wash & blow", opt: "e.g. Long hair", price: "e.g. 180", note: "e.g. Prefer afternoon, around 2pm" } }
+              ex: { shop: "e.g. Glow Beauty Studio", tag: "e.g. Hair, nails & bridal makeup by appointment", name: "e.g. Keratin Hair Treatment", desc: "e.g. About 90 minutes, includes wash & blow", opt: "e.g. Long hair", price: "e.g. 180", note: "e.g. Prefer afternoon, around 2pm" } },
+  // Digital products (e-books, templates, presets, classes): nothing to deliver by hand, no date, always one of each
+  digital:  { label: "Digital",  list: "Products", item: "product",   add: "Get it",      date: "",                               dateNeeded: false, empty: "This store hasn't added products yet.",
+              ex: { shop: "e.g. Kak Ina Templates", tag: "e.g. Canva templates & e-books for small businesses", name: "e.g. 30 Raya Canva Templates", desc: "e.g. Edit on your phone or laptop", opt: "e.g. Commercial licence", price: "e.g. 19", note: "e.g. Please send it to my email too" } }
 };
+const isDigital = d => !!d && d.kind === "digital";
+// Sold online, so never a pin on the map: link-only shops (Affiliate Shops) and digital stores
+const noPin = d => affOnly(d) || isDigital(d);
+// "Payhip" rather than "payhip.com" on the Buy button
+const DG_SITES = { payhip: "Payhip", gumroad: "Gumroad", "ko-fi": "Ko-fi", lemonsqueezy: "Lemon Squeezy", stan: "Stan Store", etsy: "Etsy", sellfy: "Sellfy", podia: "Podia", teachable: "Teachable", thinkific: "Thinkific", kajabi: "Kajabi", udemy: "Udemy", canva: "Canva" };
+function dgSite(u){
+  const b = linkInfo(u).brand; if (!/\./.test(b)) return b;
+  const h = b.replace(/^www\./, "").split("."), key = h.length > 2 && h[h.length - 2].length <= 3 ? h[h.length - 3] : h[h.length - 2];
+  return DG_SITES[key] || DG_SITES[h[0]] || b;
+}
+const DG_HOW = { wa: "WhatsApp", link: "Link after payment", ext: "Your checkout page" };
 const W = d => KINDS[d && d.kind] || KINDS.products;
 
 // ---------- Calendar: the seller marks days off; customers can't pick them ----------
@@ -1783,11 +1834,27 @@ function calHtml(y, m, off, mode, sel, min){
     <div class="calgrid">${cells}</div>
     <div class="callegend"><span><i></i>Not taking orders</span></div>`;
 }
+// A digital product's extras (kept only when used, so other stores' data stays small):
+// fmt "PDF · 42 pages", get = what's inside (one per line), smp = sample pages, how = wa | link | ext,
+// ext = the seller's own checkout page, eta = "within 1 hour", dl = the private download link (the server never shows it to customers), best = Best value
+function dgFields(it){
+  const o = {}, s = (v, n) => String(v || "").replace(/[<>]/g, "").slice(0, n);
+  if (it.fmt) o.fmt = s(it.fmt, 60).trim();
+  if (it.get) o.get = s(it.get, 800);
+  const smp = (Array.isArray(it.smp) ? it.smp : []).map(u => safeImg(String(u || ""))).filter(Boolean).slice(0, 4); if (smp.length) o.smp = smp;
+  if (it.how === "link" || it.how === "ext") o.how = it.how;
+  if (it.ext) o.ext = safeUrl(String(it.ext).trim()).slice(0, 600);
+  if (it.eta) o.eta = s(it.eta, 40);
+  if (it.dl) o.dl = String(it.dl).trim().replace(/[<>"\s]/g, "").slice(0, 600);
+  if (it.best) o.best = true;
+  return o;
+}
 function normalize(d){
   const x = Object.assign(JSON.parse(JSON.stringify(BLANK)), d || {});
   x.items = (Array.isArray(x.items) ? x.items : []).filter(it => it && typeof it === "object").map(it => ({
     n: String(it.n || ""), d: String(it.d || ""), img: String(it.img || ""), out: !!it.out, sec: String(it.sec || "").trim().slice(0, 30),
-    o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String((o && o.l) || ""), p: Math.min(Math.max(0, Number(o && o.p) || 0), 1e9) })) : [{ l: "", p: 0 }]
+    o: Array.isArray(it.o) && it.o.length ? it.o.map(o => ({ l: String((o && o.l) || ""), p: Math.min(Math.max(0, Number(o && o.p) || 0), 1e9) })) : [{ l: "", p: 0 }],
+    ...dgFields(it)
   }));
   x.links = (Array.isArray(x.links) ? x.links : []).slice(0, 80).map(l => ({
     u: safeUrl(String((l && l.u) || "").trim()).slice(0, 600), sec: String((l && l.sec) || "").trim().slice(0, 30), n: looksJunk((l && l.n) || "", true) ? "" : String((l && l.n) || "").slice(0, 120),
@@ -1839,6 +1906,7 @@ function kmBetween(a, b, c, d){ const t = x => x * Math.PI / 180, h = Math.sin(t
 // ---------- Link Kedai App icon set: one line style everywhere (24px grid, 1.8 stroke, rounded) ----------
 const ICONS = {"chevron": "<path d=\"m9 6 6 6-6 6\"/>", "back": "<path d=\"m15 6-6 6 6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/>", "heart": "<path d=\"M12 20s-7-4.4-9-9a4.6 4.6 0 0 1 9-3 4.6 4.6 0 0 1 9 3c-2 4.6-9 9-9 9z\"/>", "bell": "<path d=\"M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.9 1.9 0 0 0 3.4 0\"/>", "chart": "<path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/>", "shield": "<path d=\"M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z\"/><path d=\"m9 12 2 2 4-4\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "chat": "<path d=\"M21 12a8.5 8.5 0 0 1-12.5 7.5L3 21l1.5-5.2A8.5 8.5 0 1 1 21 12z\"/>", "sliders": "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><circle cx=\"9\" cy=\"10\" r=\"2\"/><path d=\"m21 16-5-5-9 9\"/>", "palette": "<path d=\"M12 3a9 9 0 1 0 0 18c1 0 1.7-.8 1.7-1.7 0-1-.9-1.4-.9-2.4 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4.1-4-7.2-9-7.2z\"/><circle cx=\"7.5\" cy=\"11.5\" r=\"1\"/><circle cx=\"10\" cy=\"7.5\" r=\"1\"/><circle cx=\"15\" cy=\"7.5\" r=\"1\"/>", "pin": "<path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/>", "card": "<rect x=\"2.5\" y=\"5\" width=\"19\" height=\"14\" rx=\"2.5\"/><path d=\"M2.5 10h19M6 15h4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1.5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "share": "<circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "mail": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2.5\"/><path d=\"m3.5 7 8.5 6 8.5-6\"/>", "lock": "<rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/>", "logout": "<path d=\"M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3\"/><path d=\"m10 17-5-5 5-5M5 12h11\"/>", "check": "<path d=\"m5 12 5 5 9-10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "box": "<path d=\"M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z\"/><path d=\"m3 7.5 9 4.5 9-4.5M12 12v9\"/>", "grid": "<rect x=\"3.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"3.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13.5\" y=\"13.5\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "store": "<path d=\"M4 9.5V20h16V9.5\"/><path d=\"M3 9.5 4.5 4h15L21 9.5c0 1.6-1.3 2.5-2.9 2.5S15.3 11 15.3 9.5c0 1.6-1.4 2.5-3.3 2.5S8.7 11 8.7 9.5C8.7 11 7.5 12 5.9 12S3 11.1 3 9.5z\"/><path d=\"M9.5 20v-5h5v5\"/>", "food": "<path d=\"M3.5 11h17a8.5 8.5 0 0 1-17 0z\"/><path d=\"M9 7.5c0-1.4 1.4-1.4 1.4-3M13.6 7.5c0-1.4 1.4-1.4 1.4-3\"/>", "cake": "<path d=\"M4 21h16M5 21v-8.5h14V21\"/><path d=\"M5 16.5c2.3 1.2 4.7 1.2 7 0s4.7-1.2 7 0\"/><path d=\"M12 12.5V9\"/><path d=\"M12 6.5c.8-.8.8-1.7 0-2.5-.8.8-.8 1.7 0 2.5z\"/>", "cup": "<path d=\"M6 8h12l-1.5 12.5h-9z\"/><path d=\"M5 8h14M12 8V4h4\"/>", "shirt": "<path d=\"M8.5 3.5 3.5 6.5l2 4.5 2.5-1v10.5h8V10l2.5 1 2-4.5-5-3c0 1.6-1.6 2.8-3.5 2.8S8.5 5.1 8.5 3.5z\"/>", "sparkle": "<path d=\"M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z\"/><path d=\"M19 17v4M17 19h4\"/>", "scissors": "<circle cx=\"6\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"6\" cy=\"17.5\" r=\"2.5\"/><path d=\"M8.2 7.8 20 18M8.2 16.2 20 6\"/>", "home": "<path d=\"M3.5 11 12 4l8.5 7\"/><path d=\"M5.5 9.5V20h13V9.5\"/><path d=\"M10 20v-6h4v6\"/>", "wrench": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5v3h3l5.8-5.8a4 4 0 0 0 5.4-5.4L15 12l-2.4-.6L12 9z\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "flag": "<path d=\"M5 21V4M5 4h11l-2 4 2 4H5\"/>", "star": "<path d=\"m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z\"/>", "trend": "<path d=\"m3 17 6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "upload": "<path d=\"M12 16V4M7 9l5-5 5 5\"/><path d=\"M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/>", "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><path d=\"M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17\"/>", "up": "<path d=\"m6 15 6-6 6 6\"/>", "down": "<path d=\"m6 9 6 6 6-6\"/>", "x": "<path d=\"M6 6l12 12M18 6 6 18\"/>", "pencil": "<path d=\"M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z\"/><path d=\"m13.5 6.5 4 4\"/>", "phone": "<rect x=\"6.5\" y=\"2.5\" width=\"11\" height=\"19\" rx=\"2.5\"/><path d=\"M10.5 18h3\"/>", "ext": "<path d=\"M14 4h6v6M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/>"};
 function ico(name, size, sw){ return `<svg width="${size || 22}" height="${size || 22}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw || 1.8}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.box}</svg>`; }
+ICONS.download = "<path d=\"M12 4v11M7 10l5 5 5-5\"/><path d=\"M5 19.5h14\"/>";
 const CAT_ICON = { all: "grid", food: "food", cakes: "cake", drinks: "cup", fashion: "shirt", beauty: "sparkle", crafts: "scissors", homestay: "home", services: "wrench", other: "box" };
 function stallIcon(cat){ return ico(CAT_ICON[cat] || "box", 27); }
 function catOf(d){ return CATS[d.cat] ? d.cat : d.kind === "food" ? "food" : d.kind === "services" ? "services" : "other"; }
@@ -2261,6 +2329,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261018-digital-stores", at: "2026-10-18", title: "Sell digital products", body: "You can now sell e-books, templates, presets and online classes. In Shop details, under What do you sell?, pick Digital. Each product gets a book-shaped cover, sample pages, a What you get list and a Best value badge for bundles. Choose how buyers get it: on WhatsApp, a private download link you send after payment, or your own checkout page. Customers find you under Digital on Spot It!." },
   { id: "u-20261018-bridges", at: "2026-10-18", title: "Bridges on Spot It!", body: "The Penang Bridge now crosses the channel on the Spot It! map at its real length, with its cable-stayed towers in the middle, and the Kuala Terengganu Drawbridge stands with its deck split open. Zoom in on Penang or Kuala Terengganu to see them." },
   { id: "u-20261018-sepang", at: "2026-10-18", title: "Sepang on Spot It!", body: "Sepang now has its own landmarks on the Spot It! map: the real shape of the Sepang International Circuit, raised like a model and lying right on the track, and KLIA with its control tower. Zoom in near Sepang to see them." },
   { id: "u-20261018-more-landmarks", at: "2026-10-18", title: "Every state on Spot It!", body: "Four more landmarks on the Spot It! map: Istana Jahar in Kota Bharu, the floating mosque in Kuala Perlis, the Minangkabau house in Seremban and the Chimney in Labuan. Now every state has one." },
@@ -2433,7 +2502,7 @@ function edSteps(){
   return {
     details: !!(S.name.trim() && S.wa),
     products: named.some(it => it.o.some(o => +o.p > 0)) || (S.links || []).some(l => safeUrl(l.u)),
-    listing: !!(S.loc.on && S.loc.state && (S.loc.city || affOnly(S))),
+    listing: !!(S.loc.on && S.loc.state && (S.loc.city || noPin(S))),
     status: true
   };
 }
@@ -2694,7 +2763,7 @@ const isBlankItem = it => !!it && !it.n.trim() && !String(it.d || "").trim() && 
 function edProduct(i){
   const it = S.items[i];
   if (!it){ EDV = "products"; return edProducts(); }
-  const STARTER_SECS = { food: ["Mains","Drinks","Desserts","Add-ons","Sides"], products: ["Best sellers","New arrivals","Accessories","Sale"], services: ["Packages","Add-ons"] };
+  const STARTER_SECS = { food: ["Mains","Drinks","Desserts","Add-ons","Sides"], products: ["Best sellers","New arrivals","Accessories","Sale"], services: ["Packages","Add-ons"], digital: ["Bundles","Best sellers","E-books","Templates","Free"] };
   // every section already created and still used by any item (this one included), in menu order, then unused starter ideas
   const usedSecs = [...new Set(S.items.map(x => x.sec.trim()).filter(Boolean))];
   const curSec = it.sec.trim();
@@ -2702,7 +2771,7 @@ function edProduct(i){
   const fresh = isBlankItem(it);
   return `${edTop((fresh ? "Add " : "Edit ") + W(S).item, "products", fresh ? `<button class="btn small" data-act="del" data-i="${i}">Cancel</button>` : `<button class="btn small dangerline" data-act="del" data-i="${i}">${ico("trash",16)}Delete</button>`)}
   <section class="card">
-    <label style="margin-top:0">Photo (optional)</label>
+    <label style="margin-top:0">${isDigital(S) ? "Cover picture (optional)" : "Photo (optional)"}</label>
     <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
   </section>
   <section class="card">
@@ -2711,10 +2780,10 @@ function edProduct(i){
   </section>
   ${it.o.length === 1 && !it.o[0].l.trim() ? `<section class="card">
     <label style="margin-top:0">Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="${i}" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
-    <button class="btn small" style="margin-top:12px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add sizes or flavours</button>
-    <p class="hint">Only if customers choose between versions with different prices, like Small and Large, or Chocolate and Pandan.</p>
+    <button class="btn small" style="margin-top:12px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}${isDigital(S) ? "Add versions" : "Add sizes or flavours"}</button>
+    <p class="hint">${isDigital(S) ? "Only if buyers choose between versions with different prices, like a Personal and a Commercial licence, or Basic and Full pack." : "Only if customers choose between versions with different prices, like Small and Large, or Chocolate and Pandan."}</p>
   </section>` : `<section class="card">
-    <div class="between"><h2 style="margin:0">Sizes or flavours</h2><span class="hint" style="margin:0">Customers pick one</span></div>
+    <div class="between"><h2 style="margin:0">${isDigital(S) ? "Versions" : "Sizes or flavours"}</h2><span class="hint" style="margin:0">Customers pick one</span></div>
     <div class="opthead"><span>Name</span><span>Price (${esc(S.cur || curSymbol(S.curCode))})</span><i></i></div>
     ${it.o.map((o,j)=>`
       <div class="opt">
@@ -2724,21 +2793,47 @@ function edProduct(i){
       </div>`).join("")}
     <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add another</button>
   </section>`}
-  ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, "e.g. Drinks")}
+  ${isDigital(S) ? edDigital(it, i) : ""}
+  ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, isDigital(S) ? "e.g. Templates" : "e.g. Drinks")}
   <section class="card">
     <label class="check" style="margin-top:0"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>Sold out for now</span></label>
     <div class="between" style="margin-top:12px"><span class="hint" style="margin:0">Position in your list</span>
       <span class="ctl"><button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button><button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button></span></div>
   </section>`;
 }
+// A digital product's extras: what it is, what's inside, sample pages, Best value, and how the buyer gets it
+function edDigital(it, i){
+  const how = it.how || "wa", smp = Array.isArray(it.smp) ? it.smp : [];
+  return `<section class="card">
+    <h2 style="margin:0">About this product</h2>
+    <label>What it is (optional)<input type="text" data-i="${i}" data-f="fmt" maxlength="60" value="${esc(it.fmt || "")}" placeholder="e.g. PDF · 42 pages, or Canva · 30 designs"></label>
+    <label>What you get (optional, one per line)<textarea data-i="${i}" data-f="get" maxlength="800" rows="4" placeholder="${esc("30 editable Canva designs\nFont and colour guide\nVideo: how to edit on your phone")}">${esc(it.get || "")}</textarea></label>
+    <label>Sample pages (optional, up to 4)</label>
+    <p class="hint" style="margin:0 0 8px">Show a few pages or designs so buyers can see what they'll get.</p>
+    <div class="dgsmp" id="smpPrev${i}">${smp.map((u, k) => `<span class="dgsmpi"><img src="${esc(sized(u, 200))}" alt="Sample ${k + 1}"><button type="button" data-act="rm-smp" data-i="${i}" data-k="${k}" aria-label="Remove sample ${k + 1}">${ico("x", 14, 2.4)}</button></span>`).join("")}
+      ${smp.length < 4 ? `<label class="dgsmpadd filebtn">${ico("plus", 20, 2)}<span>Add</span><input type="file" accept="image/*" data-media="smp" data-i="${i}" aria-label="Add a sample page"></label>` : ""}</div>
+    <label class="check"><input type="checkbox" data-i="${i}" data-f="best" ${it.best ? "checked" : ""}><span>Show as <b>Best value</b> (for a bundle), at the top of your store</span></label>
+  </section>
+  <section class="card">
+    <h2 style="margin:0">How buyers get it</h2>
+    <div class="seg dghow" style="margin-top:10px">${Object.entries(DG_HOW).map(([k, v]) => `<button type="button" data-act="dghow" data-i="${i}" data-v="${k}" aria-pressed="${how === k}">${v}</button>`).join("")}</div>
+    ${how === "ext" ? `<label>Your checkout page<input type="url" data-i="${i}" data-f="ext" value="${esc(it.ext || "")}" placeholder="e.g. https://payhip.com/b/AbC1"></label>
+    <p class="hint">The <b>Get it</b> button opens this page (Payhip, Gumroad, Shopee or your own). Buyers pay and download there.</p>`
+    : `${how === "link" ? `<label>Your download link (only you see this)<input type="url" data-i="${i}" data-f="dl" value="${esc(it.dl || "")}" placeholder="e.g. https://drive.google.com/..."></label>
+    <p class="hint">Customers never see this link on your store. When a buyer has paid, tap <b>Send to a buyer</b> and pick their chat: the link goes in a thank-you message, ready to send.</p>
+    <button type="button" class="btn small wa" data-act="dgsend" data-i="${i}" style="margin-top:10px">${ico("chat", 16)}Send to a buyer</button>`
+    : `<p class="hint">Orders come to your WhatsApp. When the buyer has paid, send them the file in the chat.</p>`}
+    <label>When they get it (optional)<input type="text" data-i="${i}" data-f="eta" maxlength="40" value="${esc(it.eta || "")}" placeholder="e.g. within 1 hour"></label>`}
+  </section>`;
+}
 function edListing(){ setTimeout(initPinMap, 0); return `${edTop("Spot It! listing", "home")}${edListingCard()}`; }
 function edListingCard(){
   const cities = CITIES[S.loc.state] || [];
-  const other = S.loc.city && !cities.includes(S.loc.city), aff = affOnly(S);
+  const other = S.loc.city && !cities.includes(S.loc.city), aff = noPin(S);
   return `
   <section class="card" id="locCard">
     <label class="check" style="margin-top:0"><input type="checkbox" data-floc="on" ${S.loc.on ? "checked" : ""}><span>List my store on Spot It!</span></label>
-    <p class="hint">${aff ? "You only share shop links, so customers find you under <b>Affiliate Shops</b> on Spot It!, not as a pin on the map. Just pick your state and category." : "Customers using the Link Kedai App can find you by state, city and category."}</p>
+    <p class="hint">${isDigital(S) ? "You sell digital products, so customers find you under <b>Digital</b> on Spot It!, not as a pin on the map. Just pick your state and category." : aff ? "You only share shop links, so customers find you under <b>Affiliate Shops</b> on Spot It!, not as a pin on the map. Just pick your state and category." : "Customers using the Link Kedai App can find you by state, city and category."}</p>
     <div id="locBox" ${S.loc.on ? "" : "hidden"}>
       <label>State<select data-floc="state"><option value="">Choose your state</option>${STATES.map(st => `<option ${S.loc.state === st ? "selected" : ""}>${st}</option>`).join("")}</select></label>
       ${aff ? "" : `<label>City or town<select data-floc="city" ${S.loc.state ? "" : "disabled"}><option value="">${S.loc.state ? "Choose your city or town" : "Choose a state first"}</option>${cities.map(c => `<option ${S.loc.city === c ? "selected" : ""}>${c}</option>`).join("")}<option value="__other" ${other || EDOTHER ? "selected" : ""}>Other town</option></select></label>
@@ -2877,6 +2972,7 @@ const ASK_KB = [
   { id: "reorder", q: "How do I change the order of my items?", k: "reorder move up down top first", a: () => `Open an item and use the up and down arrows next to <b>Position in your list</b>.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "sections", q: "How do I group items into sections?", k: "section group category heading drink dessert", a: () => `Open an item and tap a <b>Section</b> chip, like Drinks or Desserts, or tap <b>+ New</b> to type your own. Items in the same section show together on your store.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "orders", q: "How do I receive orders?", k: "order receive where see go enter whatsapp come customer", a: () => `Customers pick items on your store and tap <b>Send order on WhatsApp</b>. A chat opens to your phone number (<b>${esc(fmtWa(S.wa) || "the one on your Profile")}</b>) with the order already written in: items, total, their name, date and note. You reply to them on WhatsApp as usual.` },
+  { id: "digital", q: "Can I sell digital products like e-books or templates?", k: "digital ebook e-book ebooks template templates canva preset presets lightroom pdf printable printables course courses class online download file files", a: () => `Yes. In <b>Shop details</b>, under <b>What do you sell?</b>, pick <b>Digital</b>. Each product then gets a book-shaped cover, sample pages, a <b>What you get</b> list, and a choice of how buyers get it: on <b>WhatsApp</b>, a private <b>download link</b> you send after payment, or <b>your own checkout page</b> (Payhip, Gumroad and so on). Customers find you under <b>Digital</b> on Spot It!.`, go: () => askGo("details", "Open Shop details") },
   { id: "custpay", q: "How do customers pay me?", k: "customer pay me receive money bank transfer cash online gateway card cod", a: () => `Customers pay you directly, the way you agree on WhatsApp: bank transfer, DuitNow, cash and so on. ${esc(APP_NAME)} takes <b>no commission</b> on your sales.` },
   { id: "delivery", q: "How do I set delivery or pickup?", k: "delivery pickup area courier postage", a: () => `You agree delivery or pickup with each customer on WhatsApp. Customers can write it in their order note, for example "Pickup Saturday 3pm". You can mention your delivery areas in the short line under your shop name in <b>Shop details</b>.`, go: () => askGo("details", "Open Shop details") },
   { id: "openclose", q: "How do I open or close my store?", k: "open close break rest stop today temporarily", a: () => `Go to <b>Store status</b> on your Store page and tap <b>Open</b> or <b>Closed</b>. You can add a message, like "Closed for Hari Raya. Back on 5 April". While closed, customers can't send orders. On Android, press and hold the app icon to open or close your shop in one tap.`, go: () => askGo("status", "Open Store status") },
@@ -3007,7 +3103,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 94;
+const APP_VERSION = 95;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3083,7 +3179,7 @@ function edStart(){
   const head = (title, sub) => `<div class="fr-head">${EDSTEP > 1 ? `<button class="iconbtn" data-act="frback" aria-label="Back">${ico("back", 20)}</button>` : ""}<div class="fr-dots" role="img" aria-label="Step ${EDSTEP} of 3">${dots}</div>${EDSTEP < 3 ? `<button class="fr-skip" data-act="frskip">Skip for now</button>` : ""}</div>
     <h1 class="fr-title">${title}</h1><p class="fr-sub">${sub}</p>`;
   if (EDSTEP === 1) return head("What do you sell?", "This sets the right words for your store, like Menu or Products. You can change it later.") +
-    `<div class="fr-kinds">${[["food", "food", "Food", "Meals, cakes, kuih and drinks"], ["products", "shirt", "Products", "Clothes, beauty, crafts and more"], ["services", "wrench", "Services", "Hair, beauty, repairs, homestay"]]
+    `<div class="fr-kinds">${[["food", "food", "Food", "Meals, cakes, kuih and drinks"], ["products", "shirt", "Products", "Clothes, beauty, crafts and more"], ["services", "wrench", "Services", "Hair, beauty, repairs, homestay"], ["digital", "download", "Digital", "E-books, templates, presets, online classes"]]
       .map(([k, ic, t, d]) => `<button class="fr-kind" data-act="frkind" data-v="${k}" aria-pressed="${S.kind === k}"><span class="tile">${ico(ic, 26)}</span><span class="tt"><b>${t}</b><span>${d}</span></span>${ico("chevron", 18)}</button>`).join("")}</div>`;
   if (EDSTEP === 2){
     if (!S.items.length) S.items.push({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
@@ -3242,8 +3338,8 @@ function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.cla
 let AUTOSAVE_T = 0, EDITV = 0, SAVING = null;
 function saveProblem(){
   if (S.loc.on && !S.loc.state) return "Choose your state under Spot It! listing.";
-  if (S.loc.on && !S.loc.city && !affOnly(S)) return "Choose your city or town under Spot It! listing.";
-  if (S.loc.on && S.loc.pub && S.loc.lat == null && !affOnly(S)) return "Drag the pin onto your shop under Spot It! listing.";
+  if (S.loc.on && !S.loc.city && !noPin(S)) return "Choose your city or town under Spot It! listing.";
+  if (S.loc.on && S.loc.pub && S.loc.lat == null && !noPin(S)) return "Drag the pin onto your shop under Spot It! listing.";
   if (!S.name.trim()) return "Add your shop name.";
   if (!S.wa || S.wa.length < 9) return "Add your phone number, so orders can reach you.";
   return "";
@@ -3688,6 +3784,14 @@ $("builder").addEventListener("click", async e => {
   else if (a === "rm-logo"){ S.logo = ""; redraw(); }
   else if (a === "rm-cover"){ S.cover = ""; redraw(); }
   else if (a === "rm-item"){ S.items[i].img = ""; redraw(); }
+  else if (a === "rm-smp"){ const it = S.items[i]; if (it && Array.isArray(it.smp)){ it.smp.splice(+b.dataset.k, 1); if (!it.smp.length) delete it.smp; } redraw(); }
+  else if (a === "dghow"){ const it = S.items[i]; if (it){ if (b.dataset.v === "wa") delete it.how; else it.how = b.dataset.v; } redraw(); }
+  else if (a === "dgsend"){
+    const it = S.items[i]; if (!it) return;
+    if (!safeUrl(it.dl)) return notify("Add your download link first. It must start with https://");
+    const msg = `Thank you for your payment! 🙏\n\nHere's your ${it.n.trim() || "file"}:\n${it.dl}\n\n${S.name.trim()}`.trim();
+    window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank", "noopener");
+  }
   else if (a === "rm-link"){ if (S.links[i]) S.links[i].img = ""; redraw(); }
   else if (a === "publish"){ openPublishCheck(); }
   else if (a === "codelive"){
@@ -3818,7 +3922,7 @@ async function saveNow(){
 }
 async function saveStore(){
   if (S.loc.on && !S.loc.state) return notify("Choose your state under Spot It! listing, so customers can find you.");
-  if (S.loc.on && !S.loc.city && !affOnly(S)) return notify("Choose your city or town under Spot It! listing, so customers can find you.");
+  if (S.loc.on && !S.loc.city && !noPin(S)) return notify("Choose your city or town under Spot It! listing, so customers can find you.");
   if (!S.name.trim()) return notify("Add your shop name first.");
   if (!S.wa || S.wa.length < 9) return notify("Add your phone number first, so orders can reach you.");
   const btn = document.querySelector('[data-act="save"]');
@@ -3869,7 +3973,7 @@ $("bwrap").addEventListener("change", e => {
   if (kind === "receipt") return publishWithReceipt(t);
   const file = t.files && t.files[0];
   if (!file) return;
-  const idx = t.dataset.i, boxId = kind === "logo" ? "logoPrev" : kind === "cover" ? "coverPrev" : kind === "link" ? "lkPrev" + idx : "imgPrev" + idx;
+  const idx = t.dataset.i, boxId = kind === "logo" ? "logoPrev" : kind === "cover" ? "coverPrev" : kind === "link" ? "lkPrev" + idx : kind === "smp" ? "smpPrev" + idx : "imgPrev" + idx;
   const target = kind === "link" ? S.links[+idx] : kind === "item" || (kind !== "logo" && kind !== "cover") ? S.items[+idx] : null, sid = SESSION.id;   // the item itself, not its place in the list
   if (target) UP_ITEMS.add(target);
   const btn = t.closest(".filebtn");
@@ -3890,7 +3994,7 @@ $("bwrap").addEventListener("change", e => {
       if (!good) throw new Error("Your photo was uploaded, but Google Drive won't show it. Its link: " + r.url);
       if (!SESSION || SESSION.id !== sid) throw new Error("You switched stores, so this photo wasn't added.");
       const still = !target || S.items.includes(target) || S.links.includes(target);
-      if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (still) target.img = good;
+      if (kind === "logo") S.logo = good; else if (kind === "cover") S.cover = good; else if (still && kind === "smp") target.smp = [...(Array.isArray(target.smp) ? target.smp : []), good].slice(0, 4); else if (still) target.img = good;
       PENDING_BOXES.delete(boxId); UPN--; if (target) UP_ITEMS.delete(target);
       touch(); renderEditor(!still ? "That item was removed, so its photo wasn't added." : UPN ? "Photo added. Uploading the next one..." : "Photo added.");
     } catch(err){
@@ -3946,7 +4050,7 @@ async function showStore(data, isPreview, refresh){
   // town + state (the seller's own preview uses what they've set in the editor)
   const pl = isPreview ? (S && S.loc && S.loc.state ? { city: S.loc.city, state: S.loc.state, pub: S.loc.on && S.loc.pub && S.loc.lat != null, lat: S.loc.lat, lng: S.loc.lng, addr: S.loc.addr } : null) : STORE_PLACE;
   const plTxt = pl ? [pl.city, pl.state].filter(Boolean).join(", ") : "";
-  $("stPlace").hidden = !plTxt; $("stPlace").innerHTML = plTxt ? ico("pin", 14, 2) + `<span>${esc(plTxt)}</span>` : "";
+  $("stPlace").hidden = !plTxt && !isDigital(D); $("stPlace").innerHTML = isDigital(D) ? ico("download", 14, 2) + `<span>Digital · Sent after payment</span>` : plTxt ? ico("pin", 14, 2) + `<span>${esc(plTxt)}</span>` : "";
   const visit = pl && pl.pub && isFinite(+pl.lat) && isFinite(+pl.lng);
   $("stVisit").hidden = !visit;
   $("stVisit").innerHTML = visit ? `<span class="addr">${ico("store", 16, 2)}<span>Visit the shop${pl.addr ? ": " + esc(pl.addr) : ""}</span></span>${dirButtons(pl.lat, pl.lng, "mxdir")}` : "";
@@ -3976,6 +4080,8 @@ async function showStore(data, isPreview, refresh){
   if (!refresh || dayOff(D.off, $("date").value)) setDate("");   // a day the shop has since marked off can't stay picked
   $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false");
   $("dateLabel").textContent = W(D).date;
+  $("dateWrap").hidden = isDigital(D); $("cEmailWrap").hidden = !isDigital(D);
+  $("sheetTitle").textContent = isDigital(D) ? "Your order" : "Your cart";
   $("note").placeholder = W(D).ex.note;
   $("send").textContent = D.kind === "services" ? "Send booking on WhatsApp" : "Send order on WhatsApp";
   $("err").textContent = "";
@@ -3983,7 +4089,7 @@ async function showStore(data, isPreview, refresh){
   // C2: a product sheet from another store, or for an item that changed, never stays open
   if (!refresh){ closeSheet("pOverlay"); closeSheet("overlay"); ORDER_SENT = false; }
   else if ($("pOverlay").classList.contains("open") && (!D.items[pSel.i] || D.items[pSel.i].out || D.closed || pSig(D.items[pSel.i]) !== pSel.sig)) dismissSheet("pOverlay");
-  if (!refresh){ $("note").value = ""; MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
+  if (!refresh){ $("note").value = ""; $("cEmail").value = ""; MVIEW = "menu"; MSEC = "all"; MQ = ""; $("stQ").value = ""; }
   renderMenu(); renderBar();
   if (!refresh) showAd();
 }
@@ -4074,7 +4180,17 @@ function sized(u, w){
   if (/^https:\/\/drive\.google\.com\/thumbnail\?/.test(u)) return /[?&]sz=w\d+/.test(u) ? u.replace(/([?&])sz=w\d+/, "$1sz=w" + w) : u + "&sz=w" + w;
   return u;
 }
+// Digital product card: a book-shaped cover, what it is, the price and a Get it button
+function dgRow(i){
+  const p = D.items[i], img = safeImg(p.img), n = inCart(i), ext = p.how === "ext" && safeUrl(p.ext);
+  return `<button class="prow dgrow${p.out ? " out" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
+    <div class="dgcover">${img ? `<img src="${esc(sized(img, 480))}" alt="" loading="lazy" decoding="async">` : `<div class="ph">${initial(p.n)}</div>`}${p.best ? `<span class="dgbest">Best value</span>` : ""}</div>
+    <div class="ptext"><h3>${esc(p.n)}</h3>${p.fmt ? `<span class="dgchip">${esc(p.fmt)}</span>` : ""}
+      <div class="pmeta"><span class="pprice">${priceLabel(p)}</span>${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">In your order</span>` : `<span class="dgget">${ext ? "Buy" : "Get it"}</span>`}</div></div>
+  </button>`;
+}
 function productRow(i){
+  if (isDigital(D)) return dgRow(i);
   const p = D.items[i], img = safeImg(p.img), n = inCart(i), bare = !img && D.layout === "list";   // Minimal draws its own "+"
   return `<button class="prow${p.out ? " out" : ""}${bare ? " nophoto" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
     <div class="ptext">
@@ -4111,6 +4227,7 @@ function adPlace(){ const ad = $("adWrap"), first = $("menu").querySelector(".gr
 function renderMenu(){
   adHome();
   const list = D.items.map((p,i) => p.n.trim() ? i : -1).filter(i => i >= 0);
+  if (isDigital(D)) list.sort((a, b) => (!!D.items[b].best - !!D.items[a].best) || a - b);   // Best value bundles first
   const linkList = (D.links || []).map((l,j) => l.u ? j : -1).filter(j => j >= 0);
   const tabs = $("secTabs"), vt = $("viewTabs"), sb = $("stSearch");
   const both = !!(list.length && linkList.length), total = list.length + linkList.length;
@@ -4121,7 +4238,7 @@ function renderMenu(){
   if (sb.hidden) MQ = "";
   $("stQ").placeholder = both ? `Search ${W(D).list.toLowerCase()} and shop links` : list.length ? `Search the ${W(D).list.toLowerCase()}` : "Search shop links";
   if (!total){ $("menu").innerHTML = `<p class="empty">${esc(W(D).empty)}</p>`; tabs.hidden = true; tabs.innerHTML = ""; return; }
-  const gridCls = D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
+  const gridCls = isDigital(D) ? " dggrid" : D.layout === "grid" ? " grid" : D.layout === "minimal" ? " minimal" : "";
   const affNote = `<p class="affnote">${ico("ext", 13, 2.2)}<span>Opens the shop's own page. The seller may earn a commission, at no extra cost to you.</span></p>`;
   const block = (title, rows, note, links) => `<section class="group">${title ? `<h2>${esc(title)}</h2>` : ""}${note ? affNote : ""}<div class="plist${links ? " llist" : gridCls}">${rows}</div></section>`;
   const q = MQ.trim().toLowerCase();
@@ -4185,12 +4302,28 @@ function openProduct(i){
   $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : ""; $("pImg").hidden = !img;
   $("pTitle").textContent = p.n;
   $("pDesc").textContent = p.d; $("pDesc").hidden = !p.d;
+  const dg = isDigital(D);
+  if (dg){   // cover and sample pages to swipe through, then what it is, what's inside and how it arrives
+    const pics = [img, ...(p.smp || [])].filter(Boolean);
+    $("pImg").innerHTML = pics.length > 1 ? `<div class="dgstrip">${pics.map((u, k) => `<img src="${esc(sized(u, 900))}" alt="${k ? "Sample " + k : ""}" loading="${k ? "lazy" : "eager"}">`).join("")}</div><span class="dgcount">${pics.length} pictures · swipe</span>` : pics.length ? `<img src="${esc(pics[0])}" alt="">` : "";
+    $("pImg").hidden = !pics.length; $("pImg").classList.toggle("dgpics", pics.length > 1);
+    const gets = String(p.get || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
+    const how = p.how === "ext" && safeUrl(p.ext) ? `You pay and download on ${esc(dgSite(p.ext))}.` : `Send your order on WhatsApp and pay the shop. ${p.how === "link" ? "They'll send you the download link" : "They'll send you the file"} on WhatsApp${p.eta ? ", " + esc(p.eta) : ""}.`;
+    $("pDg").innerHTML = (p.fmt ? `<span class="dgchip">${esc(p.fmt)}</span>` : "") + (gets.length ? `<h3>What you get</h3><ul class="dgget-list">${gets.map(g => `<li>${ico("check", 15, 2.6)}<span>${esc(g)}</span></li>`).join("")}</ul>` : "") + `<div class="dghowbox">${ico("download", 18, 2)}<span><b>How you get it</b>${how}</span></div>`;
+  } else $("pImg").classList.remove("dgpics");
+  $("pDg").hidden = !dg; $("pQtyRow").hidden = dg;
+  $("pOpts").setAttribute("aria-label", dg ? "Choose a version" : "Choose an option");
   $("pOpts").hidden = p.o.length < 2 && !p.o[0].l;
   $("pOpts").innerHTML = p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
   updateProduct();
   openSheet("pOverlay");
 }
-function updateProduct(){ const p = D.items[pSel.i], o = p && p.o[pSel.j]; if (!o) return closeSheet("pOverlay"); $("pQty").textContent = pSel.q; $("pAdd").textContent = W(D).add + " · " + money(o.p * pSel.q); }
+function updateProduct(){
+  const p = D.items[pSel.i], o = p && p.o[pSel.j]; if (!o) return closeSheet("pOverlay");
+  $("pQty").textContent = pSel.q;
+  const ext = isDigital(D) && p.how === "ext" && safeUrl(p.ext);
+  $("pAdd").textContent = ext ? `Buy on ${dgSite(p.ext)} · ${money(o.p)}` : isDigital(D) ? (cart[pSel.i + "|" + pSel.j] ? "Already in your order" : W(D).add + " · " + money(o.p)) : W(D).add + " · " + money(o.p * pSel.q);
+}
 $("menu").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openProduct(+b.dataset.p); });
 $("pOpts").addEventListener("change", e => { pSel.j = +e.target.value; updateProduct(); });
 $("pMinus").onclick = () => { pSel.q = Math.max(1, pSel.q - 1); updateProduct(); };
@@ -4198,7 +4331,11 @@ $("pPlus").onclick = () => { pSel.q = Math.min(99, pSel.q + 1); updateProduct();
 $("pAdd").onclick = () => {
   const p = D.items[pSel.i];
   if (!p || p.out || D.closed || pSig(p) !== pSel.sig || !p.o[pSel.j]) return dismissSheet("pOverlay");
-  const k = pSel.i + "|" + pSel.j; cart[k] = Math.min(99, (cart[k] || 0) + pSel.q); saveCart(); dismissSheet("pOverlay"); renderMenu(); renderBar();
+  if (isDigital(D) && p.how === "ext" && safeUrl(p.ext)){   // the seller's own checkout page: buy there
+    if ($("backBtn").hidden) track("order");
+    window.open(p.ext, "_blank", "noopener"); return dismissSheet("pOverlay");
+  }
+  const k = pSel.i + "|" + pSel.j; cart[k] = isDigital(D) ? 1 : Math.min(99, (cart[k] || 0) + pSel.q); saveCart(); dismissSheet("pOverlay"); renderMenu(); renderBar();
 };
 
 function items(){
@@ -4210,12 +4347,15 @@ function message(){
   const it = items(), total = Math.round(it.reduce((a,b)=>a+b.sub,0) * 100) / 100;
   const name = $("cName").value.trim(), dv = $("date").value;
   const dt = dv ? new Date(dv + "T00:00").toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short" }) : "";
-  let m = `Hi ${D.name}, I'd like to ${D.kind === "services" ? "book" : "order"}:\n\n`;
+  const dg = isDigital(D), email = dg ? $("cEmail").value.trim() : "";
+  let m = `Hi ${D.name}, I'd like to ${D.kind === "services" ? "book" : dg ? "buy" : "order"}:\n\n`;
   if (name) m += `Name: ${name}\n`;
-  if (dt) m += `Date: ${dt}\n`;
-  if (name || dt) m += `\n`;
-  m += it.map(x => `${x.q} × ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}`).join("\n");
+  if (email) m += `Email: ${email}\n`;
+  if (dt && !dg) m += `Date: ${dt}\n`;
+  if (name || email || (dt && !dg)) m += `\n`;
+  m += it.map(x => dg ? `• ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}` : `${x.q} × ${x.name}${x.opt ? ", " + x.opt : ""} = ${money(x.sub)}`).join("\n");
   m += `\n\n*Total: ${money(total)}*`;
+  if (dg) m += `\n\nPlease send me the payment details. Thank you!`;
   const note = $("note").value.trim();
   if (note) m += `\n\nNote: ${note}`;
   return m;
@@ -4229,7 +4369,7 @@ function renderBar(){
   $("lines").innerHTML = it.map(x=>`
     <div class="cline">
       <div class="cn"><b>${esc(x.name)}</b><span>${x.opt ? esc(x.opt) + " · " : ""}${money(x.sub)}</span></div>
-      <div class="step"><button data-k="${x.k}" data-d="-1" aria-label="One less ${esc(x.name)}">−</button><span class="q">${x.q}</span><button data-k="${x.k}" data-d="1" aria-label="One more ${esc(x.name)}">+</button></div>
+      ${isDigital(D) ? `<button class="btn small" data-k="${x.k}" data-d="-99" aria-label="Remove ${esc(x.name)}">Remove</button>` : `<div class="step"><button data-k="${x.k}" data-d="-1" aria-label="One less ${esc(x.name)}">−</button><span class="q">${x.q}</span><button data-k="${x.k}" data-d="1" aria-label="One more ${esc(x.name)}">+</button></div>`}
     </div>`).join("") + `<div class="ctotal"><span>Total</span><span>${money(total)}</span></div>`;
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   if (!n) dismissSheet("overlay");
@@ -4263,15 +4403,16 @@ $("dateCal").addEventListener("click", e => {
   if (e.target.closest("[data-nodate]")){ setDate(""); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); return; }
   if (day && !day.disabled){ setDate(day.dataset.day); $("dateCal").hidden = true; $("dateBtn").setAttribute("aria-expanded", "false"); $("err").textContent = ""; }
 });
-["note","cName","date"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
+["note","cName","date","cEmail"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $(id).removeAttribute("aria-invalid"); $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
   let msg = "", bad = null;
   setDateMin();
-  ["cName","date"].forEach(id => $(id).removeAttribute("aria-invalid"));
+  ["cName","date","cEmail"].forEach(id => $(id).removeAttribute("aria-invalid"));
   if (D.closed) msg = "This store is closed right now.";
   else if (!items().length) msg = "Add something to your cart first.";
   else if (!$("cName").value.trim()){ msg = "Add your name so the shop knows who the order is for."; bad = "cName"; }
-  else if (W(D).dateNeeded && !$("date").value){ msg = "Pick a date first."; bad = "date"; }
+  else if (isDigital(D) && $("cEmail").value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("cEmail").value.trim())){ msg = "That email doesn't look right. Check it, or leave it empty."; bad = "cEmail"; }
+  else if (W(D).dateNeeded && !isDigital(D) && !$("date").value){ msg = "Pick a date first."; bad = "date"; }
   else if ($("date").value && $("date").value < $("date").min){ msg = "Pick today or a later date."; bad = "date"; }
   else if (dayOff(D.off, $("date").value)){ msg = "The shop isn't taking orders on that day. Please pick another date."; bad = "date"; }
   if (msg){
@@ -4288,7 +4429,7 @@ $("send").addEventListener("click", e => {
 let NEAR_LIST = null, NEAR_TOK = 0, NEAR_OBS = null;
 function nearPick(list, n){
   const me = STORE_PLACE || {}, has = me.lat != null && me.lng != null;
-  return (list || []).filter(x => x && x.id && x.id !== STORE_ID && !x.closed && !x.aff)
+  return (list || []).filter(x => x && x.id && x.id !== STORE_ID && !x.closed && !x.aff && !x.dg)
     .map(x => ({ x, t: me.city && x.city === me.city && x.state === me.state ? 0 : me.state && x.state === me.state ? 1 : 2,
       d: has && x.lat != null && x.lng != null ? kmBetween(me.lat, me.lng, x.lat, x.lng) : 1e9 }))
     .sort((a, b) => a.t - b.t || a.d - b.d || (b.x.v - a.x.v) || String(a.x.name).localeCompare(String(b.x.name)))
@@ -4994,7 +5135,7 @@ const mxPlace = st => [st.city || st.area, st.state].filter(Boolean).join(", ");
 const mxCol = st => /^#[0-9a-f]{6}$/i.test(st.color || "") ? st.color : "#18395C";
 const PIN_COL = "#18395C";   // every map pin wears the app's own navy, so the map looks like one app (the logo inside shows whose store it is)
 function mxArea(st){
-  if (st.aff) return null;   // Affiliate Shops sell online through Shopee, TikTok Shop and others: never a pin
+  if (st.aff || st.dg) return null;   // Affiliate Shops and Digital stores sell online: never a pin
   if (st.pub && mxHasCoords(st)) return { lat: +st.lat, lng: +st.lng, r: 0, exact: true };   // a shop that chose to show its door
   if (mxHasCoords(st)){
     // snap to a ~440 m grid, then nudge inside the cell: the true spot is always inside the 650 m circle
@@ -5011,7 +5152,7 @@ function exList(){
     (EX.cat === "all" || st.cat === EX.cat) &&
     (!q || matchWords(st.name + " " + (st.city || "") + " " + st.area + " " + st.state + " " + st.items + " " + st.tag, q)) &&
     (!EX.open || !st.closed) && (!EX.ver || st.v) && (!EX.fav || EX.favs.has(st.id)) &&
-    (EX.aff ? !!st.aff : (!st.aff || !!q || EX.fav)));   // Affiliate Shops show under their own pill, in search and in Saved
+    (EX.aff ? !!st.aff : EX.dg ? !!st.dg : ((!st.aff && !st.dg) || !!q || EX.fav)));   // Affiliate Shops and Digital stores show under their own pills, in search and in Saved
   list.forEach(st => { st._a = mxArea(st); st._km = EX.me && st._a ? kmBetween(EX.me.lat, EX.me.lng, st._a.lat, st._a.lng) : null; });
   const byName = (a, b) => (a.closed - b.closed) || (b.v - a.v) || a.name.localeCompare(b.name);
   return list.sort((a, b) => ((a._km == null) - (b._km == null)) || ((a._km || 0) - (b._km || 0)) || byName(a, b));
@@ -5582,7 +5723,7 @@ function mxMarker(el, ll, anchor){ return new maplibregl.Marker({ element: el, a
 function mxDraw(force){
   if (!MX || !MX.map) return;
   const map = MX.map, z = map.getZoom(), all = exList(), list = all.filter(s => s._a);
-  MX.noarea = all.filter(s => !s._a && !s.aff); MX.affs = all.filter(s => s.aff); MX.mapped = list.length;
+  MX.noarea = all.filter(s => !s._a && !s.aff && !s.dg); MX.affs = all.filter(s => s.aff); MX.dgs = all.filter(s => s.dg); MX.mapped = list.length;
   const cl = mxCluster(list);
   const sig = cl.map(c => c.items.map(i => i.id).join(",")).join("|") + "#" + MX.sel + "#" + z.toFixed(1);
   if (force || sig !== MX.sig){
@@ -5616,13 +5757,15 @@ function mxDraw(force){
   MX.view = list.filter(s => b.contains([s._a.lng, s._a.lat]));
   const c = map.getContainer(); c.classList.toggle("mxzoom", z >= 13); c.classList.toggle("mxhassel", !!MX.sel);
   const pill = $("mxPill");
-  const na = MX.affs.length;
-  pill.innerHTML = EX.aff ? `${ico("link", 18, 2)}<span>${na} Affiliate ${na === 1 ? "Shop" : "Shops"}</span>` : `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view${na ? ` · ${na} Affiliate` : ""}</span>`;
+  const na = MX.affs.length, nd = MX.dgs.length;
+  pill.innerHTML = EX.aff ? `${ico("link", 18, 2)}<span>${na} Affiliate ${na === 1 ? "Shop" : "Shops"}</span>` : EX.dg ? `${ico("download", 18, 2)}<span>${nd} Digital ${nd === 1 ? "store" : "stores"}</span>` : `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view${na + nd ? ` · ${na + nd} online` : ""}</span>`;
   pill.classList.toggle("off", !!MX.sel || !all.length);
   const em = $("mxEmpty"), have = EX.stores.length;
   em.hidden = !MX.loaded || !!all.length;
   if (!em.hidden) em.innerHTML = MX.err
     ? `<b>Couldn't load stores</b><p>${esc(friendly(MX.err, "Check your internet and try again."))}</p><button type="button" class="btn solid" id="mxRetry">Try again</button>`
+    : EX.dg && !EX.stores.some(s => s.dg)
+    ? `<b>No Digital stores yet</b><p>Sellers of e-books, templates, presets and online classes appear here.</p><button type="button" class="btn solid" id="mxClear">Back to all stores</button>`
     : EX.aff && !EX.stores.some(s => s.aff)
     ? `<b>No Affiliate Shops yet</b><p>Sellers who share Shopee, TikTok Shop and other shop links appear here.</p><button type="button" class="btn solid" id="mxClear">Back to all stores</button>`
     : EX.fav && !EX.favs.size
@@ -5645,7 +5788,10 @@ function affShops(st){ return [...new Set((Array.isArray(st.lh) ? st.lh : []).ma
 function mxRow(st, mapped){
   const logo = safeImg(st.logo), n = +st.lk || 0;
   return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : initial(st.name), "sm")}
-    <span class="mxci"><b><span>${esc(st.name)}</span></b>${st.aff
+    <span class="mxci"><b><span>${esc(st.name)}</span></b>${st.dg
+      ? `<span class="mxmeta">Digital products${+st.dn ? ` · ${+st.dn} ${+st.dn === 1 ? "product" : "products"}` : ""}</span>
+    <span class="mxmeta">${st.closed ? `<span class="exshut">Closed</span>` : `<span class="exopen">Open</span>`} · ${esc(st.state || "")}</span></span>`
+      : st.aff
       ? `<span class="mxmeta">${esc(affShops(st) || "Online shop links")}</span>
     <span class="mxmeta">${n ? `${n} ${n === 1 ? "link" : "links"} · ` : ""}${esc(CATS[st.cat] || "Other")}</span></span>`
       : `<span class="mxmeta">${esc(mxMeta(st))} · ${esc(CATS[st.cat] || "Other")}</span>
@@ -5653,17 +5799,24 @@ function mxRow(st, mapped){
     <button type="button" class="mxfav" data-fav="${esc(st.id)}" aria-pressed="${EX.favs.has(st.id)}" aria-label="Save to favourites">${ico("heart", 19, 2)}</button></a>`;
 }
 function mxRenderSheet(){
-  const v = MX.view || [], n = v.length, affs = MX.affs || [];
+  const v = MX.view || [], n = v.length, affs = MX.affs || [], dgs = MX.dgs || [];
+  const dgNote = `<p class="mxnote">Sellers of e-books, templates, presets and online classes. You order on WhatsApp and get the file after you pay.</p>`;
+  if (EX.dg){
+    $("mxShTitle").textContent = `${dgs.length} Digital ${dgs.length === 1 ? "store" : "stores"}`;
+    $("mxList").innerHTML = dgNote + (dgs.length ? dgs.map(s => mxRow(s, false)).join("") : `<p class="mxnone">No Digital stores match.<br>Try another category.</p>`);
+    return;
+  }
   const affNote = `<p class="mxnote">Online sellers sharing Shopee, TikTok Shop and other shop links. You buy and pay on those sites, which deliver to you.</p>`;
   if (EX.aff){
     $("mxShTitle").textContent = `${affs.length} Affiliate ${affs.length === 1 ? "Shop" : "Shops"}`;
     $("mxList").innerHTML = affNote + (affs.length ? affs.map(s => mxRow(s, false)).join("") : `<p class="mxnone">No Affiliate Shops match.<br>Try another category.</p>`);
     return;
   }
-  const found = n + (MX.noarea || []).length + affs.length;
+  const found = n + (MX.noarea || []).length + affs.length + dgs.length;
   $("mxShTitle").textContent = EX.q.trim() ? `${found} ${found === 1 ? "result" : "results"}` : n ? `${n} ${n === 1 ? "store" : "stores"} in this area` : "In this area";
-  $("mxList").innerHTML = (n ? v.map(s => mxRow(s, true)).join("") : MX.mapped || !affs.length ? `<p class="mxnone">No stores in this part of the map yet.<br>Zoom out or move the map to see more.</p>` : "") +
+  $("mxList").innerHTML = (n ? v.map(s => mxRow(s, true)).join("") : MX.mapped || !(affs.length + dgs.length) ? `<p class="mxnone">No stores in this part of the map yet.<br>Zoom out or move the map to see more.</p>` : "") +
     (MX.noarea && MX.noarea.length ? `<h3 class="mxh3">Not on the map yet</h3><p class="mxnote">These sellers haven't set a location.</p>${MX.noarea.map(s => mxRow(s, false)).join("")}` : "") +
+    (dgs.length ? `<h3 class="mxh3">Digital stores</h3>${dgNote}${dgs.map(s => mxRow(s, false)).join("")}` : "") +
     (affs.length ? `<h3 class="mxh3">Affiliate Shops</h3>${affNote}${affs.map(s => mxRow(s, false)).join("")}` : "");
 }
 // Google Maps and Waze open with the shop as the destination
@@ -5703,7 +5856,7 @@ function mxSyncStep(){
 }
 // Back from a store to Browse brings back the same search, filters and map view
 let EX_BACK = false;
-function exRemember(){ try { if (MX) { const c = MX.map.getCenter(); sessionStorage.setItem("lk-ex", JSON.stringify({ q: EX.q, cat: EX.cat, open: EX.open, ver: EX.ver, aff: EX.aff, fav: EX.fav, c: [c.lng, c.lat], z: MX.map.getZoom() })); } } catch(e) {} }
+function exRemember(){ try { if (MX) { const c = MX.map.getCenter(); sessionStorage.setItem("lk-ex", JSON.stringify({ q: EX.q, cat: EX.cat, open: EX.open, ver: EX.ver, aff: EX.aff, dg: EX.dg, fav: EX.fav, c: [c.lng, c.lat], z: MX.map.getZoom() })); } } catch(e) {} }
 function mxToggleFav(id){
   EX.favs.has(id) ? EX.favs.delete(id) : EX.favs.add(id); exSaveFavs();
   document.querySelectorAll(`[data-fav="${CSS.escape(id)}"]`).forEach(b => b.setAttribute("aria-pressed", String(EX.favs.has(id))));
@@ -5712,7 +5865,7 @@ function mxToggleFav(id){
 function mxChips(){
   document.querySelectorAll("[data-excat]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.excat === EX.cat)));
   const t = (id, on) => { const b = $(id); if (b) b.setAttribute("aria-pressed", String(!!on)); };
-  t("exOpen", EX.open); t("exVer", EX.ver); t("exAff", EX.aff);
+  t("exOpen", EX.open); t("exVer", EX.ver); t("exAff", EX.aff); t("exDg", EX.dg);
   const fb = $("exFav"), bb = $("exBrowse"); if (fb && bb){ fb.toggleAttribute("aria-current", EX.fav); bb.toggleAttribute("aria-current", !EX.fav); if (EX.fav) fb.setAttribute("aria-current", "page"); else bb.setAttribute("aria-current", "page"); }
 }
 function exRender(fit){   // re-apply filters; optionally move the map to the results
@@ -5777,10 +5930,10 @@ async function renderExplore(){
   setAccent(COLORS[0]); document.title = APP_NAME + " · Spot It!";
   let me = null; try { me = JSON.parse(localStorage.getItem("lk-me") || "null"); } catch(e) {}
   if (me && !(me.at > Date.now() - 864e5)) me = null;   // a day old: the phone may be somewhere else now
-  EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, aff: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
+  EX = { stores: [], me, near: !!me, cat: "all", q: "", open: false, ver: false, aff: false, dg: false, fav: false, favs: exFavs(), geo: mxGeoCache() };
   let prev = null; if (EX_BACK) try { prev = JSON.parse(sessionStorage.getItem("lk-ex") || "null"); } catch(e) {}
   EX_BACK = false;
-  if (prev) Object.assign(EX, { q: String(prev.q || ""), cat: prev.cat || "all", open: !!prev.open, ver: !!prev.ver, aff: !!prev.aff, fav: !!prev.fav });
+  if (prev) Object.assign(EX, { q: String(prev.q || ""), cat: prev.cat || "all", open: !!prev.open, ver: !!prev.ver, aff: !!prev.aff, dg: !!prev.dg && !prev.aff, fav: !!prev.fav });
   const view = prev && Array.isArray(prev.c) && isFinite(prev.z) ? { center: prev.c, zoom: prev.z } : null;
   $("gwrap").innerHTML = `
     <div id="mxMap" role="application" aria-label="Map showing the areas where sellers sell"></div>
@@ -5790,7 +5943,7 @@ async function renderExplore(){
         <label class="mxsearch mxg"><span class="mxtrain" id="mxTrain" aria-hidden="true"></span>${ico("search", 20, 1.8)}<input type="search" id="exQ" placeholder="Search stores or items" aria-label="Search stores or items" autocomplete="off" enterkeyhint="search"><button type="button" class="mxclr" id="mxClr" aria-label="Clear search" hidden>${ico("x", 16, 2)}</button></label>
         <a class="mxib mxg" href="${esc(home())}" aria-label="For sellers" title="For sellers">${ico("store", 21)}</a>
       </div>
-      <div class="mxchips" id="exCats" role="group" aria-label="Filters"><button type="button" class="mxchip t mxg" id="exAff">${ico("link", 18, 2)}Affiliate Shops</button><i class="mxsep"></i><button type="button" class="mxchip mxg" data-excat="all">${ico("grid", 19, 1.9)}All</button>${Object.keys(CATS).map(k => `<button type="button" class="mxchip mxg" data-excat="${k}">${ico(CAT_ICON[k], 19, 1.9)}${CATS[k]}</button>`).join("")}<i class="mxsep"></i><button type="button" class="mxchip t mxg" id="exOpen">Open now</button><button type="button" class="mxchip t mxg" id="exVer">Verified</button></div>
+      <div class="mxchips" id="exCats" role="group" aria-label="Filters"><button type="button" class="mxchip t mxg" id="exAff">${ico("link", 18, 2)}Affiliate Shops</button><button type="button" class="mxchip t mxg" id="exDg">${ico("download", 18, 2)}Digital</button><i class="mxsep"></i><button type="button" class="mxchip mxg" data-excat="all">${ico("grid", 19, 1.9)}All</button>${Object.keys(CATS).map(k => `<button type="button" class="mxchip mxg" data-excat="${k}">${ico(CAT_ICON[k], 19, 1.9)}${CATS[k]}</button>`).join("")}<i class="mxsep"></i><button type="button" class="mxchip t mxg" id="exOpen">Open now</button><button type="button" class="mxchip t mxg" id="exVer">Verified</button></div>
     </div>
     <div class="mxempty mxg" id="mxEmpty" hidden></div>
     <div class="mxfabs"><button type="button" class="mxib mxg" id="exNear" aria-label="Show stores near me" title="Near me">${ico("locate", 22)}</button></div>
@@ -5865,17 +6018,22 @@ async function renderExplore(){
   $("exCats").onclick = e => {
     const b = e.target.closest("button"); if (!b) return;
     if (b.id === "exAff"){   // Affiliate Shops have no pins, so their list opens straight away
-      EX.aff = !EX.aff; mxDeselect(); exRender(!EX.aff);
+      EX.aff = !EX.aff; EX.dg = false; mxDeselect(); exRender(!EX.aff);
       if (EX.aff && MX.affs && MX.affs.length) mxOpenSheet(); else mxCloseSheet();
       return;
     }
+    if (b.id === "exDg"){   // Digital stores have no pins either: their list opens straight away
+      EX.dg = !EX.dg; EX.aff = false; mxDeselect(); exRender(!EX.dg);
+      if (EX.dg && MX.dgs && MX.dgs.length) mxOpenSheet(); else mxCloseSheet();
+      return;
+    }
     if (b.dataset.excat){ EX.cat = b.dataset.excat; } else if (b.id === "exOpen"){ EX.open = !EX.open; } else if (b.id === "exVer"){ EX.ver = !EX.ver; } else return;
-    exRender(!EX.aff);
+    exRender(!EX.aff && !EX.dg);
   };
   $("exQ").oninput = () => { EX.q = $("exQ").value; $("mxClr").hidden = !EX.q; clearTimeout(MX.qt); MX.qt = setTimeout(() => exRender(true), 350); };
   $("exQ").onkeydown = e => { if (e.key === "Enter") $("exQ").blur(); };
   $("mxClr").onclick = () => { $("exQ").value = ""; EX.q = ""; $("mxClr").hidden = true; exRender(true); };
-  $("mxEmpty").onclick = e => { if (e.target.id === "mxRetry") return renderExplore(); if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.aff = false; EX.fav = false; mxCloseSheet(); $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
+  $("mxEmpty").onclick = e => { if (e.target.id === "mxRetry") return renderExplore(); if (e.target.id === "mxClear"){ EX.q = ""; EX.cat = "all"; EX.open = false; EX.ver = false; EX.aff = false; EX.dg = false; EX.fav = false; mxCloseSheet(); $("exQ").value = ""; $("mxClr").hidden = true; exRender(true); } };
   $("exNear").onclick = () => { if (EX.me){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); mxToast("Showing stores around you"); exLocate(false, false); } else exLocate(false, true); };
   $("exBrowse").onclick = () => { EX.fav = false; exRender(true); };
   $("exFav").onclick = () => { EX.fav = true; exRender(true); if (!EX.favs.size) mxToast("Tap the heart on a store to save it"); };
@@ -5902,8 +6060,9 @@ async function renderExplore(){
   const list = exList();
   if (!me && !view) mxFit(list, 12);
   mxDraw(true);
-  if (prev && EX.aff && MX.affs && MX.affs.length) mxOpenSheet();   // back from an Affiliate shop: its list again
+  if (prev && ((EX.aff && MX.affs && MX.affs.length) || (EX.dg && MX.dgs && MX.dgs.length))) mxOpenSheet();   // back from an Affiliate or Digital store: its list again
   if (urlFlag("affiliate") && !EX.aff){ $("exAff").click(); history.replaceState(null, "", home() + "explore"); }
+  if (urlFlag("digital") && !EX.dg){ $("exDg").click(); history.replaceState(null, "", home() + "explore"); }
   if (Array.isArray(savedNear)) freshNear.then(st => { if (MX && MX.map === map && JSON.stringify(st) !== JSON.stringify(savedNear)){ EX.stores = st; mxDraw(true); } }).catch(() => {});
   mxGeocode().then(found => { if (found && MX && MX.map === map && !me && !MX.moved && !MX.sel) mxFit(exList(), 12); });
   if (me) exLocate(true);
