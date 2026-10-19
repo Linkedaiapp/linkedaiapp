@@ -570,7 +570,9 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .svopts{font-size:12px;font-weight:700;color:var(--muted)}
 .svpick{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;padding:7px 14px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent-ink)}
 .svrow.on .svpick{background:var(--accent);color:#fff;border-color:var(--accent)}
-.svgo{flex:none;display:grid;place-items:center;color:var(--muted)}   /* the whole row opens booking; the big button at the bottom is the one Book button */
+.svgo{flex:none;display:grid;place-items:center;color:var(--muted)}
+.optrow.ro{cursor:default}
+.svbookhint[hidden]{display:none}.svbookhint{display:flex;gap:8px;align-items:flex-start;margin:14px 0 0;padding:11px 13px;border-radius:var(--r-md);background:var(--soft);font-size:14px;line-height:1.4;color:var(--muted)}.svbookhint svg{flex:none;margin-top:1px;color:var(--accent-ink,var(--accent))}.svbookhint b{color:var(--ink)}   /* the whole row opens booking; the big button at the bottom is the one Book button */
 .svbook{width:100%;max-width:692px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--accent);color:#fff;border:0;border-radius:var(--r-md);padding:13px 18px;cursor:pointer;box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 40%,transparent)}
 .svbook .svb1{font-size:18px;font-weight:800;letter-spacing:.01em}
 .svbook .svb2{font-size:12.5px;font-weight:600;opacity:.88}
@@ -2560,6 +2562,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-service-details", at: "2026-10-19", title: "Tap a service to see its details", body: "On services stores, tapping a service now shows its details: photos, description and every package with its price. To book, customers use the one big button at the bottom, where they pick the service, date and time." },
   { id: "u-20261019-one-book-button", at: "2026-10-19", title: "One Book button", body: "On services stores, each service no longer has its own small Book button: customers tap the service, or the big button at the bottom. The service they picked still shows Chosen, and plans with a brochure still show View." },
   { id: "u-20261019-shop-details-tidy", at: "2026-10-19", title: "A tidier Shop details page", body: "Shop details is now one page: your logo and cover photo are at the top, then your shop name and number. Brand colour sits with your Store style, and for services stores with your Book button, so you see the button in your colour as you type. Write your own button words; the ready-made word pills are gone." },
   { id: "u-20261019-style-cards-small", at: "2026-10-19", title: "Smaller Store style cards", body: "The little phones under Store style in Shop details are now smaller, so the page is shorter and easier to scroll." },
@@ -3381,7 +3384,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 119;
+const APP_VERSION = 120;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4621,7 +4624,6 @@ function svChoose(i, j){ Object.keys(cart).forEach(k => { if (k.startsWith(i + "
 function openBooking(){ renderBar(); openSheet("overlay"); }
 function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
-  if (isService(D) && !hasBrochure(p)){ if (!inCart(i)) svChoose(i, 0); renderMenu(); return openBooking(); }
   pSel = { i, j: 0, q: 1, sig: pSig(p) };
   const img = safeImg(p.img);
   $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : ""; $("pImg").hidden = !img;
@@ -4635,22 +4637,27 @@ function openProduct(i){
     const gets = String(p.get || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
     const how = p.how === "ext" && safeUrl(p.ext) ? `You pay and download on ${esc(dgSite(p.ext))}.` : `Send your order on WhatsApp and pay the shop. ${p.how === "link" ? "They'll send you the download link" : "They'll send you the file"} on WhatsApp${p.eta ? ", " + esc(p.eta) : ""}.`;
     $("pDg").innerHTML = (p.fmt ? `<span class="dgchip">${esc(p.fmt)}</span>` : "") + (gets.length ? `<h3>What you get</h3><ul class="dgget-list">${gets.map(g => `<li>${ico("check", 15, 2.6)}<span>${esc(g)}</span></li>`).join("")}</ul>` : "") + `<div class="dghowbox">${ico("download", 18, 2)}<span><b>How you get it</b>${how}</span></div>`;
-  } else if (isService(D)){   // a brochure: pages to swipe (tap one to see it full size), what's covered, the PDF
+  } else if (isService(D) && hasBrochure(p)){   // a brochure: pages to swipe (tap one to see it full size), what's covered, the PDF
     const pics = (p.br || []).length ? p.br : [img].filter(Boolean);
     $("pImg").innerHTML = pics.length > 1 ? `<div class="dgstrip brstrip">${pics.map((u, k) => `<a href="${esc(u)}" target="_blank" rel="noopener" aria-label="Open page ${k + 1} full size"><img src="${esc(sized(u, 1200))}" alt="Brochure page ${k + 1}" loading="${k ? "lazy" : "eager"}"></a>`).join("")}</div><span class="dgcount">${pics.length} pages · swipe, tap to zoom</span>` : pics.length ? `<a href="${esc(pics[0])}" target="_blank" rel="noopener" aria-label="Open full size"><img src="${esc(pics[0])}" alt=""></a>` : "";
     $("pImg").hidden = !pics.length; $("pImg").classList.toggle("dgpics", pics.length > 1);
     const cov = String(p.cov || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
     $("pDg").innerHTML = (cov.length ? `<h3>What's covered</h3><ul class="dgget-list">${cov.map(g => `<li>${ico("check", 15, 2.6)}<span>${esc(g)}</span></li>`).join("")}</ul>` : "")
       + (safeUrl(p.pdf) ? `<a class="btn full brpdf" href="${esc(p.pdf)}" target="_blank" rel="noopener" style="margin-top:14px">${ico("download", 18, 2)}Download brochure (PDF)</a>` : "");
-  } else $("pImg").classList.remove("dgpics");
+  } else { $("pImg").classList.remove("dgpics"); $("pDg").innerHTML = ""; }
   const sv = isService(D);
+  // services: this sheet is details only; booking is the big button at the bottom of the store
+  let hint = $("svHint"); if (!hint){ hint = document.createElement("p"); hint.id = "svHint"; hint.className = "svbookhint"; $("pOpts").insertAdjacentElement("afterend", hint); }
+  hint.hidden = !sv; if (sv) hint.innerHTML = `${ico("clock", 16, 2)}<span>To book, close this and tap <b>${esc(svBtn(D).t)}</b> at the bottom.</span>`;
   $("pDg").hidden = !dg && !sv; $("pQtyRow").hidden = dg || sv;
-  $("pAsk").hidden = !sv;
+  $("pAsk").hidden = !isAgent(D); $("pAdd").hidden = sv;
   $("pAsk").onclick = STORE_DEMO ? (ev => { ev.preventDefault(); notify(`This is a demo store, so nothing was sent.\n\nA real agent would get: "Hi ${D.name}, I'd like to know more about ${p.n}."`); }) : null;
   if (sv) $("pAsk").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(`Hi ${D.name}, I'd like to know more about ${p.n}.`);
-  $("pOpts").setAttribute("aria-label", dg ? "Choose a version" : sv ? "Choose a package" : "Choose an option");
+  $("pOpts").setAttribute("aria-label", dg ? "Choose a version" : sv ? (isAgent(D) ? "Plans" : "Packages and prices") : "Choose an option");
   $("pOpts").hidden = p.o.length < 2 && !p.o[0].l;
-  $("pOpts").innerHTML = p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
+  $("pOpts").innerHTML = sv ? p.o.map(o => `<div class="optrow ro"><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${o.p > 0 ? money(o.p) : isAgent(D) ? "" : "Get a quote"}</span></div>`).join("")
+    : p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
+  $("pOpts").setAttribute("role", sv ? "list" : "radiogroup");
   updateProduct();
   openSheet("pOverlay");
 }
