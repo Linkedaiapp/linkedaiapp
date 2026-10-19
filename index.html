@@ -1226,6 +1226,20 @@ a.prow{text-decoration:none;color:inherit}
 .seg + .hint{margin-top:10px}
 .seg.kinds button{padding:8px 6px 9px;min-height:40px;font-size:14px}
 .seg:not(.dghow):not(.svtime) button{white-space:nowrap}
+/* Store style cards: a little phone per style, in the store's colour; the chosen one has a coloured edge and a tick */
+.lycards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.lycard{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 6px 9px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--soft);color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s ease,background-color .2s ease,transform .15s ease}
+.lycard:active{transform:scale(.97)}
+.lycard svg{width:100%;max-width:74px;height:auto;display:block}
+.lycard .lyf{fill:var(--surface);stroke:var(--line2,var(--line));stroke-width:2}
+.lycard .lyn{fill:var(--line)}
+.lycard .lys{fill:color-mix(in srgb,var(--ink) 16%,transparent)}
+.lycard .lys2{fill:color-mix(in srgb,var(--ink) 9%,transparent)}
+.lycard .lya{fill:color-mix(in srgb,color-mix(in srgb,var(--ly) 78%,var(--ink)) 50%,transparent)}   /* mixed with the text colour, so a dark brand colour still shows in dark mode */
+.lycard .lyp{fill:none;stroke:color-mix(in srgb,var(--ink) 30%,transparent);stroke-width:1.4}
+.lycard[aria-pressed="true"]{border-color:var(--accent-ink,var(--accent));background:color-mix(in srgb,var(--accent) 8%,var(--surface));color:var(--ink);font-weight:700}
+.lycard[aria-pressed="true"] .lya{fill:color-mix(in srgb,color-mix(in srgb,var(--ly) 78%,var(--ink)) 80%,transparent)}
+.lycard[aria-pressed="true"]::after{content:"";position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--accent-ink,var(--accent)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/12px no-repeat}
 /* compact rows: about 7 items per screen instead of 5 */
 .prow{padding:12px;gap:12px}
 .pimg{width:76px;height:76px}
@@ -2545,6 +2559,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-style-cards", at: "2026-10-19", title: "See each store style before you pick", body: "In Shop details, Store style now shows a little phone for List, Photo grid and Minimal, in your brand colour, so you can see how your store will look before you tap Preview. Tap one to use it." },
   { id: "u-20261019-store-style-fix", at: "2026-10-19", title: "Store style fixed", body: "In Shop details, What do you sell? and Store style (List, Photo grid, Minimal) are now slim tabs that always fit your screen. Before, Minimal and Digital were cut off at the edge." },
   { id: "u-20261019-saved-pill", at: "2026-10-19", title: "Saved message fixed", body: "The little Saved message at the top of the editor now slides fully away after it shows. On some phones it used to stay half visible under the status bar." },
   { id: "u-20261019-tabs-everywhere", at: "2026-10-19", title: "The same slim tabs everywhere", body: "Every switch in the app now uses the slim tabs from your store page: Appearance and Text size in Settings, Page style, How buyers get it, payment, and the Preferred time when customers book. Tap a word to switch; the line shows which one is on." },
@@ -2833,6 +2848,20 @@ function edDetails(){
   </section>` : ""}
   ${edLook()}`;
 }
+// Store style: three little phones that show how each style looks, before the seller taps Preview
+function layoutPicker(){
+  if (isDigital(S) || isService(S)) return `<label>Store style</label><p class="hint" style="margin-top:4px">${isDigital(S) ? "Digital stores use cards made for downloads, with a cover for each product." : "Services stores use a booking list with one big Book button."}</p>`;
+  const phone = inner => `<svg viewBox="0 0 80 140" aria-hidden="true"><rect class="lyf" x="2" y="2" width="76" height="136" rx="14"/><rect class="lyn" x="30" y="7" width="20" height="4" rx="2"/><circle class="lya" cx="14" cy="23" r="5"/><rect class="lys" x="23" y="20.5" width="30" height="5" rx="2.5"/>${inner}</svg>`;
+  const rows = (n, step, f) => Array.from({ length: n }, (_, k) => f(36 + k * step)).join("");
+  const looks = {
+    list: rows(4, 24, y => `<rect class="lys" x="9" y="${y + 2}" width="34" height="4.5" rx="2.2"/><rect class="lys2" x="9" y="${y + 10}" width="20" height="3.5" rx="1.7"/><rect class="lya" x="54" y="${y}" width="17" height="17" rx="3.5"/>`),
+    grid: [[9, 36], [42, 36], [9, 86], [42, 86]].map(([x, y]) => `<rect class="lya" x="${x}" y="${y}" width="29" height="27" rx="4"/><rect class="lys" x="${x}" y="${y + 31}" width="21" height="4" rx="2"/><rect class="lys2" x="${x}" y="${y + 38}" width="13" height="3.5" rx="1.7"/>`).join(""),
+    minimal: rows(5, 19, y => `<rect class="lys" x="9" y="${y + 1}" width="40" height="4.5" rx="2.2"/><rect class="lys2" x="9" y="${y + 9}" width="22" height="3.5" rx="1.7"/><circle class="lyp" cx="67" cy="${y + 6}" r="4.2"/>`)
+  };
+  const names = { list: "List", grid: "Photo grid", minimal: "Minimal" };
+  return `<label>Store style</label>
+    <div class="lycards" role="group" aria-label="Store style" style="--ly:${esc(S.color || COLORS[0])}">${["list", "grid", "minimal"].map(v => `<button type="button" class="lycard" data-act="layout" data-v="${v}" aria-pressed="${S.layout === v}">${phone(looks[v])}<span>${names[v]}</span></button>`).join("")}</div>`;
+}
 function edLook(){   // the logo, cover, colour and style cards, shown on Shop details
   return `<h2 class="edsub" id="lookSec">Look</h2>
   <section class="card">
@@ -2844,12 +2873,7 @@ function edLook(){   // the logo, cover, colour and style cards, shown on Shop d
   <section class="card">
     <label style="margin-top:0">Brand colour</label>
     <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
-    <label>Store style</label>
-    <div class="seg">
-      <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
-      <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
-      <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
-    </div>
+    ${layoutPicker()}
     ${(S.links || []).some(l => safeUrl(l.u)) ? `<p class="hint">Shop links always show as a simple list, so customers can scan lots of them quickly.</p>` : ""}
   </section>`;
 }
@@ -3362,7 +3386,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 115;
+const APP_VERSION = 116;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3891,12 +3915,7 @@ function legacyEditor(msg){
     <div class="seg kinds">
       ${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}
     </div>
-    <label>Store style</label>
-    <div class="seg">
-      <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
-      <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
-      <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
-    </div>
+    ${layoutPicker()}
   </section>
 
   ${edListingCard()}${(setTimeout(initPinMap, 0), "")}
