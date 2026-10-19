@@ -2331,7 +2331,7 @@ function setLook(t){
 }
 function setTextSize(z){ try { if (z === "large") localStorage.setItem("lk-text", "large"); else localStorage.removeItem("lk-text"); } catch(e) {} document.documentElement.classList.toggle("lk-large", z === "large"); }
 function paintBars(){ document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.content = isDark() ? "#141112" : "#F7F5F3"); }   // the phone's bars match the page
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paintBars(); if (MX && $("mxMap")){ exRemember(); EX_BACK = true; renderExplore(); } });   // the map has its own light and dark style
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { paintBars(); if (MX && $("mxMap") && lookPref() === "auto"){ const t = INPAGE_N.get(HIST_CUR); if (t && t.mx && !t.self){ t.self = true; history.back(); } exRemember(); EX_BACK = true; renderExplore(); } });   // the map has its own light and dark style
 paintBars();
 // iPhones ignore "no zoom" in the page settings: stop the pinch gesture too, except on a map (it zooms itself)
 ["gesturestart", "gesturechange"].forEach(t => document.addEventListener(t, e => { if (!(e.target.closest && e.target.closest(".maplibregl-map"))) e.preventDefault(); }, { passive: false }));
@@ -2564,7 +2564,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your phone number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id) || !!DEMOS[id]) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id) || Object.prototype.hasOwnProperty.call(DEMOS, id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
@@ -2589,6 +2589,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-bug-hunt", at: "2026-10-19", title: "Lots of small fixes", body: "We checked the whole app for bugs and fixed them. Each store now keeps its own cart. Share in your preview always copies your own link. Add many at once now reads prices like 1,200 and 45/kg, and a price on its own line. If your login needs checking again, your unsaved changes stay on screen. Back works better on Spot It! and during first setup. Check for updates finds a newer version every time." },
   { id: "u-20261019-easy-items", at: "2026-10-19", title: "Adding items is easier", body: "Adding an item now starts with just a photo, name and price. Everything else (description, section, sold out) is under More details, one tap away. New: Add many at once, on your Menu or Products page. Type one item per line with its price, like Teh tarik 3, and add them all in one go. A line like Drinks: puts the next items in that section." },
   { id: "u-20261019-swipe-dots", at: "2026-10-19", title: "Easier to flip through pictures", body: "When a product has several pictures, like brochure pages or digital samples, customers now see dots and arrows under them, so they can flip page by page even on a computer. Your item photo is included too." },
   { id: "u-20261019-book-in-details", at: "2026-10-19", title: "Book straight from a service", body: "On services stores, the details of each service now end with your big Book button. Customers read the details, tap it, and the booking sheet opens with that service already picked." },
@@ -3059,13 +3060,21 @@ function edProducts(){
 // Add many at once: one item per line, "name price"; a line like "Drinks:" starts a section
 function parseBulk(txt){
   let sec = "";
-  const out = [];
+  const out = [], P = String.raw`(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:[.,]\d{1,2})?)`;
+  const num = x => Math.round(+(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(x) ? x.replace(/,/g, "") : x.replace(",", ".")) * 100) / 100;   // 1,200 is twelve hundred; 3,50 is three fifty
   String(txt || "").split(/\n+/).map(l => l.replace(/\s+/g, " ").trim()).filter(Boolean).forEach(l => {
     const hd = l.match(/^#\s*(.+)$/) || l.match(/^([^\d]{1,30}):$/);
     if (hd){ sec = hd[1].trim().slice(0, 30); return; }
-    const m = l.match(/^(.*?)[\s\-–:=,.@]*(?:rm|s\$|\$)?\s*(\d+(?:[.,]\d{1,2})?)\s*(?:rm|ringgit)?$/i);
-    const n = (m && m[1].trim() ? m[1] : l).replace(/[\s\-–:=,@]+$/, "").trim().slice(0, 80);
-    if (n) out.push({ n, p: m && m[1].trim() ? Math.round(+m[2].replace(",", ".") * 100) / 100 : 0, sec });
+    const t = l.replace(/[\s.]+$/, "");   // "RM8.50." ends with a full stop
+    // a line that is only a price belongs to the line above
+    const only = t.match(new RegExp("^(?:rm|s\\$|\\$)?\\s*" + P + "\\s*(?:rm)?$", "i"));
+    if (only){ const last = out[out.length - 1]; if (last && !(last.p > 0)) last.p = num(only[1]); return; }
+    // two prices like "3.00 / 3.50" (hot and cold): the first one
+    const two = t.match(new RegExp("^(.*?)[\\s\\-–:=,@]*(?:rm|\\$)?\\s*" + P + "\\s*\\/\\s*(?:rm|\\$)?\\s*" + P + "$", "i"));
+    const m = two || t.match(new RegExp("^(.*?)[\\s\\-–:=,@]*(?:rm|s\\$|\\$)?\\s*" + P + "\\s*(?:rm|ringgit)?\\s*(\\/\\s*[a-z]+|\\([^)]*\\))?$", "i"));
+    const extra = !two && m && m[3] ? (m[3][0] === "/" ? " (per " + m[3].slice(1).trim() + ")" : " " + m[3]) : "";
+    const n = ((m && m[1].trim() ? m[1] : t).replace(/[\s\-–:=,@]+$/, "").trim() + extra).slice(0, 80);
+    if (n) out.push({ n, p: m && m[1].trim() ? num(m[2]) : 0, sec });
   });
   return out.slice(0, 60);
 }
@@ -3094,6 +3103,7 @@ document.addEventListener("input", e => { if (e.target && e.target.id === "bulkI
 let ED_MORE = false;
 document.addEventListener("toggle", e => { if (e.target && e.target.id === "edMore") ED_MORE = e.target.open; }, true);
 const moreWhat = () => isDigital(S) ? "Description, what's inside, samples, section" : isService(S) ? "Description, section, not available" : "Description, section, sold out";
+const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
 // nothing typed or added yet: a new item that can simply be cancelled
 const isBlankItem = it => !!it && !it.n.trim() && !String(it.d || "").trim() && !safeImg(it.img) && it.o.every(o => !String(o.l || "").trim() && !(+o.p > 0));
 function edProduct(i){
@@ -3455,7 +3465,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 123;
+const APP_VERSION = 124;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3464,9 +3474,11 @@ async function checkUpdate(){
     const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (!reg) throw 0;
     await reg.update();
     const nw = reg.installing || reg.waiting;
+    let live = 0; try { const t = await (await fetch("sw.js", { cache: "no-store" })).text(); live = +((t.match(/linkedai-v(\d+)/) || [])[1] || 0); } catch(e) {}
+    if (!nw && live > APP_VERSION){ if (el) el.textContent = "Updating…"; if (DIRTY) await flushSave(); return location.reload(); }   // already installed by another tab: this page just needs to reload
     if (!nw){ await appVersion(); return notify(`You have the latest version (${APP_VERSION}).`); }
     if (el) el.textContent = "Updating…";
-    if (DIRTY) await autoSave();
+    if (DIRTY) await flushSave();
     navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), { once: true });
     setTimeout(() => location.reload(), 6000);   // in case the new version was already in charge
   } catch(e){ await appVersion(); notify("Couldn't check right now. Check your internet and try again."); }
@@ -3517,6 +3529,7 @@ function renderEditor(msg){
   bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask" || EDV === "settings");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
+  PENDING_BOXES.forEach(id => { const b = $(id); if (b) spinOn(b); });   // a photo still uploading keeps its spinner after any redraw
 }
 function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); clearTimeout(notifyQuiet.t); notifyQuiet.t = setTimeout(() => { const x = $("edToast"); if (x) x.textContent = ""; }, 6000); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
 
@@ -4086,16 +4099,15 @@ $("builder").addEventListener("click", async e => {
   if (!b) return;
   const a = b.dataset.act, i = +b.dataset.i, j = +b.dataset.j;
   const redraw = () => { touch(); renderEditor(); };
-  const blankItem = () => ({ n: "", d: "", img: "", out: false, sec: "", o: [{ l: "", p: 0 }] });
   if (a === "chwa"){ openWaChange(); return; }
   if (a === "chpin"){ openPinChange(); return; }
   if (a === "chemail"){ openEmailChange(); return; }
-  if (a === "frkind"){ S.kind = b.dataset.v; touch(); EDSTEP = 2; renderEditor(); window.scrollTo(0, 0); setTimeout(() => { const el = document.querySelector('[data-f="n"][data-i="0"]'); if (el) el.focus(); }, 60); return; }
-  if (a === "frback"){ EDSTEP = Math.max(1, EDSTEP - 1); renderEditor(); window.scrollTo(0, 0); return; }
+  if (a === "frkind"){ S.kind = b.dataset.v; touch(); EDSTEP = 2; inpagePush({ ed: "start", step: 2 }); renderEditor(); window.scrollTo(0, 0); setTimeout(() => { const el = document.querySelector('[data-f="n"][data-i="0"]'); if (el) el.focus(); }, 60); return; }
+  if (a === "frback"){ const t = INPAGE_N.get(HIST_CUR); if (t && t.ed === "start" && t.step === EDSTEP) return history.back(); EDSTEP = Math.max(1, EDSTEP - 1); renderEditor(); window.scrollTo(0, 0); return; }
   if (a === "frnext"){
     const it = S.items[0];
     if (!it || !it.n.trim() || (!isService(S) && !(+it.o[0].p > 0))){ $("frErr").textContent = isService(S) ? "Add a name, or tap Skip for now." : "Add a name and a price, or tap Skip for now."; return; }
-    EDSTEP = 3; renderEditor(); window.scrollTo(0, 0); return;
+    EDSTEP = 3; inpagePush({ ed: "start", step: 3 }); renderEditor(); window.scrollTo(0, 0); return;
   }
   if (a === "frskip" || a === "frhome" || a === "frpublish"){
     markStartDone(); edTidy(); EDV = a === "frhome" ? "products" : "home"; renderEditor(); window.scrollTo(0, 0);
@@ -4114,13 +4126,13 @@ $("builder").addEventListener("click", async e => {
   if (a === "asksend"){ askSend(); return; }
   if (a === "askq"){ askAnswer(b.dataset.v); return; }
   if (a === "go" || a === "back"){ const to = b.dataset.v, ti = b.dataset.i != null ? +b.dataset.i : null; leaveEdPage(to); EDOTHER = false; return a === "back" ? edBack(to, ti) : edGo(to, ti); }
-  if (a === "secpick"){ S.items[i].sec = S.items[i].sec === b.dataset.v ? "" : b.dataset.v; redraw(); return; }
+  if (a === "secpick"){ S.items[i].sec = S.items[i].sec.trim() === b.dataset.v ? "" : b.dataset.v; redraw(); return; }
   if (a === "secnew"){ const inp = b.closest(".seccard").querySelector(".secnew"); inp.hidden = false; inp.focus(); return; }
   if (a === "lkadd"){ if (S.links.length >= 80) return notify("You can add up to 80 links. Delete one to add another."); S.links.push({ u: "", sec: "", n: "", img: "", p: 0, pu: "" }); edGo("link", S.links.length - 1); setTimeout(() => { const el = document.querySelector('[data-lf="u"]'); if (el) el.focus(); }, 30); return; }
   if (a === "lkdel"){ const l = S.links[j]; if (l && (!l.u.trim() || await ask(`Delete ${l.n.trim() ? '"' + tidyName(l.n) + '"' : "this link"}?`, "Delete", true))){ S.links.splice(j, 1); if (EDV === "link"){ EDI = -1; touch(); return edBack("links"); } redraw(); } return; }
   if (a === "lkfetch"){ const l = S.links[j]; if (l){ l.pu = ""; fetchLinkMeta(l); } return; }
   if (a === "lkedit"){ const l = S.links[j]; if (l){ const st = lkState(l); st.edit = !st.edit; updateLinkPreview(l); } return; }
-  if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = S.links[j].sec === b.dataset.v ? "" : b.dataset.v; redraw(); } return; }
+  if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = String(S.links[j].sec || "").trim() === b.dataset.v ? "" : b.dataset.v; redraw(); } return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
   else if (a === "del"){ if (isBlankItem(S.items[i]) || await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem());
@@ -4183,7 +4195,7 @@ $("builder").addEventListener("click", async e => {
   }
   else if (a === "backadmin"){
     if (UPN && !(await ask("A photo is still uploading. Leave anyway? It won't be added.", "Leave", true))) return;
-    if (DIRTY) await autoSave();
+    if (DIRTY) await flushSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Leave anyway?", "Leave", true))) return;
     DIRTY = false; clearSession(); history.pushState(null, "", home() + "admin"); renderAdmin();
   }
@@ -4232,7 +4244,7 @@ $("builder").addEventListener("click", async e => {
   }
   else if (a === "logout"){
     if (UPN && !(await ask("A photo is still uploading. Log out anyway? It won't be added.", "Log out", true))) return;
-    if (DIRTY) await autoSave();
+    if (DIRTY) await flushSave();
     if (DIRTY && !(await ask("Your changes couldn't be saved. Log out anyway?", "Log out", true))) return;
     if (SESSION && SESSION.tok) apiPost({ action: "forget", id: SESSION.id }).catch(() => {});
     DIRTY = false; clearTimeout(AUTOSAVE_T); clearSession(true); setIconBadge(0); renderStart();
@@ -4272,6 +4284,13 @@ async function publishWithReceipt(input){
 }
 
 // Saves right now. Edits made while it's on its way stay marked unsaved, and autosave sends them next.
+// Before leaving (log out, update, Back to admin): save until nothing is left, so a save that was already running isn't reported as a failure
+async function flushSave(){
+  for (let k = 0; k < 3 && DIRTY && SESSION && !saveProblem(); k++){
+    if (ED_SYNC) await new Promise(r => setTimeout(r, 1200));
+    try { await saveNow(); } catch(e){ break; }
+  }
+}
 async function saveNow(){
   clearTimeout(AUTOSAVE_T); if (SAVING){ try { await SAVING; } catch(e) {} }
   const v = EDITV;
@@ -4381,7 +4400,7 @@ window.addEventListener("beforeunload", e => { if (DIRTY){ e.preventDefault(); e
    ============================================================ */
 let D = null, cart = {}, pSel = { i: 0, j: 0, q: 1 }, AD = null;
 const money = n => fmtMoney(D.cur, n);
-function cartKey(){ return "lk-cart:" + D.wa; }
+function cartKey(){ return "lk-cart:" + (!$("backBtn").hidden && SESSION ? "pv:" + SESSION.id : STORE_ID || D.wa); }   // per store: two stores on one number (and the demos) keep their own carts
 // Each line also remembers its name, option and price, so a seller reordering or changing items never swaps what's in a cart
 function cartSig(k){ const [i, j] = k.split("|").map(Number), it = D.items[i], o = it && it.o[j]; return it && o ? it.n + "\u0001" + o.l + "\u0001" + o.p : ""; }
 function saveCart(){ try { const s = {}; Object.keys(cart).forEach(k => s[k] = cartSig(k)); localStorage.setItem(cartKey(), JSON.stringify({ q: cart, s })); } catch(e) {} }
@@ -4582,7 +4601,7 @@ function dgRow(i){
   </button>`;
 }
 // Services: a catalogue card; tapping it picks the service and opens the booking sheet
-const svPrice = p => p.o.some(o => o.p > 0) ? priceLabel(p) : "Get a quote";
+const svPrice = p => { const ps = p.o.map(o => +o.p || 0).filter(x => x > 0); if (!ps.length) return "Get a quote"; const lo = Math.min(...ps); return (p.o.length > 1 && (Math.max(...ps) !== lo || ps.length < p.o.length) ? "From " : "") + money(lo); };
 function svRow(i){
   const p = D.items[i], img = safeImg(p.img || (p.br && p.br[0])), on = inCart(i) > 0, n = p.o.length, br = hasBrochure(p);
   return `<button class="prow svrow${p.out ? " out" : ""}${on ? " on" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
@@ -4690,7 +4709,8 @@ $("stQ").addEventListener("keydown", e => { if (e.key === "Enter") $("stQ").blur
 function shareText(d, link, customer){ const m = String((d && d.shareMsg) || "").trim(); return (m || (customer ? `Order from ${(d && d.name) || "this store"} here:` : "Order here:")) + " " + link; }
 // Share this store: the phone's own share menu (WhatsApp, Telegram, Facebook...), or copy the link where there isn't one
 $("stShare").addEventListener("click", async () => {
-  const url = storeLink(STORE_ID || (SESSION && SESSION.id) || ""), name = (D && D.name) || "this store";
+  const pv = !$("backBtn").hidden && SESSION;   // the seller's preview: their own link, never a store looked at earlier
+  const url = storeLink(pv ? SESSION.id : STORE_ID || (SESSION && SESSION.id) || ""), name = (D && D.name) || "this store";
   if (navigator.share){
     try { await navigator.share({ title: name, text: shareText(D, "", true).trim(), url }); return; }
     catch(e){ if (e && e.name === "AbortError") return; }
@@ -4886,7 +4906,6 @@ $("dateCal").addEventListener("click", e => {
 ["note","cName","date","cEmail","cAddr"].forEach(id => $(id).addEventListener("input", () => { $("err").textContent = ""; $(id).removeAttribute("aria-invalid"); $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message()); }));
 $("send").addEventListener("click", e => {
   let msg = "", bad = null;
-  if (STORE_DEMO && $("backBtn").hidden && items().length && $("cName").value.trim()){ e.preventDefault(); notify("This is a demo store, so nothing was sent.\n\nA real store would get this on WhatsApp:\n\n" + message()); return; }
   setDateMin();
   ["cName","date","cEmail"].forEach(id => $(id).removeAttribute("aria-invalid"));
   if (D.closed) msg = "This store is closed right now.";
@@ -4901,6 +4920,7 @@ $("send").addEventListener("click", e => {
     if (bad){ const f = $(bad); f.setAttribute("aria-invalid", "true"); f.setAttribute("aria-describedby", "err"); try { f.focus({ preventScroll: true }); f.scrollIntoView({ block: "center", behavior: reduceMotion() ? "auto" : "smooth" }); } catch(_) {} }   // take them to the field that needs fixing
     return;
   }
+  if (STORE_DEMO && $("backBtn").hidden){ e.preventDefault(); notify("This is a demo store, so nothing was sent.\n\nA real store would get this on WhatsApp:\n\n" + message()); return; }   // after the same checks a real store makes
   $("send").href = "https://wa.me/" + D.wa + "?text=" + encodeURIComponent(message());
   if ($("backBtn").hidden) track("order");
   ORDER_SENT = true;   // the cart stays until they come back and say the order went through
@@ -6406,7 +6426,7 @@ function exLocate(silent, fly){
     if (fly || (was && kmBetween(was.lat, was.lng, EX.me.lat, EX.me.lng) > 2)){ mxDeselect(); MX.map.flyTo({ center: [EX.me.lng, EX.me.lat], zoom: 12, duration: 700 }); if (fly) mxToast("Showing stores around you"); }
     mxDraw(true);
   }, err => {
-    if (err && err.code === 1){ EX.me = null; EX.near = false; try { localStorage.removeItem("lk-me"); } catch(e) {} if (MX) mxDraw(true); }   // location turned off: forget the old spot
+    if (err && err.code === 1){ EX.me = null; EX.near = false; try { localStorage.removeItem("lk-me"); } catch(e) {} if (MX && MX.me){ MX.me.remove(); MX.me = null; } if (MX) mxDraw(true); }   // location turned off: forget the old spot
     if (!silent) notify("Couldn't get your location. Allow location for this site in your browser settings.");
   }, { timeout: 12000 });
 }
@@ -6675,8 +6695,9 @@ function renderHome(){
 }
 // Back: the page before, when it was one of ours; else where it makes sense (Spot It! from a store, the home page from the rest)
 function backBtnHtml(to){ return `<button type="button" class="pgback" data-pgback="${to || ""}" aria-label="Back" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>`; }
+const SEEN_APP = (() => { let v = false; try { v = !!sessionStorage.getItem("lk-inapp"); sessionStorage.setItem("lk-inapp", "1"); } catch(e) {} return v; })();
 function goBack(fallback){
-  let ours = false; try { ours = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch(e) {}
+  let ours = false; try { ours = SEEN_APP && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch(e) {}
   if (history.length > 1 && (HIST_CUR > 0 || ours)) return history.back();
   history.pushState(null, "", fallback || home()); route();
 }
@@ -6757,6 +6778,7 @@ async function route(){
   if (q === "explore" || q === "near") return renderExplore();
   if (q === "signup"){ return renderStart("", "signup"); }
   if (q === "build" || q === "edit"){
+    STORE_ID = ""; STORE_DEMO = false;   // a store looked at earlier must not leak into the seller's preview (its link, cart or ads)
     PENDING_VIEW = urlFlag("status") ? "status" : "";
     SESSION = loadSession();
     if (SESSION){
@@ -6775,7 +6797,11 @@ async function route(){
           DIRTY = false;
           // newer changes from another phone: use them even while the preview is open, so an edit afterwards never saves the old copy
           S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); if (!$("builder").hidden) renderEditor();
-        }).catch(e => { ED_SYNC = false; if (authErr(e)){ clearSession(); renderStart(friendly(e, "")); } });
+        }).catch(e => {
+          ED_SYNC = false; if (!authErr(e)) return;
+          if ((DIRTY || UPN) && pinErr(e)) return relogin(e).then(ok => { if (ok && DIRTY) scheduleAutosave(300); });   // edits made meanwhile stay; ask for the PIN
+          clearSession(); renderStart(friendly(e, ""));
+        });
         return;
       }
       $("gwrap").innerHTML = `${loaderHtml("Opening your store...")}`; show("page"); SPLASH.ready();
@@ -6788,7 +6814,7 @@ async function route(){
     }
     return renderStart();
   }
-  if (DEMOS[q]){   // a built-in demo store
+  if (Object.prototype.hasOwnProperty.call(DEMOS, q)){   // a built-in demo store
     ++ROUTE_TOK; STORE_ID = q; STORE_DEMO = true; STORE_VERIFIED = true; STORE_TRIAL = false; STORE_PLACE = DEMOS[q].place;
     showStore(normalize(JSON.parse(JSON.stringify(DEMOS[q].data))), false); SPLASH.ready(); loadAd().then(() => { if (STORE_ID === q) showAd(); });
     return;
@@ -6822,19 +6848,20 @@ window.addEventListener("popstate", async e => {
   HIST_CUR = st._n || 0;
   if (INPAGE_N.has(left) && HIST_CUR < left){   // Back from one of our in-page steps: stay on this page
     const step = INPAGE_N.get(left); INPAGE_N.delete(left);
-    if (step.self){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }   // our own close: a message shown meanwhile stays
-    if ($("askOverlay").classList.contains("open") && !$("askOverlay").classList.contains("closing")) return closeAsk(false);   // one already closing doesn't swallow this step
+    if (step.self){ if (step.mx) return mxSyncStep(); const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }   // a map list opened again meanwhile gets its own Back step   // our own close: a message shown meanwhile stays
+    if ($("askOverlay").classList.contains("open") && !$("askOverlay").classList.contains("closing")){ closeAsk(false); if (step.mx || step.sheet || step.preview || step.ed) inpagePush(step); return; }   // the card or sheet under the message keeps its Back step   // one already closing doesn't swallow this step
     if (step.sheet){ const o = $(step.sheet); if (o && o.classList.contains("open")) closeSheet(o); return; }
     if (step.mx){ mxCloseSheet(); mxDeselect(); return; }
     if (step.preview){ if (!$("store").hidden && !$("backBtn").hidden) leavePreview(); return; }
     if (!$("builder").hidden && SESSION){
+      if (step.ed === "start" && step.step && EDV === "start"){ EDSTEP = Math.max(1, step.step - 1); renderEditor(); window.scrollTo(0, 0); return; }   // a first-run step back
       const v = st.ed || "home"; if (v !== EDV){ leaveEdPage(v); EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); }
       if (backTo && backTo.v !== EDV) edGo(backTo.v, backTo.i);   // the ‹ arrow's page wasn't the one below
     }
     return;
   }
   document.querySelectorAll(".overlay.open").forEach(o => closeSheet(o));   // a real page change never keeps a pop-up open
-  if (DIRTY) await autoSave();
+  if (DIRTY) await flushSave();
   EX_BACK = true;
   if (!DIRTY) return route();
   const here = location.href;
