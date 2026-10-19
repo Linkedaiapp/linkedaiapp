@@ -578,6 +578,25 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .svpick{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;padding:7px 14px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent-ink)}
 .svrow.on .svpick{background:var(--accent);color:#fff;border-color:var(--accent)}
 .svgo{flex:none;display:grid;place-items:center;color:var(--muted)}
+/* the item editor's fold: basics first, the optional extras tucked in here */
+.bulkbtn{margin-top:12px}
+#bulkIn{font-size:16px;line-height:1.5;min-height:200px}
+.bulkout:empty{display:none}
+.bulkout{margin-top:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--soft);font-size:14px}
+.bulkout ul{list-style:none;margin:8px 0 0;padding:0}
+.bulkout li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line)}
+.bulkout li span:last-child{flex:none;font-weight:700}
+.bulkout li i{font-style:normal;font-size:12px;color:var(--muted);background:var(--surface);padding:1px 7px;border-radius:999px;margin-left:4px}
+.bulkout li.more{color:var(--muted);justify-content:center}
+.edmore summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.edmore summary::-webkit-details-marker{display:none}
+.edmore summary > span{display:flex;flex-direction:column;gap:2px}
+.edmore summary .hint{margin:0}
+.edmore summary svg{flex:none;color:var(--muted);transition:transform .2s ease}
+.edmore[open] summary svg{transform:rotate(180deg)}
+.edmore[open] summary{padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.edmore .card{background:none;border:0;box-shadow:none;padding:0;margin:16px 0 0}
+.edmore .card h2{font-size:15px}
 .optrow.ro{cursor:default}
 .pbook{margin-top:16px;box-shadow:none}
 .svbookhint{display:flex;gap:8px;align-items:flex-start;margin:14px 0 0;padding:11px 13px;border-radius:var(--r-md);background:var(--soft);font-size:14px;line-height:1.4;color:var(--muted)}.svbookhint svg{flex:none;margin-top:1px;color:var(--accent-ink,var(--accent))}.svbookhint b{color:var(--ink)}   /* the whole row opens booking; the big button at the bottom is the one Book button */
@@ -2570,6 +2589,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-easy-items", at: "2026-10-19", title: "Adding items is easier", body: "Adding an item now starts with just a photo, name and price. Everything else (description, section, sold out) is under More details, one tap away. New: Add many at once, on your Menu or Products page. Type one item per line with its price, like Teh tarik 3, and add them all in one go. A line like Drinks: puts the next items in that section." },
   { id: "u-20261019-swipe-dots", at: "2026-10-19", title: "Easier to flip through pictures", body: "When a product has several pictures, like brochure pages or digital samples, customers now see dots and arrows under them, so they can flip page by page even on a computer. Your item photo is included too." },
   { id: "u-20261019-book-in-details", at: "2026-10-19", title: "Book straight from a service", body: "On services stores, the details of each service now end with your big Book button. Customers read the details, tap it, and the booking sheet opens with that service already picked." },
   { id: "u-20261019-service-details", at: "2026-10-19", title: "Tap a service to see its details", body: "On services stores, tapping a service now shows its details: photos, description and every package with its price. To book, customers use the one big button at the bottom, where they pick the service, date and time." },
@@ -3032,8 +3052,48 @@ function edProducts(){
     return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(sized(u, 160))}" alt="" decoding="async">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}${it.sec ? " · " + esc(it.sec) : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
   }).join("");
   return `${edTop(W(S).list, "", `<button class="btn small solid" data-act="additem">${ico("plus",16,2.2)}Add</button>`)}
-  ${S.items.length ? `<section class="card lk-group">${rows}</section>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button></section>`}`;
+  ${S.items.length ? `<section class="card lk-group">${rows}</section>
+  <button class="btn full bulkbtn" data-act="go" data-v="bulk">${ico("copy",18)}Add many at once</button>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button>
+    <button class="btn full" style="margin-top:10px" data-act="go" data-v="bulk">${ico("copy",18)}Add many at once</button><p class="hint" style="margin-top:6px">Type your whole ${esc(W(S).list.toLowerCase())} as a list. Add photos later.</p></section>`}`;
 }
+// Add many at once: one item per line, "name price"; a line like "Drinks:" starts a section
+function parseBulk(txt){
+  let sec = "";
+  const out = [];
+  String(txt || "").split(/\n+/).map(l => l.replace(/\s+/g, " ").trim()).filter(Boolean).forEach(l => {
+    const hd = l.match(/^#\s*(.+)$/) || l.match(/^([^\d]{1,30}):$/);
+    if (hd){ sec = hd[1].trim().slice(0, 30); return; }
+    const m = l.match(/^(.*?)[\s\-–:=,.@]*(?:rm|s\$|\$)?\s*(\d+(?:[.,]\d{1,2})?)\s*(?:rm|ringgit)?$/i);
+    const n = (m && m[1].trim() ? m[1] : l).replace(/[\s\-–:=,@]+$/, "").trim().slice(0, 80);
+    if (n) out.push({ n, p: m && m[1].trim() ? Math.round(+m[2].replace(",", ".") * 100) / 100 : 0, sec });
+  });
+  return out.slice(0, 60);
+}
+let BULK_TXT = "";
+function edBulk(){
+  const ex = { food: "Drinks:\nTeh tarik 3\nMilo ais 3.50\nFood:\nNasi lemak ayam 9\nMee goreng mamak 7.50", products: "Baju kurung moden 89\nTudung bawal satin 25\nTote bag 35", services: "Aircond normal service 80\nChemical wash 150\nGas top-up", digital: "Ebook resepi kuih raya 15\nCanva templates bundle 29\nLightroom presets 19" }[S.kind] || "Item one 10\nItem two 15";
+  setTimeout(bulkPaint, 0);
+  return `${edTop("Add many at once", "products")}
+  <section class="card">
+    <label style="margin-top:0" for="bulkIn">Type one ${esc(W(S).item)} per line: the name, then the price</label>
+    <textarea id="bulkIn" rows="9" maxlength="6000" placeholder="${esc(ex)}" autocapitalize="sentences">${esc(BULK_TXT)}</textarea>
+    <p class="hint">A line ending with <b>:</b> like <b>Drinks:</b> puts the next ${esc(W(S).item)}s in that section.${isService(S) ? " No price? Customers see <b>Get a quote</b>." : ""} You can add photos and details to each one later.</p>
+    <div id="bulkOut" class="bulkout" aria-live="polite"></div>
+    <button class="btn solid full" id="bulkGo" data-act="bulkadd" style="margin-top:12px" disabled>Add</button>
+  </section>`;
+}
+function bulkPaint(){
+  const t = $("bulkIn"); if (!t) return;
+  BULK_TXT = t.value;
+  const rows = parseBulk(t.value), cur = S.cur || curSymbol(S.curCode);
+  $("bulkOut").innerHTML = rows.length ? `<b>${rows.length} ${rows.length === 1 ? esc(W(S).item) : esc(W(S).item) + "s"} ready</b><ul>${rows.slice(0, 12).map(r => `<li><span>${esc(r.n)}${r.sec ? ` <i>${esc(r.sec)}</i>` : ""}</span><span>${r.p > 0 ? esc(cur) + (+r.p).toFixed(2) : isService(S) ? "Get a quote" : "No price yet"}</span></li>`).join("")}${rows.length > 12 ? `<li class="more">and ${rows.length - 12} more</li>` : ""}</ul>` : "";
+  const g = $("bulkGo"); g.disabled = !rows.length; g.textContent = rows.length ? `Add ${rows.length} ${rows.length === 1 ? W(S).item : W(S).item + "s"}` : "Add";
+}
+document.addEventListener("input", e => { if (e.target && e.target.id === "bulkIn") bulkPaint(); });
+// More details (the optional extras on an item) stays open or closed while the seller edits
+let ED_MORE = false;
+document.addEventListener("toggle", e => { if (e.target && e.target.id === "edMore") ED_MORE = e.target.open; }, true);
+const moreWhat = () => isDigital(S) ? "Description, what's inside, samples, section" : isService(S) ? "Description, section, not available" : "Description, section, sold out";
 // nothing typed or added yet: a new item that can simply be cancelled
 const isBlankItem = it => !!it && !it.n.trim() && !String(it.d || "").trim() && !safeImg(it.img) && it.o.every(o => !String(o.l || "").trim() && !(+o.p > 0));
 function edProduct(i){
@@ -3047,19 +3107,15 @@ function edProduct(i){
   const fresh = isBlankItem(it);
   return `${edTop((fresh ? "Add " : "Edit ") + W(S).item, "products", fresh ? `<button class="btn small" data-act="del" data-i="${i}">Cancel</button>` : `<button class="btn small dangerline" data-act="del" data-i="${i}">${ico("trash",16)}Delete</button>`)}
   <section class="card">
-    <label style="margin-top:0">${isDigital(S) ? "Cover picture (optional)" : "Photo (optional)"}</label>
+    <label style="margin-top:0">${isDigital(S) ? "Cover picture" : "Photo"}</label>
     <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
-  </section>
-  <section class="card">
-    <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
-    <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
-  </section>
-  ${it.o.length === 1 && !it.o[0].l.trim() ? `<section class="card">
-    <label style="margin-top:0">Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="${i}" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
+    <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
+  ${it.o.length === 1 && !it.o[0].l.trim() ? `
+    <label>Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="${i}" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
     ${isService(S) ? `<p class="hint">No fixed price? Leave it empty and customers see <b>Get a quote</b>.</p>` : ""}
     <button class="btn small" style="margin-top:12px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}${isDigital(S) ? "Add versions" : isService(S) ? "Add packages" : "Add sizes or flavours"}</button>
     <p class="hint">${isDigital(S) ? "Only if buyers choose between versions with different prices, like a Personal and a Commercial licence, or Basic and Full pack." : "Only if customers choose between versions with different prices, like Small and Large, or Chocolate and Pandan."}</p>
-  </section>` : `<section class="card">
+  </section>` : `</section><section class="card">
     <div class="between"><h2 style="margin:0">${isDigital(S) ? "Versions" : isService(S) ? "Packages" : "Sizes or flavours"}</h2><span class="hint" style="margin:0">Customers pick one</span></div>
     <div class="opthead"><span>Name</span><span>Price (${esc(S.cur || curSymbol(S.curCode))})</span><i></i></div>
     ${it.o.map((o,j)=>`
@@ -3070,28 +3126,34 @@ function edProduct(i){
       </div>`).join("")}
     <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add another</button>
   </section>`}
-  ${isDigital(S) ? edDigital(it, i) : ""}${isService(S) ? edBrochure(it, i) : ""}
-  ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, isDigital(S) ? "e.g. Templates" : "e.g. Drinks")}
-  <section class="card">
-    <label class="check" style="margin-top:0"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>Sold out for now</span></label>
+  ${isDigital(S) ? dgHowCard(it, i) : ""}${isAgent(S) ? edBrochure(it, i) : ""}
+  <details class="card edmore" id="edMore" ${ED_MORE ? "open" : ""}>
+    <summary><span><b>More details</b><span class="hint">${esc(moreWhat())}</span></span>${ico("down", 20, 2)}</summary>
+    <label>Description<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
+    ${isDigital(S) ? dgMore(it, i) : ""}${isService(S) && !isAgent(S) && hasBrochure(it) ? edBrochure(it, i) : ""}
+    ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, isDigital(S) ? "e.g. Templates" : "e.g. Drinks")}
+    <label class="check"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>${isService(S) ? "Not available for now" : "Sold out for now"}</span></label>
     <div class="between" style="margin-top:12px"><span class="hint" style="margin:0">Position in your list</span>
       <span class="ctl"><button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button><button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button></span></div>
-  </section>`;
+  </details>`;
 }
 // A digital product's extras: what it is, what's inside, sample pages, Best value, and how the buyer gets it
-function edDigital(it, i){
-  const how = it.how || "wa", smp = Array.isArray(it.smp) ? it.smp : [];
-  return `<section class="card">
-    <h2 style="margin:0">About this product</h2>
-    <label>What it is (optional)<input type="text" data-i="${i}" data-f="fmt" maxlength="60" value="${esc(it.fmt || "")}" placeholder="e.g. PDF · 42 pages, or Canva · 30 designs"></label>
-    <label>What you get (optional, one per line)<textarea data-i="${i}" data-f="get" maxlength="800" rows="4" placeholder="${esc("30 editable Canva designs\nFont and colour guide\nVideo: how to edit on your phone")}">${esc(it.get || "")}</textarea></label>
-    <label>Sample pages (optional, up to 4)</label>
+// Nice-to-have details of a digital product, shown inside More details
+function dgMore(it, i){
+  const smp = Array.isArray(it.smp) ? it.smp : [];
+  return `    <label>Format label<input type="text" data-i="${i}" data-f="fmt" maxlength="60" value="${esc(it.fmt || "")}" placeholder="e.g. PDF · 42 pages, or Canva · 30 designs"></label>
+    <label>What you get (one per line)<textarea data-i="${i}" data-f="get" maxlength="800" rows="4" placeholder="${esc("30 editable Canva designs\nFont and colour guide\nVideo: how to edit on your phone")}">${esc(it.get || "")}</textarea></label>
+    <label>Sample pages (up to 4)</label>
     <p class="hint" style="margin:0 0 8px">Show a few pages or designs so buyers can see what they'll get.</p>
     <div class="dgsmp" id="smpPrev${i}">${smp.map((u, k) => `<span class="dgsmpi"><img src="${esc(sized(u, 200))}" alt="Sample ${k + 1}"><button type="button" data-act="rm-smp" data-i="${i}" data-k="${k}" aria-label="Remove sample ${k + 1}">${ico("x", 14, 2.4)}</button></span>`).join("")}
       ${smp.length < 4 ? `<label class="dgsmpadd filebtn">${ico("plus", 20, 2)}<span>Add</span><input type="file" accept="image/*" data-media="smp" data-i="${i}" aria-label="Add a sample page"></label>` : ""}</div>
     <label class="check"><input type="checkbox" data-i="${i}" data-f="best" ${it.best ? "checked" : ""}><span>Show as <b>Best value</b> (for a bundle), at the top of your store</span></label>
-  </section>
-  <section class="card">
+    <label>When they get it<input type="text" data-i="${i}" data-f="eta" maxlength="40" value="${esc(it.eta || "")}" placeholder="e.g. within 1 hour"></label>`;
+}
+// How a digital product reaches the buyer: the one digital choice that matters, so it stays outside the fold
+function dgHowCard(it, i){
+  const how = it.how || "wa";
+  return `  <section class="card">
     <h2 style="margin:0">How buyers get it</h2>
     <div class="seg dghow" style="margin-top:10px">${Object.entries(DG_HOW).map(([k, v]) => `<button type="button" data-act="dghow" data-i="${i}" data-v="${k}" aria-pressed="${how === k}">${v}</button>`).join("")}</div>
     ${how === "ext" ? `<label>Your checkout page<input type="url" data-i="${i}" data-f="ext" value="${esc(it.ext || "")}" placeholder="e.g. https://payhip.com/b/AbC1"></label>
@@ -3099,8 +3161,7 @@ function edDigital(it, i){
     : `${how === "link" ? `<label>Your download link (only you see this)<input type="url" data-i="${i}" data-f="dl" value="${esc(it.dl || "")}" placeholder="e.g. https://drive.google.com/..."></label>
     <p class="hint">Customers never see this link on your store. When a buyer has paid, tap <b>Send to a buyer</b> and pick their chat: the link goes in a thank-you message, ready to send.</p>
     <button type="button" class="btn small wa" data-act="dgsend" data-i="${i}" style="margin-top:10px">${ico("chat", 16)}Send to a buyer</button>`
-    : `<p class="hint">Orders come to your WhatsApp. When the buyer has paid, send them the file in the chat.</p>`}
-    <label>When they get it (optional)<input type="text" data-i="${i}" data-f="eta" maxlength="40" value="${esc(it.eta || "")}" placeholder="e.g. within 1 hour"></label>`}
+    : `<p class="hint">Orders come to your WhatsApp. When the buyer has paid, send them the file in the chat.</p>`}`}
   </section>`;
 }
 // Services (mostly agents): brochure pages, a PDF and what's covered
@@ -3394,7 +3455,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 122;
+const APP_VERSION = 123;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3449,7 +3510,7 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, settings: () => { setTimeout(appVersion, 0); return edSettings(); }, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, bulk: edBulk, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, settings: () => { setTimeout(appVersion, 0); return edSettings(); }, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   document.body.classList.toggle("pinning", EDV === "listing");
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
@@ -4066,6 +4127,14 @@ $("builder").addEventListener("click", async e => {
     if (EDV === "product"){ EDI = -1; touch(); return edBack("products"); } redraw(); } }
   else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); setTimeout(() => { const el = document.querySelector(`.opt input[data-i="${i}"][data-f="l"]`); if (el && !el.value) el.focus(); }, 30); }
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
+  else if (a === "bulkadd"){
+    const rows = parseBulk(($("bulkIn") || {}).value);
+    if (!rows.length) return;
+    S.items = S.items.filter(it => !isBlankItem(it));
+    rows.forEach(r => S.items.push(Object.assign(blankItem(), { n: r.n, sec: r.sec, o: [{ l: "", p: r.p }] })));
+    BULK_TXT = ""; touch(); scheduleAutosave(600);
+    edGo("products"); notify(`${rows.length} ${rows.length === 1 ? W(S).item : W(S).item + "s"} added. Tap any one to add a photo or details.`);
+  }
   else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ touch(); edGo("product", S.items.length - 1); } else redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ keepSlide(b, () => { S.layout = b.dataset.v; redraw(); }); }
