@@ -715,7 +715,7 @@ html,body{overflow-x:hidden}
 .x{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
 .psheet{padding:0 0 calc(20px + env(safe-area-inset-bottom,0px))}
 .psheet .x{position:absolute;top:12px;right:12px;z-index:2}
-.pbig{aspect-ratio:16/10;background:var(--soft)}
+.pbig{aspect-ratio:16/10;background:var(--soft) center/cover no-repeat}
 .pbig img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-lg) var(--r-lg) 0 0}
 .pbig .ph{border-radius:var(--r-lg) var(--r-lg) 0 0;font-size:32px}
 .pbody{padding:18px 16px 0}
@@ -2651,6 +2651,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-smooth", at: "2026-10-19", title: "Smoother and faster everywhere", body: "Pop-ups now slide down when they close, and you can swipe one down to close it. The page behind stays still. Pages slide in only when you change page, not on every tap. On a slow connection the app opens faster, and it always tells you when something is still loading or saving. Spot It! zooms more smoothly and uses much less data for store logos." },
   { id: "u-20261019-checkup-fixes", at: "2026-10-19", title: "More fixes after a full check-up", body: "Free-code stores: Go live free now just goes live. Before you go live, your Store page shows the right button for your store. Status messages no longer thank you for a payment you didn't make. Prices show the same in your editor and on your store. Your Spot It! listing no longer stops your other changes saving. Plus many small speed and reliability fixes." },
   { id: "u-20261019-no-save-button", at: "2026-10-19", title: "No more Save button", body: "Everything you change in your store now saves by itself, a few seconds after you stop typing. The bar at the bottom shows Saving…, then All changes saved. If it ever says Not saved yet, tap it to see what is missing." },
   { id: "u-20261019-bug-hunt", at: "2026-10-19", title: "Lots of small fixes", body: "We checked the whole app for bugs and fixed them. Each store now keeps its own cart. Share in your preview always copies your own link. Add many at once now reads prices like 1,200 and 45/kg, and a price on its own line. If your login needs checking again, your unsaved changes stay on screen. Back works better on Spot It! and during first setup. Check for updates finds a newer version every time." },
@@ -3296,7 +3297,7 @@ async function initPinMap(){
   if (!box.isConnected) return;
   const has = S.loc.lat != null && S.loc.lng != null, town = mxGeoCache()[[S.loc.city, S.loc.state].filter(Boolean).join(", ")];
   const center = has ? [S.loc.lng, S.loc.lat] : town ? [town.lng, town.lat] : [101.6869, 3.139];
-  const map = new maplibregl.Map({ container: box, style: MX_STYLE(mxDark()), center, zoom: has ? 17 : town ? 13 : 11, attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false });
+  const map = new maplibregl.Map({ pixelRatio: Math.min(window.devicePixelRatio || 1, 2), container: box, style: MX_STYLE(mxDark()), center, zoom: has ? 17 : town ? 13 : 11, attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false });
   map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
@@ -3530,7 +3531,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 125;
+const APP_VERSION = 126;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4596,7 +4597,7 @@ function productRow(i){
       <div class="pmeta"><span class="pprice">${priceLabel(p)}${p.o.length === 1 && p.o[0].l ? ` · ${esc(p.o[0].l)}` : ""}</span>
         ${p.out ? `<span class="pill dark">Sold out</span>` : n ? `<span class="pill">${n} in cart</span>` : ""}</div>
     </div>
-    ${bare ? (p.out ? "" : `<span class="addb solo" aria-hidden="true">+</span>`) : `<div class="pimg">${img ? `<img src="${esc(sized(img, D.layout === "grid" ? 480 : 240))}" alt="" loading="lazy" decoding="async">` : `<div class="ph">${initial(p.n)}</div>`}
+    ${bare ? (p.out ? "" : `<span class="addb solo" aria-hidden="true">+</span>`) : `<div class="pimg">${img ? `<img src="${esc(sized(img, D.layout === "grid" ? 480 : 240))}"${D.layout === "grid" ? ` srcset="${esc(sized(img, 320))} 320w, ${esc(sized(img, 480))} 480w" sizes="45vw"` : ""} alt="" loading="lazy" decoding="async">` : `<div class="ph">${initial(p.n)}</div>`}
       ${p.out ? "" : `<span class="addb" aria-hidden="true">+</span>`}</div>`}
   </button>`;
 }
@@ -4699,7 +4700,8 @@ function openProduct(i){
   const p = D.items[i]; if (!p || p.out || D.closed) return;
   pSel = { i, j: 0, q: 1, sig: pSig(p) };
   const img = safeImg(p.img);
-  $("pImg").innerHTML = img ? `<img src="${esc(img)}" alt="">` : ""; $("pImg").hidden = !img;
+  $("pImg").innerHTML = img ? `<img src="${esc(sized(img, 900))}" alt="" decoding="async">` : ""; $("pImg").hidden = !img;
+  $("pImg").style.backgroundImage = img && !isDigital(D) && !isService(D) ? `url("${sized(img, D.layout === "grid" ? 480 : 240).replace(/["\\]/g, "")}")` : "";   // the photo already on the page, until the big one arrives
   $("pTitle").textContent = p.n;
   $("pDesc").textContent = p.d; $("pDesc").hidden = !p.d;
   const dg = isDigital(D);
@@ -4911,7 +4913,7 @@ function nearPick(list, n){
     .slice(0, n).map(o => o.x);
 }
 function nearCards(picks){
-  return `<div class="nearrow">${picks.map(x => { const logo = safeImg(x.logo);
+  return `<div class="nearrow">${picks.map(x => { const logo = sized(safeImg(x.logo), 160);
     return `<a class="nearst" href="${esc(storeLink(x.id))}"><span class="nearpin" style="--c:${PIN_COL}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot">${initial(x.name || x.id)}${logo ? `<img class="mxlg" src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>${x.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}</span><b>${esc(x.name || x.id)}</b><span>${esc(x.city || x.state || "")}</span></a>`; }).join("")}</div>`;
 }
 function renderNear(){
@@ -5654,6 +5656,8 @@ function mxMaskMalaysia(map){
   map.addLayer(Object.assign({ id: "myborder", paint: { "line-color": "#18395C", "line-width": ["interpolate", ["linear"], ["zoom"], 4, 2, 12, 4] } }, base), firstLabel);
 }
 function mxLoadMap(){
+  if (!mxLoadMap.pc){ mxLoadMap.pc = 1; ["https://cdnjs.cloudflare.com", "https://tiles.openfreemap.org"].forEach(h => { const l = document.createElement("link"); l.rel = "preconnect"; l.href = h; l.crossOrigin = ""; document.head.appendChild(l); });
+    fetch(MX_STYLE(), { mode: "cors" }).catch(() => {}); }   // the map's style file downloads at the same time as its code, not after
   if (window.maplibregl) return Promise.resolve();
   if (mxLoadMap.p) return mxLoadMap.p;
   return mxLoadMap.p = new Promise((res, rej) => {
@@ -5726,7 +5730,7 @@ function skyFly(){
   const far = Math.max(pxLen, Math.min(...lim)), to = { lng: from.lng + dLng * far, lat: from.lat + dLat * far };
   const dur = Math.min(120000, Math.max(10000, pxLen * 22) * far / pxLen);   // about 12 seconds to cross the screen, then on it goes
   const deg = Math.atan2(B[1] - A[1], B[0] - A[0]) * 180 / Math.PI;   // the map never rotates, so the screen heading is the map heading
-  const logo = safeImg(ad.logo), el = document.createElement("div");
+  const logo = sized(safeImg(ad.logo), 64), el = document.createElement("div");
   el.className = "skyflight";
   el.innerHTML = `<span class="skyscale"><i class="skyrope" style="transform:rotate(${(deg + 180).toFixed(1)}deg) translateX(13px)"></i>
     <span class="skybanner"><span class="skyflag">${logo ? `<img src="${esc(logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(ad.text)}</span></span></span>
@@ -5776,7 +5780,7 @@ function skyLoop(now){
     f.mk.setLngLat([lng, lat]); f.trail.geometry.coordinates[1] = [lng, lat];
     return true;
   });
-  if (!SKY.open && now - (SKY.trailAt || 0) > 200){ SKY.trailAt = now; try { const src = map.getSource("skytrail"); if (src) src.setData({ type: "FeatureCollection", features: SKY.flights.map(f => f.trail) }); } catch(e) {} }   // trails redrawn 5 times a second, and not while paused (rebuilding them every frame was heavy)
+  if (!SKY.open && now - (SKY.trailAt || 0) > 200 && SKY.flights.some(skyOnScreen)){ SKY.trailAt = now; try { const src = map.getSource("skytrail"); if (src) src.setData({ type: "FeatureCollection", features: SKY.flights.map(f => f.trail) }); } catch(e) {} }   // trails redrawn 5 times a second, and not while paused (rebuilding them every frame was heavy)
   SKY.raf = SKY.flights.length ? requestAnimationFrame(skyLoop) : 0;
 }
 // planes look smaller as the map zooms out, like things really on the map: full size at street and town level, about half over the whole country
@@ -6068,23 +6072,27 @@ function kltAdd(map){
 function kltScale(){
   if (!MX || !MX.klt) return;
   const z = MX.map.getZoom();
-  MX.map.getContainer().style.setProperty("--pin-k", Math.max(.6, Math.min(1, .6 + (z - 6) * .08)).toFixed(3));   // store pins: full size from zoom 11, 60% at country view
+  // store pins: full size from zoom 11, 60% at country view. In steps of 0.05 and only when it changes: setting it restyles every pin
+  const pk = (Math.round(Math.max(.6, Math.min(1, .6 + (z - 6) * .08)) * 20) / 20).toFixed(2);
+  if (MX.pinK !== pk){ MX.pinK = pk; MX.map.getContainer().style.setProperty("--pin-k", pk); }
   const H = Math.max(17, Math.min(61, 17 + (z - 5) * 4.7));   // a landmark at country view, a skyline in the city
   MX.klt.forEach(({ b, mk }) => {
     const el = mk.getElement(), sv = el.firstElementChild, [vw, vh] = Array.isArray(b.vb) ? b.vb : [b.vb, 212];
-    el.style.display = z < b.from ? "none" : "";
+    const hide = z < b.from; if (el._hid !== hide){ el._hid = hide; el.style.display = hide ? "none" : ""; }
+    if (hide) return;   // a hidden landmark isn't resized
     if (b.geo){   // drawn at its true size: b.geo metres across
       const mpp = 78271.517 * Math.cos(b.at[1] * Math.PI / 180) / Math.pow(2, z), w = Math.max(b.min ?? 70, Math.min(b.max ?? 1100, b.geo / mpp)), h = w * vh / vw;
+      const wr = Math.round(w); if (sv._w === wr) return; sv._w = wr;   // only when it really changes size (whole pixels)
       sv.style.width = w + "px"; sv.style.height = h + "px"; mk.setOffset([0, h / 2]);   // centred on the spot
       if (b.scaled) b.scaled(sv, vw / w);
       return;
     }
-    const h = Math.max(24, H * b.h);
+    const h = Math.round(Math.max(24, H * b.h)); if (sv._h === h) return; sv._h = h;
     sv.style.height = h + "px"; sv.style.width = h * vw / vh + "px";
     mk.setOffset([0, h * 6 / vh]);   // the ground line, not the shadow, sits on the spot
   });
 }
-function skyScale(){ const z = MX && MX.map ? MX.map.getZoom() : 10, k = Math.max(.5, Math.min(1, .5 + (z - 5) * .1)); document.querySelectorAll(".skyscale").forEach(x => x.style.transform = `scale(${k.toFixed(3)})`); }
+function skyScale(){ if (!SKY.flights || !SKY.flights.length) return; const z = MX && MX.map ? MX.map.getZoom() : 10, k = Math.max(.5, Math.min(1, .5 + (z - 5) * .1)); document.querySelectorAll(".skyscale").forEach(x => x.style.transform = `scale(${k.toFixed(3)})`); }
 function skyOnScreen(f){ const el = MX && MX.map && MX.map.getContainer(); if (!el) return false; const p = MX.map.project(f.mk.getLngLat()), m = 60; return p.x > -m && p.y > -m && p.x < el.clientWidth + m && p.y < el.clientHeight + m; }
 // all planes and trails leave the map
 function skyLand(){
@@ -6203,16 +6211,29 @@ function mxCluster(list){
   out.forEach(c => { if (c.items.length === 1) c.ll = [c.items[0]._a.lng, c.items[0]._a.lat]; else { const q = map.unproject([c.x, c.y]); c.ll = [q.lng, q.lat]; } });
   return out;
 }
+// the shaded area around each single pin (shops that only show their area), sized for the zoom
+function mxAreaFeats(cl, z){
+  const feats = [];
+  cl.forEach(c => {
+    if (c.items.length > 1) return;
+    const st = c.items[0]; if (st._a.exact) return;
+    const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
+    feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : PIN_COL, sel: st.id === MX.sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
+  });
+  return feats;
+}
 function mxMarker(el, ll, anchor){ return new maplibregl.Marker({ element: el, anchor: anchor || "center" }).setLngLat(ll).addTo(MX.map); }
 function mxDraw(force){
   if (!MX || !MX.map) return;
   const map = MX.map, z = map.getZoom(), all = exList(), list = all.filter(s => s._a);
   MX.noarea = all.filter(s => !s._a && !s.aff && !s.dg); MX.affs = all.filter(s => s.aff); MX.dgs = all.filter(s => s.dg); MX.mapped = list.length;
   const cl = mxCluster(list);
-  const sig = cl.map(c => c.items.map(i => i.id).join(",")).join("|") + "#" + MX.sel + "#" + z.toFixed(1);
+  // the pins depend on the groups, not the zoom: zooming keeps them and only resizes the shaded areas
+  const sig = cl.map(c => c.items.map(i => i.id).join(",")).join("|") + "#" + MX.sel, zk = z.toFixed(1);
+  if (!force && sig === MX.sig && zk !== MX.zk){ MX.zk = zk; const src = MX.ready && map.getSource("mxareas"); if (src) src.setData({ type: "FeatureCollection", features: mxAreaFeats(cl, z) }); }
   if (force || sig !== MX.sig){
-    MX.sig = sig; MX.mk.forEach(m => m.remove()); MX.mk = [];
-    const feats = [];
+    MX.sig = sig; MX.zk = zk; MX.mk.forEach(m => m.remove()); MX.mk = [];
+    const feats = mxAreaFeats(cl, z);
     cl.forEach(c => {
       if (c.items.length > 1){
         const el = document.createElement("div"); el.className = "mxcl"; el.innerHTML = `<span>${c.items.length}</span>`;
@@ -6223,11 +6244,9 @@ function mxDraw(force){
         MX.mk.push(mxMarker(el, c.ll)); return;
       }
       const st = c.items[0], col = PIN_COL, sel = st.id === MX.sel;
-      const mpp = 40075016.686 * Math.cos(c.ll[1] * Math.PI / 180) / (512 * Math.pow(2, z));
-      if (!st._a.exact) feats.push({ type: "Feature", properties: { id: st.id, c: st.closed ? "#8A8F98" : col, sel: sel ? 1 : 0 }, geometry: { type: "Polygon", coordinates: [mxCircle(c.ll[0], c.ll[1], Math.max(st._a.r, 32 * mpp))] } });
       const el = document.createElement("div"); el.className = "mxmk" + (st._a.exact ? " exact" : "") + (st.closed ? " closed" : "") + (sel ? " sel" : "");
       // the shop's own logo on its pin (the shop icon shows if there's no logo, or it doesn't load)
-      const lg = safeImg(st.logo);
+      const lg = sized(safeImg(st.logo), 96);   // a 30px pin: no need for the full-size logo
       // a map pin: the store's colour, with its logo in the round head (the shop icon if there's no logo, or it doesn't load)
       el.innerHTML = `<span class="mxpin" style="--c:${col}"><svg class="mxdrop" viewBox="0 0 44 56" aria-hidden="true"><path d="M22 54C22 54 3 36.2 3 22a19 19 0 0 1 38 0c0 14.2-19 32-19 32z"/></svg><span class="mxdot${lg ? " haslogo" : ""}">${ico("store", 16, 2)}${lg ? `<img class="mxlg" src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('haslogo');this.remove()">` : ""}</span></span>${st.v ? `<span class="mxvb">${ico("check", 9, 3.4)}</span>` : ""}<span class="mxnm">${esc(st.name)}</span>`;
       el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", st.name + ", " + (CATS[st.cat] || "Other") + ", " + mxMeta(st));
@@ -6272,7 +6291,7 @@ function mxMeta(st){ return [st.city || st.area, st.state].filter(Boolean).join(
 // "Shopee · TikTok Shop" from the shop addresses an Affiliate Shop links to
 function affShops(st){ return [...new Set((Array.isArray(st.lh) ? st.lh : []).map(h => linkInfo("https://" + h).brand).filter(Boolean))].slice(0, 3).join(" · "); }
 function mxRow(st, mapped){
-  const logo = safeImg(st.logo), n = +st.lk || 0;
+  const logo = sized(safeImg(st.logo), 160), n = +st.lk || 0;
   return `<a class="mxrow" href="${esc(storeLink(st.id))}" data-store="${esc(st.id)}" data-mapped="${mapped ? 1 : 0}">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : initial(st.name), "sm")}
     <span class="mxci"><b><span>${esc(st.name)}</span></b>${st.dg
       ? `<span class="mxmeta">Digital products${+st.dn ? ` · ${+st.dn} ${+st.dn === 1 ? "product" : "products"}` : ""}</span>
@@ -6314,7 +6333,7 @@ function dirButtons(lat, lng, cls){
 // "Klang, PJ, Subang +2": the areas a service seller covers, short enough for one line
 function mxCov(st){ const a = String(st.cov || "").split(/[,;]+/).map(x => x.trim()).filter(Boolean); return a.slice(0, 3).join(", ") + (a.length > 3 ? ` +${a.length - 3}` : ""); }
 function mxShowCard(st){
-  const c = $("mxCard"), logo = safeImg(st.logo), blurb = st.tag || st.items || "";
+  const c = $("mxCard"), logo = sized(safeImg(st.logo), 160), blurb = st.tag || st.items || "";
   c.dataset.store = st.id;
   c.innerHTML = `<div class="mxcrow">${vLogo(st, logo ? `<img src="${esc(logo)}" alt="" loading="lazy">` : initial(st.name))}
     <div class="mxci"><b><span>${esc(st.name)}</span>${st._a && st._a.exact ? `<span class="shoptag">Shop</span>` : ""}</b>${st.v ? `<span class="vlabel">Verified by ${esc(APP_NAME)}</span>` : ""}<span class="mxmeta">${esc(mxMeta(st))}</span>
@@ -6473,7 +6492,7 @@ async function renderExplore(){
   }
   if (!$("mxMap") || rtok !== ROUTE_TOK || MX) return;   // the person already left this page, or it opened again meanwhile
 
-  const map = new maplibregl.Map({ container: "mxMap", style: MX_STYLE(mxDark()), center: view ? view.center : me ? [me.lng, me.lat] : [108.3, 4.2], zoom: view ? view.zoom : me ? 11 : 5, minZoom: 4, maxZoom: 17,
+  const map = new maplibregl.Map({ pixelRatio: Math.min(window.devicePixelRatio || 1, 2), container: "mxMap", style: MX_STYLE(mxDark()), center: view ? view.center : me ? [me.lng, me.lat] : [108.3, 4.2], zoom: view ? view.zoom : me ? 11 : 5, minZoom: 4, maxZoom: 17,
     maxBounds: MY_BOUNDS,   // the map stays on Malaysia
     attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false });
   map.touchZoomRotate.disableRotation();
