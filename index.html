@@ -1186,7 +1186,11 @@ a.prow{text-decoration:none;color:inherit}
 .tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:var(--verify-ink)}
 /* browse-stores button in the top-right corner, clear of the logo */
 .stmore{left:auto;right:12px}.stmore.stshare{right:64px}.stmore.stshare.solo{right:12px}
-.stmore.stback{left:12px;right:auto}
+/* Back stays in the corner while the customer scrolls, and above the Store closed cover */
+.stmore.stback{position:fixed;left:12px;right:auto;top:calc(12px + env(safe-area-inset-top,0px));z-index:10}
+/* the seller's preview: Back to editor floats top-left (a later .btn rule made it scroll away, half off the screen) */
+#backBtn{position:fixed;left:12px;right:auto;top:calc(12px + env(safe-area-inset-top,0px));z-index:11}
+.pgback.pgfix{position:fixed;left:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:10;box-shadow:var(--sh-2)}
 /* Back on every page: a round arrow before the page name */
 .pgback{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;transition:transform .15s ease}
 .pgback:active{transform:scale(.93)}
@@ -2523,6 +2527,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-back-stays", at: "2026-10-19", title: "Back button always there", body: "On store pages, the back arrow now stays in the top corner while customers scroll, and it shows while a store is still opening. In your store preview, Back to editor also stays in the top corner, fully on screen." },
   { id: "u-20261019-back-button", at: "2026-10-19", title: "A back button on every page", body: "Every page now has a round back arrow at the top left: your store page, sign up, login, About, the policy pages and more. On your store page, customers tap it to go back where they came from, or to Spot It! if they opened your link straight from WhatsApp." },
   { id: "u-20261019-ad-tuck-fix", at: "2026-10-19", title: "Smoother Sponsored banner", body: "When a customer tucks the Sponsored banner away, your menu now glides up in one smooth move. Before, it slipped under your shop card for a moment and then jumped back." },
   { id: "u-20261018-ad-tuck", at: "2026-10-18", title: "A tidier Sponsored banner", body: "On store pages, the Sponsored banner now slides down from behind your shop card, the same width as it. Customers can tap the arrow to tuck it away, and your menu moves straight up under your shop card." },
@@ -3335,7 +3340,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 110;
+const APP_VERSION = 111;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -6651,7 +6656,7 @@ async function route(){
     const tok = ++ROUTE_TOK, saved = shopCopy(q), here = () => tok === ROUTE_TOK;
     const open = r => { STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_TRIAL = !!r.trial; STORE_PLACE = r.place || null; };
     if (saved){ open(saved); showStore(saved.data, false); loadAd().then(() => { if (here() && STORE_ID === q) showAd(); }); }
-    else { $("gwrap").innerHTML = storeSkeleton(); show("page"); }
+    else { $("gwrap").innerHTML = backBtnHtml("explore").replace('class="pgback"', 'class="pgback pgfix"') + storeSkeleton(); show("page"); }
     SPLASH.ready();
     try {
       if (!saved) loadAd().then(() => { if (here() && STORE_ID === q) showAd(); });   // ads never hold up the store
