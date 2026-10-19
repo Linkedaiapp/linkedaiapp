@@ -290,7 +290,7 @@ textarea{min-height:72px;resize:vertical}
 .skyflag{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:5px;background:#FFF8E1;color:#1C1917;font-size:12.5px;font-weight:800;line-height:1.15;white-space:nowrap;border:1.5px solid #E7B416}
 
 .skycloth{position:relative;display:block}
-.skyslice{position:absolute;top:0;height:100%;overflow:hidden;animation:skyCloth .85s ease-in-out infinite;will-change:transform}
+.skyslice{position:absolute;top:0;height:100%;overflow:hidden;animation:skyCloth .85s ease-in-out infinite}
 .skyslicein{position:absolute;top:0;display:block}
 .skyflight.held .skyslice{animation-play-state:paused}
 @keyframes skyCloth{0%,100%{transform:translateY(calc(var(--a) * -1))}50%{transform:translateY(var(--a))}}
@@ -542,7 +542,7 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .stripnav .snb{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
 .stripnav .snb:disabled{opacity:.35;cursor:default}
 .sndots{display:flex;gap:6px}
-.sndots button{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:color-mix(in srgb,var(--ink) 22%,transparent);cursor:pointer;transition:width .2s ease,background-color .2s ease}
+.sndots button{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:color-mix(in srgb,var(--ink) 22%,transparent);cursor:pointer;transition:width var(--dur-2) var(--ease-out),background-color var(--dur-2) ease}
 .sndots button[aria-current="true"]{width:20px;background:var(--accent-ink,var(--accent))}
 .sndots button::after{content:"";position:absolute;inset:-10px -3px}.sndots button{position:relative}
 .dgcount{position:absolute;right:14px;bottom:24px;font-size:11.5px;font-weight:700;background:rgba(0,0,0,.55);color:#fff;padding:3px 9px;border-radius:999px;pointer-events:none}
@@ -680,7 +680,7 @@ img.broken{visibility:hidden}
 .overlay .sheet .url,.overlay .sheet b,.overlay .sheet p{overflow-wrap:anywhere}
 html,body{overflow-x:hidden}
 .overlay.closing{animation:ovOut .24s ease both}
-.overlay.closing .sheet{animation:shOut .24s cubic-bezier(.4,0,1,1) both}
+.overlay.closing .sheet{animation:shOut var(--dur-2) var(--ease-in) both}
 #askOverlay.open .sheet{animation:popIn .32s cubic-bezier(.16,1,.3,1) both}
 #askOverlay.closing .sheet{animation:popOut .18s ease both}
 @keyframes ovIn{from{background:rgba(10,10,12,0)}to{background:rgba(10,10,12,.5)}}
@@ -797,9 +797,9 @@ html,body{overflow-x:hidden}
 .adzone{position:relative}
 /* Closed, the banner keeps only the strip hidden behind the card (26px), so the items below never slide under the card;
    tucked, it also keeps room for the little tab, so nothing jumps when the tab shows */
-.adwrap{position:relative;z-index:1;margin:-26px 14px 0;max-height:26px;overflow:hidden;transition:max-height .9s cubic-bezier(.2,.7,.2,1)}
+.adwrap{position:relative;z-index:1;margin:-26px 14px 0;max-height:26px;overflow:hidden;transition:max-height var(--dur-3) var(--ease-out)}
 .adwrap.tucked{max-height:53px}
-.adwrap .adin{padding-top:34px;transform:translateY(-100%);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.adwrap .adin{padding-top:34px;transform:translateY(-100%);transition:transform var(--dur-3) var(--ease-out)}
 .adwrap.out{max-height:var(--adh,460px)}
 .adwrap.out .adin{transform:none}
 .adbox{position:relative}
@@ -896,8 +896,10 @@ label{font-weight:600;font-size:14px}
 .lk-tabs .dotn{position:absolute;top:0;right:8px;min-width:16px;height:16px;border-radius:999px;background:var(--alert);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 4px}
 #builder.tabbed .wrap{padding-bottom:110px}
 #builder.tabbed.dirty .wrap{padding-bottom:180px}
+#builder.tabbed .wrap{padding-bottom:180px}   /* the same space whether the bar shows or not: nothing jumps */
 #builder.tabbed .actions{bottom:calc(90px + env(safe-area-inset-bottom,0px));background:transparent;border:0;padding-top:0}
-#builder.tabbed:not(.dirty) .actions{display:none}
+#builder.tabbed .actions{transition:transform var(--dur-2) var(--ease-out),opacity var(--dur-2) ease}
+#builder.tabbed:not(.dirty) .actions{transform:translateY(calc(100% + 90px));opacity:0;pointer-events:none}
 .lk-bar{display:flex;align-items:center;gap:10px;min-height:56px;margin:0 0 6px}
 .lk-bar h1{flex:1;font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0}
 .lk-bar h1{min-width:0;overflow-wrap:anywhere}.lk-bar > .iconbtn,.lk-bar > .bellbtn,.lk-bar > .btn{flex:none}   /* a long store name wraps; the buttons always stay on screen */
@@ -921,7 +923,9 @@ label{font-weight:600;font-size:14px}
 .lk-link{display:flex;align-items:center;gap:8px;font-weight:600;overflow-wrap:anywhere;min-width:0}
 .lk-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .lk-3 .btn{padding:0 8px;gap:6px}
-.lk-sec{animation:lkIn .35s cubic-bezier(.2,.8,.2,1) both}
+#bwrap.anim .lk-sec{animation:lkIn var(--dur-3) var(--ease-out) both}
+#bwrap.anim.back .lk-sec{animation-name:lkBack}
+@keyframes lkBack{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
 @keyframes lkIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.lk-sec{animation:none}}
 
@@ -950,9 +954,25 @@ label{font-weight:600;font-size:14px}
 /* =====================================================================
    Finishing polish: soft, smooth interactions
    ===================================================================== */
-html{scroll-behavior:smooth}
+
 button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
-:root{--spring:cubic-bezier(.34,1.56,.64,1);--soft-ease:cubic-bezier(.22,1,.36,1)}
+:root{--spring:cubic-bezier(.34,1.56,.64,1);--soft-ease:cubic-bezier(.22,1,.36,1);
+  /* one motion system: small changes, exits, entrances; things coming in ease out, things leaving ease in */
+  --dur-1:120ms;--dur-2:240ms;--dur-3:360ms;--ease-out:cubic-bezier(.22,1,.36,1);--ease-in:cubic-bezier(.4,0,1,1)}
+/* a pop-up is open: the page behind it stays still */
+html.sheet-open,html.sheet-open body{overflow:hidden}
+.overlay{overscroll-behavior:contain}
+.overlay .sheet{overscroll-behavior:contain}
+.overlay .sheet.dragging{animation:none !important;transition:none !important}
+.overlay .sheet.snapback{transition:transform var(--dur-2) var(--ease-out) !important}
+/* phones: the blur behind pop-ups is expensive to animate; the dark tint alone reads the same */
+@media (pointer:coarse){.overlay{-webkit-backdrop-filter:none;backdrop-filter:none}.overlay.open{background:rgba(10,10,12,.55)}}
+.sheet .btn{-webkit-backdrop-filter:none;backdrop-filter:none}
+/* the line under a tab glides in instead of popping */
+.seg button[aria-pressed="true"]::after{animation:tabLine var(--dur-2) var(--ease-out)}
+@keyframes tabLine{from{opacity:0;transform:translateX(-50%) scaleX(.3)}to{opacity:1;transform:translateX(-50%) scaleX(1)}}
+/* More details opens with a soft fade (browsers that can't, just open it) */
+.edmore[open] > :not(summary){animation:softIn var(--dur-2) var(--ease-out)}
 /* buttons press in softly and spring back */
 .btn,.iconbtn,.bellbtn,.chips button,.excities button,.stalls button,.seg button,.lk-tabs button,.exsfav,.xmini{
   transition:transform .22s var(--spring),background-color .25s ease,color .25s ease,border-color .25s ease,box-shadow .25s ease,opacity .2s ease}
@@ -987,16 +1007,16 @@ button,a,label,.exshop,.lk-row,.prow{-webkit-tap-highlight-color:transparent}
 /* the heart pops when a shop is saved */
 @keyframes heartPop{0%{transform:scale(1)}35%{transform:scale(1.35)}60%{transform:scale(.9)}100%{transform:scale(1)}}
 .exsfav[aria-pressed="true"] svg{animation:heartPop .45s var(--spring)}
-.lk-tabs button[aria-current="page"] svg{animation:heartPop .4s var(--spring)}
+#bwrap.anim .lk-tabs button[aria-current="page"] svg{animation:heartPop .4s var(--spring)}
 /* softer sheets and pop-ups */
-.overlay.open .sheet{animation:shIn .5s var(--soft-ease) both}
+.overlay.open:not(.closing) .sheet{animation:shIn var(--dur-3) var(--ease-out) both}
 .overlay{transition:background-color .3s ease}
 /* status messages fade in */
 .status{transition:opacity .3s ease}
 @keyframes softIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .status:not(:empty){animation:softIn .35s var(--soft-ease)}
 /* the progress bar fills smoothly */
-.lk-prog i{transition:width .8s var(--soft-ease)}
+.lk-prog i{transition:width var(--dur-3) var(--ease-out)}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .overlay.open .sheet,.overlay.closing .sheet{animation:none}
@@ -1414,6 +1434,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 .tab[aria-current="true"],.sechip.on,.chips button[aria-pressed="true"],.excities button[aria-pressed="true"]{background:var(--plum);border-color:var(--plum-ink);color:#fff;box-shadow:none}
 .sechip{height:32px;padding:0 12px;font-size:13px}
 .tag2.paid{background:var(--ok-bg);color:var(--ok)}.tag2.claim{background:var(--warn-bg);color:var(--warn)}.tag2.unpaid{background:var(--err-bg);color:var(--err)}
+/* reduce motion: every animation and transition ends at once (the per-feature rules above stay) */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}}
 </style>
 <script>(function(){ try { var t = localStorage.getItem("lk-look"), z = localStorage.getItem("lk-text"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); if (z === "large") document.documentElement.classList.add("lk-large"); } catch(e) {} })();</script>
 </head>
@@ -2197,7 +2219,7 @@ function closeSheet(id){
   if (matchMedia("(prefers-reduced-motion: reduce)").matches){ o.classList.remove("open"); return; }
   o.classList.add("closing");
   clearTimeout(o._closeT);
-  o._closeT = setTimeout(() => o.classList.remove("open", "closing"), 230);
+  o._closeT = setTimeout(() => { o.classList.remove("open", "closing"); const sh = o.querySelector(".sheet"); if (sh){ sh.style.transform = ""; sh.style.transition = ""; sh.style.animation = ""; } }, 250);   // a little after the 240ms slide
 }
 // Opening cancels any close still in progress, so a new pop-up never vanishes
 const BACK_SHEETS = ["pOverlay", "overlay", "repOverlay", "pinOverlay", "waOverlay", "emOverlay", "fpOverlay", "payOverlay", "pubOverlay", "promptOverlay"];
@@ -2214,6 +2236,7 @@ function syncInert(){
 }
 function sheetTrap(o){
   if (SHEET_STACK.includes(o)) return;
+  document.documentElement.classList.add("sheet-open");
   const ret = document.activeElement;
   o._ret = ret && ret !== document.body && !o.contains(ret) ? ret : null;
   SHEET_STACK.push(o); syncInert();
@@ -2221,6 +2244,7 @@ function sheetTrap(o){
 function sheetRelease(o){
   const k = SHEET_STACK.indexOf(o); if (k < 0) return;
   SHEET_STACK.splice(k, 1); syncInert();
+  if (!SHEET_STACK.length) document.documentElement.classList.remove("sheet-open");
   const r = o._ret; o._ret = null;
   if (r && document.contains(r) && !r.closest("[inert]")) try { r.focus({ preventScroll: true }); } catch(e) {}
 }
@@ -2228,16 +2252,48 @@ function openSheet(id){
   const o = $(id); if (!o) return;
   if (BACK_SHEETS.includes(id) && !o.classList.contains("open") && !o._hist){ inpagePush(Object.assign({}, history.state, { sheet: id })); o._hist = true; }
   clearTimeout(o._closeT);
+  const sh0 = o.querySelector(".sheet"); if (sh0){ sh0.style.transform = ""; sh0.style.transition = ""; sh0.style.animation = ""; sh0.classList.remove("dragging", "snapback"); }   // a fresh slide-in after any earlier drag
   o.classList.remove("closing");
   o.classList.add("open");
   sheetTrap(o);
   const x = o.querySelector(".xmini, [data-close]"); if (x) try { x.focus({ preventScroll: true }); } catch(e) {}
 }
+// Swipe a pop-up down to close it: it follows the finger, closes past a quarter of its height or on a quick flick,
+// and otherwise glides back. Only when the sheet is scrolled to its top, so scrolling inside it still works.
+(function(){
+  let d = null;
+  document.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1) return;
+    const sh = e.target.closest && e.target.closest(".overlay.open:not(.closing) > .sheet");
+    if (!sh || sh.closest("#askOverlay, #promptOverlay") || sh.scrollTop > 0) return;
+    if (e.target.closest("input, textarea, select, .dgstrip, .sechips, .seg, .opts, [data-nodrag]")) return;
+    const t = e.touches[0]; d = { sh, o: sh.parentElement, y0: t.clientY, x0: t.clientX, t0: performance.now(), dy: 0, on: false };
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if (!d) return;
+    const t = e.touches[0], dy = t.clientY - d.y0, dx = t.clientX - d.x0;
+    if (!d.on){
+      if (Math.abs(dx) > 10 || dy < -6){ d = null; return; }   // sideways or up: not a close
+      if (dy < 8) return;
+      d.on = true; d.sh.classList.add("dragging"); d.sh.style.animation = "none";
+    }
+    e.preventDefault();   // the sheet moves, not the page
+    d.dy = Math.max(0, dy); d.sh.style.transform = `translateY(${d.dy}px)`;
+  }, { passive: false });
+  const end = () => {
+    const x = d; d = null; if (!x || !x.on) return;
+    const fast = x.dy / Math.max(1, performance.now() - x.t0) > .5, close = x.dy > x.sh.offsetHeight * .25 || (fast && x.dy > 40);
+    x.sh.classList.remove("dragging");
+    if (close){ x.sh.style.transition = "transform var(--dur-2) var(--ease-in)"; x.sh.style.transform = "translateY(100%)"; dismissSheet(x.o); }
+    else { x.sh.classList.add("snapback"); x.sh.style.transform = ""; setTimeout(() => x.sh.classList.remove("snapback"), 260); }
+  };
+  document.addEventListener("touchend", end); document.addEventListener("touchcancel", end);
+})();
 function show(id){
   ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
   if (id !== "builder") document.body.classList.remove("pinning");
   if (id !== "builder" && $("savePill")) $("savePill").classList.remove("show");
-  const el = $(id); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
+  const el = $(id); el.classList.remove("enter"); void el.offsetWidth; if (id !== "builder") el.classList.add("enter");   // the editor has its own page slide
   clearTimeout(el._enterT); el._enterT = setTimeout(() => el.classList.remove("enter"), 800);   // only animate when a page opens, not on every redraw
   window.scrollTo(0,0);
 }
@@ -3521,13 +3577,16 @@ function edProfile(){
     <button class="btn small dangerline" data-act="deleteacct">${ico("trash",16)}Delete account</button>
   </section>` : ""}`;
 }
-let EDOTHER = false;
+let EDOTHER = false, LAST_EDV = "", ED_DIR = "";
 function renderEditor(msg){
-  setTimeout(updateBell, 0);
+  (window.requestIdleCallback || (f => setTimeout(f, 300)))(updateBell);   // after the page has slid in, not during it
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
   const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, bulk: edBulk, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, settings: () => { setTimeout(appVersion, 0); return edSettings(); }, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
+  const bw = $("bwrap"), moved = EDV !== LAST_EDV; LAST_EDV = EDV;   // a redraw on the same page (a tap, a choice) doesn't replay the page's entrance
+  bw.classList.toggle("back", ED_DIR === "back"); ED_DIR = "";
+  if (moved){ bw.classList.remove("anim"); void bw.offsetWidth; bw.classList.add("anim"); clearTimeout(bw._animT); bw._animT = setTimeout(() => bw.classList.remove("anim"), 450); }
   document.body.classList.toggle("pinning", EDV === "listing");
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
   bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask" || EDV === "settings");   // nothing to save or preview on News or Profile
@@ -3686,6 +3745,7 @@ function leaveEdPage(to){
 // then opens the arrow's page if the step below was a different one
 let ED_BACK_TO = null;
 function edBack(v, i){
+  ED_DIR = "back";
   const top = INPAGE_N.get(HIST_CUR);
   if (top && top.ed && !$("builder").hidden){ ED_BACK_TO = { v, i: i == null ? null : i }; return history.back(); }
   edGo(v, i);
@@ -5685,7 +5745,7 @@ function skyFly(){
 // The end tied to the tow line barely moves; the loose end flaps the most, and each fold catches the light.
 function skyCloth(bn, poleRight){
   const flag = bn.querySelector(".skyflag"); if (!flag) return;
-  const W = flag.offsetWidth, H = flag.offsetHeight, N = Math.max(18, Math.round(W / 6)), html = flag.outerHTML, T = .85;
+  const W = flag.offsetWidth, H = flag.offsetHeight, N = Math.min(14, Math.max(10, Math.round(W / 12))), html = flag.outerHTML, T = .85;
   const cloth = document.createElement("span"); cloth.className = "skycloth"; cloth.style.width = W + "px"; cloth.style.height = H + "px";
   let out = "";
   for (let i = 0; i < N; i++){
@@ -6765,7 +6825,7 @@ window.addEventListener("popstate", async e => {
     if (step.preview){ if (!$("store").hidden && !$("backBtn").hidden) leavePreview(); return; }
     if (!$("builder").hidden && SESSION){
       if (step.ed === "start" && step.step && EDV === "start"){ EDSTEP = Math.max(1, step.step - 1); renderEditor(); window.scrollTo(0, 0); return; }   // a first-run step back
-      const v = st.ed || "home"; if (v !== EDV){ leaveEdPage(v); EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); }
+      const v = st.ed || "home"; if (v !== EDV){ leaveEdPage(v); ED_DIR = "back"; EDV = v; if (st.i != null) EDI = st.i; renderEditor(); window.scrollTo(0, 0); }
       if (backTo && backTo.v !== EDV) edGo(backTo.v, backTo.i);   // the ‹ arrow's page wasn't the one below
     }
     return;
