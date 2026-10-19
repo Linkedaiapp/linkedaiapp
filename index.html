@@ -534,6 +534,13 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .dgstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding:14px 14px 16px;scrollbar-width:none}
 .dgstrip::-webkit-scrollbar{display:none}
 .pbig .dgstrip img{flex:none;width:70%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:var(--r-sm);scroll-snap-align:center;box-shadow:0 4px 14px rgba(20,10,15,.18)}
+.stripnav{display:flex;align-items:center;justify-content:center;gap:10px;margin:-6px 0 4px}
+.stripnav .snb{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.stripnav .snb:disabled{opacity:.35;cursor:default}
+.sndots{display:flex;gap:6px}
+.sndots button{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:color-mix(in srgb,var(--ink) 22%,transparent);cursor:pointer;transition:width .2s ease,background-color .2s ease}
+.sndots button[aria-current="true"]{width:20px;background:var(--accent-ink,var(--accent))}
+.sndots button::after{content:"";position:absolute;inset:-10px -3px}.sndots button{position:relative}
 .dgcount{position:absolute;right:14px;bottom:24px;font-size:11.5px;font-weight:700;background:rgba(0,0,0,.55);color:#fff;padding:3px 9px;border-radius:999px;pointer-events:none}
 .dginfo{margin:8px 0 6px}
 .dginfo h3{font-size:15px;margin:14px 0 8px}
@@ -1967,7 +1974,7 @@ const DEMOS = {
     bio: "Licensed agent since 2016. I help families pick the right medical card and takaful. Free policy review, no obligation.", areas: "Kuala Lumpur, Selangor, Online (video call)",
     items: [
       { n: "Medical Card Gold", d: "Hospital and surgery cover", br: [DEMO_IMG("med-1.webp"), DEMO_IMG("med-2.webp"), DEMO_IMG("med-3.webp")], cov: "Room up to RM250 a day\nNo lifetime limit\nCashless at 70+ panel hospitals\nCovers you until age 100", o: [{ l: "", p: 0 }] },
-      { n: "Family Takaful", d: "Protection for the whole family, Shariah-compliant", br: [DEMO_IMG("takaful-1.webp")], cov: "Death and disability\n36 critical illnesses\nEducation fund for your children", o: [{ l: "Basic", p: 0 }, { l: "Plus", p: 0 }] },
+      { n: "Family Takaful", d: "Protection for the whole family, Shariah-compliant", br: [DEMO_IMG("takaful-1.webp"), DEMO_IMG("takaful-2.webp"), DEMO_IMG("takaful-3.webp")], cov: "Death and disability\n36 critical illnesses\nEducation fund for your children", o: [{ l: "Basic", p: 0 }, { l: "Plus", p: 0 }] },
       { n: "Free Policy Review", d: "Show me your current policy and I'll check it for you", o: [{ l: "", p: 0 }] }] } },
   "demo-food": { place: { city: "Shah Alam", state: "Selangor" }, data: { name: "Dapur Kak Yah", tagline: "Homemade nasi lemak, kek & kuih. Order a day ahead", kind: "food", cat: "food", color: "#C2410C", layout: "grid", wa: "60100000000", logo: DEMO_IMG("food-logo.webp"),
     off: { days: [1] },
@@ -2563,6 +2570,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-swipe-dots", at: "2026-10-19", title: "Easier to flip through pictures", body: "When a product has several pictures, like brochure pages or digital samples, customers now see dots and arrows under them, so they can flip page by page even on a computer. Your item photo is included too." },
   { id: "u-20261019-book-in-details", at: "2026-10-19", title: "Book straight from a service", body: "On services stores, the details of each service now end with your big Book button. Customers read the details, tap it, and the booking sheet opens with that service already picked." },
   { id: "u-20261019-service-details", at: "2026-10-19", title: "Tap a service to see its details", body: "On services stores, tapping a service now shows its details: photos, description and every package with its price. To book, customers use the one big button at the bottom, where they pick the service, date and time." },
   { id: "u-20261019-one-book-button", at: "2026-10-19", title: "One Book button", body: "On services stores, each service no longer has its own small Book button: customers tap the service, or the big button at the bottom. The service they picked still shows Chosen, and plans with a brochure still show View." },
@@ -3386,7 +3394,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 121;
+const APP_VERSION = 122;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4640,7 +4648,7 @@ function openProduct(i){
     const how = p.how === "ext" && safeUrl(p.ext) ? `You pay and download on ${esc(dgSite(p.ext))}.` : `Send your order on WhatsApp and pay the shop. ${p.how === "link" ? "They'll send you the download link" : "They'll send you the file"} on WhatsApp${p.eta ? ", " + esc(p.eta) : ""}.`;
     $("pDg").innerHTML = (p.fmt ? `<span class="dgchip">${esc(p.fmt)}</span>` : "") + (gets.length ? `<h3>What you get</h3><ul class="dgget-list">${gets.map(g => `<li>${ico("check", 15, 2.6)}<span>${esc(g)}</span></li>`).join("")}</ul>` : "") + `<div class="dghowbox">${ico("download", 18, 2)}<span><b>How you get it</b>${how}</span></div>`;
   } else if (isService(D) && hasBrochure(p)){   // a brochure: pages to swipe (tap one to see it full size), what's covered, the PDF
-    const pics = (p.br || []).length ? p.br : [img].filter(Boolean);
+    const pics = [...new Set([img, ...(p.br || [])].filter(Boolean))];   // the photo too, so every picture can be swiped to
     $("pImg").innerHTML = pics.length > 1 ? `<div class="dgstrip brstrip">${pics.map((u, k) => `<a href="${esc(u)}" target="_blank" rel="noopener" aria-label="Open page ${k + 1} full size"><img src="${esc(sized(u, 1200))}" alt="Brochure page ${k + 1}" loading="${k ? "lazy" : "eager"}"></a>`).join("")}</div><span class="dgcount">${pics.length} pages · swipe, tap to zoom</span>` : pics.length ? `<a href="${esc(pics[0])}" target="_blank" rel="noopener" aria-label="Open full size"><img src="${esc(pics[0])}" alt=""></a>` : "";
     $("pImg").hidden = !pics.length; $("pImg").classList.toggle("dgpics", pics.length > 1);
     const cov = String(p.cov || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
@@ -4663,7 +4671,23 @@ function openProduct(i){
     : p.o.map((o,j) => `<label class="optrow"><input type="radio" name="popt" value="${j}" ${j===0?"checked":""}><span class="ol">${esc(o.l || p.n)}</span><span class="pprice">${money(o.p)}</span></label>`).join("");
   $("pOpts").setAttribute("role", sv ? "list" : "radiogroup");
   updateProduct();
+  stripNav($("pImg"));
   openSheet("pOverlay");
+}
+// Pictures you swipe through: dots under them, and arrows (a mouse can't swipe) to go page by page
+function stripNav(box){
+  const old = box.querySelector(".stripnav"); if (old) old.remove();
+  const st = box.querySelector(".dgstrip"); if (!st || st.children.length < 2) return;
+  const n = st.children.length, at = () => { const mid = st.scrollLeft + st.clientWidth / 2; let best = 0, bd = 1e9; [...st.children].forEach((c, k) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bd){ bd = d; best = k; } }); return best; };
+  const go = k => { const c = st.children[Math.max(0, Math.min(n - 1, k))]; st.scrollTo({ left: c.offsetLeft - (st.clientWidth - c.offsetWidth) / 2, behavior: reduceMotion() ? "auto" : "smooth" }); };
+  const nav = document.createElement("div"); nav.className = "stripnav";
+  nav.innerHTML = `<button type="button" class="snb" data-sn="-1" aria-label="Previous picture">${ico("back", 18, 2.4)}</button><span class="sndots">${Array.from({ length: n }, (_, k) => `<button type="button" data-snk="${k}" aria-label="Picture ${k + 1} of ${n}"></button>`).join("")}</span><button type="button" class="snb" data-sn="1" aria-label="Next picture">${ico("chevron", 18, 2.4)}</button>`;
+  st.insertAdjacentElement("afterend", nav);
+  const paint = () => { const k = at(); nav.querySelectorAll("[data-snk]").forEach((d, j) => d.setAttribute("aria-current", String(j === k))); nav.querySelector('[data-sn="-1"]').disabled = k === 0; nav.querySelector('[data-sn="1"]').disabled = k === n - 1; };
+  nav.onclick = e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.snk != null) go(+b.dataset.snk); else go(at() + +b.dataset.sn); };
+  let t = 0; st.addEventListener("scroll", () => { cancelAnimationFrame(t); t = requestAnimationFrame(paint); }, { passive: true });
+  const cnt = box.querySelector(".dgcount"); if (cnt) cnt.remove();
+  paint();
 }
 function updateProduct(){
   const p = D.items[pSel.i], o = p && p.o[pSel.j]; if (!o) return closeSheet("pOverlay");
