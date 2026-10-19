@@ -105,7 +105,7 @@ textarea{min-height:72px;resize:vertical}
 /* What do you sell?: one row of wide choices that slides sideways, so none is ever squeezed or cut off */
 .seg.kinds{display:flex;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .seg.kinds::-webkit-scrollbar{display:none}
-.seg.kinds button{flex:none;min-width:116px;padding-left:18px;padding-right:18px;scroll-snap-align:start}
+.seg.kinds button{flex:1 0 auto;min-width:0;padding-left:16px;padding-right:16px;white-space:nowrap;scroll-snap-align:start}   /* each button as wide as its words: the row fills the card, and slides only when it must */
 .expill{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--accent-ink,var(--accent));background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent-ink,var(--accent));font-weight:700;font-size:14.5px;cursor:pointer}
 .expill svg:last-child{transition:transform .2s ease}
 .expill[aria-expanded="true"] svg:last-child{transform:rotate(180deg)}
@@ -1217,13 +1217,15 @@ a.prow{text-decoration:none;color:inherit}
 .stnav .viewtabs button[aria-pressed="true"]::after{content:"";position:absolute;left:50%;bottom:-1px;width:min(96px,56%);height:3px;transform:translateX(-50%);border-radius:3px 3px 0 0;background:var(--accent-ink,var(--accent))}
 .stnav .viewtabs button span{font-size:11.5px;font-weight:700;color:var(--muted);margin-left:3px}
 /* Every switch in the app (Appearance, Text size, Services / Agent, payment, admin...) uses the same modern tabs:
-   plain words on one line, a short line in the accent colour under the one that's on. The "What do you sell?" cards stay cards. */
-.seg:not(.kinds){background:none;border-radius:0;padding:0;gap:0;border:0;border-bottom:1px solid var(--line)}
-.seg:not(.kinds) button{background:none;box-shadow:none;border:0;border-radius:0;min-height:40px;padding:8px 6px 9px;font-weight:600;color:var(--muted);position:relative}
-.seg:not(.kinds) button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--ink);font-weight:700}
-.seg:not(.kinds) button[aria-pressed="true"]::after{content:"";position:absolute;left:50%;bottom:-1px;width:min(96px,56%);height:3px;transform:translateX(-50%);border-radius:3px 3px 0 0;background:var(--accent-ink,var(--accent))}
-.seg:not(.kinds) button:active{transform:none;opacity:.7}
-.seg:not(.kinds) + .hint{margin-top:10px}
+   plain words on one line, a short line in the accent colour under the one that's on. "What do you sell?" too: it slides sideways only if the words cannot fit. */
+.seg{background:none;border-radius:0;padding:0;gap:0;border:0;border-bottom:1px solid var(--line)}
+.seg button{background:none;box-shadow:none;border:0;border-radius:0;min-height:40px;padding:8px 6px 9px;font-weight:600;color:var(--muted);position:relative}
+.seg button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--ink);font-weight:700}
+.seg button[aria-pressed="true"]::after{content:"";position:absolute;left:50%;bottom:0;width:min(96px,56%);height:3px;transform:translateX(-50%);border-radius:3px 3px 0 0;background:var(--accent-ink,var(--accent))}
+.seg button:active{transform:none;opacity:.7}
+.seg + .hint{margin-top:10px}
+.seg.kinds button{padding:8px 6px 9px;min-height:40px;font-size:14px}
+.seg:not(.dghow):not(.svtime) button{white-space:nowrap}
 /* compact rows: about 7 items per screen instead of 5 */
 .prow{padding:12px;gap:12px}
 .pimg{width:76px;height:76px}
@@ -2543,6 +2545,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-store-style-fix", at: "2026-10-19", title: "Store style fixed", body: "In Shop details, What do you sell? and Store style (List, Photo grid, Minimal) are now slim tabs that always fit your screen. Before, Minimal and Digital were cut off at the edge." },
   { id: "u-20261019-saved-pill", at: "2026-10-19", title: "Saved message fixed", body: "The little Saved message at the top of the editor now slides fully away after it shows. On some phones it used to stay half visible under the status bar." },
   { id: "u-20261019-tabs-everywhere", at: "2026-10-19", title: "The same slim tabs everywhere", body: "Every switch in the app now uses the slim tabs from your store page: Appearance and Text size in Settings, Page style, How buyers get it, payment, and the Preferred time when customers book. Tap a word to switch; the line shows which one is on." },
   { id: "u-20261019-modern-tabs", at: "2026-10-19", title: "Slimmer Products / Shop links tabs", body: "On store pages with both products and shop links, the switch is now slim modern tabs with a line in your store colour under the one that is open, so your items start higher up. Labels like Digital and your town now always fit inside their pill." },
@@ -2842,7 +2845,7 @@ function edLook(){   // the logo, cover, colour and style cards, shown on Shop d
     <label style="margin-top:0">Brand colour</label>
     <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
     <label>Store style</label>
-    <div class="seg kinds">
+    <div class="seg">
       <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
       <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
       <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
@@ -3359,7 +3362,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 114;
+const APP_VERSION = 115;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3889,7 +3892,7 @@ function legacyEditor(msg){
       ${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}
     </div>
     <label>Store style</label>
-    <div class="seg kinds">
+    <div class="seg">
       <button data-act="layout" data-v="list" aria-pressed="${S.layout==="list"}">List</button>
       <button data-act="layout" data-v="grid" aria-pressed="${S.layout==="grid"}">Photo grid</button>
       <button data-act="layout" data-v="minimal" aria-pressed="${S.layout==="minimal"}">Minimal</button>
