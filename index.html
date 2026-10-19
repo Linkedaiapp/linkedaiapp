@@ -1283,8 +1283,8 @@ a.prow{text-decoration:none;color:inherit}
 .opt input:first-child{min-width:0}   /* more room for the option name */
 .bulcard.unread{border-color:var(--line);box-shadow:0 4px 14px rgba(24,57,92,.06)}
 .lk-row .tag2{flex:none}
-.savepill{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:30;max-width:calc(100% - 32px);display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600;box-shadow:var(--sh-2);transition:transform .3s cubic-bezier(.2,.8,.2,1);pointer-events:none;text-align:left}
-.savepill.show{transform:translate(-50%,0)}
+.savepill{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,calc(-100% - 24px - env(safe-area-inset-top,0px)));opacity:0;visibility:hidden;z-index:30;max-width:calc(100% - 32px);display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600;box-shadow:var(--sh-2);transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .25s ease,visibility 0s linear .3s;pointer-events:none;text-align:left}
+.savepill.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s ease,visibility 0s}   /* hidden = fully above the screen and faded, even under a phone status bar */
 .savepill[data-state="saved"]{color:var(--ok)}
 .savepill[data-state="bad"]{color:var(--err);border-color:color-mix(in srgb,var(--err) 35%,transparent);pointer-events:auto;cursor:pointer}
 .savepill .spin{width:14px;height:14px}
@@ -2543,6 +2543,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-saved-pill", at: "2026-10-19", title: "Saved message fixed", body: "The little Saved message at the top of the editor now slides fully away after it shows. On some phones it used to stay half visible under the status bar." },
   { id: "u-20261019-tabs-everywhere", at: "2026-10-19", title: "The same slim tabs everywhere", body: "Every switch in the app now uses the slim tabs from your store page: Appearance and Text size in Settings, Page style, How buyers get it, payment, and the Preferred time when customers book. Tap a word to switch; the line shows which one is on." },
   { id: "u-20261019-modern-tabs", at: "2026-10-19", title: "Slimmer Products / Shop links tabs", body: "On store pages with both products and shop links, the switch is now slim modern tabs with a line in your store colour under the one that is open, so your items start higher up. Labels like Digital and your town now always fit inside their pill." },
   { id: "u-20261019-back-stays", at: "2026-10-19", title: "Back button always there", body: "On store pages, the back arrow now stays in the top corner while customers scroll, and it shows while a store is still opening. In your store preview, Back to editor also stays in the top corner, fully on screen." },
@@ -3358,7 +3359,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 113;
+const APP_VERSION = 114;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
