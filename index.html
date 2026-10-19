@@ -135,10 +135,10 @@ textarea{min-height:72px;resize:vertical}
 #splash .sp-mark{width:200px;height:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.35));opacity:0;transform:scale(.7);animation:spPop .7s cubic-bezier(.34,1.56,.64,1) .15s forwards,spFloat 2.4s ease-in-out .9s infinite}
 @keyframes spPop{to{opacity:1;transform:none}}
 @keyframes spFloat{50%{transform:translateY(-8px)}}
-#splash .sp-logo::after{content:"";width:120px;height:4px;border-radius:999px;margin-top:6px;opacity:0;background:linear-gradient(90deg,transparent,var(--gold),transparent) no-repeat rgba(255,255,255,.16);background-size:45% 100%;animation:spFade .4s ease 1.2s forwards,spBar 1.3s ease-in-out 1.2s infinite}
+#splash .sp-logo::after{content:"";width:120px;height:4px;border-radius:999px;margin-top:6px;opacity:0;background:linear-gradient(90deg,transparent,var(--gold),transparent) no-repeat rgba(255,255,255,.16);background-size:45% 100%;animation:spFade .3s ease .45s forwards,spBar 1.3s ease-in-out .45s infinite}
 @keyframes spFade{to{opacity:1}}
 @keyframes spBar{0%{background-position:-60% 0}100%{background-position:160% 0}}
-#splash .sp-name{font-family:"Sora","Figtree",system-ui,sans-serif;font-weight:700;font-size:28px;letter-spacing:-.03em;color:#fff;opacity:0;transform:translateY(10px);animation:spName .6s cubic-bezier(.16,1,.3,1) 1.15s forwards}
+#splash .sp-name{font-family:"Sora","Figtree",system-ui,sans-serif;font-weight:700;font-size:28px;letter-spacing:-.03em;color:#fff;opacity:0;transform:translateY(10px);animation:spName .5s cubic-bezier(.16,1,.3,1) .35s forwards}
 @keyframes spDraw{to{stroke-dashoffset:0}}
 @keyframes spLink{0%{opacity:0;transform:rotate(-70deg) scale(.4)}60%{opacity:1;transform:rotate(12deg) scale(1.08)}100%{opacity:1;transform:none}}
 @keyframes spName{to{opacity:1;transform:none}}
@@ -458,6 +458,7 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .actions .autostat svg{flex:none;color:var(--ok)}
 .actions .autostat[data-state="bad"]{color:var(--err);cursor:pointer}.actions .autostat[data-state="bad"] svg{color:var(--err)}
 .actions .autostat .spin{width:14px;height:14px;flex:none}
+.mxpill .spin{width:16px;height:16px;border-width:2px}
 
 /* ---------- Store ---------- */
 .st{max-width:720px;margin:0 auto;padding-bottom:130px;position:relative}
@@ -659,10 +660,10 @@ img.broken{visibility:hidden}
 .cover:has(img.broken){background:var(--accent)}
 @keyframes shimmer{from{background-position:100% 0}to{background-position:0 0}}
 /* spinner for uploads */
-.spin{width:24px;height:24px;border:2.5px solid rgba(0,0,0,.12);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:none}
+.spin{width:24px;height:24px;border:2.5px solid color-mix(in srgb,currentColor 16%,transparent);border-top-color:var(--accent-ink,var(--accent));border-radius:50%;animation:spin .8s linear infinite;flex:none}
 .btn .spin{width:18px;height:18px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.upov{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;background:rgba(255,255,255,.78);
+.upov{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;background:color-mix(in srgb,var(--surface) 82%,transparent);
   font-size:11px;font-weight:700;color:var(--ink);border-radius:inherit;animation:pageIn .2s ease both}
 
 .filebtn.busy{pointer-events:none;opacity:.85}
@@ -1420,6 +1421,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 /* grey outline shown while a page loads for the first time */
 .skel{background:linear-gradient(100deg,var(--line) 20%,var(--soft) 42%,var(--line) 64%) 0 0/300% 100%;animation:shimmer 1.3s ease-in-out infinite;border-radius:var(--r-sm)}
 .skel-store{max-width:720px;margin:-20px -16px 0}
+.skslow{text-align:center;color:var(--muted);font-size:14px;margin:18px 16px;animation:softIn var(--dur-2) var(--ease-out)}.skslow .btn{margin-left:6px}
 .sk-cover{height:clamp(120px,32vw,200px);border-radius:0}
 .sk-card{position:relative;margin:-36px 14px 14px;padding:0 16px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card)}
 .sk-logo{width:72px;height:72px;border-radius:50%;margin:-36px 0 12px;box-shadow:0 0 0 5px var(--surface)}
@@ -1442,7 +1444,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 <body>
 <div id="splash" aria-hidden="true">
   <div class="sp-logo">
-    <img class="sp-mark" src="logo-white.png" alt="">
+    <img class="sp-mark" src="logo-white.png" alt="" width="200" height="123" fetchpriority="high">
     <div class="sp-name">Link Kedai App</div>
   </div>
 </div>
@@ -1757,8 +1759,7 @@ const SPLASH = (() => {
   const notStore = /^(build|edit|signup|admin)$/i;
   const isStore = (qs[0] && !notStore.test(qs[0])) || (!/\/$/.test(location.pathname) && !notStore.test(pw));
   const minMs = first ? (isStore ? 500 : 900) : 0;   // short: the page itself should be the welcome
-  const t0 = Date.now();
-  let done = false;
+  let done = false;   // timed from when the page started loading, so a slow download doesn't add more splash on top
   function hide(){
     if (done) return; done = true;
     try { sessionStorage.setItem("lk-splash", "1"); } catch(e) {}
@@ -1766,7 +1767,7 @@ const SPLASH = (() => {
     setTimeout(() => box.remove(), 800);
   }
   setTimeout(hide, 12000);                  // never block the page for long
-  return { ready(){ setTimeout(hide, Math.max(0, minMs - (Date.now() - t0))); } };
+  return { ready(){ setTimeout(hide, Math.max(0, minMs - performance.now())); } };
 })();
 
 /* ============================================================
@@ -1952,7 +1953,7 @@ function serverMoved(j){
 async function apiGet(params, again){
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the server link to site.json.");
   const q = new URLSearchParams({ ...params, t: Date.now() }).toString();
-  const j = await fetchJson(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q, {}, 2);
+  const j = await fetchJson(SITE.api + (SITE.api.includes("?") ? "&" : "?") + q, {}, 2, 9000);
   if (!again && serverMoved(j)) return apiGet(params, true);
   return j;
 }
@@ -1963,7 +1964,7 @@ async function apiPost(body, extra){
   if (SESSION && SESSION.tok && body.id === SESSION.id && !body.pin && !body.key) body.tok = SESSION.tok;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the server link to site.json.");
   const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
-  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" || body.action === "selfpublish" ? 2 : RETRY_OK.has(body.action) && !(body.action === "admin" && /^(delete|rename|resetpin)$/.test(body.op || "")) ? 2 : 1, body.action === "upload" || body.action === "selfpublish" ? 40000 : 0);   // a receipt photo goes to Drive too: same time and retry as photos (the server answers "live" again if it already went through)
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" || body.action === "selfpublish" ? 2 : RETRY_OK.has(body.action) && !(body.action === "admin" && /^(delete|rename|resetpin)$/.test(body.op || "")) ? 2 : 1, body.action === "upload" || body.action === "selfpublish" ? 40000 : 15000);   // a receipt photo goes to Drive too: same time and retry as photos (the server answers "live" again if it already went through)
   if (!(extra && extra.again) && serverMoved(j)) return apiPost(body, Object.assign({}, extra, { again: true }));
   if (j.error) throw new Error(String(j.error).replace(/\bWhatsApp number/g, "phone number").replace(/^phone number/, "Phone number"));
   return j;
@@ -2289,6 +2290,7 @@ function openSheet(id){
   };
   document.addEventListener("touchend", end); document.addEventListener("touchcancel", end);
 })();
+document.addEventListener("click", e => { if (e.target.closest && e.target.closest("[data-reload]")) location.reload(); });
 function show(id){
   ["builder","page","store"].forEach(x => $(x).hidden = x !== id);
   if (id !== "builder") document.body.classList.remove("pinning");
@@ -2533,7 +2535,7 @@ $("fpSave").onclick = async () => {
   if (!/^\d{6}$/.test(np)) return sayErr("fpErr2", "Your new PIN must be exactly 6 digits.");
   if (np !== $("fpPin2").value) return sayErr("fpErr2", "The two new PINs don't match. Please type them again.");
   if (weakPin(np)) return sayErr("fpErr2", "Pick a PIN that's harder to guess than 111111 or 123456.");
-  btn.disabled = true; btn.textContent = "Saving..."; sayErr("fpErr2");
+  btn.disabled = true; btn.textContent = "Saving…"; sayErr("fpErr2");
   try {
     const r = await apiPost({ action: "forgotreset", email, code, newPin: np, keep: !!($("lKeep") && $("lKeep").checked) });
     closeSheet("fpOverlay"); enterEditor(r, np);
@@ -2816,7 +2818,8 @@ async function loadBulletin(){
   const id = SESSION.id;
   let b = null; try { b = await apiPost({ action: "bulletin", id, pin: SESSION.pin }); } catch(e) {}
   if (!SESSION || SESSION.id !== id) return;
-  BUL = b; updateBell();
+  BUL = b || {}; updateBell();   // a failed load still ends the waiting (the cards fall back to what's known)
+  if (!$("builder").hidden && (EDV === "insights" || EDV === "news")) renderEditor();   // the page that was waiting for them
   if (b && !SESSION.admin) try { if (b.verified) localStorage.setItem("lk-ver:" + id, "1"); else localStorage.removeItem("lk-ver:" + id); } catch(e) {}
   const tags = $("linkTags"); if (tags) tags.innerHTML = linkTags();
   const slot = $("pubSlot"); if (slot) slot.innerHTML = publishCardHtml();   // trial or not, now that the status is here
@@ -3065,7 +3068,7 @@ async function fetchLinkMeta(l){
   if (!l || !safeUrl(l.u)) return;
   const st = lkState(l), url = l.u; if (looksJunk(l.n)) l.n = ""; st.s = "loading"; updateLinkPreview(l);
   try {
-    const d = await linkPreviewData(url);
+    const d = await Promise.race([linkPreviewData(url), new Promise((_, rej) => setTimeout(() => rej(new Error("The shop's page is taking too long to answer. Type the name and price yourself, or tap Try again.")), 15000))]);   // never a spinner for a minute
     if (!S.links.includes(l) || l.u !== url) return;   // link was changed or deleted meanwhile
     if (d.limited){ st.s = "fail"; st.m = "The free preview limit is used up for today. Type the name and price yourself, or try again tomorrow."; st.edit = true; }
     else {
@@ -3311,6 +3314,7 @@ async function initPinMap(){
 }
 
 function edInsights(){
+  if (!BUL) return `${edTop("Insights", "")}<section class="card">${loaderHtml("Getting your numbers…")}</section>`;   // filled in when they arrive, never a false "no numbers yet"
   const items = insItems(), seen = bulSeen(), b = BUL || {};
   setTimeout(() => markSeen(items), 0);
   const st = Array.isArray(b.stats) ? b.stats : [], sum = (arr, f) => arr.reduce((a, x) => a + (x[f] || 0), 0);
@@ -3592,7 +3596,7 @@ function renderEditor(msg){
   bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask" || EDV === "settings");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
-  const as = $("autoStat"); if (as && as.dataset.state !== "bad") autoStat(DIRTY ? "saving" : "ok");
+  const as = $("autoStat"); if (as && as.dataset.state !== "bad") autoStat(DIRTY ? "saving" : ED_SYNC ? "sync" : "ok");
   PENDING_BOXES.forEach(id => { const b = $(id); if (b) spinOn(b); });   // a photo still uploading keeps its spinner after any redraw
 }
 function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); clearTimeout(notifyQuiet.t); notifyQuiet.t = setTimeout(() => { const x = $("edToast"); if (x) x.textContent = ""; }, 6000); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
@@ -3646,7 +3650,7 @@ $("waSave").onclick = async () => {
   if (a === S.wa) return err("That's already your number.");
   const pin = SESSION.tok ? $("waPin").value.trim() : "";
   if (SESSION.tok && !/^\d{6}$/.test(pin)) return err("Type your 6-digit PIN to change your number.");
-  const btn = $("waSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
+  const btn = $("waSave"); btn.disabled = true; btn.textContent = "Saving…"; err("");
   const old = S.wa, had = SESSION.pin; S.wa = a;
   try {
     if (pin) SESSION.pin = pin;   // this one save checks the PIN instead of the phone's login key
@@ -3668,7 +3672,7 @@ $("pinSave").onclick = async () => {
   if (np !== np2) return err("The two new PINs don't match. Please type them again.");
   if (np === old) return err("Your new PIN is the same as your current one.");
   if (weakPin(np)) return err("Pick a PIN that's harder to guess than 111111 or 123456.");
-  const btn = $("pinSave"); btn.disabled = true; btn.textContent = "Saving..."; err("");
+  const btn = $("pinSave"); btn.disabled = true; btn.textContent = "Saving…"; err("");
   try {
     const r = await apiPost({ action: "changepin", id: SESSION.id, pin: old, newPin: np, keep: !!SESSION.tok });
     if (r.tok) SESSION.tok = r.tok; else if (SESSION.tok){ delete SESSION.tok; SESSION.pin = np; try { localStorage.removeItem("lk-keep"); } catch(e) {} } else SESSION.pin = np;
@@ -3762,7 +3766,7 @@ function openEditor(msg){
   else if (PENDING_VIEW && EDV === "home"){ EDV = PENDING_VIEW; history.replaceState(null, "", home() + "build"); }
   PENDING_VIEW = "";
   setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
-function touch(){ DIRTY = true; EDITV++; autoStat("saving"); const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
+function touch(){ DIRTY = true; EDITV++; autoStat("saving"); const sp = $("savePill"); if (sp && sp.dataset.state === "bad") sp.classList.remove("show"); const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
 
 // ---------- Changes save by themselves a moment after the seller stops typing ----------
 let AUTOSAVE_T = 0, EDITV = 0, SAVING = null;
@@ -3782,7 +3786,9 @@ function saveProblem(){
 function autoStat(state, text){
   const el = $("autoStat"); if (!el) return;
   el.dataset.state = state || "ok";
-  el.innerHTML = state === "saving" ? `<span class="spin"></span><span>Saving…</span>` : state === "bad" ? `${ico("x", 15, 2.6)}<span>${esc(text || "Not saved yet")}</span>` : `${ico("check", 15, 2.6)}<span>All changes saved</span>`;
+  clearTimeout(autoStat.t);
+  if (state === "saving") autoStat.t = setTimeout(() => { if (el.dataset.state === "saving"){ const t = el.querySelector("span:last-child"); if (t) t.textContent = "Still saving…"; } }, 8000);   // a slow save never looks frozen
+  el.innerHTML = state === "sync" ? `<span class="spin"></span><span>Checking for changes…</span>` : state === "saving" ? `<span class="spin"></span><span>Saving…</span>` : state === "bad" ? `${ico("x", 15, 2.6)}<span>${esc(text || "Not saved yet")}</span>` : `${ico("check", 15, 2.6)}<span>All changes saved</span>`;
 }
 document.addEventListener("click", e => { if (e.target.closest && e.target.closest('#autoStat[data-state="bad"]')){ const why = saveProblem(); if (why) notify(why); autoSave(true); } });
 function savePill(state, text){
@@ -3792,7 +3798,10 @@ function savePill(state, text){
   if (!state || $("builder").hidden){ el.classList.remove("show"); return; }
   el.dataset.state = state;
   autoStat(state === "saved" ? "ok" : state, state === "bad" ? "Not saved yet. Tap to see why" : "");
-  el.innerHTML = state === "saving" ? `<span class="spin"></span><span>Saving...</span>` : state === "saved" ? `${ico("check", 15, 2.6)}<span>${esc(text || "Saved")}</span>` : `<span><b>Not saved:</b> ${esc(text)} <u>Try again</u></span>`;
+  // one indicator: where the bottom bar shows the status, the bubble only appears for something worth reading
+  const bld = $("builder"), bar = !bld.classList.contains("tabbed") && !bld.classList.contains("noactions") && !bld.classList.contains("starting");
+  if (bar && (state === "saving" || (state === "saved" && (!text || text === "Saved")))){ el.classList.remove("show"); return; }
+  el.innerHTML = state === "saving" ? `<span class="spin"></span><span>Saving…</span>` : state === "saved" ? `${ico("check", 15, 2.6)}<span>${esc(text || "Saved")}</span>` : `<span><b>Not saved:</b> ${esc(text)} <u>Try again</u></span>`;
   el.classList.add("show");
   if (state === "saved") el._t = setTimeout(() => el.classList.remove("show"), 2200);
 }
@@ -4011,7 +4020,7 @@ function openPublishCheck(){
 }
 $("pubGo").onclick = async () => {
   if (!["pubOk1","pubOk2","pubOk3"].every(id => $(id).checked)) { $("pubErr").textContent = "Tick all three boxes to continue."; return; }
-  const btn = $("pubGo"); btn.disabled = true; btn.textContent = "Saving...";
+  const btn = $("pubGo"); btn.disabled = true; btn.textContent = "Saving…";
   try {
     if (DIRTY || SAVING) await saveNow();
     closeSheet("pubOverlay");
@@ -4290,7 +4299,8 @@ async function saveNow(){
 let UPQ = Promise.resolve(), UPN = 0;
 // the status line only exists on the Store home page, so never assume it is there
 function setStatus(t){ const el = $("saveStatus"); if (el) el.textContent = t; }
-function spinOn(box){ if (box && !box.querySelector(".upov")){ const ov = document.createElement("div"); ov.className = "upov"; ov.innerHTML = `<span class="spin"></span>Uploading`; box.appendChild(ov); } }
+function spinOn(box){ if (box && !box.querySelector(".upov")){ const ov = document.createElement("div"); ov.className = "upov"; ov.innerHTML = `<span class="spin"></span><span>Uploading…</span>`; box.appendChild(ov);
+  setTimeout(() => { if (ov.isConnected){ const t = ov.querySelector("span:last-child"); if (t) t.textContent = "Still uploading… slow connection"; } }, 15000); } }   // a slow upload never looks stuck
 // Does this photo address really show an image? (Google Drive can take a moment, or block some address styles)
 function imgLoads(url, ms){
   return new Promise(res => {
@@ -5650,6 +5660,7 @@ function mxLoadMap(){
     if (!$("mxCss")){ const l = document.createElement("link"); l.id = "mxCss"; l.rel = "stylesheet"; l.crossOrigin = "anonymous"; l.integrity = MX_SRI.css; l.href = MX_LIB + ".min.css"; document.head.appendChild(l); }
     const old = $("mxJs"); if (old) old.remove();   // a retry replaces the failed script instead of adding another
     const s = document.createElement("script"); s.id = "mxJs"; s.crossOrigin = "anonymous"; s.integrity = MX_SRI.js; s.src = MX_LIB + ".min.js"; s.onload = () => res(); s.onerror = () => { mxLoadMap.p = null; rej(new Error("The map couldn't load. Check your connection and try again.")); };
+    setTimeout(() => { if (!window.maplibregl && mxLoadMap.p){ mxLoadMap.p = null; rej(new Error("The map is taking too long to load. Check your connection and try again.")); } }, 15000);   // a stalled download shows the list and Try again instead of an empty map
     document.head.appendChild(s);
   });
 }
@@ -6231,8 +6242,9 @@ function mxDraw(force){
   const c = map.getContainer(); c.classList.toggle("mxzoom", z >= 13); c.classList.toggle("mxhassel", !!MX.sel);
   const pill = $("mxPill");
   const na = MX.affs.length, nd = MX.dgs.length;
-  pill.innerHTML = EX.aff ? `${ico("link", 18, 2)}<span>${na} Affiliate ${na === 1 ? "Shop" : "Shops"}</span>` : EX.dg ? `${ico("download", 18, 2)}<span>${nd} Digital ${nd === 1 ? "store" : "stores"}</span>` : `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view${na + nd ? ` · ${na + nd} online` : ""}</span>`;
-  pill.classList.toggle("off", !!MX.sel || !all.length);
+  if (!MX.loaded || MX.fitting){ pill.innerHTML = `<span class="spin"></span><span>Finding stores…</span>`; pill.classList.remove("off"); }   // never "0 stores" while still looking
+  else pill.innerHTML = EX.aff ? `${ico("link", 18, 2)}<span>${na} Affiliate ${na === 1 ? "Shop" : "Shops"}</span>` : EX.dg ? `${ico("download", 18, 2)}<span>${nd} Digital ${nd === 1 ? "store" : "stores"}</span>` : `${ico("list", 18, 2)}<span>${MX.view.length} ${MX.view.length === 1 ? "store" : "stores"} in view${na + nd ? ` · ${na + nd} online` : ""}</span>`;
+  if (MX.loaded && !MX.fitting) pill.classList.toggle("off", !!MX.sel || !all.length);
   const em = $("mxEmpty"), have = EX.stores.length;
   em.hidden = !MX.loaded || !!all.length;
   if (!em.hidden) em.innerHTML = MX.err
@@ -6251,6 +6263,7 @@ function mxDraw(force){
 function mxFit(list, maxZoom){
   const pts = list.filter(s => s._a).map(s => [s._a.lng, s._a.lat]);
   if (!pts.length) return;
+  const me = MX; me.fitting = true; me.map.once("moveend", () => { me.fitting = false; if (MX === me) mxDraw(true); });
   MX.map.fitBounds(mxBounds(pts), { padding: { top: 150, bottom: 140, left: 40, right: 40 }, maxZoom: maxZoom || 14, duration: 600 });
 }
 
@@ -6424,7 +6437,7 @@ async function renderExplore(){
     <div class="mxempty mxg" id="mxEmpty" hidden></div>
     <div class="mxfabs"><button type="button" class="mxib mxg" id="exNear" aria-label="Show stores near me" title="Near me">${ico("locate", 22)}</button></div>
     <a class="mxinfo" href="${esc(home())}about#map" aria-label="Map credits and about us">i</a>
-    <button type="button" class="mxpill mxg off" id="mxPill"><span>${esc("Finding stores...")}</span></button>
+    <button type="button" class="mxpill mxg" id="mxPill"><span class="spin"></span><span>Finding stores…</span></button>
     <section class="mxcard" id="mxCard" aria-live="polite"></section>
     <nav class="lk-tabs" aria-label="Customer menu"><button type="button" id="exBrowse">${ico("pin", 22)}<span>Spot It!</span></button><button type="button" id="exFav"><span class="fillme" style="display:contents">${ico("heart", 22)}</span><span>Saved</span></button></nav>
     <div class="mxscrim" id="mxScrim"></div>
@@ -6735,7 +6748,11 @@ async function route(){
   document.body.classList.remove("exploring"); mxDestroy(); ROUTE_TOK++;
   await loadSite();
   const bareQ = location.search.slice(1).split("&").filter(x => x && !x.includes("="))[0] || pathShop();
-  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|about|explore|near)?$/i.test(bareQ)) await CONFIG_P;
+  if (/^(admin|build|edit|signup|terms|privacy|refund|safe|about|explore|near)?$/i.test(bareQ)){
+    // wait a moment for prices and settings, but never leave a blank page behind a slow server: draw now, then again when they arrive
+    const tok = ROUTE_TOK, late = await Promise.race([CONFIG_P.then(() => false, () => false), new Promise(r => setTimeout(() => r(true), 1500))]);
+    if (late) CONFIG_P.then(() => { if (tok !== ROUTE_TOK) return; if (!$("builder").hidden){ if (SESSION && S) renderEditor(); } else if (!/^(explore|near|admin)$/i.test(bareQ)) route(); }, () => {});
+  }
   // Ignore tracking codes apps add to links (fbclid=..., utm_source=..., igsh=...): only a bare word counts
   const bare = location.search.slice(1).split("&").map(x => { try { return decodeURIComponent(x); } catch(e){ return x; } }).filter(x => x && !x.includes("="));
   const q = (bare[0] || "").toLowerCase() || pathShop();
@@ -6757,7 +6774,7 @@ async function route(){
         // open at once from this tab's copy, then take the server's newer version if nothing was changed meanwhile
         S = normalize(Object.assign({}, saved.data, { loc: saved.loc })); STATUS = saved.status; ME_EMAIL = saved.email || ""; ED_SYNC = true; openEditor(); SPLASH.ready();
         apiPost(req).then(async r => {
-          ED_SYNC = false;
+          ED_SYNC = false; if (!DIRTY) autoStat("ok");
           if (!SESSION || SESSION.id !== saved.id) return;
           const same = JSON.stringify(normalize(Object.assign({}, r.data, { loc: r.loc }))) === JSON.stringify(normalize(Object.assign({}, saved.data, { loc: saved.loc }))) && r.status === saved.status;
           rememberEd(r);
@@ -6766,11 +6783,11 @@ async function route(){
           if ((DIRTY || UPN) && !(await ask("This store was changed on another phone or tab. Open the newer version? What you just changed here will be lost.", "Open newer version"))) return scheduleAutosave(300);
           DIRTY = false;
           // newer changes from another phone: use them even while the preview is open, so an edit afterwards never saves the old copy
-          S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); if (!$("builder").hidden) renderEditor();
+          S = normalize(Object.assign({}, r.data, { loc: r.loc })); STATUS = r.status; edTidy(); if (!$("builder").hidden){ renderEditor(); savePill("saved", "Updated with the newest version of your store"); }
         }).catch(e => {
           ED_SYNC = false; if (!authErr(e)) return;
           if ((DIRTY || UPN) && pinErr(e)) return relogin(e).then(ok => { if (ok && DIRTY) scheduleAutosave(300); });   // edits made meanwhile stay; ask for the PIN
-          clearSession(); renderStart(friendly(e, ""));
+          clearSession(); renderStart(pinErr(e) ? "You were logged out on this phone. Log in again to keep editing." : friendly(e, ""));
         });
         return;
       }
@@ -6795,7 +6812,9 @@ async function route(){
     const tok = ++ROUTE_TOK, saved = shopCopy(q), here = () => tok === ROUTE_TOK;
     const open = r => { STORE_ID = q; STORE_VERIFIED = !!r.verified; STORE_TRIAL = !!r.trial; STORE_PLACE = r.place || null; };
     if (saved){ open(saved); showStore(saved.data, false); loadAd().then(() => { if (here() && STORE_ID === q) showAd(); }); }
-    else { $("gwrap").innerHTML = backBtnHtml("explore").replace('class="pgback"', 'class="pgback pgfix"') + storeSkeleton(); show("page"); }
+    else { $("gwrap").innerHTML = backBtnHtml("explore").replace('class="pgback"', 'class="pgback pgfix"') + storeSkeleton(); show("page");
+      setTimeout(() => { if (here() && !$("page").hidden && document.querySelector(".skel-store") && !$("skSlow")) $("gwrap").insertAdjacentHTML("beforeend", `<p class="skslow" id="skSlow" role="status">Still opening… the connection is slow. <button type="button" class="btn small" data-reload>Try again</button></p>`); }, 6000);   // a slow store never looks frozen
+    }
     SPLASH.ready();
     try {
       if (!saved) loadAd().then(() => { if (here() && STORE_ID === q) showAd(); });   // ads never hold up the store
