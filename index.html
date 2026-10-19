@@ -572,7 +572,8 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .svrow.on .svpick{background:var(--accent);color:#fff;border-color:var(--accent)}
 .svgo{flex:none;display:grid;place-items:center;color:var(--muted)}
 .optrow.ro{cursor:default}
-.svbookhint[hidden]{display:none}.svbookhint{display:flex;gap:8px;align-items:flex-start;margin:14px 0 0;padding:11px 13px;border-radius:var(--r-md);background:var(--soft);font-size:14px;line-height:1.4;color:var(--muted)}.svbookhint svg{flex:none;margin-top:1px;color:var(--accent-ink,var(--accent))}.svbookhint b{color:var(--ink)}   /* the whole row opens booking; the big button at the bottom is the one Book button */
+.pbook{margin-top:16px;box-shadow:none}
+.svbookhint{display:flex;gap:8px;align-items:flex-start;margin:14px 0 0;padding:11px 13px;border-radius:var(--r-md);background:var(--soft);font-size:14px;line-height:1.4;color:var(--muted)}.svbookhint svg{flex:none;margin-top:1px;color:var(--accent-ink,var(--accent))}.svbookhint b{color:var(--ink)}   /* the whole row opens booking; the big button at the bottom is the one Book button */
 .svbook{width:100%;max-width:692px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--accent);color:#fff;border:0;border-radius:var(--r-md);padding:13px 18px;cursor:pointer;box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 40%,transparent)}
 .svbook .svb1{font-size:18px;font-weight:800;letter-spacing:.01em}
 .svbook .svb2{font-size:12.5px;font-weight:600;opacity:.88}
@@ -2562,6 +2563,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-book-in-details", at: "2026-10-19", title: "Book straight from a service", body: "On services stores, the details of each service now end with your big Book button. Customers read the details, tap it, and the booking sheet opens with that service already picked." },
   { id: "u-20261019-service-details", at: "2026-10-19", title: "Tap a service to see its details", body: "On services stores, tapping a service now shows its details: photos, description and every package with its price. To book, customers use the one big button at the bottom, where they pick the service, date and time." },
   { id: "u-20261019-one-book-button", at: "2026-10-19", title: "One Book button", body: "On services stores, each service no longer has its own small Book button: customers tap the service, or the big button at the bottom. The service they picked still shows Chosen, and plans with a brochure still show View." },
   { id: "u-20261019-shop-details-tidy", at: "2026-10-19", title: "A tidier Shop details page", body: "Shop details is now one page: your logo and cover photo are at the top, then your shop name and number. Brand colour sits with your Store style, and for services stores with your Book button, so you see the button in your colour as you type. Write your own button words; the ready-made word pills are gone." },
@@ -3384,7 +3386,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 120;
+const APP_VERSION = 121;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4647,8 +4649,10 @@ function openProduct(i){
   } else { $("pImg").classList.remove("dgpics"); $("pDg").innerHTML = ""; }
   const sv = isService(D);
   // services: this sheet is details only; booking is the big button at the bottom of the store
-  let hint = $("svHint"); if (!hint){ hint = document.createElement("p"); hint.id = "svHint"; hint.className = "svbookhint"; $("pOpts").insertAdjacentElement("afterend", hint); }
-  hint.hidden = !sv; if (sv) hint.innerHTML = `${ico("clock", 16, 2)}<span>To book, close this and tap <b>${esc(svBtn(D).t)}</b> at the bottom.</span>`;
+  // services: the same big Book button as the store, at the end of the details; it opens the booking sheet with this service picked
+  let bk = $("pBook"); if (!bk){ bk = document.createElement("button"); bk.type = "button"; bk.id = "pBook"; bk.className = "svbook pbook"; bk.innerHTML = `<span class="svb1"></span><span class="svb2"></span>`; $("pAdd").insertAdjacentElement("beforebegin", bk);
+    bk.onclick = () => { const q = D.items[pSel.i]; if (!q || q.out || D.closed) return dismissSheet("pOverlay"); if (!inCart(pSel.i)) svChoose(pSel.i, 0); dismissSheet("pOverlay"); renderMenu(); setTimeout(openBooking, 250); }; }
+  bk.hidden = !sv; if (sv){ bk.querySelector(".svb1").textContent = svBtn(D).t; bk.querySelector(".svb2").textContent = svBtn(D).s; }
   $("pDg").hidden = !dg && !sv; $("pQtyRow").hidden = dg || sv;
   $("pAsk").hidden = !isAgent(D); $("pAdd").hidden = sv;
   $("pAsk").onclick = STORE_DEMO ? (ev => { ev.preventDefault(); notify(`This is a demo store, so nothing was sent.\n\nA real agent would get: "Hi ${D.name}, I'd like to know more about ${p.n}."`); }) : null;
