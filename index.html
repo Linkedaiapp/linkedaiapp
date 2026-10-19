@@ -1216,6 +1216,14 @@ a.prow{text-decoration:none;color:inherit}
 .stnav .viewtabs button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--ink);font-weight:700}
 .stnav .viewtabs button[aria-pressed="true"]::after{content:"";position:absolute;left:50%;bottom:-1px;width:min(96px,56%);height:3px;transform:translateX(-50%);border-radius:3px 3px 0 0;background:var(--accent-ink,var(--accent))}
 .stnav .viewtabs button span{font-size:11.5px;font-weight:700;color:var(--muted);margin-left:3px}
+/* Every switch in the app (Appearance, Text size, Services / Agent, payment, admin...) uses the same modern tabs:
+   plain words on one line, a short line in the accent colour under the one that's on. The "What do you sell?" cards stay cards. */
+.seg:not(.kinds){background:none;border-radius:0;padding:0;gap:0;border:0;border-bottom:1px solid var(--line)}
+.seg:not(.kinds) button{background:none;box-shadow:none;border:0;border-radius:0;min-height:40px;padding:8px 6px 9px;font-weight:600;color:var(--muted);position:relative}
+.seg:not(.kinds) button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--ink);font-weight:700}
+.seg:not(.kinds) button[aria-pressed="true"]::after{content:"";position:absolute;left:50%;bottom:-1px;width:min(96px,56%);height:3px;transform:translateX(-50%);border-radius:3px 3px 0 0;background:var(--accent-ink,var(--accent))}
+.seg:not(.kinds) button:active{transform:none;opacity:.7}
+.seg:not(.kinds) + .hint{margin-top:10px}
 /* compact rows: about 7 items per screen instead of 5 */
 .prow{padding:12px;gap:12px}
 .pimg{width:76px;height:76px}
@@ -2535,6 +2543,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-tabs-everywhere", at: "2026-10-19", title: "The same slim tabs everywhere", body: "Every switch in the app now uses the slim tabs from your store page: Appearance and Text size in Settings, Page style, How buyers get it, payment, and the Preferred time when customers book. Tap a word to switch; the line shows which one is on." },
   { id: "u-20261019-modern-tabs", at: "2026-10-19", title: "Slimmer Products / Shop links tabs", body: "On store pages with both products and shop links, the switch is now slim modern tabs with a line in your store colour under the one that is open, so your items start higher up. Labels like Digital and your town now always fit inside their pill." },
   { id: "u-20261019-back-stays", at: "2026-10-19", title: "Back button always there", body: "On store pages, the back arrow now stays in the top corner while customers scroll, and it shows while a store is still opening. In your store preview, Back to editor also stays in the top corner, fully on screen." },
   { id: "u-20261019-back-button", at: "2026-10-19", title: "A back button on every page", body: "Every page now has a round back arrow at the top left: your store page, sign up, login, About, the policy pages and more. On your store page, customers tap it to go back where they came from, or to Spot It! if they opened your link straight from WhatsApp." },
@@ -3349,7 +3358,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 112;
+const APP_VERSION = 113;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
