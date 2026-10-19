@@ -578,6 +578,16 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .svpick{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;padding:7px 14px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent-ink)}
 .svrow.on .svpick{background:var(--accent);color:#fff;border-color:var(--accent)}
 .svgo{flex:none;display:grid;place-items:center;color:var(--muted)}
+/* the item editor's fold: basics first, the optional extras tucked in here */
+.edmore summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.edmore summary::-webkit-details-marker{display:none}
+.edmore summary > span{display:flex;flex-direction:column;gap:2px}
+.edmore summary .hint{margin:0}
+.edmore summary svg{flex:none;color:var(--muted);transition:transform .2s ease}
+.edmore[open] summary svg{transform:rotate(180deg)}
+.edmore[open] summary{padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.edmore .card{background:none;border:0;box-shadow:none;padding:0;margin:16px 0 0}
+.edmore .card h2{font-size:15px}
 .optrow.ro{cursor:default}
 .pbook{margin-top:16px;box-shadow:none}
 .svbookhint{display:flex;gap:8px;align-items:flex-start;margin:14px 0 0;padding:11px 13px;border-radius:var(--r-md);background:var(--soft);font-size:14px;line-height:1.4;color:var(--muted)}.svbookhint svg{flex:none;margin-top:1px;color:var(--accent-ink,var(--accent))}.svbookhint b{color:var(--ink)}   /* the whole row opens booking; the big button at the bottom is the one Book button */
@@ -3034,6 +3044,10 @@ function edProducts(){
   return `${edTop(W(S).list, "", `<button class="btn small solid" data-act="additem">${ico("plus",16,2.2)}Add</button>`)}
   ${S.items.length ? `<section class="card lk-group">${rows}</section>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button></section>`}`;
 }
+// More details (the optional extras on an item) stays open or closed while the seller edits
+let ED_MORE = false;
+document.addEventListener("toggle", e => { if (e.target && e.target.id === "edMore") ED_MORE = e.target.open; }, true);
+const moreWhat = () => isDigital(S) ? "Description, what's inside, samples, section" : isService(S) ? "Description, section, not available" : "Description, section, sold out";
 // nothing typed or added yet: a new item that can simply be cancelled
 const isBlankItem = it => !!it && !it.n.trim() && !String(it.d || "").trim() && !safeImg(it.img) && it.o.every(o => !String(o.l || "").trim() && !(+o.p > 0));
 function edProduct(i){
@@ -3047,19 +3061,15 @@ function edProduct(i){
   const fresh = isBlankItem(it);
   return `${edTop((fresh ? "Add " : "Edit ") + W(S).item, "products", fresh ? `<button class="btn small" data-act="del" data-i="${i}">Cancel</button>` : `<button class="btn small dangerline" data-act="del" data-i="${i}">${ico("trash",16)}Delete</button>`)}
   <section class="card">
-    <label style="margin-top:0">${isDigital(S) ? "Cover picture (optional)" : "Photo (optional)"}</label>
+    <label style="margin-top:0">${isDigital(S) ? "Cover picture" : "Photo"}</label>
     <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
-  </section>
-  <section class="card">
-    <label style="margin-top:0">Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
-    <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
-  </section>
-  ${it.o.length === 1 && !it.o[0].l.trim() ? `<section class="card">
-    <label style="margin-top:0">Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="${i}" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
+    <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
+  ${it.o.length === 1 && !it.o[0].l.trim() ? `
+    <label>Price (${esc(S.cur || curSymbol(S.curCode))})<input type="number" inputmode="decimal" data-i="${i}" data-j="0" data-f="p" value="${it.o[0].p || ""}" placeholder="${esc(W(S).ex.price)}"></label>
     ${isService(S) ? `<p class="hint">No fixed price? Leave it empty and customers see <b>Get a quote</b>.</p>` : ""}
     <button class="btn small" style="margin-top:12px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}${isDigital(S) ? "Add versions" : isService(S) ? "Add packages" : "Add sizes or flavours"}</button>
     <p class="hint">${isDigital(S) ? "Only if buyers choose between versions with different prices, like a Personal and a Commercial licence, or Basic and Full pack." : "Only if customers choose between versions with different prices, like Small and Large, or Chocolate and Pandan."}</p>
-  </section>` : `<section class="card">
+  </section>` : `</section><section class="card">
     <div class="between"><h2 style="margin:0">${isDigital(S) ? "Versions" : isService(S) ? "Packages" : "Sizes or flavours"}</h2><span class="hint" style="margin:0">Customers pick one</span></div>
     <div class="opthead"><span>Name</span><span>Price (${esc(S.cur || curSymbol(S.curCode))})</span><i></i></div>
     ${it.o.map((o,j)=>`
@@ -3070,28 +3080,34 @@ function edProduct(i){
       </div>`).join("")}
     <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">${ico("plus",16,2.2)}Add another</button>
   </section>`}
-  ${isDigital(S) ? edDigital(it, i) : ""}${isService(S) ? edBrochure(it, i) : ""}
-  ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, isDigital(S) ? "e.g. Templates" : "e.g. Drinks")}
-  <section class="card">
-    <label class="check" style="margin-top:0"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>Sold out for now</span></label>
+  ${isDigital(S) ? dgHowCard(it, i) : ""}${isAgent(S) ? edBrochure(it, i) : ""}
+  <details class="card edmore" id="edMore" ${ED_MORE ? "open" : ""}>
+    <summary><span><b>More details</b><span class="hint">${esc(moreWhat())}</span></span>${ico("down", 20, 2)}</summary>
+    <label>Description<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
+    ${isDigital(S) ? dgMore(it, i) : ""}${isService(S) && !isAgent(S) && hasBrochure(it) ? edBrochure(it, i) : ""}
+    ${secCard(secs, curSec, `data-act="secpick" data-i="${i}"`, `data-i="${i}" data-f="sec"`, isDigital(S) ? "e.g. Templates" : "e.g. Drinks")}
+    <label class="check"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}><span>${isService(S) ? "Not available for now" : "Sold out for now"}</span></label>
     <div class="between" style="margin-top:12px"><span class="hint" style="margin:0">Position in your list</span>
       <span class="ctl"><button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button><button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button></span></div>
-  </section>`;
+  </details>`;
 }
 // A digital product's extras: what it is, what's inside, sample pages, Best value, and how the buyer gets it
-function edDigital(it, i){
-  const how = it.how || "wa", smp = Array.isArray(it.smp) ? it.smp : [];
-  return `<section class="card">
-    <h2 style="margin:0">About this product</h2>
-    <label>What it is (optional)<input type="text" data-i="${i}" data-f="fmt" maxlength="60" value="${esc(it.fmt || "")}" placeholder="e.g. PDF · 42 pages, or Canva · 30 designs"></label>
-    <label>What you get (optional, one per line)<textarea data-i="${i}" data-f="get" maxlength="800" rows="4" placeholder="${esc("30 editable Canva designs\nFont and colour guide\nVideo: how to edit on your phone")}">${esc(it.get || "")}</textarea></label>
-    <label>Sample pages (optional, up to 4)</label>
+// Nice-to-have details of a digital product, shown inside More details
+function dgMore(it, i){
+  const smp = Array.isArray(it.smp) ? it.smp : [];
+  return `    <label>Format label<input type="text" data-i="${i}" data-f="fmt" maxlength="60" value="${esc(it.fmt || "")}" placeholder="e.g. PDF · 42 pages, or Canva · 30 designs"></label>
+    <label>What you get (one per line)<textarea data-i="${i}" data-f="get" maxlength="800" rows="4" placeholder="${esc("30 editable Canva designs\nFont and colour guide\nVideo: how to edit on your phone")}">${esc(it.get || "")}</textarea></label>
+    <label>Sample pages (up to 4)</label>
     <p class="hint" style="margin:0 0 8px">Show a few pages or designs so buyers can see what they'll get.</p>
     <div class="dgsmp" id="smpPrev${i}">${smp.map((u, k) => `<span class="dgsmpi"><img src="${esc(sized(u, 200))}" alt="Sample ${k + 1}"><button type="button" data-act="rm-smp" data-i="${i}" data-k="${k}" aria-label="Remove sample ${k + 1}">${ico("x", 14, 2.4)}</button></span>`).join("")}
       ${smp.length < 4 ? `<label class="dgsmpadd filebtn">${ico("plus", 20, 2)}<span>Add</span><input type="file" accept="image/*" data-media="smp" data-i="${i}" aria-label="Add a sample page"></label>` : ""}</div>
     <label class="check"><input type="checkbox" data-i="${i}" data-f="best" ${it.best ? "checked" : ""}><span>Show as <b>Best value</b> (for a bundle), at the top of your store</span></label>
-  </section>
-  <section class="card">
+    <label>When they get it<input type="text" data-i="${i}" data-f="eta" maxlength="40" value="${esc(it.eta || "")}" placeholder="e.g. within 1 hour"></label>`;
+}
+// How a digital product reaches the buyer: the one digital choice that matters, so it stays outside the fold
+function dgHowCard(it, i){
+  const how = it.how || "wa";
+  return `  <section class="card">
     <h2 style="margin:0">How buyers get it</h2>
     <div class="seg dghow" style="margin-top:10px">${Object.entries(DG_HOW).map(([k, v]) => `<button type="button" data-act="dghow" data-i="${i}" data-v="${k}" aria-pressed="${how === k}">${v}</button>`).join("")}</div>
     ${how === "ext" ? `<label>Your checkout page<input type="url" data-i="${i}" data-f="ext" value="${esc(it.ext || "")}" placeholder="e.g. https://payhip.com/b/AbC1"></label>
@@ -3099,8 +3115,7 @@ function edDigital(it, i){
     : `${how === "link" ? `<label>Your download link (only you see this)<input type="url" data-i="${i}" data-f="dl" value="${esc(it.dl || "")}" placeholder="e.g. https://drive.google.com/..."></label>
     <p class="hint">Customers never see this link on your store. When a buyer has paid, tap <b>Send to a buyer</b> and pick their chat: the link goes in a thank-you message, ready to send.</p>
     <button type="button" class="btn small wa" data-act="dgsend" data-i="${i}" style="margin-top:10px">${ico("chat", 16)}Send to a buyer</button>`
-    : `<p class="hint">Orders come to your WhatsApp. When the buyer has paid, send them the file in the chat.</p>`}
-    <label>When they get it (optional)<input type="text" data-i="${i}" data-f="eta" maxlength="40" value="${esc(it.eta || "")}" placeholder="e.g. within 1 hour"></label>`}
+    : `<p class="hint">Orders come to your WhatsApp. When the buyer has paid, send them the file in the chat.</p>`}`}
   </section>`;
 }
 // Services (mostly agents): brochure pages, a PDF and what's covered
