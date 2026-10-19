@@ -1227,10 +1227,10 @@ a.prow{text-decoration:none;color:inherit}
 .seg.kinds button{padding:8px 6px 9px;min-height:40px;font-size:14px}
 .seg:not(.dghow):not(.svtime) button{white-space:nowrap}
 /* Store style cards: a little phone per style, in the store's colour; the chosen one has a coloured edge and a tick */
-.lycards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
-.lycard{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 6px 9px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--soft);color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s ease,background-color .2s ease,transform .15s ease}
+.lycards{display:grid;grid-template-columns:repeat(3,minmax(0,84px));gap:8px;margin-top:8px}
+.lycard{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 4px 6px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:var(--soft);color:var(--muted);font:inherit;font-size:12px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s ease,background-color .2s ease,transform .15s ease}
 .lycard:active{transform:scale(.97)}
-.lycard svg{width:100%;max-width:74px;height:auto;display:block}
+.lycard svg{width:100%;max-width:40px;height:auto;display:block}
 .lycard .lyf{fill:var(--surface);stroke:var(--line2,var(--line));stroke-width:2}
 .lycard .lyn{fill:var(--line)}
 .lycard .lys{fill:color-mix(in srgb,var(--ink) 16%,transparent)}
@@ -1239,7 +1239,7 @@ a.prow{text-decoration:none;color:inherit}
 .lycard .lyp{fill:none;stroke:color-mix(in srgb,var(--ink) 30%,transparent);stroke-width:1.4}
 .lycard[aria-pressed="true"]{border-color:var(--accent-ink,var(--accent));background:color-mix(in srgb,var(--accent) 8%,var(--surface));color:var(--ink);font-weight:700}
 .lycard[aria-pressed="true"] .lya{fill:color-mix(in srgb,color-mix(in srgb,var(--ly) 78%,var(--ink)) 80%,transparent)}
-.lycard[aria-pressed="true"]::after{content:"";position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--accent-ink,var(--accent)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/12px no-repeat}
+.lycard[aria-pressed="true"]::after{content:"";position:absolute;top:4px;right:4px;width:15px;height:15px;border-radius:50%;background:var(--accent-ink,var(--accent)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/10px no-repeat}
 /* compact rows: about 7 items per screen instead of 5 */
 .prow{padding:12px;gap:12px}
 .pimg{width:76px;height:76px}
@@ -2559,6 +2559,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-style-cards-small", at: "2026-10-19", title: "Smaller Store style cards", body: "The little phones under Store style in Shop details are now smaller, so the page is shorter and easier to scroll." },
   { id: "u-20261019-style-cards", at: "2026-10-19", title: "See each store style before you pick", body: "In Shop details, Store style now shows a little phone for List, Photo grid and Minimal, in your brand colour, so you can see how your store will look before you tap Preview. Tap one to use it." },
   { id: "u-20261019-store-style-fix", at: "2026-10-19", title: "Store style fixed", body: "In Shop details, What do you sell? and Store style (List, Photo grid, Minimal) are now slim tabs that always fit your screen. Before, Minimal and Digital were cut off at the edge." },
   { id: "u-20261019-saved-pill", at: "2026-10-19", title: "Saved message fixed", body: "The little Saved message at the top of the editor now slides fully away after it shows. On some phones it used to stay half visible under the status bar." },
@@ -3386,7 +3387,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 116;
+const APP_VERSION = 117;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
