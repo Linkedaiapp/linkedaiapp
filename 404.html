@@ -454,6 +454,10 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
   padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
 .actions .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
 .actions .btn{flex:1}
+.actions .autostat{flex:1;display:flex;align-items:center;gap:6px;min-width:0;font-size:13.5px;font-weight:600;color:var(--muted);line-height:1.25}
+.actions .autostat svg{flex:none;color:var(--ok)}
+.actions .autostat[data-state="bad"]{color:var(--err);cursor:pointer}.actions .autostat[data-state="bad"] svg{color:var(--err)}
+.actions .autostat .spin{width:14px;height:14px;flex:none}
 
 /* ---------- Store ---------- */
 .st{max-width:720px;margin:0 auto;padding-bottom:130px;position:relative}
@@ -1480,15 +1484,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
   </div>
 </div>
 
-<!-- ============ SELLER BULLETIN BOARD ============ -->
-<div class="overlay" id="bulOverlay" role="dialog" aria-modal="true" aria-labelledby="bulTitle">
-  <div class="sheet">
-    <button class="xmini" data-close="bulOverlay" aria-label="Close">×</button>
-    <div class="bulhead"><img class="botav" src="bot.jpg" alt="Your assistant" loading="lazy"><div><b id="bulTitle">Bulletin</b><span class="hint" style="margin:0">From your Link Kedai App assistant</span></div></div>
-    <div id="bulList"></div>
-  </div>
-</div>
-
 <!-- ============ ADD OR CHANGE EMAIL ============ -->
 <div class="overlay" id="emOverlay" role="dialog" aria-modal="true" aria-labelledby="emTitle">
   <div class="sheet">
@@ -1606,8 +1601,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 <div id="builder" hidden>
   <div class="wrap" id="bwrap"></div>
   <div class="actions"><div class="in">
+    <span class="autostat" id="autoStat" role="status" aria-live="polite"></span>
     <button class="btn" data-act="preview">Preview</button>
-    <button class="btn solid" data-act="save">Save</button>
   </div></div>
 </div>
 
@@ -1776,7 +1771,6 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl = u => /^https:\/\/[^\s"'<>]+$/i.test(u || "") ? u : "";
 const safeImg = u => safeUrl(u) || (/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "");
-const safeLogo = u => /^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(u || "") ? u : "";
 // ----- affiliate links (Shopee, TikTok Shop, Lazada ...) -----
 const LINK_BRANDS = [["shopee", "Shopee"], ["shp", "Shopee"], ["tiktok", "TikTok Shop"], ["lazada", "Lazada"], ["amazon", "Amazon"], ["amzn", "Amazon"], ["aliexpress", "AliExpress"], ["temu", "Temu"], ["tokopedia", "Tokopedia"], ["mudah", "Mudah"], ["carousell", "Carousell"], ["involve", "Involve Asia"], ["accesstrade", "AccessTrade"]];
 function linkInfo(u){
@@ -1871,6 +1865,7 @@ function applyConfig(c){
     else if (c[k] !== undefined && c[k] !== null) SITE[k] = c[k];
   });
   if (!("sky" in c)) SITE.sky = null;   // the plane ad was stopped
+  if (!("train" in c)) SITE.train = null;   // and the train ad
 }
 // Small saved copies on this phone, so pages open at once and refresh quietly in the background
 const keep = {
@@ -1946,7 +1941,7 @@ async function apiPost(body, extra){
   if (SESSION && SESSION.tok && body.id === SESSION.id && !body.pin && !body.key) body.tok = SESSION.tok;
   if (!safeUrl(SITE.api)) throw new Error("The site isn't connected yet. The owner needs to add the server link to site.json.");
   const payload = JSON.stringify(body), keep = extra && extra.keepalive && payload.length < 60000 ? { keepalive: true } : {};
-  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" ? 2 : RETRY_OK.has(body.action) && !(body.action === "admin" && /^(delete|rename|resetpin)$/.test(body.op || "")) ? 2 : 1, body.action === "upload" ? 40000 : 0);
+  const j = await fetchJson(SITE.api, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: payload, ...keep }, body.action === "upload" || body.action === "selfpublish" ? 2 : RETRY_OK.has(body.action) && !(body.action === "admin" && /^(delete|rename|resetpin)$/.test(body.op || "")) ? 2 : 1, body.action === "upload" || body.action === "selfpublish" ? 40000 : 0);   // a receipt photo goes to Drive too: same time and retry as photos (the server answers "live" again if it already went through)
   if (!(extra && extra.again) && serverMoved(j)) return apiPost(body, Object.assign({}, extra, { again: true }));
   if (j.error) throw new Error(String(j.error).replace(/\bWhatsApp number/g, "phone number").replace(/^phone number/, "Phone number"));
   return j;
@@ -2114,7 +2109,7 @@ function normalize(d){
   const off = x.off && typeof x.off === "object" ? x.off : {}, today = ymd(new Date());
   x.off = { days: [...new Set((Array.isArray(off.days) ? off.days : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n <= 6))].sort(),
     dates: [...new Set((Array.isArray(off.dates) ? off.dates : []).map(String).filter(d => /^\d{4}-\d\d-\d\d$/.test(d) && d >= today))].sort().slice(0, 366) };
-  x.wa = String(x.wa || "").replace(/\D/g, "");
+  x.wa = normWa(x.wa);   // 012… becomes 6012…, so wa.me order links always work
   ["name", "tagline", "logo", "cover"].forEach(k => x[k] = String(x[k] || ""));
   // the currency sign is shown inside the store page's HTML, so it may only ever be a short plain symbol
   if (!/^[A-Z]{3}$/.test(String(x.curCode || ""))) x.curCode = "MYR";
@@ -2205,7 +2200,7 @@ function closeSheet(id){
   o._closeT = setTimeout(() => o.classList.remove("open", "closing"), 230);
 }
 // Opening cancels any close still in progress, so a new pop-up never vanishes
-const BACK_SHEETS = ["pOverlay", "overlay", "repOverlay", "pinOverlay", "waOverlay", "emOverlay", "fpOverlay", "payOverlay", "pubOverlay", "bulOverlay", "promptOverlay"];
+const BACK_SHEETS = ["pOverlay", "overlay", "repOverlay", "pinOverlay", "waOverlay", "emOverlay", "fpOverlay", "payOverlay", "pubOverlay", "promptOverlay"];
 // While a pop-up is open, everything behind it is out of reach (Tab, screen readers), and closing it puts you back on the button you tapped.
 // Only the top pop-up counts, worked out again every time one opens or closes, so pop-ups opened over each other always come out right.
 const SHEET_STACK = [], SHEET_INERT = new Set();
@@ -2285,7 +2280,12 @@ let askResolve = null;
 // wait: seconds before the yes button works (for things that can't be undone), counted down on the button
 let ASK_T = null;
 function askTimer(stop){ clearInterval(ASK_T); ASK_T = null; if (stop) $("askYes").disabled = false; }
-function ask(text, yesLabel, danger, wait){
+// One message at a time: a question or message asked while another is open waits for it, so neither answer is lost
+let ASK_CHAIN = Promise.resolve();
+function askQueued(show){ const p = ASK_CHAIN.then(show); ASK_CHAIN = p.catch(() => {}).then(() => new Promise(r => setTimeout(r, 260))); return p; }
+function ask(text, yesLabel, danger, wait){ return askQueued(() => askNow(text, yesLabel, danger, wait)); }
+function notify(text){ return askQueued(() => notifyNow(text)); }
+function askNow(text, yesLabel, danger, wait){
   askTimer(true);
   $("askText").textContent = text;
   $("askYes").textContent = yesLabel || "OK";
@@ -2301,7 +2301,7 @@ function ask(text, yesLabel, danger, wait){
   (wait ? $("askNo") : $("askYes")).focus();   // while Delete is counting down, Cancel is the safe default
   return new Promise(res => { askResolve = res; });
 }
-function notify(text){
+function notifyNow(text){
   askTimer(true);
   $("askText").textContent = text;
   $("askYes").textContent = "OK";
@@ -2486,6 +2486,10 @@ $("fpSave").onclick = async () => {
   btn.disabled = false; btn.textContent = "Save and log in";
 };
 
+// Link names new stores can't take: the same list as the server (pages of this app, our brand, support-style names, the demo stores)
+const RESERVED_IDS = ["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about", "demo",
+  "linkkedai", "linkedaiapp", "link-kedai", "linkkedai-app", "link-kedai-app", "linkkedaiapp", "kedai-app", "support", "official", "staff", "team", "billing", "payment", "security", "login", "account"];
+const isReservedId = id => { id = String(id || "").toLowerCase(); const l = id.replace(/0/g, "o").replace(/1/g, "l"); return [id, l].some(x => RESERVED_IDS.includes(x) || Object.prototype.hasOwnProperty.call(DEMOS, x)); };
 function normWa(v){
   let d = String(v || "").replace(/\D/g, "");
   if (d.startsWith("00")) d = d.slice(2);                // 0060 12...
@@ -2564,7 +2568,7 @@ function renderStart(msg, mode){
     if (!name) return $("cErr").textContent = "Add your shop name.";
     if (wa.length < 9) return $("cErr").textContent = "Add your phone number.";
     if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(id)) return $("cErr").textContent = "Pick a link name with 3 to 40 letters, numbers or dashes.";
-    if (["admin", "build", "edit", "signup", "terms", "privacy", "refund", "safe", "explore", "near", "api", "www", "help", "linkedai", "store", "stores", "about"].includes(id) || Object.prototype.hasOwnProperty.call(DEMOS, id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
+    if (isReservedId(id)) return $("cErr").textContent = "That link name is reserved. Please pick another.";
     if (!/^\d{6}$/.test(pin)) return $("cErr").textContent = "Your PIN must be exactly 6 digits.";
     if (pin !== $("cPin2").value) return $("cErr").textContent = "The two PINs don't match.";
     if (weakPin(pin)) return $("cErr").textContent = "Pick a PIN that's harder to guess than 111111 or 123456.";
@@ -2589,6 +2593,8 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-checkup-fixes", at: "2026-10-19", title: "More fixes after a full check-up", body: "Free-code stores: Go live free now just goes live. Before you go live, your Store page shows the right button for your store. Status messages no longer thank you for a payment you didn't make. Prices show the same in your editor and on your store. Your Spot It! listing no longer stops your other changes saving. Plus many small speed and reliability fixes." },
+  { id: "u-20261019-no-save-button", at: "2026-10-19", title: "No more Save button", body: "Everything you change in your store now saves by itself, a few seconds after you stop typing. The bar at the bottom shows Saving…, then All changes saved. If it ever says Not saved yet, tap it to see what is missing." },
   { id: "u-20261019-bug-hunt", at: "2026-10-19", title: "Lots of small fixes", body: "We checked the whole app for bugs and fixed them. Each store now keeps its own cart. Share in your preview always copies your own link. Add many at once now reads prices like 1,200 and 45/kg, and a price on its own line. If your login needs checking again, your unsaved changes stay on screen. Back works better on Spot It! and during first setup. Check for updates finds a newer version every time." },
   { id: "u-20261019-easy-items", at: "2026-10-19", title: "Adding items is easier", body: "Adding an item now starts with just a photo, name and price. Everything else (description, section, sold out) is under More details, one tap away. New: Add many at once, on your Menu or Products page. Type one item per line with its price, like Teh tarik 3, and add them all in one go. A line like Drinks: puts the next items in that section." },
   { id: "u-20261019-swipe-dots", at: "2026-10-19", title: "Easier to flip through pictures", body: "When a product has several pictures, like brochure pages or digital samples, customers now see dots and arrows under them, so they can flip page by page even on a computer. Your item photo is included too." },
@@ -2678,7 +2684,7 @@ function bulletinItems(){
   const push = (id, kind, label, title, body, cta) => out.push({ id, kind, label, title, body, cta, ins: /^(ins|adins)-/.test(id), keep: id === "st-offline" || id === "st-unpaid" });
   const sum = (arr, f) => arr.reduce((a, x) => a + (x[f] || 0), 0);
   // store status
-  if (b.status === "review") push("st-review-" + b.paidAt, "shield", "Store status", "Link Kedai App Guard is checking your store", "Thanks for your payment. Your store goes live as soon as it's approved, usually within 24 hours.");
+  if (b.status === "review") push("st-review-" + (b.paidAt || b.trialEnd || 0), "shield", "Store status", "Link Kedai App Guard is checking your store", (b.paid && !b.free ? "Thanks for your payment. " : "") + "Your store goes live as soon as it's approved, usually within 24 hours.");
   else if (b.status === "offline") push("st-offline", "shield", "Store status", "Your store is offline", "Your store isn't visible to customers right now. Please message Link Kedai App to sort it out.", to ? `<a class="btn small" href="https://wa.me/${to}" target="_blank" rel="noopener">Message Link Kedai App</a>` : "");
   else if (b.status === "live" && b.flagged) push("st-flag", "shield", "Store status", "Some words in your store are being checked", "Link Kedai App Guard noticed a word that needs a quick check. Your store stays live while it's reviewed.");
   else if (b.status === "live" && b.verified) push("st-verified", "shield", "Store status", "Your store is Verified", "Customers now see a blue Verified tick on your store logo. It shows your payment was confirmed and your store passed our safety check.");
@@ -2696,7 +2702,7 @@ function bulletinItems(){
     // each bar shows its number, and a screen reader hears the whole week
     const bars = `<div class="bulbars" role="img" aria-label="${esc("Visits: " + last.map(x => dn(x.date) + " " + x.v).join(", "))}">${last.map(x => `<div><b class="bv">${x.v}</b><i class="${x.v ? "" : "low"}" style="height:${Math.max(4, Math.round(x.v / max * 40))}px"></i><span>${dn(x.date).slice(0, 2)}</span></div>`).join("")}</div>`;
     push("ins-" + wk, "chart", "Shop insights · last 7 days", v ? `${v} visit${v === 1 ? "" : "s"} this week` : "No visits yet this week",
-      v ? `<div class="bulnums"><div><b>${v}</b><span>Store visits</span></div><div><b>${o}</b><span>Order taps</span></div><div><b>${Math.round(o / v * 100)}%</b><span>Ordered</span></div></div>
+      v ? `<div class="bulnums"><div><b>${v}</b><span>Store visits</span></div><div><b>${o}</b><span>Order taps</span></div><div><b>${Math.min(100, Math.round(o / v * 100))}%</b><span>Ordered</span></div></div>
         ${bars}<p>${change === null ? "" : change >= 0 ? `<span class="up">Up ${change}%</span> on last week. ` : `<span class="down">Down ${Math.abs(change)}%</span> on last week. `}Your busiest day was <b>${dn(best.date)}</b>.</p>`
         : `<p>Share your store link on WhatsApp status, Instagram, TikTok and Threads. Stores shared every few days get the most visits.</p>`);
   }
@@ -2720,8 +2726,8 @@ function bulletinItems(){
   if (named.length === 1) push("tip-more", "tip", "Tip", "Add more items", "Stores with at least 5 items get more visits. Add your other products or services.");
   if (S.closed) push("tip-closed", "tip", "Tip", "Your store shows as Closed", "Customers can't order while your store is closed. Switch it to Open under Store status when you're ready.");
   // Link Kedai App updates
-  const since = b.created ? new Date(b.created).toISOString().slice(0, 10) : "";   // a new seller starts with a clean slate, not every update from before they joined
-  APP_UPDATES.filter(u => !since || u.at >= since).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
+  const since = b.created ? new Date(Number(b.created) + 8 * 3600e3).toISOString().slice(0, 10) : "";   // a new seller starts with a clean slate (their sign-up day in Malaysia time), not every update from before they joined
+  (BUL ? APP_UPDATES.filter(u => !since || u.at >= since) : APP_UPDATES.slice(0, 5)).forEach(u => push(u.id, "news", "What's new · " + new Date(u.at + "T00:00:00").toLocaleDateString("en-MY", { day: "numeric", month: "short" }), u.title, `<p>${esc(u.body)}</p>`));
   if (b.created && Date.now() - b.created < 30 * 864e5) push("welcome", "news", "Welcome", "Welcome to Link Kedai App", "<p>I'm your Link Kedai App assistant. I'll post tips and Link Kedai App news here. Your shop numbers are under Insights. Got a question? Tap Got a question? on your Store page and ask me.</p>");
   const gone = bulGone();   // posts the seller removed; insights and must-act status posts always stay
   return out.filter(x => x.ins || x.keep || !gone.has(x.id));
@@ -2743,7 +2749,7 @@ function setIconBadge(n){ try { if (!("setAppBadge" in navigator)) return; (n ? 
 function updateBell(){
   if (SESSION && !SESSION.admin) setIconBadge(unreadOf(bulletinItems()));
   const el = $("bellCount"); if (!el) return;
-  const n = unreadOf(window.LK_ALLVIEW ? bulletinItems() : newsItems());
+  const n = unreadOf(newsItems());
   el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n);
   if (el.parentElement) el.parentElement.setAttribute("aria-label", n ? `News, ${n > 9 ? "9+" : n} unread` : "News");
   const tab = document.querySelector('.lk-tabs [data-v="insights"]');
@@ -2758,14 +2764,6 @@ async function loadBulletin(){
   if (b && !SESSION.admin) try { if (b.verified) localStorage.setItem("lk-ver:" + id, "1"); else localStorage.removeItem("lk-ver:" + id); } catch(e) {}
   const tags = $("linkTags"); if (tags) tags.innerHTML = linkTags();
   const slot = $("pubSlot"); if (slot) slot.innerHTML = publishCardHtml();   // trial or not, now that the status is here
-}
-function openBulletin(){
-  const items = bulletinItems(), seen = bulSeen();
-  $("bulList").innerHTML = items.length ? bulCards(items, seen) : `<p class="hint">Nothing here yet. Check back soon.</p>`;
-  openSheet("bulOverlay");
-  $("bulOverlay").querySelector(".sheet").scrollTop = 0;
-  try { localStorage.setItem(bulSeenKey(), JSON.stringify([...new Set([...seen, ...items.map(x => x.id)])].slice(-300))); } catch(e) {}
-  updateBell();
 }
 
 // ================= Seller: store home + section pages =================
@@ -2806,11 +2804,17 @@ function edTabs(){
   const t = (v, icon, label, n) => `<button data-act="go" data-v="${v}" ${EDV === v ? 'aria-current="page"' : ""}>${ico(icon,22)}<span>${label}</span>${n ? `<span class="dotn">${n > 9 ? "9+" : n}</span>` : ""}</button>`;
   return `<nav class="lk-tabs" aria-label="Seller menu">${t("home","store","Store")}${t("products","box",W(S).list)}${t("links","link","Links")}${t("insights","chart","Insights", unread)}${t("account","user","Account")}</nav>`;
 }
-function priceText(it){
-  const ps = it.o.map(o => +o.p).filter(x => x > 0);
-  if (!ps.length) return isService(S) ? "Get a quote" : "No price yet";
+// One price rule for the editor and the store: the lowest real price, with "From" when customers can end up paying more (or a quote)
+function priceFrom(opts){
+  const all = (opts || []).map(o => +(o && o.p) || 0), ps = all.filter(x => x > 0);
+  if (!ps.length) return null;
   const lo = Math.min(...ps);
-  return (ps.length > 1 ? "From " : "") + fmtMoney(S.cur || curSymbol(S.curCode), lo);
+  return { lo, from: all.length > 1 && (Math.max(...ps) !== lo || ps.length < all.length) };
+}
+function priceText(it){
+  const r = priceFrom(it.o);
+  if (!r) return isService(S) ? "Get a quote" : "No price yet";
+  return (r.from ? "From " : "") + fmtMoney(S.cur || curSymbol(S.curCode), r.lo);
 }
 // Live / Verified chips on the store link card. Verified comes with the store's status, a moment after the page opens,
 // so the last answer is remembered on this phone and the chips are redrawn when the new one arrives.
@@ -2834,11 +2838,11 @@ function edHome(msg){
     <div class="linkhead"><h2>${live ? "Your store link" : "Your store"}</h2><div class="linktags" id="linkTags">${linkTags()}</div></div>
     ${live ? `<p class="lk-link" style="margin:12px 0 0">${ico("link",18)}<span class="url">${esc(link).replace(/\//g, "/<wbr>")}</span></p>
       <div class="lk-3"><button class="btn small" data-act="copy">${ico("copy",16)}Copy</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">${ico("ext",16)}Open</a><a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(shareText(S, link))}" target="_blank" rel="noopener">${ico("share",16)}Share</a></div>`
-    : `<p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
+    : `<p class="hint">${STATUS === "review" ? `${BUL && BUL.paid && !BUL.free ? "Thanks for your payment. " : ""}${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Finish your setup below, then publish to get your store link."}</p>`}
     ${live ? "" : `<button class="btn small" style="margin-top:12px" data-act="preview">${ico("eye",16)}Preview my store</button>`}
     <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Saving your changes..." : ""))}</p>
   </section>
-  ${SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : ""}
+  ${SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Changes save by themselves, without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : ""}
   ${SESSION.admin ? "" : tipHtml()}
   ${allDone ? "" : `<section class="card">
     <div class="between"><h2 style="margin:0">Store setup</h2><span class="hint" style="margin:0">${done} of ${total} done</span></div>
@@ -3050,7 +3054,7 @@ function secCard(secs, cur, pick, field, ph){
 function edProducts(){
   const rows = S.items.map((it, i) => {
     const u = safeImg(it.img);
-    return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(sized(u, 160))}" alt="" decoding="async">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}${it.sec ? " · " + esc(it.sec) : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
+    return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(sized(u, 160))}" alt="" loading="lazy" decoding="async">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}${it.sec ? " · " + esc(it.sec) : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
   }).join("");
   return `${edTop(W(S).list, "", `<button class="btn small solid" data-act="additem">${ico("plus",16,2.2)}Add</button>`)}
   ${S.items.length ? `<section class="card lk-group">${rows}</section>
@@ -3279,7 +3283,7 @@ function edNews(){
 // ---------- Ask your assistant: questions about the app, answered on the phone itself (no AI service, no cost, works offline) ----------
 // Each answer has keywords (English and Malay). The question is matched to the answer whose keywords it hits most.
 // Add an entry here whenever a new feature comes out, so the assistant can explain it.
-const ASK_SYN = { gambar: "photo", foto: "photo", pic: "photo", picture: "photo", image: "photo", img: "photo", harga: "price", rm: "price", tukar: "change", ubah: "change", edit: "change", tambah: "add", letak: "add", masukkan: "add", buang: "delete", padam: "delete", hapus: "delete", remove: "delete", buka: "open", tutup: "close", closed: "close", bayar: "pay", bayaran: "pay", payment: "pay", paid: "pay", duit: "pay", kedai: "store", shop: "store", pautan: "link", lupa: "forgot", forget: "forgot", nombor: "number", no: "number", telefon: "phone", hp: "phone", fon: "phone", barang: "item", produk: "item", product: "item", menu: "item", makanan: "item", iklan: "ad", advert: "ad", advertise: "ad", peta: "map", lokasi: "location", alamat: "address", cuti: "off", holiday: "off", percuma: "free", pesanan: "order", tempahan: "order", oder: "order", pelanggan: "customer", customers: "customer", buyer: "customer", pembeli: "customer", warna: "colour", color: "colour", akaun: "account", keluar: "appear", masuk: "enter", log: "login", signin: "login", kongsi: "share", salin: "copy", habis: "end", balik: "back", stok: "stock", stock: "stock", saiz: "size", perisa: "flavour", flavor: "flavour", bahagian: "section", kategori: "category", kat: "category", categorize: "section", categorise: "section", group: "section", kumpulan: "section", berapa: "cost", mahal: "cost", kos: "cost", yuran: "cost", fee: "cost", bulanan: "monthly", pulangan: "refund", refund: "refund", pulang: "refund", sah: "verified", tick: "verified", tanda: "verified", biru: "verified", laporan: "report", lapor: "report", pasang: "install", muat: "install", download: "install", gelap: "dark", emel: "email", mail: "email", kata: "pin", password: "pin", laluan: "pin", padamkan: "delete", hantar: "send", terima: "receive", dapat: "receive", lihat: "see", tengok: "see", view: "see", jualan: "sales", pelawat: "visit", visitor: "visit", visitors: "visit", views: "view", statistik: "stat", stats: "stat", statistic: "stat", analytics: "stat", berita: "news", notification: "news", notifikasi: "news", loceng: "news", tolong: "help", bantuan: "help", hubungi: "contact", admin: "contact", support: "contact", nama: "name", logo: "logo", sampul: "cover", banner: "cover", susun: "reorder", urutan: "reorder", atas: "top", reorder: "reorder", rearrange: "reorder", sort: "reorder", position: "reorder", affiliate: "affiliate", afiliat: "affiliate", shopee: "affiliate", tiktok: "affiliate", lazada: "affiliate", hilang: "missing", tak: "not", tidak: "not", cant: "not", cannot: "not", boleh: "can", macam: "how", mana: "where", bila: "when", kenapa: "why", apa: "what", hidup: "live", aktif: "live", online: "live", publish: "publish", terbit: "publish", siar: "publish", offline: "offline", penghantaran: "delivery", hantaran: "delivery", pos: "delivery", postage: "delivery", shipping: "delivery", ambil: "pickup", tarikh: "date", hari: "day", days: "day", kawasan: "area", negeri: "state", bandar: "city", jual: "sell", selling: "sell", gaya: "style", layout: "style", theme: "style", tema: "style", mata: "currency", wang: "currency", dua: "two", second: "two", another: "two", lain: "two", kod: "code", qr: "qr", duitnow: "pay", tng: "pay", resit: "receipt", url: "link", website: "link", rokok: "vape", cigarette: "vape", arak: "alcohol", dadah: "drug", senjata: "weapon", cantik: "nice", lawa: "nice", beautiful: "nice", lambat: "slow", lembab: "slow", loading: "load", rosak: "error", stuck: "error", hang: "error", promosi: "ad", promote: "ad", dish: "item", dishes: "item", lauk: "item", kuih: "item", kek: "item", cake: "item", arrange: "reorder", ingat: "remember", remember: "remember", raya: "off", cny: "off", deepavali: "off", krismas: "off", christmas: "off",
+const ASK_SYN = { gambar: "photo", foto: "photo", pic: "photo", picture: "photo", image: "photo", img: "photo", harga: "price", rm: "price", tukar: "change", ubah: "change", edit: "change", tambah: "add", letak: "add", buang: "delete", padam: "delete", hapus: "delete", remove: "delete", buka: "open", tutup: "close", closed: "close", bayar: "pay", bayaran: "pay", payment: "pay", paid: "pay", duit: "pay", kedai: "store", shop: "store", pautan: "link", lupa: "forgot", forget: "forgot", nombor: "number", no: "number", telefon: "phone", hp: "phone", fon: "phone", barang: "item", produk: "item", product: "item", menu: "item", makanan: "item", iklan: "ad", advert: "ad", advertise: "ad", peta: "map", lokasi: "location", cuti: "off", holiday: "off", percuma: "free", pesanan: "order", tempahan: "order", oder: "order", pelanggan: "customer", customers: "customer", buyer: "customer", pembeli: "customer", warna: "colour", color: "colour", akaun: "account", keluar: "appear", masuk: "enter", log: "login", signin: "login", kongsi: "share", salin: "copy", habis: "end", balik: "back", stok: "stock", stock: "stock", saiz: "size", perisa: "flavour", flavor: "flavour", bahagian: "section", kategori: "category", kat: "category", categorize: "section", categorise: "section", group: "section", kumpulan: "section", berapa: "cost", mahal: "cost", kos: "cost", yuran: "cost", fee: "cost", bulanan: "monthly", pulangan: "refund", refund: "refund", pulang: "refund", sah: "verified", tick: "verified", tanda: "verified", biru: "verified", laporan: "report", lapor: "report", pasang: "install", muat: "install", download: "install", gelap: "dark", emel: "email", mail: "email", kata: "pin", password: "pin", laluan: "pin", padamkan: "delete", hantar: "send", terima: "receive", dapat: "receive", tengok: "see", view: "see", jualan: "sales", pelawat: "visit", visitor: "visit", visitors: "visit", views: "view", statistik: "stat", stats: "stat", statistic: "stat", analytics: "stat", berita: "news", loceng: "news", tolong: "help", bantuan: "help", hubungi: "contact", admin: "contact", support: "contact", nama: "name", logo: "logo", sampul: "cover", banner: "cover", susun: "reorder", urutan: "reorder", atas: "top", reorder: "reorder", rearrange: "reorder", sort: "reorder", position: "reorder", affiliate: "affiliate", afiliat: "affiliate", shopee: "affiliate", tiktok: "affiliate", lazada: "affiliate", hilang: "missing", tak: "not", tidak: "not", cant: "not", cannot: "not", boleh: "can", macam: "how", mana: "where", bila: "when", kenapa: "why", apa: "what", hidup: "live", aktif: "live", online: "live", publish: "publish", terbit: "publish", siar: "publish", offline: "offline", penghantaran: "delivery", hantaran: "delivery", pos: "delivery", postage: "delivery", shipping: "delivery", ambil: "pickup", tarikh: "date", hari: "day", days: "day", kawasan: "area", negeri: "state", bandar: "city", jual: "sell", selling: "sell", gaya: "style", layout: "style", theme: "style", tema: "style", mata: "currency", wang: "currency", dua: "two", second: "two", another: "two", lain: "two", kod: "code", qr: "qr", duitnow: "pay", tng: "pay", resit: "receipt", url: "link", website: "link", rokok: "vape", cigarette: "vape", arak: "alcohol", dadah: "drug", senjata: "weapon", cantik: "nice", lawa: "nice", beautiful: "nice", lambat: "slow", lembab: "slow", loading: "load", rosak: "error", stuck: "error", hang: "error", promosi: "ad", promote: "ad", dish: "item", dishes: "item", lauk: "item", kuih: "item", kek: "item", cake: "item", arrange: "reorder", ingat: "remember", remember: "remember", raya: "off", cny: "off", deepavali: "off", krismas: "off", christmas: "off",
   sunday: "day", monday: "day", tuesday: "day", wednesday: "day", thursday: "day", friday: "day", saturday: "day", ahad: "day", isnin: "day", selasa: "day", rabu: "day", khamis: "day", jumaat: "day", sabtu: "day", weekend: "day",
   gmbr: "photo", gmbar: "photo", gamba: "photo", pics: "photo", brg: "item", hrg: "price", tkr: "change", tukarkan: "change", betulkan: "change", salah: "change", bkk: "open", bukak: "open", x: "not", tk: "not", xde: "not", takde: "not", tiada: "not", belum: "not", blm: "not", blh: "can", bole: "can", leh: "can",
   rehat: "close", kedua: "two", terus: "permanently", selamanya: "permanently", forever: "permanently", orang: "person", people: "person", cakap: "talk", bercakap: "talk", sembang: "talk", chat: "talk", deleted: "delete", removed: "delete", delete: "delete",
@@ -3287,7 +3291,7 @@ const ASK_SYN = { gambar: "photo", foto: "photo", pic: "photo", picture: "photo"
   diskaun: "discount", potongan: "discount", promo: "discount", voucher: "discount", kupon: "discount", coupon: "discount", kuantiti: "quantity", qty: "quantity", limit: "quantity", hadkan: "quantity", had: "quantity", pieces: "quantity", pcs: "quantity", unit: "quantity",
   batal: "cancel", cancelled: "cancel", pembatalan: "cancel", simpan: "save", saved: "save", saving: "save", notifikasi: "notify", notification: "notify", notifications: "notify", alert: "notify", bunyi: "notify", tahu: "know",
   gagal: "fail", failed: "fail", fails: "fail", error: "error", kosong: "blank", putih: "blank", wangi: "", sila: "", awak: "", kau: "", korang: "", kita: "", kami: "", dia: "",
-  app: "app", aplikasi: "app", apps: "app", android: "app", iphone: "app", ios: "app", playstore: "app", appstore: "app", gateway: "gateway", fpx: "gateway", online: "online", kad: "card", tunai: "cash", cod: "cod",
+  app: "app", aplikasi: "app", apps: "app", android: "app", iphone: "app", ios: "app", playstore: "app", appstore: "app", gateway: "gateway", fpx: "gateway", kad: "card", tunai: "cash", cod: "cod",
   lihat: "see", nampak: "see", tunjuk: "show", papar: "show", senarai: "list", listing: "list", listed: "list", appear: "appear", muncul: "appear", jumpa: "find", cari: "find", search: "find", nearby: "near", dekat: "near", berdekatan: "near",
   design: "design", reka: "design", rupa: "design", kaler: "colour", kalar: "colour", tagline: "tagline", slogan: "tagline", kenyataan: "tagline", drag: "drag", seret: "drag", alamat: "address", tempat: "location", status: "status", review: "review", semak: "review", lulus: "review", approve: "review", approved: "review" };
 // phrases first, so two-word questions match as one idea
@@ -3318,12 +3322,13 @@ function askStatusHtml(){
   const b = BUL || {}, live = STATUS === "live";
   if (live && b.trial){ const left = Math.max(0, Math.ceil((Number(b.trialEnd) - Date.now()) / 864e5)); return `Your store is <b>live on a free trial</b>, with <b>${left} day${left === 1 ? "" : "s"}</b> left. Pay ${askPriceTxt()} before it ends and it stays live for good.`; }
   if (live) return `Your store is <b>live</b>. Customers can open your link and order${S.closed ? ", but it's set to <b>Closed</b> right now, so they can't send orders. Switch it to Open under Store status" : ""}.`;
-  if (STATUS === "review") return "We have your payment and are checking your store. It goes live once approved, usually within 24 hours.";
-  if (STATUS === "offline") return "Your store is <b>offline</b> right now" + (Number(b.trialEnd) > 0 && !b.paid ? ", because your free trial ended. Pay once to bring it back, just as you left it." : ". This usually means a payment couldn't be found. WhatsApp us and we'll sort it out.");
-  return "Your store <b>isn't live yet</b>. Add what you sell, then tap <b>Go live free</b> (or Publish) on your Store page. " + esc(unpaidLeft());
+  if (STATUS === "review") return (b.paid && !b.free ? "We have your payment and are checking your store. " : "We're checking your store. ") + "It goes live once approved, usually within 24 hours.";
+  if (STATUS === "offline") return "Your store is <b>offline</b> right now. It was taken offline by " + esc(APP_NAME) + ". WhatsApp us and we'll sort it out.";
+  if (Number(b.trialEnd) > 0 && !b.paid) return "Your <b>free trial has ended</b>, so your store is offline. Tap <b>Bring my store back</b> on your Store page and pay once to make it live again, just as you left it.";
+  return "Your store <b>isn't live yet</b>. Add what you sell, then tap " + (b.free ? "<b>Go live</b>" : b.trialUsed ? "<b>Publish my store</b>" : "<b>Go live free</b> (or Publish)") + " on your Store page. " + esc(unpaidLeft());
 }
 const ASK_KB = [
-  { id: "additem", q: "How do I add an item?", k: "add new list post put sell food", a: () => `Go to the <b>${esc(W(S).list)}</b> tab and tap <b>+ Add</b>. Type the name and price, and add a photo if you like. Your changes save by themselves in a few seconds, or tap <b>Save</b>.`, go: () => askGo("products", "Open " + W(S).list) },
+  { id: "additem", q: "How do I add an item?", k: "add new list post put sell food", a: () => `Go to the <b>${esc(W(S).list)}</b> tab and tap <b>+ Add</b>. Type the name and price, and add a photo if you like. Your changes save by themselves in a few seconds. There is no Save button to tap.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "photo", q: "How do I add or change a photo?", k: "photo upload picture change", a: () => `Open the item under <b>${esc(W(S).list)}</b> and tap <b>Upload photo</b>, then pick a picture from your phone. Tap <b>Change photo</b> to swap it, or <b>Remove</b> to take it off. Your logo and cover photo are under <b>Shop details</b>.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "price", q: "How do I change a price?", k: "price change wrong", a: () => `Open the item under <b>${esc(W(S).list)}</b> and type the new price. It saves by itself. Customers see it straight away.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "sizes", q: "How do I add sizes or flavours?", k: "size flavour option variant small large medium choose type different", a: () => `Open the item and tap <b>Add sizes or flavours</b>. Give each one a name and a price, like Small RM5 and Large RM8. Customers pick one when they order.`, go: () => askGo("products", "Open " + W(S).list) },
@@ -3348,7 +3353,7 @@ const ASK_KB = [
   { id: "removed", q: "Will my store be deleted if I don't pay?", k: "delete not removed 10 day unpaid lose store", a: () => `A store that's never paid for is removed 10 days after sign-up, so link names and phone numbers don't get stuck. A store on a finished free trial goes offline first and is only removed if it stays unpaid. ${esc(unpaidLeft()) || "Your store is safe."}` },
   { id: "refund", q: "Can I get a refund?", k: "refund back", a: () => `You can get a refund if your store couldn't be published because of a problem on our side, or wasn't approved, and you ask within 7 days of paying, or if you were charged twice. Once your store is live, the fee isn't refundable. <a href="${esc(home())}refund" target="_blank" rel="noopener">Read the Refund Policy</a>.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to ask about a refund for my store ${SESSION ? SESSION.id : ""}.`) },
   { id: "verified", q: "How do I get the Verified tick?", k: "verified badge blue trust", a: () => `The blue <b>Verified</b> tick shows on your logo once your payment is confirmed and your store passes ${esc(APP_NAME)} Guard, our safety check. It helps customers trust your link.${BUL && BUL.verified ? " Your store is already verified." : ""}` },
-  { id: "look", q: "How do I change my logo, colour or style?", k: "logo cover colour style look design nice list grid minimal layout", a: () => `Open <b>Shop details</b> and scroll to <b>Look</b>. There you can upload your logo and a cover photo, pick a brand colour, and choose a store style: List, Photo grid or Minimal.`, go: () => askGo("details", "Open Shop details") },
+  { id: "look", q: "How do I change my logo, colour or style?", k: "logo cover colour style look design nice list grid minimal layout", a: () => `Open <b>Shop details</b>. Your logo and cover photo are at the top. Further down, pick a brand colour and tap a store style (List, Photo grid or Minimal): the little phones show how each one looks. Services stores set their big Book button there too.`, go: () => askGo("details", "Open Shop details") },
   { id: "name", q: "How do I change my shop name?", k: "name shop change tagline rename", a: () => `Open <b>Shop details</b> and type a new <b>Shop name</b>. You can also add a short line under your name. Your store link stays the same.`, go: () => askGo("details", "Open Shop details") },
   { id: "currency", q: "How do I change the currency or what I sell?", k: "currency kind service food sgd", a: () => `Open <b>Shop details</b>. Under <b>What do you sell?</b> pick food, products or services, and choose your <b>Currency</b> below it.`, go: () => askGo("details", "Open Shop details") },
   { id: "preview", q: "How do I see my store like a customer?", k: "see preview front customer", a: () => `Tap the shop icon at the top of your Store page (next to the bell). It opens your store front exactly as customers see it. Your own visits never count in Insights.`, go: () => `<button class="btn small" data-act="preview">${ico("store",16)}See my store</button>` },
@@ -3365,7 +3370,7 @@ const ASK_KB = [
   { id: "login", q: "How do I stay logged in or log out?", k: "login logout stay keep sign appear account", a: () => `When you log in, tick <b>Keep me logged in on this phone</b> and you won't need your PIN on that phone for 90 days. To log out, go to <b>Account</b> and tap <b>Log out</b>.`, go: () => askGo("account", "Open Account") },
   { id: "delacct", q: "How do I delete my account?", k: "delete account permanently quit", a: () => `Open <b>Profile</b> and scroll to <b>Danger zone</b>. Deleting removes your store, items and photos for good, and your link stops working. It can't be undone, and the fee isn't refunded once you've gone live. To take a break instead, just set your store to Closed.`, go: () => askGo("profile", "Open Profile") },
   { id: "install", q: "How do I put the app on my home screen?", k: "install home screen app", a: () => /iphone|ipad|ipod/i.test(navigator.userAgent) ? `In Safari, tap the <b>Share</b> button, then <b>Add to Home Screen</b>.` : `In Chrome, tap the <b>⋮</b> menu, then <b>Add to home screen</b> (or <b>Install app</b>).` },
-  { id: "dark", q: "How do I turn on dark mode?", k: "dark mode night black theme", a: () => `${esc(APP_NAME)} follows your phone: it goes dark when your phone is in dark mode, and light when it isn't. Change it in your phone's display settings.` },
+  { id: "dark", q: "How do I turn on dark mode?", k: "dark mode night black theme", a: () => `Go to <b>Account</b>, then <b>Settings</b>, and under <b>Appearance</b> tap <b>Dark</b>. <b>Auto</b> follows your phone's own setting, and <b>Light</b> keeps it light.`, go: () => askGo("settings", "Open Settings") },
   { id: "ads", q: "How do I advertise on other stores?", k: "ad promote promotion", a: () => `Your banner can show on every ${esc(APP_NAME)} store, rotating with up to 4 others, and you get weekly ad insights in News.${BUL && BUL.adPrice ? ` Price: <b>${esc(BUL.adPrice)}</b>.` : ""} WhatsApp us to book.`, go: () => askWa(`Hi ${APP_NAME}, I'd like to book an ad for ${(S && S.name) || (SESSION ? SESSION.id : "")}.`, "Book an ad") },
   { id: "rules", q: "What can't I sell?", k: "not sell allowed ban banned prohibited rule vape alcohol drug weapon report guard safe", a: () => `You can't sell drugs, vape or cigarettes, alcohol, adult content or services, weapons, or scam and fake products. ${esc(APP_NAME)} Guard checks every store, and customers can report stores. Stores that break the rules are removed.`, go: () => `<a class="btn small" href="${esc(home())}terms" target="_blank" rel="noopener">Read the Terms</a>` },
   { id: "two", q: "Can I have two stores?", k: "two store multiple", a: () => `Yes. Each store uses its own phone number, so sign up again with a different phone number for your second store.` },
@@ -3373,7 +3378,7 @@ const ASK_KB = [
   { id: "social", q: "How do I put my store link on Instagram, TikTok or Facebook?", k: "instagram facebook tiktok bio social", a: () => `${STATUS === "live" ? `Copy your link (<b>${esc(storeLink(SESSION.id))}</b>) from Your store link on your Store page,` : "Once your store is live, copy your link from Your store link on your Store page,"} then paste it in your Instagram or TikTok bio (Edit profile, then Links or Website) or your Facebook page. You can also tap <b>Share</b> to send it straight to WhatsApp groups.`, go: () => askGo("home", "Open my Store page") },
   { id: "notify", q: "Will I be told when someone orders?", k: "notify know new order", a: () => `Yes, on WhatsApp. Every order is a WhatsApp message to your phone number, so you get WhatsApp's usual notification. Make sure WhatsApp notifications are on for your phone.` },
   { id: "photofail", q: "My photo won't upload", k: "photo upload fail not appear", a: () => `Check your internet, then try again with a different photo. Very big photos or screenshots can be slow; a normal phone photo works best. If it still fails, close the app, open it again and retry. Still stuck? WhatsApp us.`, go: () => askWa() },
-  { id: "save", q: "Do I need to tap Save?", k: "save", a: () => `Your changes save by themselves a few seconds after you stop typing. You'll see "Saving your changes..." and then it's done. You can also tap <b>Save</b> to save straight away.` },
+  { id: "save", q: "Do I need to tap Save?", k: "save", a: () => `No. There's no Save button: your changes save by themselves a few seconds after you stop typing. The bar at the bottom shows <b>Saving…</b>, then <b>All changes saved</b>. If it says <b>Not saved yet</b>, tap it to see what's missing.` },
   { id: "cancel", q: "A customer wants to cancel or change their order", k: "cancel change customer", a: () => `Orders are agreed between you and your customer on WhatsApp, so just reply to them in that chat to cancel or change it. Nothing needs to change in ${esc(APP_NAME)}.` },
   { id: "discount", q: "Can I give a discount or promo code?", k: "discount sale promotion", a: () => `There are no promo codes yet. You can lower the price on the item for a while, mention the promotion in its description or in the short line under your shop name, and give the discount when you reply on WhatsApp.`, go: () => askGo("products", "Open " + W(S).list) },
   { id: "stocklimit", q: "Can I limit how many can be ordered?", k: "quantity", a: () => `There's no stock count yet. When something runs out, open the item and tick <b>Sold out for now</b>. You can also write the limit in the item's description, like "Only 20 per day".`, go: () => askGo("products", "Open " + W(S).list) },
@@ -3465,7 +3470,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 124;
+const APP_VERSION = 125;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3518,7 +3523,6 @@ function edProfile(){
 }
 let EDOTHER = false;
 function renderEditor(msg){
-  if (window.LK_ALLVIEW) return legacyEditor(msg);
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
@@ -3529,6 +3533,7 @@ function renderEditor(msg){
   bld.classList.toggle("noactions", EDV === "news" || EDV === "profile" || EDV === "plan" || EDV === "ask" || EDV === "settings");   // nothing to save or preview on News or Profile
   const st = $("saveStatus"); if (st && msg && EDV !== "home") st.textContent = msg;
   if (msg && EDV !== "home") notifyQuiet(msg);
+  const as = $("autoStat"); if (as && as.dataset.state !== "bad") autoStat(DIRTY ? "saving" : "ok");
   PENDING_BOXES.forEach(id => { const b = $(id); if (b) spinOn(b); });   // a photo still uploading keeps its spinner after any redraw
 }
 function notifyQuiet(m){ const b = $("builder").querySelector(".actions .in"); if (!b) return; let t = $("edToast"); clearTimeout(notifyQuiet.t); notifyQuiet.t = setTimeout(() => { const x = $("edToast"); if (x) x.textContent = ""; }, 6000); if (!t){ t = document.createElement("p"); t.id = "edToast"; t.className = "status"; t.setAttribute("role","status"); t.style.cssText = "text-align:center;margin:0 0 8px;width:100%"; b.parentNode.insertBefore(t, b); } t.textContent = m; }
@@ -3686,7 +3691,7 @@ function edBack(v, i){
   edGo(v, i);
 }
 function edTidy(){
-  if (!window.LK_ALLVIEW) S.items = S.items.filter(keepItem);   // no empty starter rows in the new Products page
+  S.items = S.items.filter(keepItem);   // no empty starter rows in the new Products page
   S.links = (S.links || []).filter(l => l.u.trim());
 }
 function openEditor(msg){
@@ -3697,24 +3702,36 @@ function openEditor(msg){
   else if (PENDING_VIEW && EDV === "home"){ EDV = PENDING_VIEW; history.replaceState(null, "", home() + "build"); }
   PENDING_VIEW = "";
   setAccent(COLORS[0]); document.title = "Edit " + (S.name || "my store"); renderEditor(msg); show("builder"); loadBulletin(); }
-function touch(){ DIRTY = true; EDITV++; const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
+function touch(){ DIRTY = true; EDITV++; autoStat("saving"); const bl = $("builder"); if (bl) bl.classList.add("dirty"); const st = $("saveStatus"); if (st) st.textContent = "Saving your changes..."; scheduleAutosave(); }
 
 // ---------- Changes save by themselves a moment after the seller stops typing ----------
 let AUTOSAVE_T = 0, EDITV = 0, SAVING = null;
-function saveProblem(){
-  if (S.loc.on && !S.loc.state) return "Choose your state under Spot It! listing.";
-  if (S.loc.on && !S.loc.city && !noPin(S)) return "Choose your city or town under Spot It! listing.";
+// Unfinished Spot It! listing details don't stop saving (everything else still saves); the seller just gets a reminder
+function listingTodo(){
+  if (S.loc.on && !S.loc.state) return "Choose your state under Spot It! listing, so customers can find you.";
+  if (S.loc.on && !S.loc.city && !noPin(S)) return "Choose your city or town under Spot It! listing, so customers can find you.";
   if (S.loc.on && S.loc.pub && S.loc.lat == null && !noPin(S)) return "Drag the pin onto your shop under Spot It! listing.";
+  return "";
+}
+function saveProblem(){
   if (!S.name.trim()) return "Add your shop name.";
   if (!S.wa || S.wa.length < 9) return "Add your phone number, so orders can reach you.";
   return "";
 }
+// Everything saves by itself: the bar shows where it's at instead of a Save button
+function autoStat(state, text){
+  const el = $("autoStat"); if (!el) return;
+  el.dataset.state = state || "ok";
+  el.innerHTML = state === "saving" ? `<span class="spin"></span><span>Saving…</span>` : state === "bad" ? `${ico("x", 15, 2.6)}<span>${esc(text || "Not saved yet")}</span>` : `${ico("check", 15, 2.6)}<span>All changes saved</span>`;
+}
+document.addEventListener("click", e => { if (e.target.closest && e.target.closest('#autoStat[data-state="bad"]')){ const why = saveProblem(); if (why) notify(why); autoSave(true); } });
 function savePill(state, text){
   let el = $("savePill");
   if (!el){ el = document.createElement("button"); el.type = "button"; el.id = "savePill"; el.className = "savepill"; el.setAttribute("aria-live", "polite"); el.onclick = () => { if (el.dataset.state === "bad") autoSave(true); }; document.body.appendChild(el); }
   clearTimeout(el._t);
   if (!state || $("builder").hidden){ el.classList.remove("show"); return; }
   el.dataset.state = state;
+  autoStat(state === "saved" ? "ok" : state, state === "bad" ? "Not saved yet. Tap to see why" : "");
   el.innerHTML = state === "saving" ? `<span class="spin"></span><span>Saving...</span>` : state === "saved" ? `${ico("check", 15, 2.6)}<span>${esc(text || "Saved")}</span>` : `<span><b>Not saved:</b> ${esc(text)} <u>Try again</u></span>`;
   el.classList.add("show");
   if (state === "saved") el._t = setTimeout(() => el.classList.remove("show"), 2200);
@@ -3752,7 +3769,8 @@ async function autoSave(retry, keepalive){
     const r = await SAVING; STATUS = r.status || STATUS;
     if (EDITV === v){ DIRTY = false; rememberEdNow(); const bl = $("builder"); if (bl) bl.classList.remove("dirty"); const st = $("saveStatus"); if (st) st.textContent = ""; }
     else scheduleAutosave();
-    savePill("saved", r.flagged && STATUS !== "live" ? "Saved. Some words need a quick check by " + APP_NAME + "." : "Saved");
+    const todo = listingTodo();
+    savePill("saved", r.flagged && STATUS !== "live" ? "Saved. Some words need a quick check by " + APP_NAME + "." : todo ? "Saved. " + todo : "Saved");
   } catch(e){
     const m = friendly(e, "No internet right now. Your changes are still here.");
     if (pinErr(e)){ savePill("bad", "Log in again to save. Your changes are still here."); relogin(e).then(ok => { if (ok && DIRTY) scheduleAutosave(300); }); return; }
@@ -3804,7 +3822,7 @@ function publishCardHtml(){
     <h2>Your store is offline</h2>
     <p class="hint">It was taken offline, usually because a payment couldn't be found. ${help} to sort it out.</p>
   </section>`;
-  const qr = safeUrl(SITE.qr);
+  if (!BUL) return `<section class="card" id="publishCard"><p class="hint" style="margin:0">Checking your store…</p></section>`;   // trial, free code or paid: known once the status arrives (this card is redrawn then)
   if (!S.items.some(it => it.n.trim()) && !(S.links || []).some(l => safeUrl(l.u))) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Start with your ${esc(W(S).list.toLowerCase())}</h2>
     <p class="hint">Add what you sell, with prices and photos. When your store looks right, you publish it.</p>
@@ -3822,7 +3840,7 @@ function publishCardHtml(){
     <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
     <button class="btn solid full" style="margin-top:12px;padding:15px" data-act="publish">Bring my store back</button>
   </section>`;
-  if (!b.paid) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
+  if (!b.paid && !b.trialUsed) return `<section class="card" id="publishCard" style="border-color:var(--accent)">
     <h2>Go live free for 14 days</h2>
     <p class="hint">Share your link and take orders, free for 14 days. Then pay once${price} to keep it. No monthly fees, no commission.</p>
     <p class="hint unpaidleft" id="pubLeft" style="margin:8px 0 0;color:var(--warn);font-weight:600">${esc(unpaidLeft())}</p>
@@ -3943,101 +3961,6 @@ $("pubGo").onclick = async () => {
   btn.disabled = false; btn.textContent = "Go to payment";
 };
 
-function legacyEditor(msg){
-  setTimeout(updateBell, 0);
-  const link = storeLink(SESSION.id), live = STATUS === "live";
-  const adminBar = SESSION.admin ? `<section class="card adminbar"><div class="between"><div><b>Admin mode</b><p class="hint" style="margin:2px 0 0">You're editing this store as admin. Save works without their PIN.</p></div><button class="btn small solid" data-act="backadmin">Dashboard</button></div></section>` : "";
-  $("bwrap").innerHTML = `
-  <div class="top"><span class="brand">${esc(APP_NAME)}</span><div class="topacts"><button class="bellbtn" data-act="bulletin" aria-label="Bulletin board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="bellcount" id="bellCount" hidden></span></button><button class="btn small" data-act="logout">Log out</button></div></div>
-
-  <section class="card linkcard">
-    ${live ? `
-    <div class="between"><h2>Your store link</h2><span class="tag2 paid">Live</span></div>
-    <p class="url">${esc(link)}</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn small" data-act="copy">Copy</button>
-      <a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Open</a>
-      <a class="btn small wa" href="https://wa.me/?text=${encodeURIComponent(shareText(S, link))}" target="_blank" rel="noopener">Share</a>
-    </div>
-    <p class="hint">This link never changes. Your changes save by themselves and show on your store straight away.</p>` : `
-    <div class="between"><h2>Your store</h2>${STATUS === "review" ? `<span class="tag2 claim">In review</span>` : STATUS === "offline" ? `<span class="tag2 unpaid">Offline</span>` : `<span class="tag2 claim">Not live yet</span>`}</div>
-    <p class="hint">${STATUS === "review" ? `Thanks for your payment. ${esc(APP_NAME)} is checking your store, and it goes live once approved, usually within 24 hours.` : STATUS === "offline" ? "Your store is offline, so it has no working link right now." : "Build your store and tap Preview to see it. Your store link appears here once you publish."}</p>`}
-    <p class="hint">You log in with <b>${esc(S.wa || "your phone number")}</b> and your PIN.</p>
-    <p class="status" id="saveStatus" role="status">${esc(msg || (DIRTY ? "Saving your changes..." : ""))}</p>
-  </section>
-
-  ${adminBar}
-  ${SESSION.admin ? "" : tipHtml()}
-  ${SESSION.admin ? "" : publishCardHtml()}
-
-  <section class="card">
-    <h2>Store status</h2>
-    <div class="seg">
-      <button data-act="open" data-v="1" aria-pressed="${!S.closed}">Open</button>
-      <button data-act="open" data-v="0" aria-pressed="${S.closed}">Closed</button>
-    </div>
-    <label>Message when closed (optional)<input type="text" data-f="closedMsg" value="${esc(S.closedMsg)}" placeholder="e.g. Closed for Hari Raya. Back on 5 April, 9am"></label>
-  </section>
-  ${offCardHtml()}
-
-  <section class="card">
-    <h2>Shop</h2>
-    <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}" placeholder="${esc(W(S).ex.shop)}"></label>
-    <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="${esc(W(S).ex.tag)}"></label>
-    <label>Logo</label>
-    <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
-    <label>Cover photo (optional)</label>
-    <div class="media-row">${photoBox("coverPrev", S.cover, "No cover", "wide")}${photoControls("cover", S.cover)}</div>
-    <label>Phone number<input type="tel" data-f="wa" value="${esc(S.wa)}" placeholder="e.g. 012-345 6789"></label>
-    <p class="hint">Orders are sent here, and you log in with this number.</p>
-    <label>Currency<select data-f="curCode">${COMMON_CUR.map(c => curOption(c, S.curCode)).join("")}<optgroup label="More">${CURRENCIES.filter(c => !COMMON_CUR.includes(c)).map(c => curOption(c, S.curCode)).join("")}</optgroup></select></label>
-    <label>Brand colour</label>
-    <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
-    <label>What do you sell?</label>
-    <div class="seg kinds">
-      ${Object.entries(KINDS).map(([k,v]) => `<button data-act="kind" data-v="${k}" aria-pressed="${S.kind===k}">${v.label}</button>`).join("")}
-    </div>
-    ${layoutPicker()}
-  </section>
-
-  ${edListingCard()}${(setTimeout(initPinMap, 0), "")}
-
-  <section class="card">
-    <h2>${W(S).list}</h2>
-    ${S.items.map((it,i)=>`
-      <div class="item">
-        <div class="ihead"><b>Item ${i+1}</b>
-          <span class="ctl">
-            <button data-act="up" data-i="${i}" aria-label="Move up" ${i===0?"disabled":""}>${ico("up",18)}</button>
-            <button data-act="down" data-i="${i}" aria-label="Move down" ${i===S.items.length-1?"disabled":""}>${ico("down",18)}</button>
-            <button class="del" data-act="del" data-i="${i}">Delete</button>
-          </span>
-        </div>
-        <label>Name<input type="text" data-i="${i}" data-f="n" value="${esc(it.n)}" placeholder="${esc(W(S).ex.name)}"></label>
-        <label>Description (optional)<input type="text" data-i="${i}" data-f="d" value="${esc(it.d)}" placeholder="${esc(W(S).ex.desc)}"></label>
-        <label>Menu section (optional)<input type="text" data-i="${i}" data-f="sec" value="${esc(it.sec)}" placeholder="e.g. Drinks, Mains" maxlength="30"></label>
-        <label>Photo (optional)</label>
-        <div class="media-row">${photoBox("imgPrev" + i, it.img, "No photo", "sq")}${photoControls("item", it.img, `data-i="${i}"`)}</div>
-        <label>Options and prices</label>
-        ${it.o.map((o,j)=>`
-          <div class="opt">
-            <input type="text" data-i="${i}" data-j="${j}" data-f="l" value="${esc(o.l)}" placeholder="${esc(W(S).ex.opt)}">
-            <input type="number" inputmode="decimal" data-i="${i}" data-j="${j}" data-f="p" value="${o.p ? (+o.p).toFixed(2) : ""}" placeholder="${esc(W(S).ex.price)}">
-            <button data-act="delopt" data-i="${i}" data-j="${j}" aria-label="Remove option">×</button>
-          </div>`).join("")}
-        <button class="btn small" style="margin-top:10px" data-act="addopt" data-i="${i}">Add option</button>
-        <label class="check"><input type="checkbox" data-i="${i}" data-f="out" ${it.out?"checked":""}> Sold out for now</label>
-      </div>`).join("")}
-    <button class="btn full" style="margin-top:14px" data-act="additem">Add ${W(S).item}</button>
-  </section>
-
-  <section class="card dangercard">
-    <h2>Danger zone</h2>
-    <p class="hint">Delete your store and account. Your store link stops working, and your items and photos are removed. This can't be undone.</p>
-    <button class="btn danger full" style="margin-top:12px" data-act="deleteacct">Delete my account</button>
-  </section>`;
-}
-
 function onField(e){
   const t = e.target, f = t.dataset.f;
   if (t.dataset.fbk){   // the Book button's words, with a live preview
@@ -4048,7 +3971,7 @@ function onField(e){
   }
   if (t.dataset.floc){
     if (t.dataset.floc === "on"){ if (e.type !== "change") return; S.loc.on = t.checked; touch(); renderEditor(); return; }
-    if (t.dataset.floc === "state"){ S.loc.state = t.value; S.loc.city = ""; EDOTHER = false; touch(); if (!window.LK_ALLVIEW && e.type === "change") renderEditor(); return; }
+    if (t.dataset.floc === "state"){ S.loc.state = t.value; S.loc.city = ""; EDOTHER = false; touch(); if (e.type === "change") renderEditor(); return; }
     if (t.dataset.floc === "city"){ if (t.value === "__other"){ EDOTHER = true; S.loc.city = ""; } else { EDOTHER = false; S.loc.city = t.value; } touch(); if (e.type === "change") renderEditor(); return; }
     if (t.dataset.floc === "cityOther"){ const sel = document.querySelector('[data-floc="city"]'); if (!t.isConnected || (sel && sel.value !== "__other")) return; S.loc.city = t.value.trim().slice(0, 40); touch(); return; }
     if (t.dataset.floc === "area"){ S.loc.area = t.value; touch(); return; }
@@ -4135,7 +4058,7 @@ $("builder").addEventListener("click", async e => {
   if (a === "lksecpick"){ if (S.links[j]){ S.links[j].sec = String(S.links[j].sec || "").trim() === b.dataset.v ? "" : b.dataset.v; redraw(); } return; }
   if (a === "up" && i > 0){ [S.items[i-1], S.items[i]] = [S.items[i], S.items[i-1]]; if (EDV === "product") EDI = i - 1; redraw(); }
   else if (a === "down" && i < S.items.length-1){ [S.items[i+1], S.items[i]] = [S.items[i], S.items[i+1]]; if (EDV === "product") EDI = i + 1; redraw(); }
-  else if (a === "del"){ if (isBlankItem(S.items[i]) || await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1); if (!S.items.length && window.LK_ALLVIEW) S.items.push(blankItem());
+  else if (a === "del"){ if (isBlankItem(S.items[i]) || await ask(`Delete ${S.items[i].n.trim() ? '"' + S.items[i].n.trim() + '"' : "this item"}?`, "Delete", true)){ S.items.splice(i,1);
     if (EDV === "product"){ EDI = -1; touch(); return edBack("products"); } redraw(); } }
   else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); setTimeout(() => { const el = document.querySelector(`.opt input[data-i="${i}"][data-f="l"]`); if (el && !el.value) el.focus(); }, 30); }
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
@@ -4145,9 +4068,9 @@ $("builder").addEventListener("click", async e => {
     S.items = S.items.filter(it => !isBlankItem(it));
     rows.forEach(r => S.items.push(Object.assign(blankItem(), { n: r.n, sec: r.sec, o: [{ l: "", p: r.p }] })));
     BULK_TXT = ""; touch(); scheduleAutosave(600);
-    edGo("products"); notify(`${rows.length} ${rows.length === 1 ? W(S).item : W(S).item + "s"} added. Tap any one to add a photo or details.`);
+    edGo("products"); setTimeout(() => savePill("saved", `${rows.length} ${rows.length === 1 ? W(S).item : W(S).item + "s"} added`), 50);   // a quiet note, no box to tap away
   }
-  else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ touch(); edGo("product", S.items.length - 1); } else redraw(); }
+  else if (a === "additem"){ S.items.push(blankItem()); touch(); edGo("product", S.items.length - 1); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ keepSlide(b, () => { S.layout = b.dataset.v; redraw(); }); }
   else if (a === "kind"){ keepSlide(b, () => { S.kind = b.dataset.v; redraw(); }); }
@@ -4213,7 +4136,7 @@ $("builder").addEventListener("click", async e => {
       notify("Your store and account have been deleted.");
     } catch(err){ b.disabled = false; b.innerHTML = ico("trash",16) + "Delete account"; notify(friendly(err, "Couldn't delete your account right now. Check your internet and try again.")); }
   }
-  else if (a === "bulletin"){ if (window.LK_ALLVIEW) openBulletin(); else edGo("news"); }
+  else if (a === "bulletin") edGo("news");
   else if (a === "bulx"){ const y = window.scrollY; bulRemove([b.dataset.v]); renderEditor(); window.scrollTo(0, y); }
   else if (a === "bulclear"){ if (!(await ask("Remove all these posts? Status posts you still need to act on stay.", "Clear all"))) return; bulRemove(newsItems().filter(x => !x.keep).map(x => x.id)); renderEditor(); }
   else if (a === "shoutx"){ const y = window.scrollY; markSeen(newsItems().filter(x => /^u-/.test(x.id))); renderEditor(); window.scrollTo(0, y); }
@@ -4237,7 +4160,6 @@ $("builder").addEventListener("click", async e => {
   else if (a === "hidetip"){ try { localStorage.setItem("lk-tip-home", "1"); } catch(err) {} const t = $("tipCard"); if (t) t.remove(); }
   else if (a === "copy"){ const ok = await copyText(storeLink(SESSION.id)); setStatus(ok ? "Link copied." : "Press and hold the link to copy it."); }
   else if (a === "preview"){ inpagePush({ preview: 1, ed: EDV }); showStore(S, true); }
-  else if (a === "save"){ await saveStore(); }
   else if (a === "recheck"){
     try { const r = await apiPost({ action: "login", id: SESSION.id, pin: SESSION.pin }); STATUS = r.status; renderEditor(STATUS === "live" ? "Your store is live!" : "Not approved yet. Try again after sending your receipt."); }
     catch(err){ notify(friendly(err, "Couldn't check right now. Check your internet and try again.")); }
@@ -4302,24 +4224,6 @@ async function saveNow(){
     return r;
   } catch(e){ if (!pinErr(e)) scheduleAutosave(15000); throw e; }
   finally { SAVING = null; }
-}
-async function saveStore(){
-  if (S.loc.on && !S.loc.state) return notify("Choose your state under Spot It! listing, so customers can find you.");
-  if (S.loc.on && !S.loc.city && !noPin(S)) return notify("Choose your city or town under Spot It! listing, so customers can find you.");
-  if (!S.name.trim()) return notify("Add your shop name first.");
-  if (!S.wa || S.wa.length < 9) return notify("Add your phone number first, so orders can reach you.");
-  const btn = document.querySelector('[data-act="save"]');
-  btn.disabled = true; btn.textContent = "Saving...";
-  try {
-    const r = await saveNow(); savePill("");
-    renderEditor(r.flagged && STATUS !== "live" ? `Saved. Some words in your store need a quick check by ${APP_NAME} before it can go live.`
-      : STATUS === "live" ? "Saved. Your store link shows the new version now." : STATUS === "review" ? "Saved." : "Saved. Publish your store to make it live.");
-  } catch(e){
-    btn.disabled = false; btn.textContent = "Save";
-    if (pinErr(e)){ if (await relogin(e)) return saveStore(); return; }
-    notify(friendly(e, "Couldn't save right now. Check your internet. Your changes are still here, so try again in a moment."));
-  }
-  btn.disabled = false; btn.textContent = "Save";
 }
 
 // Photos upload one at a time (the Google script can drop parallel uploads), so picking several never loses any
@@ -4403,14 +4307,14 @@ const money = n => fmtMoney(D.cur, n);
 function cartKey(){ return "lk-cart:" + (!$("backBtn").hidden && SESSION ? "pv:" + SESSION.id : STORE_ID || D.wa); }   // per store: two stores on one number (and the demos) keep their own carts
 // Each line also remembers its name, option and price, so a seller reordering or changing items never swaps what's in a cart
 function cartSig(k){ const [i, j] = k.split("|").map(Number), it = D.items[i], o = it && it.o[j]; return it && o ? it.n + "\u0001" + o.l + "\u0001" + o.p : ""; }
-function saveCart(){ try { const s = {}; Object.keys(cart).forEach(k => s[k] = cartSig(k)); localStorage.setItem(cartKey(), JSON.stringify({ q: cart, s })); } catch(e) {} }
+function saveCart(){ try { if (!Object.keys(cart).length) return localStorage.removeItem(cartKey()); const s = {}; Object.keys(cart).forEach(k => s[k] = cartSig(k)); localStorage.setItem(cartKey(), JSON.stringify({ q: cart, s })); } catch(e) {} }   // an empty cart leaves nothing behind
 function loadCart(){
   let saved = {}; try { saved = JSON.parse(localStorage.getItem(cartKey()) || "{}") || {}; } catch(e) {}
   const q = saved.q && typeof saved.q === "object" ? saved.q : {}, sg = saved.s || {};
   cart = {};
   Object.keys(q).forEach(k => { const [i, j] = k.split("|").map(Number), it = D.items[i]; if (it && it.o[j] && !it.out && sg[k] && sg[k] === cartSig(k) && q[k] > 0) cart[k] = Math.min(99, Math.floor(q[k])); });
 }
-const priceLabel = p => { const ps = p.o.map(o => o.p); const lo = Math.min(...ps); return (ps.length > 1 && Math.max(...ps) !== lo ? "From " : "") + money(lo); };
+const priceLabel = p => { const r = priceFrom(p.o); return r ? (r.from ? "From " : "") + money(r.lo) : money(0); };
 const inCart = i => Object.keys(cart).filter(k => k.startsWith(i + "|")).reduce((a,k) => a + cart[k], 0);
 
 // refresh = the same store again with newer details: update in place, keep the customer's place, view and note
@@ -4601,7 +4505,7 @@ function dgRow(i){
   </button>`;
 }
 // Services: a catalogue card; tapping it picks the service and opens the booking sheet
-const svPrice = p => { const ps = p.o.map(o => +o.p || 0).filter(x => x > 0); if (!ps.length) return "Get a quote"; const lo = Math.min(...ps); return (p.o.length > 1 && (Math.max(...ps) !== lo || ps.length < p.o.length) ? "From " : "") + money(lo); };
+const svPrice = p => { const r = priceFrom(p.o); return r ? (r.from ? "From " : "") + money(r.lo) : "Get a quote"; };
 function svRow(i){
   const p = D.items[i], img = safeImg(p.img || (p.br && p.br[0])), on = inCart(i) > 0, n = p.o.length, br = hasBrochure(p);
   return `<button class="prow svrow${p.out ? " out" : ""}${on ? " on" : ""}" data-p="${i}" ${p.out ? 'aria-disabled="true"' : ""}>
@@ -4965,11 +4869,18 @@ function loadNear(isPreview){
 }
 // after the customer says the order went through: once per store per day, and only if there are other stores to show
 async function nearAfterOrder(){
-  const k = `lk-nearask:${STORE_ID}:${new Date().toISOString().slice(0, 10)}`;
-  try { if (localStorage.getItem(k)) return; } catch(e) {}
+  // one small record (store → day), trimmed to the last 7 days, instead of a new saved key per store per day
+  const day = new Date().toISOString().slice(0, 10);
+  let seen = {}; try { seen = JSON.parse(localStorage.getItem("lk-nearask") || "{}") || {}; } catch(e) {}
+  if (seen[STORE_ID] === day) return;
   if (!NEAR_LIST) try { await nearFetch(); } catch(e) { return; }
   const picks = nearPick(NEAR_LIST, 3); if (!picks.length || $("store").hidden) return;
-  try { localStorage.setItem(k, "1"); } catch(e) {}
+  try {
+    const cut = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+    Object.keys(seen).forEach(id => { if (!(seen[id] >= cut)) delete seen[id]; }); seen[STORE_ID] = day;
+    localStorage.setItem("lk-nearask", JSON.stringify(seen));
+    Object.keys(localStorage).filter(x => x.startsWith("lk-nearask:")).forEach(x => localStorage.removeItem(x));   // the old one-key-per-day records
+  } catch(e) {}
   $("nearSheetList").innerHTML = nearCards(picks);
   $("nearGo").href = home() + "explore";
   openSheet("nearOverlay");
@@ -5644,7 +5555,7 @@ function mxArea(st){
     return { lat: snap(+st.lat) + (mxHash(st.id + "a") - 0.5) * 0.0024, lng: snap(+st.lng) + (mxHash(st.id + "b") - 0.5) * 0.0024, r: 650 };
   }
   const p = mxPlace(st), c = p && EX.geo && EX.geo[p];
-  if (c) return { lat: c.lat + (mxHash(st.id + "a") - 0.5) * 0.016, lng: c.lng + (mxHash(st.id + "b") - 0.5) * 0.016, r: 1800 };   // town-level only
+  if (c && c.lat != null) return { lat: c.lat + (mxHash(st.id + "a") - 0.5) * 0.016, lng: c.lng + (mxHash(st.id + "b") - 0.5) * 0.016, r: 1800 };   // town-level only
   return null;
 }
 function exList(){
@@ -5700,7 +5611,6 @@ function skyStart(){
   if (reduceMotion()) return skyStill(ad);
   SKY.t = setTimeout(skyFly, 6000);   // the map settles first
 }
-function skyAway(){}
 // A flight across the map, like a flight tracker: the plane is a map marker that moves between two real places on the map,
 // turned to face where it's going, with a dashed trail behind it and the banner on a tow line. Dragging or zooming the map
 // carries the plane along with it.
@@ -5795,7 +5705,7 @@ function skyLoop(now){
     f.mk.setLngLat([lng, lat]); f.trail.geometry.coordinates[1] = [lng, lat];
     return true;
   });
-  try { const src = map.getSource("skytrail"); if (src) src.setData({ type: "FeatureCollection", features: SKY.flights.map(f => f.trail) }); } catch(e) {}
+  if (!SKY.open && now - (SKY.trailAt || 0) > 200){ SKY.trailAt = now; try { const src = map.getSource("skytrail"); if (src) src.setData({ type: "FeatureCollection", features: SKY.flights.map(f => f.trail) }); } catch(e) {} }   // trails redrawn 5 times a second, and not while paused (rebuilding them every frame was heavy)
   SKY.raf = SKY.flights.length ? requestAnimationFrame(skyLoop) : 0;
 }
 // planes look smaller as the map zooms out, like things really on the map: full size at street and town level, about half over the whole country
@@ -6186,15 +6096,15 @@ const mxGeoCache = () => { try { return JSON.parse(localStorage.getItem("lk-geo"
 async function mxGeocode(){
   const me = MX; if (!me) return;
   const cache = EX.geo = mxGeoCache();
-  const need = [...new Set(EX.stores.filter(s => !mxHasCoords(s)).map(mxPlace).filter(Boolean))].filter(k => !(k in cache)).slice(0, 12);
+  const need = [...new Set(EX.stores.filter(s => !mxHasCoords(s)).map(mxPlace).filter(Boolean))].filter(k => !(k in cache) || (cache[k] && cache[k].miss && Date.now() - cache[k].miss > 7 * 864e5)).slice(0, 12);   // places not found are tried again after a week
   let found = 0;
   for (const k of need){
     if (MX !== me) return found;
     try {
       const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=my&q=" + encodeURIComponent(k + ", Malaysia"), { headers: { Accept: "application/json" } });
       if (!r.ok) return found;   // busy or blocked: stop for now and try again on the next visit
-      const j = await r.json(); cache[k] = j && j[0] ? { lat: +j[0].lat, lng: +j[0].lon } : 0;
-      if (cache[k]) found++;
+      const j = await r.json(); cache[k] = j && j[0] ? { lat: +j[0].lat, lng: +j[0].lon } : { miss: Date.now() };
+      if (cache[k].lat != null) found++;
       try { localStorage.setItem("lk-geo", JSON.stringify(cache)); } catch(e) {}
       if (MX === me) mxDraw(true);
     } catch(e){ return found; }
