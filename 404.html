@@ -1032,7 +1032,7 @@ body.exploring #gwrap{padding:0;max-width:none}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mxtrain{--train:#fff;--train-ink:#18395C}}
 .tnose{display:block;width:41.3px;height:40px;flex:none;background:var(--train);-webkit-mask:url(train-nose.svg) center/100% 100% no-repeat;mask:url(train-nose.svg) center/100% 100% no-repeat}
 .tcars{position:relative;display:block;height:40px;flex:none;margin-left:-1px;border-radius:0 10px 3px 0;
-  background:repeating-linear-gradient(90deg,var(--train) 0 107px,transparent 107px 110px) 0 0/100% 37.7px no-repeat}
+  background:linear-gradient(var(--train),var(--train)) 0 0/var(--first,0px) 37.7px no-repeat,repeating-linear-gradient(90deg,var(--train) 0 107px,transparent 107px 110px) 0 0/100% 37.7px no-repeat}   /* --first: one long carriage under the words, so no gap cuts through them */
 .twheels{position:absolute;left:4px;right:6px;top:31px;height:9px;background:radial-gradient(circle,var(--train) 0 4.2px,transparent 4.4px) 0 0/27.5px 9px repeat-x}
 .ttext{position:absolute;left:16px;top:12.5px;display:flex;align-items:center;gap:4px;font-size:11.5px;line-height:12px;font-weight:800;color:var(--train-ink);white-space:nowrap;letter-spacing:.01em}.ttext img{width:12px;height:12px;border-radius:3px;object-fit:cover}
 .mxsearch input[type=search],.mxsearch input[type=search]:focus{flex:1;width:auto;min-width:0;margin:0;min-height:0;height:100%;padding:0;border:0;border-radius:0;background:none;box-shadow:none;outline:none;font:inherit;font-size:16px;font-weight:500;color:var(--ink)}
@@ -3317,7 +3317,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 106;
+const APP_VERSION = 107;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -5960,7 +5960,9 @@ function trainRun(){
   const ad = ads.length ? ads[TRAIN.i % ads.length] : null;
   box.innerHTML = `<span class="tset${ad ? " ad" : " mini"}"><span class="tnose"></span><span class="tcars">${ad ? `<span class="ttext">${safeImg(ad.logo) ? `<img src="${esc(safeImg(ad.logo))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}${esc(ad.text)}</span>` : ""}<span class="twheels"></span></span></span>`;
   const set = box.firstChild, cars = set.querySelector(".tcars"), txt = set.querySelector(".ttext");
-  cars.style.width = (ad ? Math.ceil((txt.offsetWidth + 46) / 110) * 110 : 330) + "px";   // whole carriages, enough for the words
+  const wordCars = ad ? Math.ceil((txt.offsetWidth + 46) / 110) : 0;
+  cars.style.width = (ad ? Math.max(5, wordCars + 2) * 110 : 660) + "px";   // a long train: at least 5 carriages, 2 more after the words
+  if (ad) cars.style.setProperty("--first", wordCars * 110 - 3 + "px");
   const k = ad ? 1 : .34, w = box.clientWidth, len = (set.offsetWidth) * k;
   if (ad && q){ q.dataset.ph = q.placeholder; q.placeholder = ""; }   // the train takes the whole bar while it passes
   const tf = x => `translateX(${x}px) scale(${k})`;
@@ -5970,11 +5972,11 @@ function trainRun(){
     let a = (w - tw) / 2 - at + 10, b = a;                                       // short words: glide past the middle
     if (tw > w - 70){ a = 40 - at; b = w - 12 - at - tw; }                       // long words: glide until the end shows
     a += 26; b -= 26;
-    const glide = Math.max(1500, (a - b) * 14), dur = 950 + glide + 850;
+    const glide = Math.max(1500, (a - b) * 14), out = Math.max(850, (b + len + 8) / 0.5), dur = 950 + glide + out;   // a long train leaves at the same speed, it just takes a little longer
     TRAIN.anim = set.animate([
       { transform: tf(w + 8), offset: 0, easing: "cubic-bezier(.22,.8,.36,1)" },
       { transform: tf(a), offset: 950 / dur, easing: "linear" },
-      { transform: tf(b), offset: (950 + glide) / dur, easing: "cubic-bezier(.64,0,.78,.2)" },
+      { transform: tf(b), offset: (950 + glide) / dur, easing: "cubic-bezier(.55,0,.8,.55)" },
       { transform: tf(-len - 8), offset: 1 }], { duration: dur, fill: "forwards" });
     skyHit("trainview", ad); TRAIN.i++;
   } else TRAIN.anim = set.animate([{ transform: tf(w + 8) }, { transform: tf(-len - 8) }], { duration: 2800, easing: "cubic-bezier(.45,.05,.55,.95)", fill: "forwards" });
