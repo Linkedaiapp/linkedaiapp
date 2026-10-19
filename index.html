@@ -579,6 +579,15 @@ html.lk-large body:not(.exploring):not(.pinning){zoom:1.14}   /* maps are left a
 .svrow.on .svpick{background:var(--accent);color:#fff;border-color:var(--accent)}
 .svgo{flex:none;display:grid;place-items:center;color:var(--muted)}
 /* the item editor's fold: basics first, the optional extras tucked in here */
+.bulkbtn{margin-top:12px}
+#bulkIn{font-size:16px;line-height:1.5;min-height:200px}
+.bulkout:empty{display:none}
+.bulkout{margin-top:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--soft);font-size:14px}
+.bulkout ul{list-style:none;margin:8px 0 0;padding:0}
+.bulkout li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line)}
+.bulkout li span:last-child{flex:none;font-weight:700}
+.bulkout li i{font-style:normal;font-size:12px;color:var(--muted);background:var(--surface);padding:1px 7px;border-radius:999px;margin-left:4px}
+.bulkout li.more{color:var(--muted);justify-content:center}
 .edmore summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .edmore summary::-webkit-details-marker{display:none}
 .edmore summary > span{display:flex;flex-direction:column;gap:2px}
@@ -2580,6 +2589,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-easy-items", at: "2026-10-19", title: "Adding items is easier", body: "Adding an item now starts with just a photo, name and price. Everything else (description, section, sold out) is under More details, one tap away. New: Add many at once, on your Menu or Products page. Type one item per line with its price, like Teh tarik 3, and add them all in one go. A line like Drinks: puts the next items in that section." },
   { id: "u-20261019-swipe-dots", at: "2026-10-19", title: "Easier to flip through pictures", body: "When a product has several pictures, like brochure pages or digital samples, customers now see dots and arrows under them, so they can flip page by page even on a computer. Your item photo is included too." },
   { id: "u-20261019-book-in-details", at: "2026-10-19", title: "Book straight from a service", body: "On services stores, the details of each service now end with your big Book button. Customers read the details, tap it, and the booking sheet opens with that service already picked." },
   { id: "u-20261019-service-details", at: "2026-10-19", title: "Tap a service to see its details", body: "On services stores, tapping a service now shows its details: photos, description and every package with its price. To book, customers use the one big button at the bottom, where they pick the service, date and time." },
@@ -3042,8 +3052,44 @@ function edProducts(){
     return `<button class="lk-row" data-act="go" data-v="product" data-i="${i}"><span class="thumb">${u ? `<img src="${esc(sized(u, 160))}" alt="" decoding="async">` : ico("image",20)}</span><span class="tt"><b>${esc(it.n || "Untitled " + W(S).item)}</b><span>${esc(priceText(it))}${it.o.length > 1 ? ` · ${it.o.length} options` : ""}${it.sec ? " · " + esc(it.sec) : ""}</span></span>${it.out ? `<span class="tag2 claim">Sold out</span>` : ""}<span class="chev">${ico("chevron",18)}</span></button>`;
   }).join("");
   return `${edTop(W(S).list, "", `<button class="btn small solid" data-act="additem">${ico("plus",16,2.2)}Add</button>`)}
-  ${S.items.length ? `<section class="card lk-group">${rows}</section>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button></section>`}`;
+  ${S.items.length ? `<section class="card lk-group">${rows}</section>
+  <button class="btn full bulkbtn" data-act="go" data-v="bulk">${ico("copy",18)}Add many at once</button>` : `<section class="card" style="text-align:center"><h2>Nothing here yet</h2><p class="hint">Add your first ${esc(W(S).item)} so customers can order.</p><button class="btn solid" style="margin-top:12px" data-act="additem">${ico("plus",16,2.2)}Add ${esc(W(S).item)}</button>
+    <button class="btn full" style="margin-top:10px" data-act="go" data-v="bulk">${ico("copy",18)}Add many at once</button><p class="hint" style="margin-top:6px">Type your whole ${esc(W(S).list.toLowerCase())} as a list. Add photos later.</p></section>`}`;
 }
+// Add many at once: one item per line, "name price"; a line like "Drinks:" starts a section
+function parseBulk(txt){
+  let sec = "";
+  const out = [];
+  String(txt || "").split(/\n+/).map(l => l.replace(/\s+/g, " ").trim()).filter(Boolean).forEach(l => {
+    const hd = l.match(/^#\s*(.+)$/) || l.match(/^([^\d]{1,30}):$/);
+    if (hd){ sec = hd[1].trim().slice(0, 30); return; }
+    const m = l.match(/^(.*?)[\s\-–:=,.@]*(?:rm|s\$|\$)?\s*(\d+(?:[.,]\d{1,2})?)\s*(?:rm|ringgit)?$/i);
+    const n = (m && m[1].trim() ? m[1] : l).replace(/[\s\-–:=,@]+$/, "").trim().slice(0, 80);
+    if (n) out.push({ n, p: m && m[1].trim() ? Math.round(+m[2].replace(",", ".") * 100) / 100 : 0, sec });
+  });
+  return out.slice(0, 60);
+}
+let BULK_TXT = "";
+function edBulk(){
+  const ex = { food: "Drinks:\nTeh tarik 3\nMilo ais 3.50\nFood:\nNasi lemak ayam 9\nMee goreng mamak 7.50", products: "Baju kurung moden 89\nTudung bawal satin 25\nTote bag 35", services: "Aircond normal service 80\nChemical wash 150\nGas top-up", digital: "Ebook resepi kuih raya 15\nCanva templates bundle 29\nLightroom presets 19" }[S.kind] || "Item one 10\nItem two 15";
+  setTimeout(bulkPaint, 0);
+  return `${edTop("Add many at once", "products")}
+  <section class="card">
+    <label style="margin-top:0" for="bulkIn">Type one ${esc(W(S).item)} per line: the name, then the price</label>
+    <textarea id="bulkIn" rows="9" maxlength="6000" placeholder="${esc(ex)}" autocapitalize="sentences">${esc(BULK_TXT)}</textarea>
+    <p class="hint">A line ending with <b>:</b> like <b>Drinks:</b> puts the next ${esc(W(S).item)}s in that section.${isService(S) ? " No price? Customers see <b>Get a quote</b>." : ""} You can add photos and details to each one later.</p>
+    <div id="bulkOut" class="bulkout" aria-live="polite"></div>
+    <button class="btn solid full" id="bulkGo" data-act="bulkadd" style="margin-top:12px" disabled>Add</button>
+  </section>`;
+}
+function bulkPaint(){
+  const t = $("bulkIn"); if (!t) return;
+  BULK_TXT = t.value;
+  const rows = parseBulk(t.value), cur = S.cur || curSymbol(S.curCode);
+  $("bulkOut").innerHTML = rows.length ? `<b>${rows.length} ${rows.length === 1 ? esc(W(S).item) : esc(W(S).item) + "s"} ready</b><ul>${rows.slice(0, 12).map(r => `<li><span>${esc(r.n)}${r.sec ? ` <i>${esc(r.sec)}</i>` : ""}</span><span>${r.p > 0 ? esc(cur) + (+r.p).toFixed(2) : isService(S) ? "Get a quote" : "No price yet"}</span></li>`).join("")}${rows.length > 12 ? `<li class="more">and ${rows.length - 12} more</li>` : ""}</ul>` : "";
+  const g = $("bulkGo"); g.disabled = !rows.length; g.textContent = rows.length ? `Add ${rows.length} ${rows.length === 1 ? W(S).item : W(S).item + "s"}` : "Add";
+}
+document.addEventListener("input", e => { if (e.target && e.target.id === "bulkIn") bulkPaint(); });
 // More details (the optional extras on an item) stays open or closed while the seller edits
 let ED_MORE = false;
 document.addEventListener("toggle", e => { if (e.target && e.target.id === "edMore") ED_MORE = e.target.open; }, true);
@@ -3409,7 +3455,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 122;
+const APP_VERSION = 123;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -3464,7 +3510,7 @@ function renderEditor(msg){
   setTimeout(updateBell, 0);
   if (EDV === "home") setTimeout(() => showPwaBar("sellerPwaBar"), 0);
   const tabbed = ["home","products","links","insights","account"].includes(EDV);
-  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, settings: () => { setTimeout(appVersion, 0); return edSettings(); }, account: edAccount }[EDV] || (() => edHome(msg));
+  const view = { home: () => edHome(msg), details: edDetails, look: edDetails, status: edStatus, plan: edPlan, products: edProducts, bulk: edBulk, links: edLinks, link: () => edLink(EDI), start: edStart, product: () => edProduct(EDI), listing: edListing, profile: edProfile, insights: edInsights, news: edNews, ask: edAsk, settings: () => { setTimeout(appVersion, 0); return edSettings(); }, account: edAccount }[EDV] || (() => edHome(msg));
   $("bwrap").innerHTML = `<div class="lk-sec">${view()}</div>${tabbed ? edTabs() : ""}`;
   document.body.classList.toggle("pinning", EDV === "listing");
   const bld = $("builder"); bld.classList.toggle("tabbed", tabbed); bld.classList.toggle("dirty", !!DIRTY); bld.classList.toggle("starting", EDV === "start");
@@ -4081,6 +4127,14 @@ $("builder").addEventListener("click", async e => {
     if (EDV === "product"){ EDI = -1; touch(); return edBack("products"); } redraw(); } }
   else if (a === "addopt"){ S.items[i].o.push({ l: "", p: 0 }); redraw(); setTimeout(() => { const el = document.querySelector(`.opt input[data-i="${i}"][data-f="l"]`); if (el && !el.value) el.focus(); }, 30); }
   else if (a === "delopt"){ S.items[i].o.splice(j,1); if (!S.items[i].o.length) S.items[i].o.push({ l: "", p: 0 }); redraw(); }
+  else if (a === "bulkadd"){
+    const rows = parseBulk(($("bulkIn") || {}).value);
+    if (!rows.length) return;
+    S.items = S.items.filter(it => !isBlankItem(it));
+    rows.forEach(r => S.items.push(Object.assign(blankItem(), { n: r.n, sec: r.sec, o: [{ l: "", p: r.p }] })));
+    BULK_TXT = ""; touch(); scheduleAutosave(600);
+    edGo("products"); notify(`${rows.length} ${rows.length === 1 ? W(S).item : W(S).item + "s"} added. Tap any one to add a photo or details.`);
+  }
   else if (a === "additem"){ S.items.push(blankItem()); if (!window.LK_ALLVIEW){ touch(); edGo("product", S.items.length - 1); } else redraw(); }
   else if (a === "color"){ S.color = b.dataset.c; redraw(); }
   else if (a === "layout"){ keepSlide(b, () => { S.layout = b.dataset.v; redraw(); }); }
