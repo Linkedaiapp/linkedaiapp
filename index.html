@@ -2559,6 +2559,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-shop-details-tidy", at: "2026-10-19", title: "A tidier Shop details page", body: "Shop details is now one page: your logo and cover photo are at the top, then your shop name and number. Brand colour sits with your Store style, and for services stores with your Book button, so you see the button in your colour as you type. Write your own button words; the ready-made word pills are gone." },
   { id: "u-20261019-style-cards-small", at: "2026-10-19", title: "Smaller Store style cards", body: "The little phones under Store style in Shop details are now smaller, so the page is shorter and easier to scroll." },
   { id: "u-20261019-style-cards", at: "2026-10-19", title: "See each store style before you pick", body: "In Shop details, Store style now shows a little phone for List, Photo grid and Minimal, in your brand colour, so you can see how your store will look before you tap Preview. Tap one to use it." },
   { id: "u-20261019-store-style-fix", at: "2026-10-19", title: "Store style fixed", body: "In Shop details, What do you sell? and Store style (List, Photo grid, Minimal) are now slim tabs that always fit your screen. Before, Minimal and Digital were cut off at the edge." },
@@ -2817,8 +2818,13 @@ function edHome(msg){
 `;
 }
 function edDetails(){
+  const links = (S.links || []).some(l => safeUrl(l.u));
   return `${edTop("Shop details", "home")}
   <section class="card">
+    <label style="margin-top:0">Logo</label>
+    <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
+    <label>Cover photo (optional)</label>
+    <div class="media-row">${photoBox("coverPrev", S.cover, "No cover", "wide")}${photoControls("cover", S.cover)}</div>
     <label>Shop name<input type="text" data-f="name" value="${esc(S.name)}" placeholder="${esc(W(S).ex.shop)}"></label>
     <label>Short line under your name (optional)<input type="text" data-f="tagline" value="${esc(S.tagline)}" placeholder="${esc(W(S).ex.tag)}"></label>
     <label>Phone number</label>
@@ -2832,22 +2838,23 @@ function edDetails(){
     <h2 style="margin:0">Page style</h2>
     <div class="seg" style="margin-top:10px"><button type="button" data-act="svstyle" data-v="book" aria-pressed="${!isAgent(S)}">Services</button><button type="button" data-act="svstyle" data-v="agent" aria-pressed="${isAgent(S)}">Agent</button></div>
     <p class="hint">${isAgent(S) ? "<b>Agent</b>: for insurance, takaful, property and Coway agents. Customers see your plans with brochures and book a consultation." : "<b>Services</b>: for aircond, cleaning, beauty and repairs. Customers see your prices and book a service."}</p>
-  </section>
+  </section>` : ""}
   <section class="card">
-    <h2 style="margin:0">Book button</h2>
-    <p class="hint" style="margin:6px 0 10px">The big button at the bottom of your store. Pick ready words or write your own.</p>
+    <label style="margin-top:0">Brand colour</label>
+    <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
+    ${isService(S) ? `<label>Book button</label>
+    <p class="hint" style="margin:2px 0 10px">The big button at the bottom of your store, in your brand colour. Write your own words.</p>
     <div class="bkprev" style="--accent:${esc(S.color || "#18395C")}"><span class="svbook" aria-hidden="true"><span class="svb1" id="bkPrevT">${esc(svBtn(S).t)}</span><span class="svb2" id="bkPrevS">${esc(svBtn(S).s)}</span></span></div>
-    <div class="bkpicks">${BK_PICKS.map(([t, sub]) => `<button type="button" class="sechip${svBtn(S).t === t ? " on" : ""}" data-act="bkpick" data-t="${esc(t)}" data-s="${esc(sub)}" aria-pressed="${svBtn(S).t === t}">${esc(t)}</button>`).join("")}</div>
     <label>Button words<input type="text" data-fbk="t" maxlength="24" value="${esc((S.bk && S.bk.t) || "")}" placeholder="${esc(svBtn(Object.assign({}, S, { bk: null })).t)}"></label>
-    <label>Small line under it<input type="text" data-fbk="s" maxlength="40" value="${esc((S.bk && S.bk.s) || "")}" placeholder="${esc(svBtn(Object.assign({}, S, { bk: null })).s)}"></label>
+    <label>Small line under it<input type="text" data-fbk="s" maxlength="40" value="${esc((S.bk && S.bk.s) || "")}" placeholder="${esc(svBtn(Object.assign({}, S, { bk: null })).s)}"></label>` : layoutPicker()}
+    ${links && !isService(S) ? `<p class="hint">Shop links always show as a simple list, so customers can scan lots of them quickly.</p>` : ""}
   </section>
-  <section class="card">
+  ${isService(S) ? `  <section class="card">
     <h2 style="margin:0">About you and where you go</h2>
     <label>About you (optional)<textarea data-f="bio" maxlength="300" rows="3" placeholder="e.g. Certified Coway agent since 2018. Free filter check with every service.">${esc(S.bio || "")}</textarea></label>
     <label>Areas you cover (optional)<input type="text" data-f="areas" maxlength="200" value="${esc(S.areas || "")}" placeholder="e.g. Shah Alam, Klang, Petaling Jaya"></label>
     <p class="hint">Separate areas with commas. Customers see them at the top of your store, next to a pin.</p>
-  </section>` : ""}
-  ${edLook()}`;
+  </section>` : ""}`;
 }
 // Store style: three little phones that show how each style looks, before the seller taps Preview
 function layoutPicker(){
@@ -2862,21 +2869,6 @@ function layoutPicker(){
   const names = { list: "List", grid: "Photo grid", minimal: "Minimal" };
   return `<label>Store style</label>
     <div class="lycards" role="group" aria-label="Store style" style="--ly:${esc(S.color || COLORS[0])}">${["list", "grid", "minimal"].map(v => `<button type="button" class="lycard" data-act="layout" data-v="${v}" aria-pressed="${S.layout === v}">${phone(looks[v])}<span>${names[v]}</span></button>`).join("")}</div>`;
-}
-function edLook(){   // the logo, cover, colour and style cards, shown on Shop details
-  return `<h2 class="edsub" id="lookSec">Look</h2>
-  <section class="card">
-    <label>Logo</label>
-    <div class="media-row">${photoBox("logoPrev", S.logo, "None", "")}${photoControls("logo", S.logo)}</div>
-    <label>Cover photo (optional)</label>
-    <div class="media-row">${photoBox("coverPrev", S.cover, "No cover", "wide")}${photoControls("cover", S.cover)}</div>
-  </section>
-  <section class="card">
-    <label style="margin-top:0">Brand colour</label>
-    <div class="swatches">${COLORS.map(c=>`<button class="sw" style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${S.color===c}" aria-label="Colour ${c}"></button>`).join("")}</div>
-    ${layoutPicker()}
-    ${(S.links || []).some(l => safeUrl(l.u)) ? `<p class="hint">Shop links always show as a simple list, so customers can scan lots of them quickly.</p>` : ""}
-  </section>`;
 }
 function edStatus(){
   return `${edTop("Store status", "home")}
@@ -3387,7 +3379,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 117;
+const APP_VERSION = 118;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
