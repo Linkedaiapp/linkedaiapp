@@ -1186,6 +1186,13 @@ a.prow{text-decoration:none;color:inherit}
 .tag2.verified{background:color-mix(in srgb,var(--verify) 12%,var(--surface));color:var(--verify-ink)}
 /* browse-stores button in the top-right corner, clear of the logo */
 .stmore{left:auto;right:12px}.stmore.stshare{right:64px}.stmore.stshare.solo{right:12px}
+.stmore.stback{left:12px;right:auto}
+/* Back on every page: a round arrow before the page name */
+.pgback{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;transition:transform .15s ease}
+.pgback:active{transform:scale(.93)}
+.pgback svg{width:22px;height:22px;display:block}
+.topl{display:flex;align-items:center;gap:10px;min-width:0}
+.top.hometop{min-height:0;margin:0}
 .stname{font-size:clamp(22px,6vw,28px);margin:8px 0 2px}
 /* Menu / Shop links switch and section chips stay at the top while scrolling */
 .stnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg)}
@@ -1545,6 +1552,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 <div id="store" hidden>
   <button class="btn small back" id="backBtn" hidden>Back to editor</button>
   <div class="st" id="stWrap">
+    <button type="button" class="stmore stback" id="stBack" aria-label="Back" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
     <a class="stmore" id="stMore" href="#" aria-label="Find more stores on Spot It!" title="Spot It!"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></a>
     <button type="button" class="stmore stshare" id="stShare" aria-label="Share this store" title="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg></button>
     <div class="cover" id="stCover" hidden></div>
@@ -2443,7 +2451,7 @@ function renderStart(msg, mode){
   closeSheet("payOverlay");
   setAccent(COLORS[0]); document.title = APP_NAME + (signup ? " · Sign up" : " · Seller login");
   $("gwrap").innerHTML = `
-    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <div class="top"><span class="topl">${backBtnHtml()}<span class="brand">${esc(APP_NAME)}</span></span><a class="btn small" href="${esc(home())}">Home</a></div>
     ${signup ? exampleStoresHtml() : ""}
     <header class="bh"><h1>${signup ? "Sign up" : "Seller login"}</h1><p>${signup ? "Create your store. You can build and preview it for free." : PENDING_VIEW === "status" ? "Log in to open or close your shop." : "Log in to edit your store."}</p></header>
     ${signup ? "" : loginCardHtml(msg)}
@@ -2515,6 +2523,7 @@ function renderStart(msg, mode){
 // New Link Kedai App features are announced to sellers automatically from this list.
 // Add a post at the top for every update sellers can see. The bot shows it on their store home and in News.
 const APP_UPDATES = [
+  { id: "u-20261019-back-button", at: "2026-10-19", title: "A back button on every page", body: "Every page now has a round back arrow at the top left: your store page, sign up, login, About, the policy pages and more. On your store page, customers tap it to go back where they came from, or to Spot It! if they opened your link straight from WhatsApp." },
   { id: "u-20261019-ad-tuck-fix", at: "2026-10-19", title: "Smoother Sponsored banner", body: "When a customer tucks the Sponsored banner away, your menu now glides up in one smooth move. Before, it slipped under your shop card for a moment and then jumped back." },
   { id: "u-20261018-ad-tuck", at: "2026-10-18", title: "A tidier Sponsored banner", body: "On store pages, the Sponsored banner now slides down from behind your shop card, the same width as it. Customers can tap the arrow to tuck it away, and your menu moves straight up under your shop card." },
   { id: "u-20261018-service-booking", at: "2026-10-18", title: "A booking page for services", body: "Selling services, like aircond service, Coway or insurance? Your store is now a booking page: a list of your services and one big Book now button where customers pick a date, a time and their address. In Shop details, add About you and Areas you cover: customers see them at the top with a pin, and people searching those areas on Spot It! find you too. No fixed price? Leave it empty and customers see Get a quote. Make the big button your own, like Book a shoot, Check availability or Rent now, in Shop details under Book button. Agents with brochures (insurance, takaful, property): pick Page style Agent, add your brochure pages and a PDF to each plan, and customers book a consultation." },
@@ -3326,7 +3335,7 @@ function edSettings(){
   </section>`;
 }
 // The app's version, shown in Settings. Keep it the same as V in sw.js (both go up on every release).
-const APP_VERSION = 109;
+const APP_VERSION = 110;
 let APP_VER = "Version " + APP_VERSION;
 async function appVersion(){ const el = $("appVer"); if (el) el.textContent = APP_VER; }
 async function checkUpdate(){
@@ -4291,7 +4300,7 @@ async function showStore(data, isPreview, refresh){
   $("stTerms").href = home() + "terms"; $("stPrivacy").href = home() + "privacy";
   $("stCopy").textContent = copyrightLine().replace(/<[^>]+>/g, "");
   $("stSafeLink").href = home() + "safe";
-  $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview;
+  $("stMore").href = home() + "explore"; $("stMore").hidden = !!isPreview; $("stBack").hidden = !!isPreview;   // the seller's preview has Back to editor
   $("stShare").classList.toggle("solo", !!isPreview);
   if (!refresh) loadNear(isPreview);   // the seller's preview has no Spot It! button, so Share takes its corner
   const verified = !isPreview && STORE_VERIFIED;   // blue ring + tick on the logo, like verified accounts elsewhere
@@ -6402,7 +6411,7 @@ function renderSafe(){
   setAccent(COLORS[0]); document.title = "Is " + APP_NAME + " safe?";
   const A = esc(APP_NAME);
   $("gwrap").innerHTML = `
-    <div class="top"><span class="brand">${A}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <div class="top"><span class="topl">${backBtnHtml()}<span class="brand">${A}</span></span><a class="btn small" href="${esc(home())}">Home</a></div>
     <article class="legal">
       <h1>Is ${A} safe?</h1><p class="updated">A quick guide for customers</p>
       <p>Yes. ${A} is a simple way for local sellers to share their menu or products with one link. Here's exactly how it works, so you can order with confidence.</p>
@@ -6440,7 +6449,7 @@ function renderAbout(){
   setAccent(COLORS[0]); document.title = "About us · " + APP_NAME;
   const A = esc(APP_NAME), ext = (u, t) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
   $("gwrap").innerHTML = `
-    <div class="top"><span class="brand">${A}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <div class="top"><span class="topl">${backBtnHtml()}<span class="brand">${A}</span></span><a class="btn small" href="${esc(home())}">Home</a></div>
     <article class="legal about">
       <h1>About us</h1><p class="updated">The people and tools behind ${A}</p>
       <p>${A} helps home sellers in Malaysia take orders on WhatsApp with one simple store link. No app to download, no commission. Customers find sellers near them on Spot It!.</p>
@@ -6477,7 +6486,7 @@ function renderLegal(which){
   const titles = { terms: "Terms of Service", privacy: "Privacy Policy", refund: "Refund Policy" };
   setAccent(COLORS[0]); document.title = titles[which] + " · " + APP_NAME;
   $("gwrap").innerHTML = `
-    <div class="top"><span class="brand">${esc(APP_NAME)}</span><a class="btn small" href="${esc(home())}">Home</a></div>
+    <div class="top"><span class="topl">${backBtnHtml()}<span class="brand">${esc(APP_NAME)}</span></span><a class="btn small" href="${esc(home())}">Home</a></div>
     <nav class="legalnav" aria-label="Policies">
       ${["terms", "privacy", "refund"].map(k => `<a href="${esc(home())}?${k}" ${k === which ? 'aria-current="page"' : ""}>${k === "terms" ? "Terms" : k === "privacy" ? "Privacy" : "Refunds"}</a>`).join("")}
     </nav>
@@ -6491,6 +6500,7 @@ function renderHome(){
   const to = String(SITE.ownerWa || "").replace(/\D/g, "");
   const chat = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.5-4.6A8.4 8.4 0 1 1 20.5 11.6z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg>`;
   $("gwrap").innerHTML = `
+    <div class="top hometop"><span class="topl">${backBtnHtml("explore")}</span></div>
     <div class="auth">
       <div class="brandmark">
         <img src="logo.png" alt="">
@@ -6515,9 +6525,18 @@ function renderHome(){
   show("page");
   wireLogin();
 }
+// Back: the page before, when it was one of ours; else where it makes sense (Spot It! from a store, the home page from the rest)
+function backBtnHtml(to){ return `<button type="button" class="pgback" data-pgback="${to || ""}" aria-label="Back" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>`; }
+function goBack(fallback){
+  let ours = false; try { ours = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch(e) {}
+  if (history.length > 1 && (HIST_CUR > 0 || ours)) return history.back();
+  history.pushState(null, "", fallback || home()); route();
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-pgback]"); if (b) goBack(b.dataset.pgback ? home() + b.dataset.pgback : ""); });
+$("stBack").onclick = () => goBack(home() + "explore");
 function showMessage(title, text){
   setAccent(COLORS[0]);
-  $("gwrap").innerHTML = `<header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><div style="display:flex;flex-wrap:wrap;gap:8px"><a class="btn solid" href="${esc(home())}?explore">Spot It!</a><a class="btn" href="${esc(home())}">Go to ${esc(APP_NAME)}</a></div>`;
+  $("gwrap").innerHTML = `<div class="top"><span class="topl">${backBtnHtml()}</span></div><header class="bh"><h1>${esc(title)}</h1><p>${esc(text)}</p></header><div style="display:flex;flex-wrap:wrap;gap:8px"><a class="btn solid" href="${esc(home())}?explore">Spot It!</a><a class="btn" href="${esc(home())}">Go to ${esc(APP_NAME)}</a></div>`;
   show("page");
 }
 // Installable Link Kedai App: register the offline helper on every page
